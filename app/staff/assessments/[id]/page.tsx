@@ -1,0 +1,721 @@
+"use client"
+
+import { useEffect, useState } from "react"
+import { useParams, useRouter } from "next/navigation"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
+import { Label } from "@/components/ui/label"
+import { Progress } from "@/components/ui/progress"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { 
+  assessmentAPI, 
+  assessmentResultAPI, 
+  assessorAPI, 
+  positionCompetencyAPI,
+  levelAPI,
+  competencyAPI,
+  clusterAPI
+} from "@/lib/api"
+import { toast } from "sonner"
+import { 
+  IconArrowLeft, 
+  IconCheck, 
+  IconAlertCircle,
+  IconCalendar,
+  IconTrophy,
+  IconPencil
+} from "@tabler/icons-react"
+import { format } from "date-fns"
+import { Textarea } from "@/components/ui/textarea"
+
+interface Assessment {
+  id: string
+  name: string
+  description: string
+  startDate: string
+  endDate: string
+  weightageSelf: number
+  weightageSuperior: number
+  weightagePeer: number
+}
+
+interface Competency {
+  id: string
+  positionId: string
+  competencyId: string
+  level?: number
+  competency: {
+    id: string
+    name: string
+    code: string
+    description: string
+    cluster: {
+      id: string
+      name: string
+    }
+    level: {
+      id: string
+      name: string
+    }
+  }
+}
+
+interface CompetencyScore {
+  competencyId: string
+  score: number | null
+  remark?: string
+  resultId?: string
+}
+
+export default function AssessmentDetailPage() {
+  const params = useParams()
+  const router = useRouter()
+  const assessmentId = params.id as string
+
+  const [assessment, setAssessment] = useState<Assessment | null>(null)
+  const [competencies, setCompetencies] = useState<Competency[]>([])
+  const [scores, setScores] = useState<Record<string, CompetencyScore>>({})
+  const [levels, setLevels] = useState<any[]>([])
+  const [selfAssessorId, setSelfAssessorId] = useState<string | null>(null)
+  const [isLoading, setIsLoading] = useState(true)
+  const [isSaving, setIsSaving] = useState(false)
+  const [userId, setUserId] = useState<string | null>(null)
+  const [positionId, setPositionId] = useState<string | null>(null)
+  const [hasShownWarning, setHasShownWarning] = useState(false)
+
+  useEffect(() => {
+    const storedUser = localStorage.getItem('user')
+    console.log("=== ASSESSMENT DETAIL DEBUG ===")
+    console.log("Stored user raw:", storedUser)
+    if (storedUser) {
+      try {
+        const userData = JSON.parse(storedUser)
+        console.log("Parsed user data:", userData)
+        console.log("User ID:", userData.id)
+        console.log("Position ID:", userData.positionId)
+        setUserId(userData.id)
+        setPositionId(userData.positionId || null)
+        if (userData.id) {
+          fetchAssessmentData(userData.id, userData.positionId || null)
+        } else {
+          toast.error("User ID not found")
+          setIsLoading(false)
+        }
+      } catch (error) {
+        console.error("Failed to parse user data:", error)
+        setIsLoading(false)
+      }
+    } else {
+      toast.error("Please login to continue")
+      setIsLoading(false)
+    }
+  }, [assessmentId])
+
+  const fetchAssessmentData = async (staffId: string, positionId: string | null) => {
+    try {
+      setIsLoading(true)
+
+      console.log("Fetching assessment data for:", { staffId, positionId })
+
+      // Fetch assessment data, assessors, levels, competencies, and clusters
+      const [assessmentData, allAssessors, levelsData, allCompetencies, allClusters] = await Promise.all([
+        assessmentAPI.getById(assessmentId),
+        assessorAPI.getAll(),
+        levelAPI.getAll(),
+        competencyAPI.getAll(),
+        clusterAPI.getAll(),
+      ])
+
+      console.log("Assessment data:", assessmentData)
+      console.log("All assessors:", allAssessors)
+      console.log("Levels data:", levelsData)
+
+      setAssessment(assessmentData)
+      setLevels(levelsData)
+
+      // Fetch position competencies only if positionId exists
+      let positionCompetenciesData: Competency[] = []
+      if (positionId) {
+        console.log("Fetching position competencies for positionId:", positionId)
+        const rawPositionCompetencies = await positionCompetencyAPI.getByPosition(positionId)
+        
+        // Enrich competencies with cluster and level data
+        positionCompetenciesData = rawPositionCompetencies.map((pc: any) => {
+          const fullCompetency = allCompetencies.find((c: any) => c.id === pc.competencyId)
+          const cluster = allClusters.find((cl: any) => cl.id === fullCompetency?.clusterId)
+          const level = levelsData.find((l: any) => l.id === fullCompetency?.levelId)
+          
+          return {
+            ...pc,
+            competency: {
+              ...pc.competency,
+              ...fullCompetency,
+              cluster: cluster || { id: '', name: 'N/A' },
+              level: level || { id: '', name: 'N/A' }
+            }
+          }
+        })
+        
+        console.log("Enriched position competencies:", positionCompetenciesData)
+        setCompetencies(positionCompetenciesData)
+      } else {
+        console.warn("No positionId - cannot fetch competencies")
+        if (!hasShownWarning) {
+          toast.warning("No position assigned. Please contact admin to assign a position.")
+          setHasShownWarning(true)
+        }
+      }
+
+      // Fetch all results
+      const allResults = await assessmentResultAPI.getAll()
+
+      // Find self-assessor record
+      const selfAssessor = allAssessors.find(
+        (a: any) => a.staffId === staffId && a.type?.toLowerCase() === "self"
+      )
+
+      if (!selfAssessor) {
+        toast.error("Self-assessor record not found. Please contact admin.")
+        setIsLoading(false)
+        return
+      }
+
+      setSelfAssessorId(selfAssessor.id)
+
+      // Load existing results
+      const existingResults = allResults.filter(
+        (r: any) => r.assessmentId === assessmentId && r.assessorId === selfAssessor.id
+      )
+
+      // Initialize scores
+      const initialScores: Record<string, CompetencyScore> = {}
+      positionCompetenciesData.forEach((pc: Competency) => {
+        const existingResult = existingResults.find(
+          (r: any) => r.competencyId === pc.competency.id
+        )
+        initialScores[pc.competency.id] = {
+          competencyId: pc.competency.id,
+          score: existingResult ? existingResult.score : null,
+          remark: existingResult?.remark || '',
+          resultId: existingResult?.id,
+        }
+      })
+
+      setScores(initialScores)
+    } catch (error) {
+      console.error("Failed to fetch assessment data:", error)
+      toast.error("Failed to load assessment")
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  const handleScoreChange = (competencyId: string, score: number) => {
+    setScores(prev => ({
+      ...prev,
+      [competencyId]: {
+        ...prev[competencyId],
+        score,
+      }
+    }))
+  }
+
+  const handleRemarkChange = (competencyId: string, remark: string) => {
+    setScores(prev => ({
+      ...prev,
+      [competencyId]: {
+        ...prev[competencyId],
+        remark,
+      }
+    }))
+  }
+
+  const handleSaveAll = async () => {
+    if (!selfAssessorId || !positionId) {
+      toast.error("Missing required data")
+      return
+    }
+
+    try {
+      setIsSaving(true)
+
+      const promises = Object.values(scores).map(async (scoreData) => {
+        if (scoreData.score === null) return // Skip if not rated
+
+        const payload = {
+          assessmentId,
+          positionId,
+          competencyId: scoreData.competencyId,
+          assessorId: selfAssessorId,
+          score: scoreData.score,
+          // remark: scoreData.remark || '', // TODO: Add remark field to backend schema
+        }
+
+        if (scoreData.resultId) {
+          // Update existing
+          return assessmentResultAPI.update(scoreData.resultId, payload)
+        } else {
+          // Create new
+          return assessmentResultAPI.create(payload)
+        }
+      })
+
+      await Promise.all(promises)
+      toast.success("Assessment saved successfully!")
+      
+      // Refresh data
+      if (userId && positionId) {
+        await fetchAssessmentData(userId, positionId)
+      }
+    } catch (error) {
+      console.error("Failed to save assessment:", error)
+      toast.error("Failed to save assessment")
+    } finally {
+      setIsSaving(false)
+    }
+  }
+
+  const handleSubmit = async () => {
+    const unanswered = Object.values(scores).filter(s => s.score === null)
+    
+    if (unanswered.length > 0) {
+      toast.error(`Please rate all competencies (${unanswered.length} remaining)`)
+      return
+    }
+
+    await handleSaveAll()
+    toast.success("Assessment submitted successfully!")
+    setTimeout(() => {
+      router.push("/staff/assessments")
+    }, 1500)
+  }
+
+  const calculateProgress = () => {
+    const total = Object.keys(scores).length
+    const completed = Object.values(scores).filter(s => s.score !== null).length
+    return total > 0 ? (completed / total) * 100 : 0
+  }
+
+  const getCompletedCount = () => {
+    return Object.values(scores).filter(s => s.score !== null).length
+  }
+
+  const isWithinPeriod = () => {
+    if (!assessment) return false
+    const now = new Date()
+    const start = new Date(assessment.startDate)
+    const end = new Date(assessment.endDate)
+    return now >= start && now <= end
+  }
+
+  if (isLoading) {
+    return (
+      <div className="space-y-4">
+        <Button variant="ghost" onClick={() => router.back()}>
+          <IconArrowLeft className="size-4 mr-2" />
+          Back
+        </Button>
+        <Card>
+          <CardContent className="py-8">
+            <div className="text-center text-muted-foreground">Loading...</div>
+          </CardContent>
+        </Card>
+      </div>
+    )
+  }
+
+  if (!assessment || !userId) {
+    return (
+      <div className="space-y-4">
+        <Button variant="ghost" onClick={() => router.back()}>
+          <IconArrowLeft className="size-4 mr-2" />
+          Back
+        </Button>
+        <Card>
+          <CardContent className="py-8">
+            <div className="text-center text-muted-foreground">
+              Assessment not found
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    )
+  }
+
+  const progress = calculateProgress()
+  const completedCount = getCompletedCount()
+  const totalCount = competencies.length
+  const withinPeriod = isWithinPeriod()
+
+  return (
+    <div className="space-y-4">
+      <Button variant="ghost" onClick={() => router.back()}>
+        <IconArrowLeft className="size-4 mr-2" />
+        Back to Assessments
+      </Button>
+
+      <div className="flex items-start justify-between">
+        <div>
+          <h1 className="text-3xl font-bold">{assessment.name}</h1>
+          {assessment.description && (
+            <p className="text-muted-foreground mt-1">{assessment.description}</p>
+          )}
+        </div>
+        <Badge variant={withinPeriod ? "default" : "secondary"}>
+          {withinPeriod ? "Active" : "Closed"}
+        </Badge>
+      </div>
+
+      {!withinPeriod && (
+        <Card className="border-yellow-500 bg-yellow-50 dark:bg-yellow-950">
+          <CardContent className="py-4">
+            <div className="flex items-center gap-2 text-yellow-800 dark:text-yellow-200">
+              <IconAlertCircle className="size-5" />
+              <span className="font-medium">
+                Assessment period has ended. Submissions are no longer accepted.
+              </span>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      <div className="grid gap-4 md:grid-cols-3">
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle className="text-sm font-medium flex items-center gap-2">
+              <IconCalendar className="size-4" />
+              Assessment Period
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-sm">
+              <div>{format(new Date(assessment.startDate), "dd MMM yyyy")}</div>
+              <div className="text-muted-foreground">to</div>
+              <div>{format(new Date(assessment.endDate), "dd MMM yyyy")}</div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle className="text-sm font-medium flex items-center gap-2">
+              <IconTrophy className="size-4" />
+              Progress
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-2">
+              <div className="text-2xl font-bold">
+                {completedCount} / {totalCount}
+              </div>
+              <Progress value={progress} className="h-2" />
+              <p className="text-xs text-muted-foreground">
+                {progress.toFixed(0)}% completed
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle className="text-sm font-medium">Self Weightage</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">
+              {(assessment.weightageSelf * 100).toFixed(0)}%
+            </div>
+            <p className="text-xs text-muted-foreground mt-1">
+              of total assessment
+            </p>
+          </CardContent>
+        </Card>
+      </div>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Rate Your Competencies</CardTitle>
+          <CardDescription>
+            Rate yourself based on the required competency level
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          {competencies.length === 0 ? (
+            <div className="text-center py-8 text-muted-foreground">
+              No competencies assigned to your position
+            </div>
+          ) : (
+            <CompetencyAssessmentTable
+              competencies={competencies}
+              scores={scores}
+              levels={levels}
+              onScoreChange={handleScoreChange}
+              onRemarkChange={handleRemarkChange}
+              disabled={!withinPeriod}
+            />
+          )}
+        </CardContent>
+      </Card>
+
+      {competencies.length > 0 && (
+        <div className="flex justify-end gap-2">
+          <Button 
+            variant="outline" 
+            onClick={handleSaveAll}
+            disabled={isSaving || !withinPeriod}
+          >
+            Save Progress
+          </Button>
+          <Button 
+            onClick={handleSubmit}
+            disabled={isSaving || !withinPeriod || completedCount < totalCount}
+          >
+            {isSaving ? "Submitting..." : "Submit Assessment"}
+          </Button>
+        </div>
+      )}
+    </div>
+  )
+}
+
+interface CompetencyRatingProps {
+  competency: {
+    id?: string
+    name?: string
+    code?: string
+    description?: string
+    cluster?: { name?: string }
+    level?: { name?: string }
+  }
+  index: number
+  score: number | null
+  onScoreChange: (score: number) => void
+  disabled?: boolean
+  levels?: any[]
+}
+
+interface CompetencyAssessmentTableProps {
+  competencies: Competency[]
+  scores: Record<string, CompetencyScore>
+  levels: any[]
+  onScoreChange: (competencyId: string, score: number) => void
+  onRemarkChange: (competencyId: string, remark: string) => void
+  disabled?: boolean
+}
+
+function CompetencyAssessmentTable({
+  competencies,
+  scores,
+  levels,
+  onScoreChange,
+  onRemarkChange,
+  disabled
+}: CompetencyAssessmentTableProps) {
+  // Group competencies by cluster
+  const groupedByCluster = competencies.reduce((acc, pc) => {
+    const clusterName = pc.competency?.cluster?.name || 'Uncategorized'
+    if (!acc[clusterName]) {
+      acc[clusterName] = []
+    }
+    acc[clusterName].push(pc)
+    return acc
+  }, {} as Record<string, Competency[]>)
+
+  // Sort levels by value
+  const sortedLevels = levels.sort((a, b) => (a.value || 0) - (b.value || 0))
+
+  const clusterEntries = Object.entries(groupedByCluster)
+
+  return (
+    <Tabs defaultValue={clusterEntries[0]?.[0]} className="w-full">
+      <TabsList className="grid w-full" style={{ gridTemplateColumns: `repeat(${clusterEntries.length}, minmax(0, 1fr))` }}>
+        {clusterEntries.map(([clusterName, clusterCompetencies], index) => {
+          const completed = clusterCompetencies.filter(pc => scores[pc.competency.id]?.score !== null).length
+          const total = clusterCompetencies.length
+          
+          return (
+            <TabsTrigger key={clusterName} value={clusterName} className="gap-2">
+              <span>{index + 1}. {clusterName}</span>
+              <span className="text-xs text-muted-foreground">({completed}/{total})</span>
+            </TabsTrigger>
+          )
+        })}
+      </TabsList>
+
+      {clusterEntries.map(([clusterName, clusterCompetencies], clusterIndex) => (
+        <TabsContent key={clusterName} value={clusterName} className="mt-4">
+          <Card>
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-lg">{clusterName} Competencies</CardTitle>
+                <Badge variant="outline">
+                  {clusterCompetencies.filter(pc => scores[pc.competency.id]?.score !== null).length} / {clusterCompetencies.length} Completed
+                </Badge>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="border rounded-lg overflow-hidden">
+                <div className="overflow-x-auto">
+                  <table className="w-full">
+                    <thead className="bg-primary text-primary-foreground">
+                      <tr>
+                        <th className="px-3 py-2 text-left text-sm font-medium w-12">No</th>
+                        <th className="px-3 py-2 text-left text-sm font-medium min-w-[200px]">Competency</th>
+                        <th className="px-3 py-2 text-center text-sm font-medium w-16">RCL</th>
+                        {sortedLevels.map((level) => (
+                          <th key={level.id} className="px-3 py-2 text-center text-sm font-medium w-12">
+                            {level.value}
+                          </th>
+                        ))}
+                        <th className="px-3 py-2 text-left text-sm font-medium min-w-[150px]">Remarks</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {clusterCompetencies.map((pc, index) => {
+                        const competencyScore = scores[pc.competency.id]
+                        // RCL from position competency's level field (numeric value)
+                        const rcl = pc.level !== undefined && pc.level !== null ? pc.level.toString() : 'N/A'
+                        
+                        return (
+                          <tr key={pc.id} className="border-t hover:bg-muted/50">
+                            <td className="px-3 py-3 text-sm text-center">{index + 1}</td>
+                            <td className="px-3 py-3">
+                              <div className="font-medium text-sm">{pc.competency?.name}</div>
+                              {pc.competency?.description && (
+                                <div className="text-xs text-muted-foreground mt-1">
+                                  {pc.competency.description}
+                                </div>
+                              )}
+                            </td>
+                            <td className="px-3 py-3 text-center text-sm font-medium">{rcl}</td>
+                            {sortedLevels.map((level) => (
+                              <td key={level.id} className="px-3 py-3 text-center">
+                                <button
+                                  type="button"
+                                  onClick={() => onScoreChange(pc.competency.id, level.value)}
+                                  disabled={disabled}
+                                  className={`
+                                    size-8 rounded-full border-2 transition-all
+                                    ${competencyScore?.score === level.value
+                                      ? 'bg-primary border-primary'
+                                      : 'border-muted-foreground/30 hover:border-primary/50'
+                                    }
+                                    ${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}
+                                  `}
+                                  title={`${level.value} - ${level.name}`}
+                                />
+                              </td>
+                            ))}
+                            <td className="px-3 py-3">
+                              <div className="flex items-center gap-2">
+                                <Textarea
+                                  value={competencyScore?.remark || ''}
+                                  onChange={(e) => onRemarkChange(pc.competency.id, e.target.value)}
+                                  disabled={disabled}
+                                  placeholder="Add remark..."
+                                  className="min-h-[60px] text-sm resize-none"
+                                />
+                                <IconPencil className="size-4 text-muted-foreground shrink-0" />
+                              </div>
+                            </td>
+                          </tr>
+                        )
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+      ))}
+    </Tabs>
+  )
+}
+
+function CompetencyRating({ 
+  competency, 
+  index, 
+  score, 
+  onScoreChange,
+  disabled,
+  levels = []
+}: CompetencyRatingProps) {
+  // Sort levels by value and use them as ratings
+  const ratings = levels.length > 0 
+    ? levels
+        .sort((a, b) => (a.value || 0) - (b.value || 0)) // Sort by value ascending
+        .map((level) => ({
+          value: level.value || 0,
+          label: `${level.value || 0} - ${level.name}`
+        }))
+    : [
+        { value: 0, label: "0 - No Knowledge" },
+        { value: 1, label: "1 - Basic" },
+        { value: 2, label: "2 - Limited" },
+        { value: 3, label: "3 - Moderate" },
+        { value: 4, label: "4 - Good" },
+        { value: 5, label: "5 - Excellent" },
+      ]
+
+  return (
+    <div className="border rounded-lg p-4 space-y-4">
+      <div className="flex items-start justify-between">
+        <div className="flex-1">
+          <div className="flex items-center gap-2 mb-2">
+            <Badge variant="outline" className="text-xs">
+              {index}
+            </Badge>
+            <Badge variant="secondary" className="text-xs">
+              {competency?.code || 'N/A'}
+            </Badge>
+            <Badge className="text-xs">
+              {competency?.level?.name || 'N/A'}
+            </Badge>
+          </div>
+          <h3 className="font-semibold text-lg">{competency?.name || 'Unnamed Competency'}</h3>
+          {competency?.description && (
+            <p className="text-sm text-muted-foreground mt-1">
+              {competency.description}
+            </p>
+          )}
+          <div className="flex items-center gap-2 mt-2 text-sm text-muted-foreground">
+            <span className="font-medium">Cluster:</span>
+            <span>{competency?.cluster?.name || 'N/A'}</span>
+          </div>
+        </div>
+        {score !== null && (
+          <div className="flex items-center gap-2 text-green-600">
+            <IconCheck className="size-5" />
+            <span className="text-sm font-medium">Rated</span>
+          </div>
+        )}
+      </div>
+
+      <div className="space-y-2">
+        <Label>Your Rating</Label>
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+          {ratings.map((rating) => (
+            <button
+              key={rating.value}
+              type="button"
+              onClick={() => onScoreChange(rating.value)}
+              disabled={disabled}
+              className={`
+                px-4 py-3 rounded-lg border-2 text-left transition-all
+                ${score === rating.value
+                  ? "border-primary bg-primary text-primary-foreground font-semibold"
+                  : "border-border hover:border-primary/50 hover:bg-muted"
+                }
+                ${disabled ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}
+              `}
+            >
+              <div className="font-semibold">{rating.value}</div>
+              <div className="text-xs opacity-90">{rating.label.split(' - ')[1]}</div>
+            </button>
+          ))}
+        </div>
+      </div>
+    </div>
+  )
+}
