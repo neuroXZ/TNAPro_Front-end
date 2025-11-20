@@ -1,4 +1,4 @@
-import { ProtectedRoute } from "@/components/protected-route"
+import { AdminRoute } from "@/components/admin-route"
 import { AdminSidebar } from "@/components/admin-sidebar"
 import { SiteHeader } from "@/components/site-header"
 
@@ -13,7 +13,7 @@ export default function AdminLayout({
   children: React.ReactNode;
 }) {
   return (
-    <ProtectedRoute>
+    <AdminRoute>
       <SidebarProvider
         style={
           {
@@ -34,6 +34,6 @@ export default function AdminLayout({
           </div>
         </SidebarInset>
       </SidebarProvider>
-    </ProtectedRoute>
+    </AdminRoute>
   )
 }

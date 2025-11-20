@@ -1,4 +1,4 @@
-import { ProtectedRoute } from "@/components/protected-route"
+import { StaffRoute } from "@/components/staff-route"
 import { StaffSidebar } from "@/components/staff-sidebar"
 import { SiteHeader } from "@/components/site-header"
 
@@ -13,7 +13,7 @@ export default function StaffLayout({
   children: React.ReactNode;
 }) {
   return (
-    <ProtectedRoute>
+    <StaffRoute>
       <SidebarProvider
         style={
           {
@@ -34,6 +34,6 @@ export default function StaffLayout({
           </div>
         </SidebarInset>
       </SidebarProvider>
-    </ProtectedRoute>
+    </StaffRoute>
   )
 }

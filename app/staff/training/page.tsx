@@ -4,10 +4,12 @@ import { useEffect, useState } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { trainingAPI, trainingCompetencyAPI, competencyAPI } from "@/lib/api"
+import { trainingAPI, trainingCompetencyAPI, competencyAPI, idpAPI, assessmentAPI } from "@/lib/api"
 import { toast } from "sonner"
-import { IconSchool, IconCalendar, IconTarget, IconClock } from "@tabler/icons-react"
+import { useAuth } from "@/lib/auth-context"
+import { IconSchool, IconCalendar, IconTarget, IconClock, IconAlertCircle, IconSparkles } from "@tabler/icons-react"
 import { format, isBefore, isAfter } from "date-fns"
+import { Alert, AlertDescription } from "@/components/ui/alert"
 
 interface Training {
   id: string
@@ -20,31 +22,104 @@ interface Training {
     name: string
     code: string
   }[]
+  isRecommended?: boolean
+}
+
+interface CompetencyGap {
+  competencyId: string
+  competencyName: string
+  trainingName?: string
+  gap: number
+  developmentStrategies: {
+    training: boolean
+    coaching: boolean
+    selfLearning: boolean
+    workExperience: boolean
+  }
+}
+
+interface IdpData {
+  staffId: string
+  staffName: string
+  positionName: string
+  competencyAnalysis: CompetencyGap[]
+  generatedAt: string
 }
 
 type TrainingStatus = 'upcoming' | 'ongoing' | 'past'
 
 export default function MyTraining() {
+  const { user } = useAuth()
   const [trainings, setTrainings] = useState<Training[]>([])
+  const [idpData, setIdpData] = useState<IdpData | null>(null)
+  const [hasIdpRecommendations, setHasIdpRecommendations] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
   const [activeTab, setActiveTab] = useState<TrainingStatus>('ongoing')
+  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
-    fetchTrainings()
-  }, [])
+    if (user?.id) {
+      fetchData()
+    }
+  }, [user])
 
-  const fetchTrainings = async () => {
+  const fetchData = async () => {
     try {
       setIsLoading(true)
+      setError(null)
+      setHasIdpRecommendations(false)
 
+      // Fetch all trainings first
       const [trainingsData, allTrainingCompetencies, allCompetencies] = await Promise.all([
         trainingAPI.getAll(),
         trainingCompetencyAPI.getAll(),
         competencyAPI.getAll(),
       ])
 
-      console.log("Trainings:", trainingsData)
-      console.log("Training Competencies:", allTrainingCompetencies)
+      // Try to fetch IDP for personalized recommendations
+      let recommendedCompetencyIds: string[] = []
+      let idp: IdpData | null = null
+      let idpSuccess = false
+
+      try {
+        // Fetch latest assessment
+        const assessments = await assessmentAPI.getAll()
+        const latestAssessment = assessments.sort((a: any, b: any) => 
+          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+        )[0]
+
+        if (latestAssessment) {
+          // Try to generate IDP
+          const idpResponse = await idpAPI.generate({
+            staffId: user!.id,
+            assessmentId: latestAssessment.id
+          })
+          idp = idpResponse.data
+          setIdpData(idp)
+
+          // Get recommended competency IDs from IDP
+          if (idp && idp.competencyAnalysis) {
+            recommendedCompetencyIds = idp.competencyAnalysis
+              .filter(comp => comp.developmentStrategies.training === true)
+              .map(comp => comp.competencyId)
+
+            if (recommendedCompetencyIds.length > 0) {
+              idpSuccess = true
+              setHasIdpRecommendations(true)
+            }
+
+            console.log("IDP generated successfully. Recommended Competency IDs:", recommendedCompetencyIds)
+          }
+        } else {
+          console.log("No assessment found - showing all trainings")
+        }
+      } catch (err: any) {
+        console.error("IDP generation failed:", err)
+        console.log("Falling back to show all trainings")
+        // Continue without IDP - will show all trainings
+        idpSuccess = false
+        setHasIdpRecommendations(false)
+      }
 
       // Enrich trainings with their competencies
       const enrichedTrainings = trainingsData.map((training: any) => {
@@ -63,16 +138,32 @@ export default function MyTraining() {
           })
           .filter(Boolean)
 
+        // Check if any competency in this training is recommended
+        const isRecommended = idpSuccess && recommendedCompetencyIds.length > 0 
+          ? competencies.some((comp: any) => recommendedCompetencyIds.includes(comp.id))
+          : false
+
         return {
           ...training,
-          competencies
+          competencies,
+          isRecommended
         }
       })
 
-      setTrainings(enrichedTrainings)
-    } catch (error) {
+      // Filter: Only filter if IDP was successful AND has recommendations
+      const filteredTrainings = idpSuccess && recommendedCompetencyIds.length > 0
+        ? enrichedTrainings.filter((training: Training) => training.isRecommended)
+        : enrichedTrainings
+
+      console.log("IDP Success:", idpSuccess)
+      console.log("Recommended Competency IDs count:", recommendedCompetencyIds.length)
+      console.log("Filtered Trainings count:", filteredTrainings.length)
+
+      setTrainings(filteredTrainings)
+    } catch (error: any) {
       console.error("Failed to fetch trainings:", error)
-      toast.error("Failed to load trainings")
+      setError("Failed to load training programs")
+      toast.error("Failed to load training programs")
     } finally {
       setIsLoading(false)
     }
@@ -98,14 +189,36 @@ export default function MyTraining() {
         <div>
           <h1 className="text-3xl font-bold">Training Programs</h1>
           <p className="text-muted-foreground mt-1">
-            Available training programs to enhance your competencies
+            Loading your training programs...
           </p>
         </div>
         <Card>
           <CardContent className="py-8">
-            <div className="text-center text-muted-foreground">Loading...</div>
+            <div className="flex items-center justify-center gap-2 text-muted-foreground">
+              <div className="h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent"></div>
+              <span>Loading training programs...</span>
+            </div>
           </CardContent>
         </Card>
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <div className="space-y-4">
+        <div>
+          <h1 className="text-3xl font-bold">Training Programs</h1>
+          <p className="text-muted-foreground mt-1">
+            Available training programs
+          </p>
+        </div>
+        <Alert variant="destructive">
+          <IconAlertCircle className="h-4 w-4" />
+          <AlertDescription className="ml-2">
+            {error}
+          </AlertDescription>
+        </Alert>
       </div>
     )
   }
@@ -117,24 +230,50 @@ export default function MyTraining() {
   return (
     <div className="space-y-4">
       <div>
-        <h1 className="text-3xl font-bold">Training Programs</h1>
+        <h1 className="text-3xl font-bold flex items-center gap-2">
+          {hasIdpRecommendations && <IconSparkles className="size-8 text-primary" />}
+          {hasIdpRecommendations ? "Recommended Training Programs" : "Training Programs"}
+        </h1>
         <p className="text-muted-foreground mt-1">
-          Available training programs to enhance your competencies
+          {hasIdpRecommendations 
+            ? "Personalized training recommendations based on your competency gaps"
+            : "Available training programs to enhance your competencies"
+          }
         </p>
       </div>
+
+      {idpData && hasIdpRecommendations && (
+        <Alert className="border-primary/50 bg-primary/5">
+          <IconTarget className="h-4 w-4 text-primary" />
+          <AlertDescription className="ml-2">
+            <strong>IDP Generated:</strong> Based on your assessment results, we've identified{" "}
+            <strong>{idpData.competencyAnalysis.filter(c => c.developmentStrategies.training).length}</strong>{" "}
+            competencies that would benefit from formal training programs.
+          </AlertDescription>
+        </Alert>
+      )}
+
+      {!hasIdpRecommendations && trainings.length > 0 && (
+        <Alert>
+          <IconAlertCircle className="h-4 w-4" />
+          <AlertDescription className="ml-2">
+            Showing all available trainings. Complete your assessments to get personalized recommendations.
+          </AlertDescription>
+        </Alert>
+      )}
 
       <div className="grid gap-4 md:grid-cols-3">
         <Card>
           <CardHeader className="pb-3">
             <CardTitle className="text-sm font-medium flex items-center gap-2">
-              <IconSchool className="size-4" />
-              Total Trainings
+              {hasIdpRecommendations ? <IconSparkles className="size-4 text-primary" /> : <IconSchool className="size-4" />}
+              {hasIdpRecommendations ? "Recommended" : "Total Programs"}
             </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{trainings.length}</div>
             <p className="text-xs text-muted-foreground mt-1">
-              Available programs
+              {hasIdpRecommendations ? "Programs matched to your needs" : "Available programs"}
             </p>
           </CardContent>
         </Card>
@@ -149,7 +288,7 @@ export default function MyTraining() {
           <CardContent>
             <div className="text-2xl font-bold">{ongoingCount}</div>
             <p className="text-xs text-muted-foreground mt-1">
-              Currently running
+              Currently available
             </p>
           </CardContent>
         </Card>
@@ -173,8 +312,20 @@ export default function MyTraining() {
       {trainings.length === 0 ? (
         <Card>
           <CardContent className="py-8">
-            <div className="text-center text-muted-foreground">
-              No training programs available
+            <div className="text-center space-y-2">
+              <IconSchool className="size-12 mx-auto text-muted-foreground" />
+              <p className="text-muted-foreground font-medium">
+                {hasIdpRecommendations 
+                  ? "No training programs currently recommended"
+                  : "No training programs available"
+                }
+              </p>
+              <p className="text-sm text-muted-foreground">
+                {hasIdpRecommendations
+                  ? "Great job! Your competency levels are meeting requirements, or there are no matching training programs available at this time."
+                  : "Please check back later for new training opportunities."
+                }
+              </p>
             </div>
           </CardContent>
         </Card>
@@ -256,13 +407,20 @@ function TrainingList({ trainings, status }: TrainingListProps) {
   return (
     <div className="grid gap-4">
       {trainings.map((training) => (
-        <Card key={training.id}>
+        <Card key={training.id} className={training.isRecommended ? "border-primary/20 shadow-sm hover:shadow-md transition-shadow" : ""}>
           <CardHeader>
             <div className="flex items-start justify-between">
               <div className="flex-1">
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 flex-wrap">
+                  {training.isRecommended && <IconSparkles className="size-5 text-primary" />}
                   <CardTitle>{training.name}</CardTitle>
                   {getStatusBadge(status)}
+                  {training.isRecommended && (
+                    <Badge variant="outline" className="gap-1 border-primary/50 text-primary">
+                      <IconTarget className="size-3" />
+                      Recommended
+                    </Badge>
+                  )}
                 </div>
                 {training.description && (
                   <CardDescription className="mt-2">
@@ -292,7 +450,7 @@ function TrainingList({ trainings, status }: TrainingListProps) {
                 <p className="text-sm font-medium">Competencies Covered:</p>
                 <div className="flex flex-wrap gap-2">
                   {training.competencies.map((comp) => (
-                    <Badge key={comp.id} variant="outline">
+                    <Badge key={comp.id} variant="outline" className={training.isRecommended ? "border-primary/30" : ""}>
                       {comp.code} - {comp.name}
                     </Badge>
                   ))}

@@ -58,6 +58,11 @@ const data = {
       icon: IconCertificate,
     },
     {
+      title: "My IDP",
+      url: "/staff/idp",
+      icon: IconFileText,
+    },
+    {
       title: "My Training",
       url: "/staff/training",
       icon: IconSchool,
