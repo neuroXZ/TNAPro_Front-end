@@ -12,8 +12,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { IconUser, IconMail, IconBriefcase, IconBuilding, IconEdit } from "@tabler/icons-react"
-import { authAPI, staffAPI } from "@/lib/api"
+import { IconUser, IconMail, IconBriefcase, IconBuilding, IconEdit, IconUsers } from "@tabler/icons-react"
+import { authAPI, staffAPI, assessorAPI } from "@/lib/api"
 import { toast } from "sonner"
 import { Skeleton } from "@/components/ui/skeleton"
 
@@ -36,6 +36,11 @@ interface ProfileData {
     id: string
     name: string
   }
+  subordinates?: Array<{
+    id: string
+    name: string
+    position?: { name: string }
+  }>
 }
 
 export default function MyProfile() {
@@ -56,8 +61,45 @@ export default function MyProfile() {
     try {
       setIsLoading(true)
       const data = await authAPI.getProfile()
-      setProfile(data)
-      updateFormData(data)
+      
+      // Fetch subordinates data
+      if (data?.id) {
+        try {
+          const [allStaff, allAssessors] = await Promise.all([
+            staffAPI.getAll(),
+            assessorAPI.getAll(),
+          ])
+          
+          // Find subordinates: staff where current user is the superior assessor
+          const subordinateAssessors = allAssessors.filter(
+            (a: any) => a.assessorId === data.id && a.type === 'superior'
+          )
+          const subordinates = subordinateAssessors
+            .map((a: any) => {
+              const subordinateStaff = allStaff.find((s: any) => s.id === a.staffId)
+              return subordinateStaff ? {
+                id: subordinateStaff.id,
+                name: subordinateStaff.name,
+                position: subordinateStaff.position
+              } : null
+            })
+            .filter(Boolean)
+          
+          const enrichedData = {
+            ...data,
+            subordinates,
+          }
+          setProfile(enrichedData)
+          updateFormData(enrichedData)
+        } catch (err) {
+          console.error('Failed to fetch subordinates:', err)
+          setProfile(data)
+          updateFormData(data)
+        }
+      } else {
+        setProfile(data)
+        updateFormData(data)
+      }
     } catch (error: any) {
       // Fallback: Try to get user data from localStorage
       const storedUser = localStorage.getItem('user')
@@ -67,24 +109,42 @@ export default function MyProfile() {
           
           // If stored user has an id, fetch full staff details
           if (userData.id) {
-            const [fullProfile, allStaff] = await Promise.all([
+            const [fullProfile, allStaff, allAssessors] = await Promise.all([
               staffAPI.getById(userData.id),
               staffAPI.getAll(), // Get all staff to find relations
+              assessorAPI.getAll(), // Get assessors to find subordinates
             ])
             
             // Find position, unit, supervisor from all staff data
             const staffWithRelations = allStaff.find((s: any) => s.id === userData.id)
+            
+            // Find subordinates: staff where current user is the superior assessor
+            const subordinateAssessors = allAssessors.filter(
+              (a: any) => a.assessorId === userData.id && a.type === 'superior'
+            )
+            const subordinates = subordinateAssessors
+              .map((a: any) => {
+                const subordinateStaff = allStaff.find((s: any) => s.id === a.staffId)
+                return subordinateStaff ? {
+                  id: subordinateStaff.id,
+                  name: subordinateStaff.name,
+                  position: subordinateStaff.position
+                } : null
+              })
+              .filter(Boolean)
+            
             if (staffWithRelations) {
               const enrichedProfile = {
                 ...fullProfile,
                 position: staffWithRelations.position,
                 unit: staffWithRelations.unit,
                 supervisor: staffWithRelations.supervisor,
+                subordinates,
               }
               setProfile(enrichedProfile)
               updateFormData(enrichedProfile)
             } else {
-              setProfile(fullProfile)
+              setProfile({ ...fullProfile, subordinates })
               updateFormData(fullProfile)
             }
             return
@@ -296,6 +356,27 @@ export default function MyProfile() {
               readOnly
             />
           </div>
+          {profile?.subordinates && profile.subordinates.length > 0 && (
+            <div className="grid gap-2">
+              <Label className="flex items-center gap-2">
+                <IconUsers className="size-4" />
+                Staff Bawahan ({profile.subordinates.length})
+              </Label>
+              <div className="space-y-2">
+                {profile.subordinates.map((sub) => (
+                  <div 
+                    key={sub.id} 
+                    className="flex items-center justify-between rounded-md border px-3 py-2 text-sm"
+                  >
+                    <span className="font-medium">{sub.name}</span>
+                    <span className="text-muted-foreground">
+                      {sub.position?.name || '-'}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </CardContent>
       </Card>
 
