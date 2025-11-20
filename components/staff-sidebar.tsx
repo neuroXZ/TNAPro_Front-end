@@ -15,6 +15,7 @@ import {
 import { NavMain } from "@/components/nav-main"
 import { NavSecondary } from "@/components/nav-secondary"
 import { NavUser } from "@/components/nav-user"
+import { useAuth } from "@/lib/auth-context"
 import {
   Sidebar,
   SidebarContent,
@@ -25,13 +26,7 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar"
 
-const data = {
-  user: {
-    name: "Staff User",
-    email: "staff@tnapro.com",
-    avatar: "/avatars/staff.jpg",
-  },
-  navMain: [
+const navMainItems = [
     {
       title: "Dashboard",
       url: "/staff/dashboard",
@@ -67,17 +62,25 @@ const data = {
       url: "/staff/training",
       icon: IconSchool,
     },
-  ],
-  navSecondary: [
+  ]
+
+const navSecondaryItems = [
     {
       title: "Profile Settings",
       url: "/staff/profile",
       icon: IconSettings,
     },
-  ],
-}
+  ]
 
 export function StaffSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+  const { user } = useAuth()
+
+  const userData = {
+    name: user?.name || "Staff User",
+    email: user?.email || "staff@tnapro.com",
+    avatar: "/avatars/staff.jpg",
+  }
+
   return (
     <Sidebar collapsible="offcanvas" {...props}>
       <SidebarHeader>
@@ -96,11 +99,11 @@ export function StaffSidebar({ ...props }: React.ComponentProps<typeof Sidebar>)
         </SidebarMenu>
       </SidebarHeader>
       <SidebarContent>
-        <NavMain items={data.navMain} />
-        <NavSecondary items={data.navSecondary} className="mt-auto" />
+        <NavMain items={navMainItems} />
+        <NavSecondary items={navSecondaryItems} className="mt-auto" />
       </SidebarContent>
       <SidebarFooter>
-        <NavUser user={data.user} />
+        <NavUser user={userData} />
       </SidebarFooter>
     </Sidebar>
   )

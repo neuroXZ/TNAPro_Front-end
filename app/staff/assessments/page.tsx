@@ -400,77 +400,84 @@ function AssessmentCard({ assessment }: { assessment: AssessmentWithStatus }) {
   return (
     
     <div className="border rounded-lg p-4 hover:bg-muted/50 transition-colors">
-      <div className="flex items-start justify-between mb-3">
-        <div className="flex-1">
-          <div className="flex items-center gap-2 mb-2">
-            <h3 className="font-semibold text-lg">{assessment.name}</h3>
-            <Badge 
-              variant={
-                assessment.status === "completed" 
-                  ? "default" 
+      <div className="flex flex-col gap-3">
+        <div className="flex items-start justify-between">
+          <div className="flex-1">
+            <div className="flex items-center gap-2 mb-2 flex-wrap">
+              <h3 className="font-semibold text-lg">{assessment.name}</h3>
+              <Badge 
+                variant={
+                  assessment.status === "completed" 
+                    ? "default" 
+                    : assessment.status === "pending" 
+                    ? "secondary" 
+                    : "outline"
+                }
+              >
+                {assessment.status === "completed" 
+                  ? "Completed" 
                   : assessment.status === "pending" 
-                  ? "secondary" 
-                  : "outline"
-              }
-            >
-              {assessment.status === "completed" 
-                ? "Completed" 
-                : assessment.status === "pending" 
-                ? "In Progress" 
-                : "Not Started"}
-            </Badge>
-          </div>
-          {assessment.description && (
-            <p className="text-sm text-muted-foreground mb-2">{assessment.description}</p>
-          )}
-          <div className="flex items-center gap-4 text-sm text-muted-foreground">
-            <div className="flex items-center gap-1">
-              <IconCalendar className="size-4" />
-              {assessment.startDate && format(new Date(assessment.startDate), "dd MMM yyyy")}
-              {" - "}
-              {assessment.endDate && format(new Date(assessment.endDate), "dd MMM yyyy")}
+                  ? "In Progress" 
+                  : "Not Started"}
+              </Badge>
             </div>
-            <div className="flex items-center gap-1">
-              <IconClipboardCheck className="size-4" />
-              {assessment.completedCompetencies} / {assessment.totalCompetencies} competencies
+            {assessment.description && (
+              <p className="text-sm text-muted-foreground mb-2">{assessment.description}</p>
+            )}
+            <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 text-sm text-muted-foreground">
+              <div className="flex items-center gap-1">
+                <IconCalendar className="size-4" />
+                <span className="text-xs sm:text-sm">
+                  {assessment.startDate && format(new Date(assessment.startDate), "dd MMM yyyy")}
+                  {" - "}
+                  {assessment.endDate && format(new Date(assessment.endDate), "dd MMM yyyy")}
+                </span>
+              </div>
+              <div className="flex items-center gap-1">
+                <IconClipboardCheck className="size-4" />
+                <span className="text-xs sm:text-sm">
+                  {assessment.completedCompetencies} / {assessment.totalCompetencies} competencies
+                </span>
+              </div>
             </div>
           </div>
         </div>
-      </div>
 
-      <div className="flex items-center justify-between">
-        <div className="grid grid-cols-3 gap-4 flex-1">
-          <div className="space-y-1">
-            <p className="text-xs text-muted-foreground">Average</p>
-            <p className="text-lg font-semibold">
-              {assessment.averageScore > 0 ? assessment.averageScore.toFixed(2) : "-"}
-            </p>
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+          <div className="grid grid-cols-3 gap-4 flex-1">
+            <div className="space-y-1">
+              <p className="text-xs text-muted-foreground">Average</p>
+              <p className="text-lg font-semibold">
+                {assessment.averageScore > 0 ? assessment.averageScore.toFixed(2) : "-"}
+              </p>
+            </div>
+            <div className="space-y-1">
+              <p className="text-xs text-muted-foreground">Self</p>
+              <p className="text-lg font-semibold">
+                {assessment.selfScore > 0 ? assessment.selfScore.toFixed(2) : "-"}
+              </p>
+            </div>
+            <div className="space-y-1">
+              <p className="text-xs text-muted-foreground">Superior</p>
+              <p className="text-lg font-semibold">
+                {assessment.superiorScore > 0 ? assessment.superiorScore.toFixed(2) : "-"}
+              </p>
+            </div>
           </div>
-          <div className="space-y-1">
-            <p className="text-xs text-muted-foreground">Self</p>
-            <p className="text-lg font-semibold">
-              {assessment.selfScore > 0 ? assessment.selfScore.toFixed(2) : "-"}
-            </p>
-          </div>
-          <div className="space-y-1">
-            <p className="text-xs text-muted-foreground">Superior</p>
-            <p className="text-lg font-semibold">
-              {assessment.superiorScore > 0 ? assessment.superiorScore.toFixed(2) : "-"}
-            </p>
-          </div>
+          <Button 
+            size="sm" 
+            onClick={() => handleStartAssessment(assessment.id)}
+            variant={assessment.status === "not-started" ? "default" : "outline"}
+            className="w-full sm:w-auto"
+          >
+            <IconFileText className="size-4 mr-1" />
+            {assessment.status === "not-started" 
+              ? "Start" 
+              : assessment.status === "pending" 
+              ? "Continue" 
+              : "View Assessment Test"}
+          </Button>
         </div>
-        <Button 
-          size="sm" 
-          onClick={() => handleStartAssessment(assessment.id)}
-          variant={assessment.status === "not-started" ? "default" : "outline"}
-        >
-          <IconFileText className="size-4 mr-1" />
-          {assessment.status === "not-started" 
-            ? "Start" 
-            : assessment.status === "pending" 
-            ? "Continue" 
-            : "View Assessment Test"}
-        </Button>
       </div>
     </div>
   )
