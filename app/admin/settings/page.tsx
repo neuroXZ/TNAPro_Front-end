@@ -117,9 +117,9 @@ export default function SettingsPage() {
     } finally {
       setIsUploading(false)
     }
-  }
+  };
 
-  const handleSaveGeneral = async () {
+  const handleSaveGeneral = async () => {
     try {
       setIsSaving(true)
       
