@@ -23,7 +23,6 @@ interface Assessment {
   endDate?: string
   weightageSelf?: number
   weightageSuperior?: number
-  weightagePeer?: number
 }
 
 interface AssessmentFormDialogProps {
@@ -54,51 +53,20 @@ export function AssessmentFormDialog({
     const numValue = parseFloat(value) || 0
     
     if (field === "weightageSelf") {
-      if (!usePeerAssessment) {
-        // Without peer: auto-calculate superior
-        const superior = Math.max(0, 100 - numValue)
-        setFormData({
-          ...formData,
-          weightageSelf: value,
-          weightageSuperior: superior.toString(),
-        })
-      } else {
-        // With peer: keep superior, auto-calculate peer
-        const superior = parseFloat(formData.weightageSuperior) || 0
-        const peer = Math.max(0, 100 - numValue - superior)
-        setFormData({
-          ...formData,
-          weightageSelf: value,
-          weightagePeer: peer.toString(),
-        })
-      }
-    } else if (field === "weightageSuperior") {
-      if (!usePeerAssessment) {
-        // Without peer: auto-calculate self
-        const self = Math.max(0, 100 - numValue)
-        setFormData({
-          ...formData,
-          weightageSuperior: value,
-          weightageSelf: self.toString(),
-        })
-      } else {
-        // With peer: keep self, auto-calculate peer
-        const self = parseFloat(formData.weightageSelf) || 0
-        const peer = Math.max(0, 100 - self - numValue)
-        setFormData({
-          ...formData,
-          weightageSuperior: value,
-          weightagePeer: peer.toString(),
-        })
-      }
-    } else if (field === "weightagePeer" && usePeerAssessment) {
-      // When peer changes, auto-calculate superior
-      const self = parseFloat(formData.weightageSelf) || 0
-      const superior = Math.max(0, 100 - self - numValue)
+      // Auto-calculate superior
+      const superior = Math.max(0, 100 - numValue)
       setFormData({
         ...formData,
-        weightagePeer: value,
+        weightageSelf: value,
         weightageSuperior: superior.toString(),
+      })
+    } else if (field === "weightageSuperior") {
+      // Auto-calculate self
+      const self = Math.max(0, 100 - numValue)
+      setFormData({
+        ...formData,
+        weightageSuperior: value,
+        weightageSelf: self.toString(),
       })
     }
   }
@@ -144,7 +112,6 @@ export function AssessmentFormDialog({
         endDate: formData.endDate ? new Date(formData.endDate).toISOString() : null,
         weightageSelf: formData.weightageSelf ? parseFloat(formData.weightageSelf) / 100 : null,
         weightageSuperior: formData.weightageSuperior ? parseFloat(formData.weightageSuperior) / 100 : null,
-        weightagePeer: null,
       })
       onOpenChange(false)
     } catch (error) {

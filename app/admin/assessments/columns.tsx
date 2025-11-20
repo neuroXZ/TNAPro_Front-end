@@ -15,7 +15,6 @@ export interface Assessment {
   endDate?: string
   weightageSelf?: number
   weightageSuperior?: number
-  weightagePeer?: number
   _count?: {
     assessmentResults: number
   }

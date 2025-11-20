@@ -49,6 +49,7 @@ const data = {
       url: "/admin/staff",
       icon: IconUsers,
     },
+    
     {
       title: "Organization",
       url: "#",
@@ -56,7 +57,7 @@ const data = {
       items: [
         {
           title: "Unit Types",
-          url: "/admin/unit-types",
+          url: "/admin/unittype",
         },
         {
           title: "Units",
@@ -102,7 +103,7 @@ const data = {
       items: [
         {
           title: "Training Programs",
-          url: "/admin/training",
+          url: "/admin/trainings",
         },
         {
           title: "Training Competencies",
@@ -134,17 +135,13 @@ const data = {
       ],
     },
     {
-      title: "Reports",
+      title: "Reports & Analytics",
       url: "#",
       icon: IconChartBar,
       items: [
         {
-          title: "Submissions",
-          url: "/admin/reports/submissions",
-        },
-        {
-          title: "IDP Reports",
-          url: "/admin/reports/idp",
+          title: "Reports",
+          url: "/admin/reports",
         },
         {
           title: "Analytics",

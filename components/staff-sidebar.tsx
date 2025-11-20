@@ -38,6 +38,11 @@ const data = {
       icon: IconDashboard,
     },
     {
+      title: "My Profile",
+      url: "/staff/profile",
+      icon: IconUserCheck,
+    },
+    {
       title: "Self Assessment",
       url: "/staff/assessments",
       icon: IconClipboardCheck,
@@ -48,26 +53,21 @@ const data = {
       icon: IconUserCheck,
     },
     {
-      title: "Training",
-      url: "/staff/training",
-      icon: IconSchool,
+      title: "My Competencies",
+      url: "/staff/competencies",
+      icon: IconCertificate,
     },
     {
-      title: "IDP",
-      url: "/staff/idp",
-      icon: IconFileText,
+      title: "My Training",
+      url: "/staff/training",
+      icon: IconSchool,
     },
   ],
   navSecondary: [
     {
-      title: "Settings",
-      url: "/staff/settings",
+      title: "Profile Settings",
+      url: "/staff/profile",
       icon: IconSettings,
-    },
-    {
-      title: "Help",
-      url: "/staff/help",
-      icon: IconHelp,
     },
   ],
 }

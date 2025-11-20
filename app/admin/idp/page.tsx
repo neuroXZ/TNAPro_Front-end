@@ -109,18 +109,50 @@ export default function AdminIdpPage() {
       console.log("Generating IDP with payload:", payload)
       const result = await idpAPI.generate(payload)
       console.log("IDP Result:", result)
-      setIdpResult(result)
-      toast.success("IDP generated successfully!")
+      
+      // Backend returns { message, data } structure
+      if (result.data) {
+        setIdpResult(result.data)
+        toast.success(result.message || "IDP generated successfully!")
+      } else {
+        // Fallback if backend returns data directly
+        setIdpResult(result)
+        toast.success("IDP generated successfully!")
+      }
     } catch (error: any) {
       console.error("Failed to generate IDP - Full error:", error)
       console.error("Error response:", error.response)
       
-      const errorMessage = error.response?.data?.message 
-        || error.response?.data?.error
-        || error.message 
-        || "Failed to generate IDP"
+      // Better error message extraction
+      let errorMessage = "Failed to generate IDP"
       
-      toast.error(errorMessage)
+      if (error.response?.data) {
+        const data = error.response.data
+        errorMessage = data.error || data.message || JSON.stringify(data)
+      } else if (error.message) {
+        errorMessage = error.message
+      }
+      
+      // User-friendly error messages
+      if (errorMessage.includes("assessment score missing")) {
+        const staff = staffList.find(s => s.id === selectedStaff)
+        toast.error(
+          `Assessment incomplete for ${staff?.name || 'this staff'}. Please ensure all competency assessments (Self & Superior) are completed.`,
+          { duration: 5000 }
+        )
+      } else if (errorMessage.includes("No assessment results found")) {
+        toast.error(
+          "No assessment results found for this staff member. Please complete the assessment first.",
+          { duration: 5000 }
+        )
+      } else if (errorMessage.includes("No competencies defined")) {
+        toast.error(
+          "No competencies defined for this staff's position. Please configure position competencies first.",
+          { duration: 5000 }
+        )
+      } else {
+        toast.error(errorMessage, { duration: 5000 })
+      }
     } finally {
       setIsGenerating(false)
     }
