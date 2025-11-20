@@ -34,6 +34,7 @@ export default function SettingsPage() {
   const [settings, setSettings] = useState<Setting | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [isSaving, setIsSaving] = useState(false)
+  const [isUploading, setIsUploading] = useState(false)
 
   // Form states
   const [companyName, setCompanyName] = useState("")
@@ -85,7 +86,40 @@ export default function SettingsPage() {
     }
   }
 
-  const handleSaveGeneral = async () => {
+  const handleLogoUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0]
+    if (!file) return
+
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      toast.error('Please select an image file')
+      return
+    }
+
+    // Validate file size (5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error('File size must be less than 5MB')
+      return
+    }
+
+    try {
+      setIsUploading(true)
+      const response = await settingAPI.uploadLogo(file)
+      
+      if (response.logoPath) {
+        setLogoPath(response.logoPath)
+        toast.success('Logo uploaded successfully')
+        await fetchSettings()
+      }
+    } catch (error) {
+      toast.error('Failed to upload logo')
+      console.error(error)
+    } finally {
+      setIsUploading(false)
+    }
+  }
+
+  const handleSaveGeneral = async () {
     try {
       setIsSaving(true)
       
@@ -212,15 +246,33 @@ export default function SettingsPage() {
                 </div>
 
                 <div className="grid gap-2">
-                  <Label htmlFor="logoPath">Logo Path</Label>
+                  <Label htmlFor="logoUpload">Upload Logo</Label>
                   <Input
-                    id="logoPath"
-                    placeholder="Enter logo file path (e.g., /uploads/logo.png)"
-                    value={logoPath}
-                    onChange={(e) => setLogoPath(e.target.value)}
+                    id="logoUpload"
+                    type="file"
+                    accept="image/*"
+                    onChange={handleLogoUpload}
+                    disabled={isUploading}
                   />
                   <p className="text-xs text-muted-foreground">
-                    Enter the path to your uploaded logo file
+                    Accepted formats: PNG, JPG, GIF, WEBP, SVG (Max 5MB)
+                  </p>
+                  {isUploading && (
+                    <p className="text-sm text-blue-600">Uploading...</p>
+                  )}
+                </div>
+
+                <div className="grid gap-2">
+                  <Label htmlFor="logoPath">Logo Path (Read Only)</Label>
+                  <Input
+                    id="logoPath"
+                    placeholder="Logo will be uploaded and path will appear here"
+                    value={logoPath}
+                    readOnly
+                    disabled
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    This path is automatically set after uploading a logo
                   </p>
                 </div>
 

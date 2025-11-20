@@ -473,6 +473,18 @@ export const settingAPI = {
     const response = await api.delete(`/setting/${id}`);
     return response.data;
   },
+
+  uploadLogo: async (file: File) => {
+    const formData = new FormData();
+    formData.append('logo', file);
+    
+    const response = await api.post('/setting/upload-logo', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+    return response.data;
+  },
 };
 
 // Assessment API
