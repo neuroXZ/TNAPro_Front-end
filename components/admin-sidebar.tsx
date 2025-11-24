@@ -34,131 +34,131 @@ import {
 } from "@/components/ui/sidebar"
 
 const navMainItems = [
-    {
-      title: "Dashboard",
-      url: "/admin/dashboard",
-      icon: IconDashboard,
-    },
-    {
-      title: "Staff Management",
-      url: "/admin/staff",
-      icon: IconUsers,
-    },
-    
-    {
-      title: "Organization",
-      url: "#",
-      icon: IconBuilding,
-      items: [
-        {
-          title: "Unit Types",
-          url: "/admin/unittype",
-        },
-        {
-          title: "Units",
-          url: "/admin/units",
-        },
-        {
-          title: "Positions",
-          url: "/admin/positions",
-        },
-        {
-          title: "Grades",
-          url: "/admin/grades",
-        },
-        {
-          title: "Clusters",
-          url: "/admin/clusters",
-        },
-      ],
-    },
-    {
-      title: "Competency",
-      url: "#",
-      icon: IconTarget,
-      items: [
-        {
-          title: "Competencies",
-          url: "/admin/competencies",
-        },
-        {
-          title: "Position Competencies",
-          url: "/admin/position-competencies",
-        },
-        {
-          title: "Levels",
-          url: "/admin/levels",
-        },
-      ],
-    },
-    {
-      title: "Training",
-      url: "#",
-      icon: IconSchool,
-      items: [
-        {
-          title: "Training Programs",
-          url: "/admin/trainings",
-        },
-        {
-          title: "Training Competencies",
-          url: "/admin/training-competencies",
-        },
-        
-      ],
-    },
-    {
-      title: "Assessment",
-      url: "#",
-      icon: IconClipboardList,
-      items: [
-        {
-          title: "Assessments",
-          url: "/admin/assessments",
-        },
-        {
-          title: "Assessment Results",
-          url: "/admin/assessment-results",
-        },
-        {
-          title: "Assessors",
-          url: "/admin/assessors",
-        },
-      ],
-    },
-    {
-      title: "Reports & Analytics",
-      url: "#",
-      icon: IconChartBar,
-      items: [
-        {
-          title: "IDP",
-          url: "/admin/idp",
-        },
-        {
-          title: "Reports",
-          url: "/admin/reports",
-        },
-        {
-          title: "Analytics",
-          url: "/admin/analytics",
-        },
-      ],
-    },
-  ]
+  {
+    title: "Dashboard",
+    url: "/admin/dashboard",
+    icon: IconDashboard,
+  },
+  {
+    title: "Organization",
+    url: "#",
+    icon: IconBuilding,
+    items: [
+      {
+        title: "Unit Types",
+        url: "/admin/unittype",
+      },
+      {
+        title: "Units",
+        url: "/admin/units",
+      },
+      {
+        title: "Positions",
+        url: "/admin/positions",
+      },
+      {
+        title: "Grades",
+        url: "/admin/grades",
+      },
+      {
+        title: "Clusters",
+        url: "/admin/clusters",
+      },
+      {
+        title: "Staff Management",
+        url: "/admin/staff",
+        // icon: IconUsers,
+      },
+
+    ],
+  },
+  {
+    title: "Competency",
+    url: "#",
+    icon: IconTarget,
+    items: [
+      {
+        title: "Competencies",
+        url: "/admin/competencies",
+      },
+      {
+        title: "Position Competencies",
+        url: "/admin/position-competencies",
+      },
+      {
+        title: "Levels",
+        url: "/admin/levels",
+      },
+    ],
+  },
+  {
+    title: "Training",
+    url: "#",
+    icon: IconSchool,
+    items: [
+      {
+        title: "Training Programs",
+        url: "/admin/trainings",
+      },
+      {
+        title: "Training Competencies",
+        url: "/admin/training-competencies",
+      },
+
+    ],
+  },
+  {
+    title: "Assessment",
+    url: "#",
+    icon: IconClipboardList,
+    items: [
+      {
+        title: "Assessments",
+        url: "/admin/assessments",
+      },
+      {
+        title: "Assessment Results",
+        url: "/admin/assessment-results",
+      },
+      {
+        title: "Assessors",
+        url: "/admin/assessors",
+      },
+    ],
+  },
+  {
+    title: "Reports & Analytics",
+    url: "#",
+    icon: IconChartBar,
+    items: [
+      {
+        title: "IDP",
+        url: "/admin/idp",
+      },
+      {
+        title: "Reports",
+        url: "/admin/reports",
+      },
+      {
+        title: "Analytics",
+        url: "/admin/analytics",
+      },
+    ],
+  },
+]
 
 const navSecondaryItems = [
-    {
-      title: "Settings",
-      url: "/admin/settings",
-      icon: IconSettings,
-    },
-    {
-      title: "Mail Templates",
-      url: "/admin/mails",
-      icon: IconMail,
-    },
-  ]
+  {
+    title: "Settings",
+    url: "/admin/settings",
+    icon: IconSettings,
+  },
+  {
+    title: "Mail Templates",
+    url: "/admin/mails",
+    icon: IconMail,
+  },
+]
 
 export function AdminSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const { user } = useAuth()
