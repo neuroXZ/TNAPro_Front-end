@@ -104,10 +104,7 @@ const navMainItems = [
           title: "Training Competencies",
           url: "/admin/training-competencies",
         },
-        {
-          title: "IDP",
-          url: "/admin/idp",
-        },
+        
       ],
     },
     {
@@ -134,6 +131,10 @@ const navMainItems = [
       url: "#",
       icon: IconChartBar,
       items: [
+        {
+          title: "IDP",
+          url: "/admin/idp",
+        },
         {
           title: "Reports",
           url: "/admin/reports",
