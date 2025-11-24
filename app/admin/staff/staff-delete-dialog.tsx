@@ -32,7 +32,7 @@ export function StaffDeleteDialog({
           <AlertDialogTitle>Are you sure?</AlertDialogTitle>
           <AlertDialogDescription>
             {deletingStaff
-              ? `This will permanently delete ${deletingStaff.name} (${deletingStaff.orgId}). This action cannot be undone.`
+              ? `This will permanently delete ${deletingStaff.name} (${deletingStaff.staffOrgId}). This action cannot be undone.`
               : `This will permanently delete ${selectedCount} selected staff. This action cannot be undone.`}
           </AlertDialogDescription>
         </AlertDialogHeader>
