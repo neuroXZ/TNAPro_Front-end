@@ -21,6 +21,12 @@ export function StaffViewDialog({
 }: StaffViewDialogProps) {
   if (!staff) return null
 
+  const getAvatarImage = () => {
+    if (staff.image) return staff.image
+    if (staff.gender?.toLowerCase() === 'female') return '/female-avatar.svg'
+    return '/male-avatar.svg'
+  }
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[500px]">
@@ -31,9 +37,16 @@ export function StaffViewDialog({
           </DialogDescription>
         </DialogHeader>
         <div className="grid gap-4 py-4">
+          <div className="flex justify-center">
+            <img
+              src={getAvatarImage()}
+              alt={staff.name}
+              className="size-24 rounded-full object-cover border-2 border-border"
+            />
+          </div>
           <div className="grid gap-2">
             <Label className="text-muted-foreground">Staff ID</Label>
-            <p className="text-sm font-medium">{staff.orgId}</p>
+            <p className="text-sm font-medium">{staff.staffOrgId}</p>
           </div>
           <div className="grid gap-2">
             <Label className="text-muted-foreground">Full Name</Label>
@@ -42,6 +55,10 @@ export function StaffViewDialog({
           <div className="grid gap-2">
             <Label className="text-muted-foreground">Email</Label>
             <p className="text-sm font-medium">{staff.email || "-"}</p>
+          </div>
+          <div className="grid gap-2">
+            <Label className="text-muted-foreground">Gender</Label>
+            <p className="text-sm font-medium capitalize">{staff.gender || "-"}</p>
           </div>
           <div className="grid gap-2">
             <Label className="text-muted-foreground">Position</Label>

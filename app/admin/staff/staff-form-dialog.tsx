@@ -22,9 +22,11 @@ import { positionAPI, unitAPI, staffAPI } from "@/lib/api"
 import { Staff } from "./columns"
 
 interface StaffFormData {
-  orgId: string
+  staffOrgId: string
   name: string
   email: string
+  image?: string
+  gender?: string
   password?: string
   positionId?: string
   unitId?: string
@@ -59,9 +61,11 @@ export function StaffFormDialog({
   const [positions, setPositions] = useState<Position[]>([])
   const [units, setUnits] = useState<Unit[]>([])
   const [formData, setFormData] = useState<StaffFormData>({
-    orgId: editingStaff?.orgId || "",
+    staffOrgId: editingStaff?.staffOrgId || "",
     name: editingStaff?.name || "",
     email: editingStaff?.email || "",
+    image: editingStaff?.image || "",
+    gender: editingStaff?.gender || "",
     password: "",
     positionId: editingStaff?.positionId || "",
     unitId: editingStaff?.unitId || "",
@@ -89,9 +93,11 @@ export function StaffFormDialog({
   useEffect(() => {
     if (editingStaff) {
       setFormData({
-        orgId: editingStaff.orgId,
+        staffOrgId: editingStaff.staffOrgId,
         name: editingStaff.name,
         email: editingStaff.email || "",
+        image: editingStaff.image || "",
+        gender: editingStaff.gender || "",
         password: "",
         positionId: editingStaff.positionId || "",
         unitId: editingStaff.unitId || "",
@@ -99,9 +105,11 @@ export function StaffFormDialog({
       })
     } else {
       setFormData({
-        orgId: "",
+        staffOrgId: "",
         name: "",
         email: "",
+        image: "",
+        gender: "",
         password: "",
         positionId: "",
         unitId: "",
@@ -140,12 +148,12 @@ export function StaffFormDialog({
           </DialogHeader>
           <div className="grid gap-4 py-4">
             <div className="grid gap-2">
-              <Label htmlFor="orgId">Staff ID *</Label>
+              <Label htmlFor="staffOrgId">Staff ID *</Label>
               <Input
-                id="orgId"
-                value={formData.orgId}
+                id="staffOrgId"
+                value={formData.staffOrgId}
                 onChange={(e) =>
-                  setFormData({ ...formData, orgId: e.target.value })
+                  setFormData({ ...formData, staffOrgId: e.target.value })
                 }
                 placeholder="e.g., STF001"
                 required
@@ -176,6 +184,37 @@ export function StaffFormDialog({
                 placeholder="email@example.com"
                 required
               />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="gender">Gender</Label>
+              <Select
+                value={formData.gender || undefined}
+                onValueChange={(value) =>
+                  setFormData({ ...formData, gender: value })
+                }
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select gender (optional)" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="male">Male</SelectItem>
+                  <SelectItem value="female">Female</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="image">Image URL</Label>
+              <Input
+                id="image"
+                value={formData.image}
+                onChange={(e) =>
+                  setFormData({ ...formData, image: e.target.value })
+                }
+                placeholder="https://example.com/avatar.jpg (optional)"
+              />
+              <p className="text-xs text-muted-foreground">
+                Leave empty to use default avatar based on gender
+              </p>
             </div>
             <div className="grid gap-2">
               <Label htmlFor="password">

@@ -7,9 +7,11 @@ import { IconEdit, IconTrash, IconArrowUp, IconArrowDown, IconArrowsSort } from 
 
 export interface Staff {
   id: string
-  orgId: string
+  staffOrgId: string
   name: string
   email?: string
+  image?: string
+  gender?: string
   positionId?: string
   unitId?: string
   supervisorId?: string
@@ -19,6 +21,13 @@ export interface Staff {
   unit?: {
     name: string
   }
+}
+
+// Helper function to get avatar image
+const getAvatarImage = (staff: Staff) => {
+  if (staff.image) return staff.image
+  if (staff.gender?.toLowerCase() === 'female') return '/female-avatar.svg'
+  return '/male-avatar.svg'
 }
 
 interface ColumnActions {
@@ -52,7 +61,7 @@ export const getColumns = (actions: ColumnActions): ColumnDef<Staff>[] => [
     enableHiding: false,
   },
   {
-    accessorKey: "orgId",
+    accessorKey: "staffOrgId",
     header: ({ column }) => {
       return (
         <Button
@@ -71,7 +80,7 @@ export const getColumns = (actions: ColumnActions): ColumnDef<Staff>[] => [
         </Button>
       )
     },
-    cell: ({ row }) => <div className="font-medium">{row.getValue("orgId")}</div>,
+    cell: ({ row }) => <div className="font-medium">{row.getValue("staffOrgId")}</div>,
   },
   {
     accessorKey: "name",
@@ -91,6 +100,19 @@ export const getColumns = (actions: ColumnActions): ColumnDef<Staff>[] => [
             <IconArrowsSort className="ml-2 size-4" />
           )}
         </Button>
+      )
+    },
+    cell: ({ row }) => {
+      const staff = row.original
+      return (
+        <div className="flex items-center gap-3">
+          <img
+            src={getAvatarImage(staff)}
+            alt={staff.name}
+            className="size-8 rounded-full object-cover"
+          />
+          <span>{staff.name}</span>
+        </div>
       )
     },
   },

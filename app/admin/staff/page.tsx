@@ -94,7 +94,9 @@ export default function StaffManagementPage() {
     const submitData = {
       name: formData.name,
       email: formData.email,
-      staffOrgId: formData.orgId, // Map orgId to staffOrgId
+      staffOrgId: formData.staffOrgId,
+      gender: formData.gender || undefined,
+      image: formData.image || undefined,
       password: formData.password,
       positionId: formData.positionId || undefined,
       unitId: formData.unitId || undefined,
