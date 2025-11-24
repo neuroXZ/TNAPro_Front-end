@@ -4,7 +4,7 @@ import { useEffect, useState } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { Alert, AlertDescription } from "@/components/ui/alert"
+import { Label } from "@/components/ui/label"
 import {
   Select,
   SelectContent,
@@ -17,18 +17,14 @@ import { useAuth } from "@/lib/auth-context"
 import { toast } from "sonner"
 import { 
   IconTarget, 
-  IconAlertCircle, 
-  IconTrophy,
-  IconSchool,
-  IconUsers,
-  IconBook,
-  IconBriefcase,
-  IconRefresh,
-  IconDownload
+  IconFileText,
+  IconDownload,
+  IconUserCheck,
+  IconTrendingUp
 } from "@tabler/icons-react"
 import { format } from "date-fns"
 
-interface CompetencyGap {
+interface CompetencyAnalysis {
   competencyId: string
   competencyName: string
   trainingName?: string
@@ -44,11 +40,11 @@ interface CompetencyGap {
   }
 }
 
-interface IdpData {
+interface IdpResult {
   staffId: string
   staffName: string
   positionName: string
-  competencyAnalysis: CompetencyGap[]
+  competencyAnalysis: CompetencyAnalysis[]
   generatedAt: string
 }
 
@@ -64,10 +60,9 @@ export default function MyIdpPage() {
   const { user } = useAuth()
   const [assessments, setAssessments] = useState<Assessment[]>([])
   const [selectedAssessmentId, setSelectedAssessmentId] = useState<string>("")
-  const [idpData, setIdpData] = useState<IdpData | null>(null)
+  const [idpResult, setIdpResult] = useState<IdpResult | null>(null)
   const [isLoading, setIsLoading] = useState(false)
   const [isLoadingAssessments, setIsLoadingAssessments] = useState(true)
-  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
     fetchAssessments()
@@ -103,41 +98,65 @@ export default function MyIdpPage() {
 
     try {
       setIsLoading(true)
-      setError(null)
       
       const response = await idpAPI.generate({
         staffId: user.id,
         assessmentId: selectedAssessmentId
       })
       
-      setIdpData(response.data)
-      toast.success("IDP generated successfully")
+      if (response.data) {
+        setIdpResult(response.data)
+        toast.success(response.message || "IDP generated successfully!")
+      } else {
+        setIdpResult(response)
+        toast.success("IDP generated successfully!")
+      }
     } catch (err: any) {
       console.error("IDP generation failed:", err)
-      const errorMessage = err.response?.data?.error || "Failed to generate IDP"
-      setError(errorMessage)
-      toast.error(errorMessage)
+      const errorMessage = err.response?.data?.error || err.message || "Failed to generate IDP"
+      
+      // User-friendly error messages
+      if (errorMessage.includes("assessment score missing")) {
+        toast.error(
+          "Assessment incomplete. Please ensure all competency assessments (Self & Superior) are completed.",
+          { duration: 5000 }
+        )
+      } else if (errorMessage.includes("No assessment results found")) {
+        toast.error(
+          "No assessment results found. Please complete the assessment first.",
+          { duration: 5000 }
+        )
+      } else if (errorMessage.includes("No competencies defined")) {
+        toast.error(
+          "No competencies defined for your position. Please contact administrator.",
+          { duration: 5000 }
+        )
+      } else {
+        toast.error(errorMessage, { duration: 5000 })
+      }
     } finally {
       setIsLoading(false)
     }
   }
 
-  const getGapBadgeColor = (gap: number) => {
-    if (gap >= 1.5) return "bg-red-600 hover:bg-red-700"
-    if (gap >= 1.0) return "bg-orange-600 hover:bg-orange-700"
-    if (gap > 0) return "bg-yellow-600 hover:bg-yellow-700"
-    return "bg-green-600 hover:bg-green-700"
+  const getStrategyBadges = (strategies: CompetencyAnalysis['developmentStrategies']) => {
+    const badges = []
+    if (strategies.training) badges.push({ label: "Training", color: "bg-red-600" })
+    if (strategies.coaching) badges.push({ label: "Coaching", color: "bg-orange-600" })
+    if (strategies.selfLearning) badges.push({ label: "Self Learning", color: "bg-blue-600" })
+    if (strategies.workExperience) badges.push({ label: "Work Experience", color: "bg-green-600" })
+    return badges
   }
 
-  const getGapLabel = (gap: number) => {
-    if (gap >= 1.5) return "Critical Gap"
-    if (gap >= 1.0) return "Significant Gap"
-    if (gap > 0) return "Minor Gap"
-    return "Meets Requirement"
+  const getGapColor = (gap: number) => {
+    if (gap >= 1.5) return "text-red-600 font-bold"
+    if (gap >= 1.0) return "text-orange-600 font-semibold"
+    if (gap > 0) return "text-yellow-600"
+    return "text-green-600"
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       <div>
         <h1 className="text-3xl font-bold">My Individual Development Plan (IDP)</h1>
         <p className="text-muted-foreground mt-1">
@@ -148,243 +167,204 @@ export default function MyIdpPage() {
       {/* Assessment Selection */}
       <Card>
         <CardHeader>
-          <CardTitle>Select Assessment</CardTitle>
+          <CardTitle>Generate IDP</CardTitle>
           <CardDescription>
-            Choose an assessment to generate your IDP
+            Select an assessment to generate your development plan
           </CardDescription>
         </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent>
           <div className="flex items-center gap-4">
-            <div className="flex-1">
+            <div className="flex-1 space-y-2">
+              <Label htmlFor="assessment">Assessment</Label>
               <Select
                 value={selectedAssessmentId}
                 onValueChange={setSelectedAssessmentId}
                 disabled={isLoadingAssessments}
               >
-                <SelectTrigger>
+                <SelectTrigger id="assessment">
                   <SelectValue placeholder="Select an assessment" />
                 </SelectTrigger>
                 <SelectContent>
                   {assessments.map((assessment) => (
                     <SelectItem key={assessment.id} value={assessment.id}>
                       {assessment.name}
-                      {assessment.startDate && ` - ${format(new Date(assessment.startDate), "MMM yyyy")}`}
+                      {assessment.startDate && ` (${format(new Date(assessment.startDate), "dd MMM yyyy")})`}
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
             </div>
-            <Button
-              onClick={generateIdp}
-              disabled={!selectedAssessmentId || isLoading}
-              className="gap-2"
-            >
-              {isLoading ? (
-                <>
-                  <div className="size-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
-                  Generating...
-                </>
-              ) : (
-                <>
-                  <IconRefresh className="size-4" />
-                  Generate IDP
-                </>
-              )}
-            </Button>
+            <div className="pt-8">
+              <Button
+                onClick={generateIdp}
+                disabled={!selectedAssessmentId || isLoading}
+              >
+                {isLoading ? (
+                  <>Generating...</>
+                ) : (
+                  <>
+                    <IconFileText className="size-4 mr-2" />
+                    Generate IDP
+                  </>
+                )}
+              </Button>
+            </div>
           </div>
-
-          {error && (
-            <Alert variant="destructive">
-              <IconAlertCircle className="h-4 w-4" />
-              <AlertDescription className="ml-2">{error}</AlertDescription>
-            </Alert>
-          )}
         </CardContent>
       </Card>
 
-      {/* IDP Results */}
-      {idpData && (
+      {idpResult && (
         <>
-          {/* Summary Cards */}
-          <div className="grid gap-4 md:grid-cols-4">
-            <Card>
-              <CardContent className="pt-6">
-                <div className="flex items-center gap-4">
-                  <div className="p-2 bg-blue-500/10 rounded-lg">
-                    <IconTarget className="size-6 text-blue-500" />
-                  </div>
-                  <div>
-                    <p className="text-sm text-muted-foreground">Total Competencies</p>
-                    <p className="text-2xl font-bold">{idpData.competencyAnalysis.length}</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardContent className="pt-6">
-                <div className="flex items-center gap-4">
-                  <div className="p-2 bg-red-500/10 rounded-lg">
-                    <IconAlertCircle className="size-6 text-red-500" />
-                  </div>
-                  <div>
-                    <p className="text-sm text-muted-foreground">Critical Gaps</p>
-                    <p className="text-2xl font-bold">
-                      {idpData.competencyAnalysis.filter(c => c.gap >= 1.5).length}
-                    </p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardContent className="pt-6">
-                <div className="flex items-center gap-4">
-                  <div className="p-2 bg-green-500/10 rounded-lg">
-                    <IconSchool className="size-6 text-green-500" />
-                  </div>
-                  <div>
-                    <p className="text-sm text-muted-foreground">Training Recommended</p>
-                    <p className="text-2xl font-bold">
-                      {idpData.competencyAnalysis.filter(c => c.developmentStrategies.training).length}
-                    </p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardContent className="pt-6">
-                <div className="flex items-center gap-4">
-                  <div className="p-2 bg-purple-500/10 rounded-lg">
-                    <IconUsers className="size-6 text-purple-500" />
-                  </div>
-                  <div>
-                    <p className="text-sm text-muted-foreground">Coaching Recommended</p>
-                    <p className="text-2xl font-bold">
-                      {idpData.competencyAnalysis.filter(c => c.developmentStrategies.coaching).length}
-                    </p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* IDP Info */}
-          <Alert>
-            <IconTarget className="h-4 w-4" />
-            <AlertDescription className="ml-2">
-              <strong>IDP for {idpData.staffName}</strong> ({idpData.positionName}) 
-              - Generated on {format(new Date(idpData.generatedAt), "dd MMM yyyy 'at' HH:mm")}
-            </AlertDescription>
-          </Alert>
-
-          {/* Competency Analysis */}
+          {/* Summary Section */}
           <Card>
             <CardHeader>
-              <div className="flex items-center justify-between">
+              <div className="flex items-start justify-between">
                 <div>
-                  <CardTitle>Competency Gap Analysis & Development Strategies</CardTitle>
-                  <CardDescription>
-                    Review your competency gaps and recommended development actions
+                  <CardTitle className="flex items-center gap-2">
+                    <IconUserCheck className="size-5" />
+                    {idpResult.staffName}
+                  </CardTitle>
+                  <CardDescription className="mt-1">
+                    {idpResult.positionName}
                   </CardDescription>
                 </div>
+                <Badge variant="outline">
+                  Generated: {format(new Date(idpResult.generatedAt), "dd MMM yyyy HH:mm")}
+                </Badge>
               </div>
             </CardHeader>
             <CardContent>
-              <div className="space-y-4">
-                {idpData.competencyAnalysis.map((comp) => (
-                  <div
-                    key={comp.competencyId}
-                    className="border rounded-lg p-4 space-y-3"
-                  >
-                    <div className="flex items-start justify-between">
-                      <div className="flex-1">
-                        <h3 className="font-semibold text-lg">{comp.competencyName}</h3>
-                        {comp.trainingName && (
-                          <p className="text-sm text-muted-foreground mt-1">
-                            Recommended Training: {comp.trainingName}
-                          </p>
-                        )}
-                      </div>
-                      <Badge className={`${getGapBadgeColor(comp.gap)} text-white`}>
-                        {getGapLabel(comp.gap)}
-                      </Badge>
-                    </div>
+              <div className="grid gap-4 md:grid-cols-3">
+                <Card>
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-sm font-medium">Total Competencies</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold">{idpResult.competencyAnalysis.length}</div>
+                  </CardContent>
+                </Card>
 
-                    {/* Scores */}
-                    <div className="grid grid-cols-4 gap-4 p-3 bg-muted rounded-lg">
-                      <div>
-                        <p className="text-xs text-muted-foreground">Required Level</p>
-                        <p className="text-lg font-bold">{comp.requiredLevel}</p>
-                      </div>
-                      <div>
-                        <p className="text-xs text-muted-foreground">Self Score</p>
-                        <p className="text-lg font-bold">{comp.selfScore}</p>
-                      </div>
-                      <div>
-                        <p className="text-xs text-muted-foreground">Superior Score</p>
-                        <p className="text-lg font-bold">{comp.superiorScore}</p>
-                      </div>
-                      <div>
-                        <p className="text-xs text-muted-foreground">Gap</p>
-                        <p className="text-lg font-bold text-red-600">{comp.gap.toFixed(2)}</p>
-                      </div>
+                <Card>
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-sm font-medium">Needs Training</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold text-red-600">
+                      {idpResult.competencyAnalysis.filter((c: CompetencyAnalysis) => c.developmentStrategies.training).length}
                     </div>
+                  </CardContent>
+                </Card>
 
-                    {/* Development Strategies */}
-                    <div>
-                      <p className="text-sm font-medium mb-2">Recommended Development Actions:</p>
-                      <div className="flex flex-wrap gap-2">
-                        {comp.developmentStrategies.training && (
-                          <Badge variant="outline" className="gap-1 border-green-500 text-green-700">
-                            <IconSchool className="size-3" />
-                            Formal Training
-                          </Badge>
-                        )}
-                        {comp.developmentStrategies.coaching && (
-                          <Badge variant="outline" className="gap-1 border-purple-500 text-purple-700">
-                            <IconUsers className="size-3" />
-                            Coaching/Mentoring
-                          </Badge>
-                        )}
-                        {comp.developmentStrategies.selfLearning && (
-                          <Badge variant="outline" className="gap-1 border-blue-500 text-blue-700">
-                            <IconBook className="size-3" />
-                            Self-Learning
-                          </Badge>
-                        )}
-                        {comp.developmentStrategies.workExperience && (
-                          <Badge variant="outline" className="gap-1 border-orange-500 text-orange-700">
-                            <IconBriefcase className="size-3" />
-                            Work Experience
-                          </Badge>
-                        )}
-                      </div>
+                <Card>
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-sm font-medium">Average Gap</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold">
+                      {(idpResult.competencyAnalysis.reduce((sum, c) => sum + c.gap, 0) / idpResult.competencyAnalysis.length).toFixed(2)}
                     </div>
-                  </div>
-                ))}
+                  </CardContent>
+                </Card>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Competency Gap Analysis Table */}
+          <Card>
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <CardTitle>Competency Gap Analysis</CardTitle>
+                <Button variant="outline" size="sm">
+                  <IconDownload className="size-4 mr-2" />
+                  Export PDF
+                </Button>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="border rounded-lg overflow-hidden">
+                <div className="overflow-x-auto">
+                  <table className="w-full">
+                    <thead className="bg-muted">
+                      <tr>
+                        <th className="px-4 py-3 text-left text-sm font-medium">No</th>
+                        <th className="px-4 py-3 text-left text-sm font-medium">Competency</th>
+                        <th className="px-4 py-3 text-center text-sm font-medium">Required</th>
+                        <th className="px-4 py-3 text-center text-sm font-medium">Self</th>
+                        <th className="px-4 py-3 text-center text-sm font-medium">Superior</th>
+                        <th className="px-4 py-3 text-center text-sm font-medium">Gap</th>
+                        <th className="px-4 py-3 text-left text-sm font-medium">Recommended Training</th>
+                        <th className="px-4 py-3 text-left text-sm font-medium">Development Strategy</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {idpResult.competencyAnalysis.map((comp, index) => (
+                        <tr key={comp.competencyId} className="border-t hover:bg-muted/50">
+                          <td className="px-4 py-3 text-sm text-center">{index + 1}</td>
+                          <td className="px-4 py-3 text-sm font-medium">{comp.competencyName}</td>
+                          <td className="px-4 py-3 text-sm text-center">{comp.requiredLevel}</td>
+                          <td className="px-4 py-3 text-sm text-center">{comp.selfScore}</td>
+                          <td className="px-4 py-3 text-sm text-center">{comp.superiorScore}</td>
+                          <td className={`px-4 py-3 text-sm text-center ${getGapColor(comp.gap)}`}>
+                            {comp.gap > 0 ? '+' : ''}{comp.gap}
+                          </td>
+                          <td className="px-4 py-3 text-sm">
+                            {comp.trainingName ? (
+                              <Badge variant="outline" className="gap-1">
+                                <IconTarget className="size-3" />
+                                {comp.trainingName}
+                              </Badge>
+                            ) : (
+                              <span className="text-muted-foreground text-xs">No training available</span>
+                            )}
+                          </td>
+                          <td className="px-4 py-3">
+                            <div className="flex flex-wrap gap-1">
+                              {getStrategyBadges(comp.developmentStrategies).map((badge, i) => (
+                                <Badge key={i} className={`${badge.color} text-white text-xs`}>
+                                  {badge.label}
+                                </Badge>
+                              ))}
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Legend */}
+          <Card className="bg-muted/50">
+            <CardHeader>
+              <CardTitle className="text-sm flex items-center gap-2">
+                <IconTrendingUp className="size-4" />
+                Development Strategy Legend
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid gap-2 md:grid-cols-2">
+                <div className="flex items-center gap-2 text-sm">
+                  <Badge className="bg-red-600">Training</Badge>
+                  <span className="text-muted-foreground">Gap ≥ 1.5 - Formal training required</span>
+                </div>
+                <div className="flex items-center gap-2 text-sm">
+                  <Badge className="bg-orange-600">Coaching</Badge>
+                  <span className="text-muted-foreground">Gap 1.0-1.5 - Coaching/mentoring needed</span>
+                </div>
+                <div className="flex items-center gap-2 text-sm">
+                  <Badge className="bg-blue-600">Self Learning</Badge>
+                  <span className="text-muted-foreground">Gap {'<'} 1.0 - Self-study materials</span>
+                </div>
+                <div className="flex items-center gap-2 text-sm">
+                  <Badge className="bg-green-600">Work Experience</Badge>
+                  <span className="text-muted-foreground">No gap - Maintain through practice</span>
+                </div>
               </div>
             </CardContent>
           </Card>
         </>
-      )}
-
-      {/* Empty State */}
-      {!idpData && !isLoading && (
-        <Card>
-          <CardContent className="py-12">
-            <div className="text-center space-y-3">
-              <IconTarget className="size-16 mx-auto text-muted-foreground" />
-              <div>
-                <p className="text-lg font-medium">No IDP Generated Yet</p>
-                <p className="text-sm text-muted-foreground">
-                  Select an assessment and click "Generate IDP" to view your development plan
-                </p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
       )}
     </div>
   )
