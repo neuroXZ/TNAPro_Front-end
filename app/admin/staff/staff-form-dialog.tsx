@@ -147,19 +147,7 @@ export function StaffFormDialog({
             </DialogDescription>
           </DialogHeader>
           <div className="grid gap-4 py-4">
-            <div className="grid gap-2">
-              <Label htmlFor="staffOrgId">Staff ID *</Label>
-              <Input
-                id="staffOrgId"
-                value={formData.staffOrgId}
-                onChange={(e) =>
-                  setFormData({ ...formData, staffOrgId: e.target.value })
-                }
-                placeholder="e.g., STF001"
-                required
-                disabled={!!editingStaff}
-              />
-            </div>
+
             <div className="grid gap-2">
               <Label htmlFor="name">Full Name *</Label>
               <Input
@@ -172,35 +160,84 @@ export function StaffFormDialog({
                 required
               />
             </div>
-            <div className="grid gap-2">
-              <Label htmlFor="email">Email *</Label>
-              <Input
-                id="email"
-                type="email"
-                value={formData.email}
-                onChange={(e) =>
-                  setFormData({ ...formData, email: e.target.value })
-                }
-                placeholder="email@example.com"
-                required
-              />
+            <div className="grid grid-cols-2 gap-4">
+              <div className="grid gap-2">
+                <Label htmlFor="staffOrgId">Staff ID *</Label>
+                <Input
+                  id="staffOrgId"
+                  value={formData.staffOrgId}
+                  onChange={(e) =>
+                    setFormData({ ...formData, staffOrgId: e.target.value })
+                  }
+                  placeholder="e.g., STF001"
+                  required
+                  disabled={!!editingStaff}
+                />
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="email">Email *</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  value={formData.email}
+                  onChange={(e) =>
+                    setFormData({ ...formData, email: e.target.value })
+                  }
+                  placeholder="email@example.com"
+                  required
+                />
+              </div>
             </div>
-            <div className="grid gap-2">
-              <Label htmlFor="gender">Gender</Label>
-              <Select
-                value={formData.gender || undefined}
-                onValueChange={(value) =>
-                  setFormData({ ...formData, gender: value })
-                }
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select gender (optional)" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="male">Male</SelectItem>
-                  <SelectItem value="female">Female</SelectItem>
-                </SelectContent>
-              </Select>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="grid gap-2">
+                <Label htmlFor="gender">Gender</Label>
+                <Select
+                  value={formData.gender || undefined}
+                  onValueChange={(value) =>
+                    setFormData({ ...formData, gender: value })
+                  }
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select gender (optional)" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="male">Male</SelectItem>
+                    <SelectItem value="female">Female</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="password">
+                  Password {!editingStaff && "*"}
+                  {editingStaff && " (leave blank to keep current)"}
+                </Label>
+                <div className="relative">
+                  <Input
+                    id="password"
+                    type={showPassword ? "text" : "password"}
+                    value={formData.password}
+                    onChange={(e) =>
+                      setFormData({ ...formData, password: e.target.value })
+                    }
+                    placeholder="Enter password"
+                    required={!editingStaff}
+                    className="pr-10"
+                  />
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                    onClick={() => setShowPassword(!showPassword)}
+                  >
+                    {showPassword ? (
+                      <IconEyeOff className="size-4 text-muted-foreground" />
+                    ) : (
+                      <IconEye className="size-4 text-muted-foreground" />
+                    )}
+                  </Button>
+                </div>
+              </div>
             </div>
             <div className="grid gap-2">
               <Label htmlFor="image">Image URL</Label>
@@ -216,38 +253,7 @@ export function StaffFormDialog({
                 Leave empty to use default avatar based on gender
               </p>
             </div>
-            <div className="grid gap-2">
-              <Label htmlFor="password">
-                Password {!editingStaff && "*"}
-                {editingStaff && " (leave blank to keep current)"}
-              </Label>
-              <div className="relative">
-                <Input
-                  id="password"
-                  type={showPassword ? "text" : "password"}
-                  value={formData.password}
-                  onChange={(e) =>
-                    setFormData({ ...formData, password: e.target.value })
-                  }
-                  placeholder="Enter password"
-                  required={!editingStaff}
-                  className="pr-10"
-                />
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
-                  onClick={() => setShowPassword(!showPassword)}
-                >
-                  {showPassword ? (
-                    <IconEyeOff className="size-4 text-muted-foreground" />
-                  ) : (
-                    <IconEye className="size-4 text-muted-foreground" />
-                  )}
-                </Button>
-              </div>
-            </div>
+
             <div className="grid gap-2">
               <Label htmlFor="positionId">Position</Label>
               <Select
@@ -304,7 +310,7 @@ export function StaffFormDialog({
           </DialogFooter>
         </form>
       </DialogContent>
-    </Dialog>
+    </Dialog >
   )
 }
 
