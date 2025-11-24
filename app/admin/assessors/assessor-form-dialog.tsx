@@ -148,14 +148,20 @@ export function AssessorFormDialog({
             </div>
             <div className="grid gap-2">
               <Label htmlFor="type">Type</Label>
-              <Input
-                id="type"
-                value={formData.type}
-                onChange={(e) =>
-                  setFormData({ ...formData, type: e.target.value })
+              <Select
+                value={formData.type || undefined}
+                onValueChange={(value) =>
+                  setFormData({ ...formData, type: value })
                 }
-                placeholder="Enter type (e.g., Self, Peer, Superior)"
-              />
+              >
+                <SelectTrigger id="type">
+                  <SelectValue placeholder="Select type" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="self">self</SelectItem>
+                  <SelectItem value="superior">superior</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
           </div>
           <DialogFooter>
