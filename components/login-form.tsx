@@ -47,23 +47,46 @@ export function LoginForm({
           <form className="p-6 md:p-8" onSubmit={handleSubmit}>
             <FieldGroup>
               <div className="flex flex-col items-center gap-2 text-center">
-                <h1 className="text-2xl font-bold">Welcome back</h1>
+                <img 
+                  src="/next.svg" 
+                  alt="TNAPro Logo" 
+                  className="h-16 w-16 object-contain"
+                />
+                <h1 className="text-2xl font-bold">Welcome</h1>
                 <p className="text-muted-foreground text-balance">
-                  Login to your TNA Pro account
+                  Login to your TNAPro account
                 </p>
               </div>
               <Field>
-                <FieldLabel htmlFor="userType">Login as</FieldLabel>
-                <select
-                  id="userType"
-                  value={userType}
-                  onChange={(e) => setUserType(e.target.value as 'staff' | 'admin')}
-                  disabled={isLoading}
-                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                >
-                  <option value="staff">Staff</option>
-                  <option value="admin">Admin</option>
-                </select>
+                <FieldLabel>Login as</FieldLabel>
+                <div className="flex gap-2 p-1 bg-muted rounded-lg">
+                  <button
+                    type="button"
+                    onClick={() => setUserType('staff')}
+                    disabled={isLoading}
+                    className={cn(
+                      "flex-1 px-4 py-2 text-sm font-medium rounded-md transition-colors",
+                      userType === 'staff'
+                        ? "bg-background text-foreground shadow-sm"
+                        : "text-muted-foreground hover:text-foreground"
+                    )}
+                  >
+                    Staff
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setUserType('admin')}
+                    disabled={isLoading}
+                    className={cn(
+                      "flex-1 px-4 py-2 text-sm font-medium rounded-md transition-colors",
+                      userType === 'admin'
+                        ? "bg-background text-foreground shadow-sm"
+                        : "text-muted-foreground hover:text-foreground"
+                    )}
+                  >
+                    Admin
+                  </button>
+                </div>
               </Field>
               <Field>
                 <FieldLabel htmlFor="username">{userType === 'staff' ? 'Staff ID' : 'Username'}</FieldLabel>
@@ -113,10 +136,10 @@ export function LoginForm({
               </Field>
             </FieldGroup>
           </form>
-          <div className="bg-muted relative hidden md:block">
+          <div className="bg-muted relative hidden md:block overflow-hidden">
             <img
-              src="/placeholder.svg"
-              alt="Image"
+              src="/login.jpg"
+              alt="Login Background"
               className="absolute inset-0 h-full w-full object-cover dark:brightness-[0.2] dark:grayscale"
             />
           </div>
