@@ -12,7 +12,7 @@ import {
   VisibilityState,
   flexRender,
 } from "@tanstack/react-table"
-import { staffAPI } from "@/lib/api"
+import { staffAPI, importAPI } from "@/lib/api"
 import { Button } from "@/components/ui/button"
 import {
   Card,
@@ -40,6 +40,7 @@ import { StaffTableSkeleton } from "./staff-table-skeleton"
 import { StaffDataTable } from "./staff-data-table"
 import { StaffTableActions } from "./staff-table-actions"
 import { StaffViewDialog } from "./staff-view-dialog"
+import { StaffImportDialog } from "./staff-import-dialog"
 
 export default function StaffManagementPage() {
   const [staff, setStaff] = useState<Staff[]>([])
@@ -47,11 +48,10 @@ export default function StaffManagementPage() {
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
   const [isViewDialogOpen, setIsViewDialogOpen] = useState(false)
+  const [isImportDialogOpen, setIsImportDialogOpen] = useState(false)
   const [editingStaff, setEditingStaff] = useState<Staff | null>(null)
   const [deletingStaff, setDeletingStaff] = useState<Staff | null>(null)
   const [viewingStaff, setViewingStaff] = useState<Staff | null>(null)
-  const [isImporting, setIsImporting] = useState(false)
-  const [isExporting, setIsExporting] = useState(false)
   
   // TanStack Table states
   const [sorting, setSorting] = useState<SortingState>([])
@@ -196,19 +196,14 @@ export default function StaffManagementPage() {
     }
   }
 
-  // ==================== IMPORT/EXPORT HANDLERS ====================
-  const handleExport = async () => {
+  const handleDownloadTemplate = async () => {
     try {
-      setIsExporting(true)
-      const response = await staffAPI.export()
-      
-      const blob = new Blob([response.data], { type: 'text/csv' })
-      if (blob.size === 0) throw new Error('No data available to export')
+      const blob = await importAPI.downloadTemplate('staff')
       
       const url = window.URL.createObjectURL(blob)
       const link = document.createElement('a')
       link.href = url
-      link.download = `staff_export_${new Date().toISOString().slice(0, 10)}.csv`
+      link.download = 'staff_import_template.csv'
       document.body.appendChild(link)
       link.click()
       
@@ -217,40 +212,15 @@ export default function StaffManagementPage() {
         window.URL.revokeObjectURL(url)
       }, 100)
       
-      toast.success("Staff data exported successfully")
-    } catch (error: any) {
-      console.error('Export error:', error)
-      toast.error(error.response?.data?.error || "Failed to export staff data")
-    } finally {
-      setIsExporting(false)
+      toast.success('Template downloaded successfully')
+    } catch (error) {
+      console.error('Download error:', error)
+      toast.error('Failed to download template')
     }
   }
 
-  const handleImport = async (file: File) => {
-    if (!file.name.endsWith('.csv')) {
-      toast.error("Please select a CSV file")
-      return
-    }
-
-    try {
-      setIsImporting(true)
-      const result = await staffAPI.import(file)
-      
-      if (result.data?.failureCount > 0) {
-        toast.warning(
-          `Import completed with ${result.data.successCount} successes and ${result.data.failureCount} failures`
-        )
-      } else {
-        toast.success(result.message || "Staff import successful!")
-      }
-      
-      fetchStaff()
-    } catch (error: any) {
-      toast.error(error.response?.data?.error || "Failed to import staff data")
-      console.error(error)
-    } finally {
-      setIsImporting(false)
-    }
+  const handleImport = () => {
+    setIsImportDialogOpen(true)
   }
 
   // ==================== RENDER ====================
@@ -265,12 +235,10 @@ export default function StaffManagementPage() {
         </div>
         <StaffTableActions
           selectedCount={table.getFilteredSelectedRowModel().rows.length}
-          isImporting={isImporting}
-          isExporting={isExporting}
           onAdd={() => handleOpenDialog()}
           onBulkDelete={handleBulkDelete}
+          onDownloadTemplate={handleDownloadTemplate}
           onImport={handleImport}
-          onExport={handleExport}
         />
       </div>
 
@@ -331,6 +299,12 @@ export default function StaffManagementPage() {
         open={isViewDialogOpen}
         onOpenChange={setIsViewDialogOpen}
         staff={viewingStaff}
+      />
+
+      <StaffImportDialog
+        open={isImportDialogOpen}
+        onOpenChange={setIsImportDialogOpen}
+        onImportSuccess={fetchStaff}
       />
     </div>
   )

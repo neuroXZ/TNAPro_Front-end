@@ -11,7 +11,7 @@ import {
   SortingState,
   VisibilityState,
 } from "@tanstack/react-table"
-import { competencyAPI } from "@/lib/api"
+import { competencyAPI, importAPI } from "@/lib/api"
 import {
   Card,
   CardContent,
@@ -30,6 +30,7 @@ import { CompetencyTableSkeleton } from "./competency-table-skeleton"
 import { CompetencyDataTable } from "./competency-data-table"
 import { CompetencyTableActions } from "./competency-table-actions"
 import { CompetencyViewDialog } from "./competency-view-dialog"
+import { CompetencyImportDialog } from "./competency-import-dialog"
 
 export default function CompetencyManagementPage() {
   const [competencies, setCompetencies] = useState<Competency[]>([])
@@ -37,6 +38,7 @@ export default function CompetencyManagementPage() {
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
   const [isViewDialogOpen, setIsViewDialogOpen] = useState(false)
+  const [isImportDialogOpen, setIsImportDialogOpen] = useState(false)
   const [editingCompetency, setEditingCompetency] = useState<Competency | null>(null)
   const [deletingCompetency, setDeletingCompetency] = useState<Competency | null>(null)
   const [viewingCompetency, setViewingCompetency] = useState<Competency | null>(null)
@@ -167,6 +169,33 @@ export default function CompetencyManagementPage() {
     }
   }
 
+  const handleDownloadTemplate = async () => {
+    try {
+      const blob = await importAPI.downloadTemplate('competency')
+      
+      const url = window.URL.createObjectURL(blob)
+      const link = document.createElement('a')
+      link.href = url
+      link.download = 'competency_import_template.csv'
+      document.body.appendChild(link)
+      link.click()
+      
+      setTimeout(() => {
+        document.body.removeChild(link)
+        window.URL.revokeObjectURL(url)
+      }, 100)
+      
+      toast.success('Template downloaded successfully')
+    } catch (error) {
+      console.error('Download error:', error)
+      toast.error('Failed to download template')
+    }
+  }
+
+  const handleImport = () => {
+    setIsImportDialogOpen(true)
+  }
+
   // ==================== RENDER ====================
   return (
     <div className="space-y-4">
@@ -181,6 +210,8 @@ export default function CompetencyManagementPage() {
           selectedCount={table.getFilteredSelectedRowModel().rows.length}
           onAdd={() => handleOpenDialog()}
           onBulkDelete={handleBulkDelete}
+          onDownloadTemplate={handleDownloadTemplate}
+          onImport={handleImport}
         />
       </div>
 
@@ -241,6 +272,12 @@ export default function CompetencyManagementPage() {
         open={isViewDialogOpen}
         onOpenChange={setIsViewDialogOpen}
         competency={viewingCompetency}
+      />
+
+      <CompetencyImportDialog
+        open={isImportDialogOpen}
+        onOpenChange={setIsImportDialogOpen}
+        onImportSuccess={fetchCompetencies}
       />
     </div>
   )

@@ -11,7 +11,7 @@ import {
   SortingState,
   VisibilityState,
 } from "@tanstack/react-table"
-import { gradeAPI } from "@/lib/api"
+import { gradeAPI, importAPI } from "@/lib/api"
 import {
   Card,
   CardContent,
@@ -30,6 +30,7 @@ import { GradeTableSkeleton } from "./grade-table-skeleton"
 import { GradeDataTable } from "./grade-data-table"
 import { GradeTableActions } from "./grade-table-actions"
 import { GradeViewDialog } from "./grade-view-dialog"
+import { GradeImportDialog } from "./grade-import-dialog"
 
 export default function GradeManagementPage() {
   const [grades, setGrades] = useState<Grade[]>([])
@@ -37,6 +38,7 @@ export default function GradeManagementPage() {
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
   const [isViewDialogOpen, setIsViewDialogOpen] = useState(false)
+  const [isImportDialogOpen, setIsImportDialogOpen] = useState(false)
   const [editingGrade, setEditingGrade] = useState<Grade | null>(null)
   const [deletingGrade, setDeletingGrade] = useState<Grade | null>(null)
   const [viewingGrade, setViewingGrade] = useState<Grade | null>(null)
@@ -167,6 +169,33 @@ export default function GradeManagementPage() {
     }
   }
 
+  const handleDownloadTemplate = async () => {
+    try {
+      const blob = await importAPI.downloadTemplate('grade')
+      
+      const url = window.URL.createObjectURL(blob)
+      const link = document.createElement('a')
+      link.href = url
+      link.download = 'grade_import_template.csv'
+      document.body.appendChild(link)
+      link.click()
+      
+      setTimeout(() => {
+        document.body.removeChild(link)
+        window.URL.revokeObjectURL(url)
+      }, 100)
+      
+      toast.success('Template downloaded successfully')
+    } catch (error) {
+      console.error('Download error:', error)
+      toast.error('Failed to download template')
+    }
+  }
+
+  const handleImport = () => {
+    setIsImportDialogOpen(true)
+  }
+
   // ==================== RENDER ====================
   return (
     <div className="space-y-4">
@@ -181,6 +210,8 @@ export default function GradeManagementPage() {
           selectedCount={table.getFilteredSelectedRowModel().rows.length}
           onAdd={() => handleOpenDialog()}
           onBulkDelete={handleBulkDelete}
+          onDownloadTemplate={handleDownloadTemplate}
+          onImport={handleImport}
         />
       </div>
 
@@ -241,6 +272,12 @@ export default function GradeManagementPage() {
         open={isViewDialogOpen}
         onOpenChange={setIsViewDialogOpen}
         grade={viewingGrade}
+      />
+
+      <GradeImportDialog
+        open={isImportDialogOpen}
+        onOpenChange={setIsImportDialogOpen}
+        onImportSuccess={fetchGrades}
       />
     </div>
   )

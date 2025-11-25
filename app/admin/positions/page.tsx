@@ -11,7 +11,7 @@ import {
   SortingState,
   VisibilityState,
 } from "@tanstack/react-table"
-import { positionAPI } from "@/lib/api"
+import { positionAPI, importAPI } from "@/lib/api"
 import {
   Card,
   CardContent,
@@ -30,6 +30,7 @@ import { PositionTableSkeleton } from "./position-table-skeleton"
 import { PositionDataTable } from "./position-data-table"
 import { PositionTableActions } from "./position-table-actions"
 import { PositionViewDialog } from "./position-view-dialog"
+import { PositionImportDialog } from "./position-import-dialog"
 
 export default function PositionManagementPage() {
   const [positions, setPositions] = useState<Position[]>([])
@@ -37,6 +38,7 @@ export default function PositionManagementPage() {
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
   const [isViewDialogOpen, setIsViewDialogOpen] = useState(false)
+  const [isImportDialogOpen, setIsImportDialogOpen] = useState(false)
   const [editingPosition, setEditingPosition] = useState<Position | null>(null)
   const [deletingPosition, setDeletingPosition] = useState<Position | null>(null)
   const [viewingPosition, setViewingPosition] = useState<Position | null>(null)
@@ -142,6 +144,33 @@ export default function PositionManagementPage() {
     setIsDeleteDialogOpen(true)
   }
 
+  const handleDownloadTemplate = async () => {
+    try {
+      const blob = await importAPI.downloadTemplate('position')
+      
+      const url = window.URL.createObjectURL(blob)
+      const link = document.createElement('a')
+      link.href = url
+      link.download = 'position_import_template.csv'
+      document.body.appendChild(link)
+      link.click()
+      
+      setTimeout(() => {
+        document.body.removeChild(link)
+        window.URL.revokeObjectURL(url)
+      }, 100)
+      
+      toast.success('Template downloaded successfully')
+    } catch (error) {
+      console.error('Download error:', error)
+      toast.error('Failed to download template')
+    }
+  }
+
+  const handleImport = () => {
+    setIsImportDialogOpen(true)
+  }
+
   const handleDeleteConfirm = async () => {
     try {
       if (deletingPosition) {
@@ -181,6 +210,8 @@ export default function PositionManagementPage() {
           selectedCount={table.getFilteredSelectedRowModel().rows.length}
           onAdd={() => handleOpenDialog()}
           onBulkDelete={handleBulkDelete}
+          onDownloadTemplate={handleDownloadTemplate}
+          onImport={handleImport}
         />
       </div>
 
@@ -241,6 +272,12 @@ export default function PositionManagementPage() {
         open={isViewDialogOpen}
         onOpenChange={setIsViewDialogOpen}
         position={viewingPosition}
+      />
+
+      <PositionImportDialog
+        open={isImportDialogOpen}
+        onOpenChange={setIsImportDialogOpen}
+        onImportSuccess={fetchPositions}
       />
     </div>
   )

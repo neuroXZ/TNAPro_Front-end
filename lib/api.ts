@@ -571,4 +571,26 @@ export const rtnAPI = {
   },
 };
 
+// Import API
+export const importAPI = {
+  downloadTemplate: async (modelType: 'staff' | 'position' | 'grade' | 'competency') => {
+    const response = await api.get(`/import/template/${modelType}`, {
+      responseType: 'blob',
+    });
+    return response.data;
+  },
+  
+  import: async (modelType: 'staff' | 'position' | 'grade' | 'competency', file: File) => {
+    const formData = new FormData();
+    formData.append('file', file);
+    
+    const response = await api.post(`/import/${modelType}`, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+    return response.data;
+  },
+};
+
 export default api;

@@ -1,4 +1,3 @@
-import { useRef } from "react"
 import { Button } from "@/components/ui/button"
 import {
   IconPlus,
@@ -9,67 +8,33 @@ import {
 
 interface StaffTableActionsProps {
   selectedCount: number
-  isImporting: boolean
-  isExporting: boolean
   onAdd: () => void
   onBulkDelete: () => void
-  onImport: (file: File) => void
-  onExport: () => void
+  onDownloadTemplate?: () => void
+  onImport?: () => void
 }
 
 export function StaffTableActions({
   selectedCount,
-  isImporting,
-  isExporting,
   onAdd,
   onBulkDelete,
+  onDownloadTemplate,
   onImport,
-  onExport,
 }: StaffTableActionsProps) {
-  const fileInputRef = useRef<HTMLInputElement>(null)
-
-  const handleImportClick = () => {
-    fileInputRef.current?.click()
-  }
-
-  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0]
-    if (file) {
-      onImport(file)
-      // Reset file input
-      if (fileInputRef.current) {
-        fileInputRef.current.value = ""
-      }
-    }
-  }
-
   return (
     <div className="flex gap-2">
-      <input
-        ref={fileInputRef}
-        type="file"
-        accept=".csv"
-        onChange={handleFileChange}
-        className="hidden"
-      />
-      <Button
-        variant="outline"
-        size="sm"
-        onClick={handleImportClick}
-        disabled={isImporting}
-      >
-        <IconUpload className="mr-2 size-4" />
-        {isImporting ? "Importing..." : "Import"}
-      </Button>
-      <Button
-        variant="outline"
-        size="sm"
-        onClick={onExport}
-        disabled={isExporting}
-      >
-        <IconDownload className="mr-2 size-4" />
-        {isExporting ? "Exporting..." : "Export"}
-      </Button>
+      {onDownloadTemplate && (
+        <Button variant="outline" size="sm" onClick={onDownloadTemplate}>
+          <IconDownload className="mr-2 size-4" />
+          Download Template
+        </Button>
+      )}
+      {onImport && (
+        <Button variant="outline" size="sm" onClick={onImport}>
+          <IconUpload className="mr-2 size-4" />
+          Import CSV
+        </Button>
+      )}
       <Button size="sm" onClick={onAdd}>
         <IconPlus className="mr-2 size-4" />
         Add Staff
