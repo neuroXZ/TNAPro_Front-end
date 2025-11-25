@@ -5,6 +5,7 @@ import { useAuth } from "@/lib/auth-context"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
+import Image from "next/image"
 import {
   Field,
   FieldDescription,
@@ -47,11 +48,9 @@ export function LoginForm({
           <form className="p-6 md:p-8" onSubmit={handleSubmit}>
             <FieldGroup>
               <div className="flex flex-col items-center gap-2 text-center">
-                <img 
-                  src="/next.svg" 
-                  alt="TNAPro Logo" 
-                  className="h-16 w-16 object-contain"
-                />
+                <div className="h-16 w-16 rounded-full bg-linear-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-bold text-2xl shadow-lg">
+                  TNA
+                </div>
                 <h1 className="text-2xl font-bold">Welcome</h1>
                 <p className="text-muted-foreground text-balance">
                   Login to your TNAPro account
@@ -136,12 +135,16 @@ export function LoginForm({
               </Field>
             </FieldGroup>
           </form>
-          <div className="bg-muted relative hidden md:block overflow-hidden">
-            <img
+          <div className="bg-linear-to-br from-blue-600 to-purple-700 relative hidden md:block overflow-hidden">
+            <div className="absolute inset-0 opacity-20">
+              <Image
               src="/login.jpg"
-              alt="Login Background"
+              width={500}
+              height={500}
+              alt="login-image"
               className="absolute inset-0 h-full w-full object-cover dark:brightness-[0.2] dark:grayscale"
             />
+            </div>
           </div>
         </CardContent>
       </Card>
