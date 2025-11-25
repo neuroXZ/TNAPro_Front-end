@@ -60,28 +60,7 @@ export const getColumns = (actions: ColumnActions): ColumnDef<Staff>[] => [
     enableSorting: false,
     enableHiding: false,
   },
-  {
-    accessorKey: "staffOrgId",
-    header: ({ column }) => {
-      return (
-        <Button
-          variant="ghost"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-          className="-ml-4"
-        >
-          Staff ID
-          {column.getIsSorted() === "asc" ? (
-            <IconArrowUp className="ml-2 size-4" />
-          ) : column.getIsSorted() === "desc" ? (
-            <IconArrowDown className="ml-2 size-4" />
-          ) : (
-            <IconArrowsSort className="ml-2 size-4" />
-          )}
-        </Button>
-      )
-    },
-    cell: ({ row }) => <div className="font-medium">{row.getValue("staffOrgId")}</div>,
-  },
+  
   {
     accessorKey: "name",
     header: ({ column }) => {
@@ -115,6 +94,28 @@ export const getColumns = (actions: ColumnActions): ColumnDef<Staff>[] => [
         </div>
       )
     },
+  },
+  {
+    accessorKey: "staffOrgId",
+    header: ({ column }) => {
+      return (
+        <Button
+          variant="ghost"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          className="-ml-4"
+        >
+          Staff ID
+          {column.getIsSorted() === "asc" ? (
+            <IconArrowUp className="ml-2 size-4" />
+          ) : column.getIsSorted() === "desc" ? (
+            <IconArrowDown className="ml-2 size-4" />
+          ) : (
+            <IconArrowsSort className="ml-2 size-4" />
+          )}
+        </Button>
+      )
+    },
+    cell: ({ row }) => <div className="font-medium">{row.getValue("staffOrgId")}</div>,
   },
   {
     accessorKey: "email",
