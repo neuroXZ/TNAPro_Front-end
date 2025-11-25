@@ -20,6 +20,8 @@ import {
   CardTitle,
 } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
+import { Badge } from "@/components/ui/badge"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { IconSearch } from "@tabler/icons-react"
 import { toast } from "sonner"
 import { Assessor, getColumns } from "./columns"
@@ -40,6 +42,7 @@ export default function AssessorManagementPage() {
   const [editingAssessor, setEditingAssessor] = useState<Assessor | null>(null)
   const [deletingAssessor, setDeletingAssessor] = useState<Assessor | null>(null)
   const [viewingAssessor, setViewingAssessor] = useState<Assessor | null>(null)
+  const [activeTab, setActiveTab] = useState<'self' | 'superior'>('self')
   
   // TanStack Table states
   const [sorting, setSorting] = useState<SortingState>([])
@@ -47,6 +50,19 @@ export default function AssessorManagementPage() {
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({})
   const [rowSelection, setRowSelection] = useState({})
   const [globalFilter, setGlobalFilter] = useState("")
+
+  // Filter assessors by type
+  const filteredAssessors = useMemo(() => {
+    return assessors.filter(assessor => assessor.type === activeTab)
+  }, [assessors, activeTab])
+
+  const selfCount = useMemo(() => {
+    return assessors.filter(a => a.type === 'self').length
+  }, [assessors])
+
+  const superiorCount = useMemo(() => {
+    return assessors.filter(a => a.type === 'superior').length
+  }, [assessors])
 
   useEffect(() => {
     fetchAssessors()
@@ -111,7 +127,7 @@ export default function AssessorManagementPage() {
   // ==================== TABLE INITIALIZATION ====================
   // Initialize table after columns are defined
   const table = useReactTable({
-    data: assessors,
+    data: filteredAssessors,
     columns,
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
@@ -210,14 +226,40 @@ export default function AssessorManagementPage() {
           {isLoading ? (
             <AssessorTableSkeleton />
           ) : (
-            <>
-              <AssessorDataTable 
-                table={table} 
-                columnsLength={columns.length}
-                onRowClick={handleRowClick}
-              />
-              {assessors.length > 0 && <DataTablePagination table={table} />}
-            </>
+            <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as 'self' | 'superior')}>
+              <TabsList className="grid w-full grid-cols-2 mb-4">
+                <TabsTrigger value="self" className="gap-2">
+                  Self
+                  <Badge variant="secondary" className="ml-1 bg-blue-500 text-white">
+                    {selfCount}
+                  </Badge>
+                </TabsTrigger>
+                <TabsTrigger value="superior" className="gap-2">
+                  Superior
+                  <Badge variant="secondary" className="ml-1 bg-green-500 text-white">
+                    {superiorCount}
+                  </Badge>
+                </TabsTrigger>
+              </TabsList>
+
+              <TabsContent value="self">
+                <AssessorDataTable 
+                  table={table} 
+                  columnsLength={columns.length}
+                  onRowClick={handleRowClick}
+                />
+                {filteredAssessors.length > 0 && <DataTablePagination table={table} />}
+              </TabsContent>
+
+              <TabsContent value="superior">
+                <AssessorDataTable 
+                  table={table} 
+                  columnsLength={columns.length}
+                  onRowClick={handleRowClick}
+                />
+                {filteredAssessors.length > 0 && <DataTablePagination table={table} />}
+              </TabsContent>
+            </Tabs>
           )}
         </CardContent>
       </Card>

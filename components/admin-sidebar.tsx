@@ -64,12 +64,23 @@ const navMainItems = [
         title: "Clusters",
         url: "/admin/clusters",
       },
+      
+
+    ],
+  },
+  {
+    title: "Staff Development",
+    url: "#",
+    icon: IconUsers,
+    items: [
       {
         title: "Staff Management",
         url: "/admin/staff",
-        // icon: IconUsers,
       },
-
+      {
+        title: "Assessors",
+        url: "/admin/assessors",
+      },
     ],
   },
   {
@@ -78,6 +89,10 @@ const navMainItems = [
     icon: IconTarget,
     items: [
       {
+        title: "Levels",
+        url: "/admin/levels",
+      },
+      {
         title: "Competencies",
         url: "/admin/competencies",
       },
@@ -85,10 +100,7 @@ const navMainItems = [
         title: "Position Competencies",
         url: "/admin/position-competencies",
       },
-      {
-        title: "Levels",
-        url: "/admin/levels",
-      },
+      
     ],
   },
   {
@@ -120,10 +132,7 @@ const navMainItems = [
         title: "Assessment Results",
         url: "/admin/assessment-results",
       },
-      {
-        title: "Assessors",
-        url: "/admin/assessors",
-      },
+
     ],
   },
   {
