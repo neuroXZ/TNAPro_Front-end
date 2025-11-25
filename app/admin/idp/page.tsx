@@ -6,6 +6,12 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
 import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip"
+import {
   Select,
   SelectContent,
   SelectItem,
@@ -14,7 +20,7 @@ import {
 } from "@/components/ui/select"
 import { staffAPI, assessmentAPI, idpAPI } from "@/lib/api"
 import { toast } from "sonner"
-import { IconFileText, IconDownload, IconUserCheck, IconTarget, IconTrendingUp } from "@tabler/icons-react"
+import { IconFileText, IconDownload, IconUserCheck, IconTarget, IconTrendingUp, IconInfoCircle } from "@tabler/icons-react"
 import { format } from "date-fns"
 import { useEffect } from "react"
 
@@ -41,6 +47,7 @@ interface CompetencyAnalysis {
   requiredLevel: number
   selfScore: number
   superiorScore: number
+  totalScore: number
   gap: number
   developmentStrategies: {
     training: boolean
@@ -330,45 +337,56 @@ export default function AdminIdpPage() {
                   <table className="w-full">
                     <thead className="bg-muted">
                       <tr>
-                        <th className="px-4 py-3 text-left text-sm font-medium">No</th>
-                        <th className="px-4 py-3 text-left text-sm font-medium">Competency</th>
-                        <th className="px-4 py-3 text-center text-sm font-medium">Required</th>
-                        <th className="px-4 py-3 text-center text-sm font-medium">Self</th>
-                        <th className="px-4 py-3 text-center text-sm font-medium">Superior</th>
-                        <th className="px-4 py-3 text-center text-sm font-medium">Gap</th>
-                        <th className="px-4 py-3 text-left text-sm font-medium">Recommended Training</th>
-                        <th className="px-4 py-3 text-left text-sm font-medium">Development Strategy</th>
+                        <th rowSpan={2} className="px-4 py-3 text-left text-sm font-medium border-r align-middle">Competency</th>
+                        <th rowSpan={2} className="px-3 py-3 text-center text-sm font-medium border-r align-middle">RCL</th>
+                        <th colSpan={3} className="px-3 py-2 text-center text-sm font-medium border-r border-b">Assessment Result</th>
+                        <th colSpan={4} className="px-3 py-2 text-center text-sm font-medium">Development Strategy</th>
+                      </tr>
+                      <tr>
+                        <th className="px-3 py-2 text-center text-sm font-medium">Self</th>
+                        <th className="px-3 py-2 text-center text-sm font-medium">Superior</th>
+                        <th className="px-3 py-2 text-center text-sm font-medium border-r">Gap</th>
+                        <th className="px-3 py-2 text-center text-sm font-medium">Training</th>
+                        <th className="px-3 py-2 text-center text-sm font-medium">Coaching</th>
+                        <th className="px-3 py-2 text-center text-sm font-medium">Self Learning</th>
+                        <th className="px-3 py-2 text-center text-sm font-medium">
+                          <div className="flex items-center justify-center gap-1">
+                            <span>Work Experience</span>
+                            <TooltipProvider>
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <IconInfoCircle className="size-3.5 cursor-help" />
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                  <p>Enhance Competency Through Working Experience</p>
+                                </TooltipContent>
+                              </Tooltip>
+                            </TooltipProvider>
+                          </div>
+                        </th>
                       </tr>
                     </thead>
                     <tbody>
                       {idpResult.competencyAnalysis.map((comp, index) => (
                         <tr key={comp.competencyId} className="border-t hover:bg-muted/50">
-                          <td className="px-4 py-3 text-sm text-center">{index + 1}</td>
-                          <td className="px-4 py-3 text-sm font-medium">{comp.competencyName}</td>
-                          <td className="px-4 py-3 text-sm text-center">{comp.requiredLevel}</td>
-                          <td className="px-4 py-3 text-sm text-center">{comp.selfScore}</td>
-                          <td className="px-4 py-3 text-sm text-center">{comp.superiorScore}</td>
-                          <td className={`px-4 py-3 text-sm text-center ${getGapColor(comp.gap)}`}>
-                            {comp.gap > 0 ? '+' : ''}{comp.gap}
+                          <td className="px-4 py-3 text-sm font-medium border-r">{comp.competencyName}</td>
+                          <td className="px-3 py-3 text-sm text-center border-r">{comp.requiredLevel}</td>
+                          <td className="px-3 py-3 text-sm text-center">{comp.selfScore || 'N/A'}</td>
+                          <td className="px-3 py-3 text-sm text-center">{comp.superiorScore || 'N/A'}</td>
+                          <td className={`px-3 py-3 text-sm text-center border-r font-medium ${getGapColor(comp.gap)}`}>
+                            {comp.gap}
                           </td>
-                          <td className="px-4 py-3 text-sm">
-                            {comp.trainingName ? (
-                              <Badge variant="outline" className="gap-1">
-                                <IconTarget className="size-3" />
-                                {comp.trainingName}
-                              </Badge>
-                            ) : (
-                              <span className="text-muted-foreground text-xs">No training available</span>
-                            )}
+                          <td className="px-3 py-3 text-center">
+                            {comp.developmentStrategies.training && <span className="text-green-600 text-lg">✓</span>}
                           </td>
-                          <td className="px-4 py-3">
-                            <div className="flex flex-wrap gap-1">
-                              {getStrategyBadges(comp.developmentStrategies).map((badge, i) => (
-                                <Badge key={i} className={`${badge.color} text-white text-xs`}>
-                                  {badge.label}
-                                </Badge>
-                              ))}
-                            </div>
+                          <td className="px-3 py-3 text-center">
+                            {comp.developmentStrategies.coaching && <span className="text-green-600 text-lg">✓</span>}
+                          </td>
+                          <td className="px-3 py-3 text-center">
+                            {comp.developmentStrategies.selfLearning && <span className="text-green-600 text-lg">✓</span>}
+                          </td>
+                          <td className="px-3 py-3 text-center">
+                            {comp.developmentStrategies.workExperience && <span className="text-green-600 text-lg">✓</span>}
                           </td>
                         </tr>
                       ))}

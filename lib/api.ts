@@ -557,4 +557,18 @@ export const idpAPI = {
   },
 };
 
+// Recommended Training (RTN) API
+export const rtnAPI = {
+  getReport: async (data: { staffId: string; assessmentId: string }) => {
+    const response = await api.post('/recommendedtraining/report', data);
+    return response.data;
+  },
+  export: async (data: { staffId: string; assessmentId: string }) => {
+    const response = await api.post('/recommendedtraining/export', data, {
+      responseType: 'blob'
+    });
+    return response;
+  },
+};
+
 export default api;

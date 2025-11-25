@@ -3,57 +3,62 @@
 import { useEffect, useState } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { trainingAPI, trainingCompetencyAPI, competencyAPI, idpAPI, assessmentAPI } from "@/lib/api"
+import { rtnAPI, assessmentAPI } from "@/lib/api"
 import { toast } from "sonner"
 import { useAuth } from "@/lib/auth-context"
-import { IconSchool, IconCalendar, IconTarget, IconClock, IconAlertCircle, IconSparkles } from "@tabler/icons-react"
+import { IconSchool, IconCalendar, IconTarget, IconClock, IconAlertCircle, IconSparkles, IconDownload } from "@tabler/icons-react"
 import { format, isBefore, isAfter } from "date-fns"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 
-interface Training {
-  id: string
-  name: string
-  description: string
+interface RecommendedTraining {
+  trainingId: string
+  trainingName: string
   startDate: string
   endDate: string
-  competencies?: {
-    id: string
-    name: string
-    code: string
-  }[]
-  isRecommended?: boolean
-}
-
-interface CompetencyGap {
-  competencyId: string
-  competencyName: string
-  trainingName?: string
-  gap: number
-  developmentStrategies: {
-    training: boolean
-    coaching: boolean
-    selfLearning: boolean
-    workExperience: boolean
+  relatedCompetency: {
+    competencyId: string
+    competencyName: string
+    clusterName: string
+    requiredLevel: number
+    weightedGap: number
   }
 }
 
-interface IdpData {
+interface RtnReport {
   staffId: string
   staffName: string
   positionName: string
-  competencyAnalysis: CompetencyGap[]
+  assessmentId: string
+  results: RecommendedTraining[]
   generatedAt: string
 }
 
 type TrainingStatus = 'upcoming' | 'ongoing' | 'past'
 
+// Group trainings by training ID to avoid duplicates
+interface GroupedTraining {
+  trainingId: string
+  trainingName: string
+  startDate: string
+  endDate: string
+  competencies: {
+    competencyId: string
+    competencyName: string
+    clusterName: string
+    requiredLevel: number
+    weightedGap: number
+  }[]
+}
+
 export default function MyTraining() {
   const { user } = useAuth()
-  const [trainings, setTrainings] = useState<Training[]>([])
-  const [idpData, setIdpData] = useState<IdpData | null>(null)
-  const [hasIdpRecommendations, setHasIdpRecommendations] = useState(false)
+  const [trainings, setTrainings] = useState<GroupedTraining[]>([])
+  const [rtnReport, setRtnReport] = useState<RtnReport | null>(null)
+  const [selectedAssessmentId, setSelectedAssessmentId] = useState<string>("")
   const [isLoading, setIsLoading] = useState(true)
+  const [isExporting, setIsExporting] = useState(false)
   const [activeTab, setActiveTab] = useState<TrainingStatus>('ongoing')
   const [error, setError] = useState<string | null>(null)
 
@@ -67,109 +72,97 @@ export default function MyTraining() {
     try {
       setIsLoading(true)
       setError(null)
-      setHasIdpRecommendations(false)
 
-      // Fetch all trainings first
-      const [trainingsData, allTrainingCompetencies, allCompetencies] = await Promise.all([
-        trainingAPI.getAll(),
-        trainingCompetencyAPI.getAll(),
-        competencyAPI.getAll(),
-      ])
+      // Fetch latest assessment
+      const assessments = await assessmentAPI.getAll()
+      const latestAssessment = assessments.sort((a: any, b: any) => 
+        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+      )[0]
 
-      // Try to fetch IDP for personalized recommendations
-      let recommendedCompetencyIds: string[] = []
-      let idp: IdpData | null = null
-      let idpSuccess = false
-
-      try {
-        // Fetch latest assessment
-        const assessments = await assessmentAPI.getAll()
-        const latestAssessment = assessments.sort((a: any, b: any) => 
-          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-        )[0]
-
-        if (latestAssessment) {
-          // Try to generate IDP
-          const idpResponse = await idpAPI.generate({
-            staffId: user!.id,
-            assessmentId: latestAssessment.id
-          })
-          idp = idpResponse.data
-          setIdpData(idp)
-
-          // Get recommended competency IDs from IDP
-          if (idp && idp.competencyAnalysis) {
-            recommendedCompetencyIds = idp.competencyAnalysis
-              .filter(comp => comp.developmentStrategies.training === true)
-              .map(comp => comp.competencyId)
-
-            if (recommendedCompetencyIds.length > 0) {
-              idpSuccess = true
-              setHasIdpRecommendations(true)
-            }
-
-            console.log("IDP generated successfully. Recommended Competency IDs:", recommendedCompetencyIds)
-          }
-        } else {
-          console.log("No assessment found - showing all trainings")
-        }
-      } catch (err: any) {
-        console.error("IDP generation failed:", err)
-        console.log("Falling back to show all trainings")
-        // Continue without IDP - will show all trainings
-        idpSuccess = false
-        setHasIdpRecommendations(false)
+      if (!latestAssessment) {
+        setError("No assessment found. Please complete an assessment first.")
+        setIsLoading(false)
+        return
       }
 
-      // Enrich trainings with their competencies
-      const enrichedTrainings = trainingsData.map((training: any) => {
-        const trainingComps = allTrainingCompetencies.filter(
-          (tc: any) => tc.trainingId === training.id
-        )
+      setSelectedAssessmentId(latestAssessment.id)
 
-        const competencies = trainingComps
-          .map((tc: any) => {
-            const comp = allCompetencies.find((c: any) => c.id === tc.competencyId)
-            return comp ? {
-              id: comp.id,
-              name: comp.name,
-              code: comp.code
-            } : null
+      // Fetch RTN report
+      const report = await rtnAPI.getReport({
+        staffId: user!.id,
+        assessmentId: latestAssessment.id
+      })
+
+      setRtnReport(report)
+
+      // Group trainings by trainingId to avoid duplicates
+      const trainingMap = new Map<string, GroupedTraining>()
+      
+      report.results.forEach((item: RecommendedTraining) => {
+        if (trainingMap.has(item.trainingId)) {
+          // Add competency to existing training
+          trainingMap.get(item.trainingId)!.competencies.push(item.relatedCompetency)
+        } else {
+          // Create new training entry
+          trainingMap.set(item.trainingId, {
+            trainingId: item.trainingId,
+            trainingName: item.trainingName,
+            startDate: item.startDate,
+            endDate: item.endDate,
+            competencies: [item.relatedCompetency]
           })
-          .filter(Boolean)
-
-        // Check if any competency in this training is recommended
-        const isRecommended = idpSuccess && recommendedCompetencyIds.length > 0 
-          ? competencies.some((comp: any) => recommendedCompetencyIds.includes(comp.id))
-          : false
-
-        return {
-          ...training,
-          competencies,
-          isRecommended
         }
       })
 
-      // Filter: Only filter if IDP was successful AND has recommendations
-      const filteredTrainings = idpSuccess && recommendedCompetencyIds.length > 0
-        ? enrichedTrainings.filter((training: Training) => training.isRecommended)
-        : enrichedTrainings
-
-      console.log("IDP Success:", idpSuccess)
-      console.log("Recommended Competency IDs count:", recommendedCompetencyIds.length)
-      console.log("Filtered Trainings count:", filteredTrainings.length)
-
-      setTrainings(filteredTrainings)
+      setTrainings(Array.from(trainingMap.values()))
+      
     } catch (error: any) {
-      console.error("Failed to fetch trainings:", error)
-      setError("Failed to load training programs")
-      toast.error("Failed to load training programs")
+      console.error("Failed to fetch recommended trainings:", error)
+      if (error.response?.status === 404) {
+        setError("No training recommendations found. Your competency levels are meeting requirements!")
+        setTrainings([])
+      } else {
+        setError(error.response?.data?.error || "Failed to load recommended training programs")
+        toast.error("Failed to load recommended training programs")
+      }
     } finally {
       setIsLoading(false)
     }
   }
 
-  const getTrainingStatus = (training: Training): TrainingStatus => {
+  const handleExport = async () => {
+    if (!selectedAssessmentId || !user?.id) return
+    
+    try {
+      setIsExporting(true)
+      const response = await rtnAPI.export({
+        staffId: user.id,
+        assessmentId: selectedAssessmentId
+      })
+      
+      const blob = new Blob([response.data], { type: 'text/csv' })
+      const url = window.URL.createObjectURL(blob)
+      const link = document.createElement('a')
+      link.href = url
+      link.download = `recommended_training_${new Date().toISOString().slice(0, 10)}.csv`
+      document.body.appendChild(link)
+      link.click()
+      
+      setTimeout(() => {
+        document.body.removeChild(link)
+        window.URL.revokeObjectURL(url)
+      }, 100)
+      
+      toast.success("Training report exported successfully")
+    } catch (error: any) {
+      console.error('Export error:', error)
+      toast.error("Failed to export training report")
+    } finally {
+      setIsExporting(false)
+    }
+  }
+
+  const getTrainingStatus = (training: GroupedTraining): TrainingStatus => {
     const now = new Date()
     const start = new Date(training.startDate)
     const end = new Date(training.endDate)
@@ -186,17 +179,19 @@ export default function MyTraining() {
   if (isLoading) {
     return (
       <div className="space-y-4">
-        <div>
-          <h1 className="text-3xl font-bold">Training Programs</h1>
-          <p className="text-muted-foreground mt-1">
-            Loading your training programs...
-          </p>
+        <div className="flex justify-between items-center">
+          <div>
+            <h1 className="text-3xl font-bold">Recommended Training Programs</h1>
+            <p className="text-muted-foreground mt-1">
+              Loading your recommended training programs...
+            </p>
+          </div>
         </div>
         <Card>
           <CardContent className="py-8">
             <div className="flex items-center justify-center gap-2 text-muted-foreground">
               <div className="h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent"></div>
-              <span>Loading training programs...</span>
+              <span>Loading recommended training programs...</span>
             </div>
           </CardContent>
         </Card>
@@ -207,18 +202,25 @@ export default function MyTraining() {
   if (error) {
     return (
       <div className="space-y-4">
-        <div>
-          <h1 className="text-3xl font-bold">Training Programs</h1>
-          <p className="text-muted-foreground mt-1">
-            Available training programs
-          </p>
+        <div className="flex justify-between items-center">
+          <div>
+            <h1 className="text-3xl font-bold">Recommended Training Programs</h1>
+            <p className="text-muted-foreground mt-1">
+              Training programs recommended based on your competency gaps
+            </p>
+          </div>
         </div>
-        <Alert variant="destructive">
+        <Alert variant={trainings.length === 0 ? "default" : "destructive"}>
           <IconAlertCircle className="h-4 w-4" />
           <AlertDescription className="ml-2">
             {error}
           </AlertDescription>
         </Alert>
+        {trainings.length === 0 && (
+          <Button onClick={fetchData} className="mt-4">
+            Try Again
+          </Button>
+        )}
       </div>
     )
   }
@@ -229,51 +231,54 @@ export default function MyTraining() {
 
   return (
     <div className="space-y-4">
-      <div>
-        <h1 className="text-3xl font-bold flex items-center gap-2">
-          {hasIdpRecommendations && <IconSparkles className="size-8 text-primary" />}
-          {hasIdpRecommendations ? "Recommended Training Programs" : "Training Programs"}
-        </h1>
-        <p className="text-muted-foreground mt-1">
-          {hasIdpRecommendations 
-            ? "Personalized training recommendations based on your competency gaps"
-            : "Available training programs to enhance your competencies"
-          }
-        </p>
+      <div className="flex justify-between items-center">
+        <div>
+          <h1 className="text-3xl font-bold flex items-center gap-2">
+            <IconSparkles className="size-8 text-primary" />
+            Recommended Training Programs
+          </h1>
+          <p className="text-muted-foreground mt-1">
+            Personalized training recommendations based on your competency gaps
+          </p>
+          {rtnReport && (
+            <p className="text-xs text-muted-foreground mt-1">
+              Generated: {format(new Date(rtnReport.generatedAt), "dd MMM yyyy")}
+            </p>
+          )}
+        </div>
+        <Button
+          onClick={handleExport}
+          disabled={isExporting || !rtnReport}
+          className="gap-2"
+        >
+          <IconDownload className="h-4 w-4" />
+          {isExporting ? "Exporting..." : "Export Report"}
+        </Button>
       </div>
 
-      {idpData && hasIdpRecommendations && (
+      {/* {rtnReport && trainings.length > 0 && (
         <Alert className="border-primary/50 bg-primary/5">
           <IconTarget className="h-4 w-4 text-primary" />
           <AlertDescription className="ml-2">
-            <strong>IDP Generated:</strong> Based on your assessment results, we've identified{" "}
-            <strong>{idpData.competencyAnalysis.filter(c => c.developmentStrategies.training).length}</strong>{" "}
-            competencies that would benefit from formal training programs.
+            <strong>RTN Report:</strong> Based on your assessment, we've identified{" "}
+            <strong>{trainings.length}</strong> training program(s) addressing{" "}
+            <strong>{rtnReport.results.length}</strong> competency gap(s).
           </AlertDescription>
         </Alert>
-      )}
-
-      {!hasIdpRecommendations && trainings.length > 0 && (
-        <Alert>
-          <IconAlertCircle className="h-4 w-4" />
-          <AlertDescription className="ml-2">
-            Showing all available trainings. Complete your assessments to get personalized recommendations.
-          </AlertDescription>
-        </Alert>
-      )}
+      )} */}
 
       <div className="grid gap-4 md:grid-cols-3">
         <Card>
           <CardHeader className="pb-3">
             <CardTitle className="text-sm font-medium flex items-center gap-2">
-              {hasIdpRecommendations ? <IconSparkles className="size-4 text-primary" /> : <IconSchool className="size-4" />}
-              {hasIdpRecommendations ? "Recommended" : "Total Programs"}
+              <IconSparkles className="size-4 text-primary" />
+              Recommended Programs
             </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{trainings.length}</div>
             <p className="text-xs text-muted-foreground mt-1">
-              {hasIdpRecommendations ? "Programs matched to your needs" : "Available programs"}
+              Based on competency gaps
             </p>
           </CardContent>
         </Card>
@@ -315,16 +320,10 @@ export default function MyTraining() {
             <div className="text-center space-y-2">
               <IconSchool className="size-12 mx-auto text-muted-foreground" />
               <p className="text-muted-foreground font-medium">
-                {hasIdpRecommendations 
-                  ? "No training programs currently recommended"
-                  : "No training programs available"
-                }
+                No training programs currently recommended
               </p>
               <p className="text-sm text-muted-foreground">
-                {hasIdpRecommendations
-                  ? "Great job! Your competency levels are meeting requirements, or there are no matching training programs available at this time."
-                  : "Please check back later for new training opportunities."
-                }
+                Great job! Your competency levels are meeting requirements, or there are no matching training programs available at this time.
               </p>
             </div>
           </CardContent>
@@ -351,7 +350,7 @@ export default function MyTraining() {
             <TabsTrigger value="past" className="gap-2">
               Past
               {pastCount > 0 && (
-                <Badge variant="secondary" className="ml-1">
+                <Badge variant="secondary" className="ml-1 bg-red-600 text-white hover:bg-red-700">
                   {pastCount}
                 </Badge>
               )}
@@ -376,7 +375,7 @@ export default function MyTraining() {
 }
 
 interface TrainingListProps {
-  trainings: Training[]
+  trainings: GroupedTraining[]
   status: TrainingStatus
 }
 
@@ -400,33 +399,26 @@ function TrainingList({ trainings, status }: TrainingListProps) {
       case 'ongoing':
         return <Badge className="bg-green-600 hover:bg-green-700">Ongoing</Badge>
       case 'past':
-        return <Badge variant="secondary">Past</Badge>
+        return <Badge className="bg-red-600 hover:bg-red-700">Past</Badge>
     }
   }
 
   return (
     <div className="grid gap-4">
       {trainings.map((training) => (
-        <Card key={training.id} className={training.isRecommended ? "border-primary/20 shadow-sm hover:shadow-md transition-shadow" : ""}>
+        <Card key={training.trainingId} className="border-primary/20 shadow-sm hover:shadow-md transition-shadow">
           <CardHeader>
             <div className="flex items-start justify-between">
               <div className="flex-1">
                 <div className="flex items-center gap-2 flex-wrap">
-                  {training.isRecommended && <IconSparkles className="size-5 text-primary" />}
-                  <CardTitle>{training.name}</CardTitle>
+                  <IconSparkles className="size-5 text-primary" />
+                  <CardTitle>{training.trainingName}</CardTitle>
                   {getStatusBadge(status)}
-                  {training.isRecommended && (
-                    <Badge variant="outline" className="gap-1 border-primary/50 text-primary">
-                      <IconTarget className="size-3" />
-                      Recommended
-                    </Badge>
-                  )}
+                  <Badge variant="outline" className="gap-1 border-primary/50 text-primary">
+                    <IconTarget className="size-3" />
+                    Recommended
+                  </Badge>
                 </div>
-                {training.description && (
-                  <CardDescription className="mt-2">
-                    {training.description}
-                  </CardDescription>
-                )}
               </div>
             </div>
             <div className="flex items-center gap-4 text-sm text-muted-foreground mt-4">
@@ -436,28 +428,35 @@ function TrainingList({ trainings, status }: TrainingListProps) {
                   {format(new Date(training.startDate), "dd MMM yyyy")} - {format(new Date(training.endDate), "dd MMM yyyy")}
                 </span>
               </div>
-              {training.competencies && training.competencies.length > 0 && (
-                <div className="flex items-center gap-1">
-                  <IconTarget className="size-4" />
-                  <span>{training.competencies.length} Competencies</span>
-                </div>
-              )}
+              <div className="flex items-center gap-1">
+                <IconTarget className="size-4" />
+                <span>{training.competencies.length} Competenc{training.competencies.length === 1 ? 'y' : 'ies'}</span>
+              </div>
             </div>
           </CardHeader>
-          {training.competencies && training.competencies.length > 0 && (
-            <CardContent>
+          <CardContent>
+            <div className="space-y-3">
+              <p className="text-sm font-medium">Addresses Competency Gaps:</p>
               <div className="space-y-2">
-                <p className="text-sm font-medium">Competencies Covered:</p>
-                <div className="flex flex-wrap gap-2">
-                  {training.competencies.map((comp) => (
-                    <Badge key={comp.id} variant="outline" className={training.isRecommended ? "border-primary/30" : ""}>
-                      {comp.code} - {comp.name}
-                    </Badge>
-                  ))}
-                </div>
+                {training.competencies.map((comp) => (
+                  <div key={comp.competencyId} className="flex items-start justify-between p-3 rounded-lg bg-muted/50 border border-primary/10">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2">
+                        <Badge variant="outline" className="border-primary/30">
+                          {comp.clusterName}
+                        </Badge>
+                        <span className="font-medium text-sm">{comp.competencyName}</span>
+                      </div>
+                      <div className="flex items-center gap-4 mt-2 text-xs text-muted-foreground">
+                        <span>Required Level: {comp.requiredLevel}</span>
+                        <span className="text-orange-600 font-medium">Gap: {comp.weightedGap.toFixed(2)}</span>
+                      </div>
+                    </div>
+                  </div>
+                ))}
               </div>
-            </CardContent>
-          )}
+            </div>
+          </CardContent>
         </Card>
       ))}
     </div>

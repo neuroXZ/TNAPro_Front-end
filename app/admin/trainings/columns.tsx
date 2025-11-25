@@ -2,9 +2,10 @@
 
 import { ColumnDef } from "@tanstack/react-table"
 import { Button } from "@/components/ui/button"
+import { Badge } from "@/components/ui/badge"
 import { Checkbox } from "@/components/ui/checkbox"
 import { IconEdit, IconTrash, IconArrowUp, IconArrowDown, IconArrowsSort } from "@tabler/icons-react"
-import { format } from "date-fns"
+import { format, isBefore, isAfter } from "date-fns"
 
 export interface Training {
   id: string
@@ -107,20 +108,42 @@ export const getColumns = (actions: ColumnActions): ColumnDef<Training>[] => [
     },
   },
   {
-    accessorKey: "description",
-    header: "Description",
+    id: "status",
+    header: "Status",
     cell: ({ row }) => {
-      const description = row.original.description
-      if (!description) return <span className="text-muted-foreground">-</span>
-      const words = description.split(" ")
-      const truncated = words.slice(0, 5).join(" ")
-      return (
-        <span className="text-sm text-muted-foreground">
-          {truncated}{words.length > 5 ? "..." : ""}
-        </span>
-      )
+      const { startDate, endDate } = row.original
+      if (!startDate || !endDate) {
+        return <Badge variant="outline">No Date</Badge>
+      }
+
+      const now = new Date()
+      const start = new Date(startDate)
+      const end = new Date(endDate)
+
+      if (isBefore(now, start)) {
+        return <Badge className="bg-blue-600 hover:bg-blue-700">Upcoming</Badge>
+      } else if (isAfter(now, end)) {
+        return <Badge className="bg-red-600 hover:bg-red-700">Past</Badge>
+      } else {
+        return <Badge className="bg-green-600 hover:bg-green-700">Ongoing</Badge>
+      }
     },
   },
+  // {
+  //   accessorKey: "description",
+  //   header: "Description",
+  //   cell: ({ row }) => {
+  //     const description = row.original.description
+  //     if (!description) return <span className="text-muted-foreground">-</span>
+  //     const words = description.split(" ")
+  //     const truncated = words.slice(0, 5).join(" ")
+  //     return (
+  //       <span className="text-sm text-muted-foreground">
+  //         {truncated}{words.length > 5 ? "..." : ""}
+  //       </span>
+  //     )
+  //   },
+  // },
   {
     id: "actions",
     header: () => <div className="text-right">Actions</div>,

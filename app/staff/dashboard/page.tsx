@@ -5,10 +5,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Progress } from "@/components/ui/progress"
-import { 
-  IconUser, 
-  IconBriefcase, 
-  IconTarget, 
+import {
+  IconUser,
+  IconBriefcase,
+  IconTarget,
   IconTrophy,
   IconClipboardCheck,
   IconArrowRight,
@@ -17,7 +17,7 @@ import {
   IconChecks
 } from "@tabler/icons-react"
 import { useAuth } from "@/lib/auth-context"
-import { staffAPI, assessmentAPI, trainingAPI } from "@/lib/api"
+import { staffAPI, assessmentAPI, trainingAPI, idpAPI } from "@/lib/api"
 import { useRouter } from "next/navigation"
 import { format } from "date-fns"
 
@@ -45,6 +45,14 @@ interface Training {
   description?: string
 }
 
+interface IdpSummary {
+  hasIdp: boolean
+  totalCompetencies: number
+  competenciesNeedingTraining: number
+  averageGap: number
+  lastGenerated?: string
+}
+
 export default function StaffDashboard() {
   const { user } = useAuth()
   const router = useRouter()
@@ -57,6 +65,12 @@ export default function StaffDashboard() {
   })
   const [assessments, setAssessments] = useState<Assessment[]>([])
   const [trainings, setTrainings] = useState<Training[]>([])
+  const [idpSummary, setIdpSummary] = useState<IdpSummary>({
+    hasIdp: false,
+    totalCompetencies: 0,
+    competenciesNeedingTraining: 0,
+    averageGap: 0
+  })
   const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
@@ -66,27 +80,52 @@ export default function StaffDashboard() {
   const fetchDashboardData = async () => {
     try {
       setIsLoading(true)
-      
+
       // Fetch assessments
       const assessmentsData = await assessmentAPI.getAll()
       setAssessments(assessmentsData)
-      
+
       // Fetch trainings
       const trainingsData = await trainingAPI.getAll()
       setTrainings(trainingsData)
-      
+
+      // Try to fetch latest IDP if available
+      if (user?.id && assessmentsData.length > 0) {
+        try {
+          const latestAssessment = assessmentsData[0]
+          const idpData = await idpAPI.generate({
+            staffId: user.id,
+            assessmentId: latestAssessment.id
+          })
+
+          if (idpData.data) {
+            const analysis = idpData.data.competencyAnalysis
+            setIdpSummary({
+              hasIdp: true,
+              totalCompetencies: analysis.length,
+              competenciesNeedingTraining: analysis.filter((c: any) => c.developmentStrategies.training).length,
+              averageGap: analysis.reduce((sum: number, c: any) => sum + c.gap, 0) / analysis.length,
+              lastGenerated: idpData.data.generatedAt
+            })
+          }
+        } catch (error) {
+          // IDP not available yet, keep default values
+          console.log("IDP not available:", error)
+        }
+      }
+
       // Calculate stats
       const now = new Date()
-      const pendingAssessments = assessmentsData.filter((a: Assessment) => 
+      const pendingAssessments = assessmentsData.filter((a: Assessment) =>
         new Date(a.endDate) > now
       )
-      const completedAssessments = assessmentsData.filter((a: Assessment) => 
+      const completedAssessments = assessmentsData.filter((a: Assessment) =>
         new Date(a.endDate) <= now
       )
-      const upcomingTraining = trainingsData.filter((t: Training) => 
+      const upcomingTraining = trainingsData.filter((t: Training) =>
         new Date(t.startDate) > now
       )
-      
+
       setStats({
         totalCompetencies: 0, // Will be updated when we have competency API
         completedAssessments: completedAssessments.length,
@@ -105,7 +144,7 @@ export default function StaffDashboard() {
     const now = new Date()
     const startDate = new Date(assessment.startDate)
     const endDate = new Date(assessment.endDate)
-    
+
     if (now < startDate) return { label: "Upcoming", color: "bg-blue-500" }
     if (now > endDate) return { label: "Completed", color: "bg-green-500" }
     return { label: "Active", color: "bg-orange-500" }
@@ -197,6 +236,105 @@ export default function StaffDashboard() {
       </div>
 
       {/* Main Content Grid */}
+      <div className="grid gap-4">
+        {/* My IDP Summary */}
+        <Card>
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <div>
+                <CardTitle>My Individual Development Plan (IDP)</CardTitle>
+                <CardDescription>
+                  Your competency gaps and development strategies
+                </CardDescription>
+              </div>
+              <Button 
+                variant="ghost" 
+                size="sm"
+                onClick={() => router.push('/staff/idp')}
+              >
+                View Full IDP
+                <IconArrowRight className="size-4 ml-1" />
+              </Button>
+            </div>
+          </CardHeader>
+          <CardContent>
+            {isLoading ? (
+              <div className="space-y-3">
+                <div className="grid gap-4 md:grid-cols-3">
+                  {[1, 2, 3].map(i => (
+                    <div key={i} className="h-24 bg-muted animate-pulse rounded-lg" />
+                  ))}
+                </div>
+              </div>
+            ) : idpSummary.hasIdp ? (
+              <div className="space-y-4">
+                <div className="grid gap-4 md:grid-cols-3">
+                  <Card>
+                    <CardHeader className="pb-3">
+                      <CardTitle className="text-sm font-medium">Total Competencies</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="text-2xl font-bold">{idpSummary.totalCompetencies}</div>
+                    </CardContent>
+                  </Card>
+
+                  <Card>
+                    <CardHeader className="pb-3">
+                      <CardTitle className="text-sm font-medium">Needs Training</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="text-2xl font-bold text-red-600">
+                        {idpSummary.competenciesNeedingTraining}
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  <Card>
+                    <CardHeader className="pb-3">
+                      <CardTitle className="text-sm font-medium">Average Gap</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="text-2xl font-bold">
+                        {idpSummary.averageGap.toFixed(2)}
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+                {idpSummary.lastGenerated && (
+                  <div className="flex items-center justify-between pt-2 border-t">
+                    <p className="text-sm text-muted-foreground">
+                      Generated: {format(new Date(idpSummary.lastGenerated), "dd MMM yyyy HH:mm")}
+                    </p>
+                    <Button 
+                      onClick={() => router.push('/staff/idp')}
+                      size="sm"
+                    >
+                      <IconTarget className="size-4 mr-2" />
+                      View Details
+                    </Button>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div className="text-center py-12">
+                <IconTarget className="size-16 mx-auto text-muted-foreground mb-3" />
+                <p className="text-lg font-medium mb-1">No IDP Generated Yet</p>
+                <p className="text-sm text-muted-foreground mb-6 max-w-md mx-auto">
+                  Generate your Individual Development Plan to identify competency gaps and get personalized development strategies
+                </p>
+                <Button 
+                  onClick={() => router.push('/staff/idp')}
+                >
+                  <IconTarget className="size-4 mr-2" />
+                  Generate IDP
+                </Button>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Assessments and Training Grid */}
       <div className="grid gap-4 md:grid-cols-2">
         {/* Pending Assessments */}
         <Card>
@@ -208,8 +346,8 @@ export default function StaffDashboard() {
                   Assessments that need your attention
                 </CardDescription>
               </div>
-              <Button 
-                variant="ghost" 
+              <Button
+                variant="ghost"
                 size="sm"
                 onClick={() => router.push('/staff/assessments')}
               >
@@ -261,7 +399,6 @@ export default function StaffDashboard() {
             )}
           </CardContent>
         </Card>
-
         {/* Upcoming Training */}
         <Card>
           <CardHeader>
@@ -272,8 +409,8 @@ export default function StaffDashboard() {
                   Training sessions scheduled for you
                 </CardDescription>
               </div>
-              <Button 
-                variant="ghost" 
+              <Button
+                variant="ghost"
                 size="sm"
                 onClick={() => router.push('/staff/training')}
               >
@@ -316,7 +453,10 @@ export default function StaffDashboard() {
             )}
           </CardContent>
         </Card>
+
       </div>
+
+      
 
       {/* Quick Actions */}
       {/* <Card>
