@@ -75,10 +75,16 @@ const navSecondaryItems = [
 export function StaffSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const { user } = useAuth()
 
+  const getAvatarImage = () => {
+    if (user?.image) return user.image
+    if (user?.gender?.toLowerCase() === 'female') return '/female-avatar.svg'
+    return '/male-avatar.svg'
+  }
+
   const userData = {
     name: user?.name || "Staff User",
     email: user?.email || "staff@tnapro.com",
-    avatar: "/avatars/staff.jpg",
+    avatar: getAvatarImage(),
   }
 
   return (

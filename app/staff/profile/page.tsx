@@ -224,17 +224,16 @@ export default function MyProfile() {
             </CardDescription>
           </CardHeader>
           <CardContent className="flex flex-col items-center">
-            {profile?.image ? (
-              <img
-                src={profile.image}
-                alt={profile.name}
-                className="size-32 rounded-full object-cover"
-              />
-            ) : (
-              <div className="flex size-32 items-center justify-center rounded-full bg-muted">
-                <IconUser className="size-16 text-muted-foreground" />
-              </div>
-            )}
+            <img
+              src={
+                profile?.image || 
+                (profile?.gender?.toLowerCase() === 'female' 
+                  ? '/female-avatar.svg' 
+                  : '/male-avatar.svg')
+              }
+              alt={profile?.name || 'Profile'}
+              className="size-32 rounded-full object-cover"
+            />
             <Button variant="outline" className="mt-4" disabled={!isEditing}>
               Change Photo
             </Button>

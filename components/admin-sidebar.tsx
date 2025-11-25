@@ -175,7 +175,7 @@ export function AdminSidebar({ ...props }: React.ComponentProps<typeof Sidebar>)
   const userData = {
     name: user?.name || "Admin User",
     email: user?.email || "admin@tnapro.com",
-    avatar: "/avatars/admin.jpg",
+    avatar: user?.image || '/male-avatar.svg',
   }
 
   return (

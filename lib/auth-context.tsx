@@ -60,13 +60,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           const { staffAPI } = await import('./api');
           const fullStaffData = await staffAPI.getById(userData.id);
           
-          // Merge data - use full staff data which includes positionId, unitId
+          // Merge data - use full staff data which includes positionId, unitId, gender, image
           const mergedData = {
             ...userData,
             positionId: fullStaffData.positionId || null,
             unitId: fullStaffData.unitId || null,
             position: fullStaffData.position || userData.position,
             unit: fullStaffData.unit || userData.unit,
+            gender: fullStaffData.gender || userData.gender,
+            image: fullStaffData.image || userData.image,
           };
           
           localStorage.setItem('user', JSON.stringify(mergedData));
