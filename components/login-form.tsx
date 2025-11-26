@@ -6,6 +6,9 @@ import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import Image from "next/image"
+import LoginImage from "@/public/login.jpg"
+
+
 import {
   Field,
   FieldDescription,
@@ -135,10 +138,11 @@ export function LoginForm({
               </Field>
             </FieldGroup>
           </form>
-          <div className="bg-linear-to-br from-blue-600 to-purple-700 relative hidden md:block overflow-hidden">
+          {/* <div className="bg-linear-to-br from-blue-300 to-purple-400 relative hidden md:block overflow-hidden"> */}
+          <div className="bg-gray-200 relative hidden md:block overflow-hidden">
             <div className="absolute inset-0 opacity-20">
               <Image
-              src="/login.jpg"
+              src={LoginImage}
               width={500}
               height={500}
               alt="login-image"
