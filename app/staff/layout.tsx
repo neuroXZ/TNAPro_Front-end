@@ -1,5 +1,5 @@
-import { StaffRoute } from "@/components/staff-route"
-import { StaffSidebar } from "@/components/staff-sidebar"
+import { StaffRoute } from "@/components/route/staff-route"
+import { StaffSidebar } from "@/components/sidebar/staff-sidebar"
 import { SiteHeader } from "@/components/site-header"
 
 import {

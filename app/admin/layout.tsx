@@ -1,5 +1,5 @@
-import { AdminRoute } from "@/components/admin-route"
-import { AdminSidebar } from "@/components/admin-sidebar"
+import { AdminRoute } from "@/components/route/admin-route"
+import { AdminSidebar } from "@/components/sidebar/admin-sidebar"
 import { SiteHeader } from "@/components/site-header"
 
 import {

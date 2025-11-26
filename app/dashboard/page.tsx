@@ -3,7 +3,7 @@
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/auth-context';
-import { ProtectedRoute } from "@/components/protected-route"
+import { ProtectedRoute } from "@/components/route/protected-route"
 
 export default function Page() {
   const router = useRouter();
