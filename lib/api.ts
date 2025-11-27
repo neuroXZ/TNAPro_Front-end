@@ -52,6 +52,34 @@ export const authAPI = {
   },
 };
 
+// Admin API
+export const adminAPI = {
+  getAll: async () => {
+    const response = await api.get('/admin');
+    return response.data;
+  },
+  
+  getById: async (id: string) => {
+    const response = await api.get(`/admin/${id}`);
+    return response.data;
+  },
+  
+  create: async (data: any) => {
+    const response = await api.post('/admin', data);
+    return response.data;
+  },
+  
+  update: async (id: string, data: any) => {
+    const response = await api.put(`/admin/${id}`, data);
+    return response.data;
+  },
+  
+  delete: async (id: string) => {
+    const response = await api.delete(`/admin/${id}`);
+    return response.data;
+  },
+};
+
 // Staff API
 export const staffAPI = {
   getAll: async () => {

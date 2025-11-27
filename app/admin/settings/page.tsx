@@ -13,9 +13,11 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { IconSettings, IconPalette, IconDeviceFloppy } from "@tabler/icons-react"
+import { IconSettings, IconPalette, IconDeviceFloppy, IconRefresh } from "@tabler/icons-react"
 import { toast } from "sonner"
 import { Skeleton } from "@/components/ui/skeleton"
+import { hexToOklch, oklchToHex } from "@/lib/color-utils"
+import { applyThemeColors } from "@/lib/theme-loader"
 
 interface Setting {
   id: string
@@ -69,14 +71,16 @@ export default function SettingsPage() {
         if (setting.key === "app_title") setAppTitle(setting.value || "")
         if (setting.key === "contact_email") setContactEmail(setting.value || "")
         
-        // Set logo and colors
+        // Set logo
         setLogoPath(setting.logoPath || "")
-        setPrimaryColor(setting.primaryColor || "#3B82F6")
-        setSecondaryColor(setting.secondaryColor || "#8B5CF6")
-        setSuccessColor(setting.successColor || "#10B981")
-        setWarningColor(setting.warningColor || "#F59E0B")
-        setDangerColor(setting.dangerColor || "#EF4444")
-        setInfoColor(setting.infoColor || "#06B6D4")
+        
+        // Convert OKLCH colors from database to HEX for color picker
+        setPrimaryColor(setting.primaryColor ? oklchToHex(setting.primaryColor) : "#3B82F6")
+        setSecondaryColor(setting.secondaryColor ? oklchToHex(setting.secondaryColor) : "#8B5CF6")
+        setSuccessColor(setting.successColor ? oklchToHex(setting.successColor) : "#10B981")
+        setWarningColor(setting.warningColor ? oklchToHex(setting.warningColor) : "#F59E0B")
+        setDangerColor(setting.dangerColor ? oklchToHex(setting.dangerColor) : "#EF4444")
+        setInfoColor(setting.infoColor ? oklchToHex(setting.infoColor) : "#06B6D4")
       }
     } catch (error) {
       toast.error("Failed to fetch settings")
@@ -149,13 +153,14 @@ export default function SettingsPage() {
     try {
       setIsSaving(true)
       
+      // Convert HEX colors to OKLCH format before saving
       const data = {
-        primaryColor,
-        secondaryColor,
-        successColor,
-        warningColor,
-        dangerColor,
-        infoColor,
+        primaryColor: hexToOklch(primaryColor),
+        secondaryColor: hexToOklch(secondaryColor),
+        successColor: hexToOklch(successColor),
+        warningColor: hexToOklch(warningColor),
+        dangerColor: hexToOklch(dangerColor),
+        infoColor: hexToOklch(infoColor),
       }
 
       if (settings?.id) {
@@ -164,7 +169,10 @@ export default function SettingsPage() {
         await settingAPI.create(data)
       }
       
-      toast.success("Theme colors saved successfully")
+      // Apply theme immediately without page refresh
+      applyThemeColors(data)
+      
+      toast.success("Theme colors saved and applied successfully")
       await fetchSettings()
     } catch (error) {
       toast.error("Failed to save theme colors")
@@ -318,7 +326,7 @@ export default function SettingsPage() {
             <CardHeader>
               <CardTitle>Theme Colors</CardTitle>
               <CardDescription>
-                Customize the color scheme of your application
+                Customize the color scheme of your application. Colors are stored in OKLCH format for better color accuracy.
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
@@ -468,6 +476,7 @@ export default function SettingsPage() {
                   onClick={fetchSettings}
                   disabled={isSaving}
                 >
+                  <IconRefresh className="mr-2 size-4" />
                   Reset
                 </Button>
                 <Button
@@ -475,7 +484,7 @@ export default function SettingsPage() {
                   disabled={isSaving}
                 >
                   <IconDeviceFloppy className="mr-2 size-4" />
-                  {isSaving ? "Saving..." : "Save Colors"}
+                  {isSaving ? "Saving..." : "Save & Apply Colors"}
                 </Button>
               </div>
             </CardContent>

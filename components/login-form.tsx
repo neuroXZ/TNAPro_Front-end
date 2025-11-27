@@ -51,7 +51,7 @@ export function LoginForm({
           <form className="p-6 md:p-8" onSubmit={handleSubmit}>
             <FieldGroup>
               <div className="flex flex-col items-center gap-2 text-center">
-                <div className="h-16 w-16 rounded-full bg-linear-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-bold text-2xl shadow-lg">
+                <div className="h-16 w-16 rounded-full bg-primary flex items-center justify-center text-white font-bold text-2xl shadow-lg">
                   TNA
                 </div>
                 <h1 className="text-2xl font-bold">Welcome</h1>
@@ -136,6 +136,18 @@ export function LoginForm({
                   {isLoading ? "Logging in..." : "Login"}
                 </Button>
               </Field>
+
+              {userType === 'admin' && (
+                <div className="text-center text-sm">
+                  <span className="text-muted-foreground">Don't have an account? </span>
+                  <a 
+                    href="/signup" 
+                    className="text-primary hover:underline font-medium"
+                  >
+                    Sign up here
+                  </a>
+                </div>
+              )}
             </FieldGroup>
           </form>
           {/* <div className="bg-linear-to-br from-blue-300 to-purple-400 relative hidden md:block overflow-hidden"> */}
