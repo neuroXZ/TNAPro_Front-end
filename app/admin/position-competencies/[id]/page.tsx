@@ -265,8 +265,8 @@ export default function PositionCompetencyDetailPage() {
 
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold">{position?.name}</h1>
-          <p className="text-muted-foreground">
+          <h1 className="text-3xl font-bold text-primary">{position?.name}</h1>
+          <p className="text-muted-foreground ">
             {position?.grade?.name && `Grade: ${position.grade.name} • `}
             {positionCompetencies.length} {positionCompetencies.length === 1 ? "competency" : "competencies"} assigned
           </p>
@@ -285,7 +285,7 @@ export default function PositionCompetencyDetailPage() {
                   />
                 )}
                 <span className="flex-1 text-left truncate">{cluster?.name || "Uncategorized"}</span>
-                <Badge variant="secondary" className="ml-auto">
+                <Badge className="ml-auto">
                   {competencies.filter((c) => c.positionCompetency).length}/{competencies.length}
                 </Badge>
               </TabsTrigger>
@@ -306,7 +306,7 @@ export default function PositionCompetencyDetailPage() {
                       />
                     )}
                     <CardTitle>{cluster?.name || "Uncategorized"}</CardTitle>
-                    <Badge variant="secondary">
+                    <Badge>
                       {competencies.filter((c) => c.positionCompetency).length} / {competencies.length}
                     </Badge>
                   </div>

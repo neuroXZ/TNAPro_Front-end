@@ -201,7 +201,7 @@ export default function PositionManagementPage() {
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold">Position Management</h1>
+          <h1 className="text-3xl font-bold text-primary">Position Management</h1>
           <p className="text-muted-foreground">
             Manage job positions in the organization
           </p>

@@ -202,7 +202,7 @@ export default function AdminIdpPage() {
   return (
     <div className="space-y-4">
       <div>
-        <h1 className="text-3xl font-bold">Individual Development Plan (IDP)</h1>
+        <h1 className="text-3xl font-bold text-primary">Individual Development Plan (IDP)</h1>
         <p className="text-muted-foreground mt-1">
           Generate and manage staff development plans based on competency gaps
         </p>

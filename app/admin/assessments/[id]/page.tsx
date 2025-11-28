@@ -50,7 +50,7 @@ export default function AssessmentDetailPage() {
 
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold">{assessment?.name}</h1>
+          <h1 className="text-3xl font-bold text-primary">{assessment?.name}</h1>
           <p className="text-muted-foreground">
             {assessment?.startDate &&
               `${new Date(assessment.startDate).toLocaleDateString()} - `}

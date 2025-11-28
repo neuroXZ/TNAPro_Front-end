@@ -172,7 +172,7 @@ export default function UnitManagementPage() {
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold">Unit Management</h1>
+          <h1 className="text-3xl font-bold text-primary">Unit Management</h1>
           <p className="text-muted-foreground">
             Manage organizational units
           </p>

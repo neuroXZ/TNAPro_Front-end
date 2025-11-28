@@ -137,7 +137,7 @@ export function LoginForm({
                 </Button>
               </Field>
 
-              {userType === 'admin' && (
+              {/* {userType === 'admin' && (
                 <div className="text-center text-sm">
                   <span className="text-muted-foreground">Don't have an account? </span>
                   <a 
@@ -147,7 +147,7 @@ export function LoginForm({
                     Sign up here
                   </a>
                 </div>
-              )}
+              )} */}
             </FieldGroup>
           </form>
           {/* <div className="bg-linear-to-br from-blue-300 to-purple-400 relative hidden md:block overflow-hidden"> */}

@@ -53,17 +53,14 @@ const navMainItems = [
         url: "/admin/units",
       },
       {
-        title: "Positions",
-        url: "/admin/positions",
-      },
-      {
         title: "Grades",
         url: "/admin/grades",
       },
       {
-        title: "Clusters",
-        url: "/admin/clusters",
+        title: "Positions",
+        url: "/admin/positions",
       },
+      
       
 
     ],
@@ -91,6 +88,10 @@ const navMainItems = [
       {
         title: "Levels",
         url: "/admin/levels",
+      },
+      {
+        title: "Clusters",
+        url: "/admin/clusters",
       },
       {
         title: "Competencies",

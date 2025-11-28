@@ -181,7 +181,7 @@ export default function MyTraining() {
       <div className="space-y-4">
         <div className="flex justify-between items-center">
           <div>
-            <h1 className="text-3xl font-bold">Recommended Training Programs</h1>
+            <h1 className="text-3xl font-bold text-primary">Recommended Training Programs</h1>
             <p className="text-muted-foreground mt-1">
               Loading your recommended training programs...
             </p>
@@ -204,7 +204,7 @@ export default function MyTraining() {
       <div className="space-y-4">
         <div className="flex justify-between items-center">
           <div>
-            <h1 className="text-3xl font-bold">Recommended Training Programs</h1>
+            <h1 className="text-3xl font-bold text-primary">Recommended Training Programs</h1>
             <p className="text-muted-foreground mt-1">
               Training programs recommended based on your competency gaps
             </p>
@@ -233,7 +233,7 @@ export default function MyTraining() {
     <div className="space-y-4">
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold flex items-center gap-2">
+          <h1 className="text-3xl font-bold flex items-center gap-2 text-primary">
             <IconSparkles className="size-8 text-primary" />
             Recommended Training Programs
           </h1>

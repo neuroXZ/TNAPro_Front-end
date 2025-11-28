@@ -358,7 +358,7 @@ export default function SuperiorAssessmentDetailPage() {
 
       <div className="flex items-start justify-between">
         <div>
-          <h1 className="text-3xl font-bold">{assessment.name}</h1>
+          <h1 className="text-3xl font-bold text-primary">{assessment.name}</h1>
           {assessment.description && (
             <p className="text-muted-foreground mt-1">{assessment.description}</p>
           )}

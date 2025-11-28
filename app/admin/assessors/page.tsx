@@ -188,7 +188,7 @@ export default function AssessorManagementPage() {
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold">Assessor Management</h1>
+          <h1 className="text-3xl font-bold text-primary">Assessor Management</h1>
           <p className="text-muted-foreground">
             Manage assessor assignments for staff evaluations
           </p>

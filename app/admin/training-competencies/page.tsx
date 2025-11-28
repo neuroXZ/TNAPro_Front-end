@@ -104,7 +104,7 @@ export default function TrainingCompetencyManagementPage() {
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold">Training Competency Management</h1>
+          <h1 className="text-3xl font-bold text-primary">Training Competency Management</h1>
           <p className="text-muted-foreground">
             Manage competencies taught in each training program
           </p>

@@ -172,7 +172,7 @@ export default function LevelManagementPage() {
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold">Level Management</h1>
+          <h1 className="text-3xl font-bold text-primary">Level Management</h1>
           <p className="text-muted-foreground">
             Manage competency proficiency levels
           </p>

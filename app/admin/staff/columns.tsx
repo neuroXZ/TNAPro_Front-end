@@ -3,6 +3,7 @@
 import { ColumnDef } from "@tanstack/react-table"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
+import { Badge } from "@/components/ui/badge"
 import { IconEdit, IconTrash, IconArrowUp, IconArrowDown, IconArrowsSort } from "@tabler/icons-react"
 
 export interface Staff {
@@ -88,34 +89,17 @@ export const getColumns = (actions: ColumnActions): ColumnDef<Staff>[] => [
           <img
             src={getAvatarImage(staff)}
             alt={staff.name}
-            className="size-8 rounded-full object-cover"
+            className="size-12 rounded-full object-cover"
           />
-          <span>{staff.name}</span>
+          <div className="flex flex-col gap-1">
+            <span className="font-medium">{staff.name}</span>
+            <Badge className="w-fit text-xs">
+              {staff.staffOrgId}
+            </Badge>
+          </div>
         </div>
       )
     },
-  },
-  {
-    accessorKey: "staffOrgId",
-    header: ({ column }) => {
-      return (
-        <Button
-          variant="ghost"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-          className="-ml-4"
-        >
-          Staff ID
-          {column.getIsSorted() === "asc" ? (
-            <IconArrowUp className="ml-2 size-4" />
-          ) : column.getIsSorted() === "desc" ? (
-            <IconArrowDown className="ml-2 size-4" />
-          ) : (
-            <IconArrowsSort className="ml-2 size-4" />
-          )}
-        </Button>
-      )
-    },
-    cell: ({ row }) => <div className="font-medium">{row.getValue("staffOrgId")}</div>,
   },
   {
     accessorKey: "email",

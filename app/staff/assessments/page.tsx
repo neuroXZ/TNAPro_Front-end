@@ -206,7 +206,7 @@ export default function MyAssessments() {
     return (
       <div className="space-y-4">
         <div>
-          <h1 className="text-3xl font-bold">My Assessments</h1>
+          <h1 className="text-3xl font-bold text-primary">My Assessments</h1>
           <p className="text-muted-foreground">
             View your assessment results and performance
           </p>
@@ -224,7 +224,7 @@ export default function MyAssessments() {
     return (
       <div className="space-y-4">
         <div>
-          <h1 className="text-3xl font-bold">My Assessments</h1>
+          <h1 className="text-3xl font-bold text-primary">My Assessments</h1>
           <p className="text-muted-foreground">
             View your assessment results and performance
           </p>
@@ -243,7 +243,7 @@ export default function MyAssessments() {
   return (
     <div className="space-y-4">
       <div>
-        <h1 className="text-3xl font-bold">My Assessments</h1>
+        <h1 className="text-3xl font-bold text-primary">My Assessments</h1>
         <p className="text-muted-foreground">
           View your assessment results and performance
         </p>

@@ -201,7 +201,7 @@ export default function CompetencyManagementPage() {
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold">Competency Management</h1>
+          <h1 className="text-3xl font-bold text-primary">Competency Management</h1>
           <p className="text-muted-foreground">
             Manage competencies and their clusters
           </p>

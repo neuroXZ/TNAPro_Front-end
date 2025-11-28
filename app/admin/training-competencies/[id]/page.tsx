@@ -186,7 +186,7 @@ export default function TrainingCompetencyDetailPage() {
 
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold">{training?.name}</h1>
+          <h1 className="text-3xl font-bold text-primary">{training?.name}</h1>
           <p className="text-muted-foreground">
             {training?.startDate && `${new Date(training.startDate).toLocaleDateString()} - `}
             {training?.endDate && new Date(training.endDate).toLocaleDateString()}

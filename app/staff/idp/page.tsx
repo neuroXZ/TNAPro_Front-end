@@ -166,7 +166,7 @@ export default function MyIdpPage() {
   return (
     <div className="space-y-4">
       <div>
-        <h1 className="text-3xl font-bold">My Individual Development Plan (IDP)</h1>
+        <h1 className="text-3xl font-bold text-primary">My Individual Development Plan (IDP)</h1>
         <p className="text-muted-foreground mt-1">
           View your personalized development plan based on competency assessment results
         </p>

@@ -163,7 +163,7 @@ export default function SuperiorAssessmentsPage() {
     return (
       <div className="space-y-4">
         <div>
-          <h1 className="text-3xl font-bold">Superior Assessments</h1>
+          <h1 className="text-3xl font-bold text-primary">Superior Assessments</h1>
           <p className="text-muted-foreground mt-1">
             Assess your subordinates' competencies
           </p>
@@ -181,7 +181,7 @@ export default function SuperiorAssessmentsPage() {
     return (
       <div className="space-y-4">
         <div>
-          <h1 className="text-3xl font-bold">Superior Assessments</h1>
+          <h1 className="text-3xl font-bold text-primary">Superior Assessments</h1>
           <p className="text-muted-foreground mt-1">
             Assess your subordinates' competencies
           </p>
@@ -209,7 +209,7 @@ export default function SuperiorAssessmentsPage() {
   return (
     <div className="space-y-4">
       <div>
-        <h1 className="text-3xl font-bold">Superior Assessments</h1>
+        <h1 className="text-3xl font-bold text-primary">Superior Assessments</h1>
         <p className="text-muted-foreground mt-1">
           Assess your subordinates' competencies
         </p>
@@ -339,7 +339,7 @@ export default function SuperiorAssessmentsPage() {
                                   </div>
                                 </div>
                                 {withinPeriod && !isCompleted && (
-                                  <Badge variant="secondary">Assess</Badge>
+                                  <Badge variant="destructive">Assess</Badge>
                                 )}
                                 {isCompleted && (
                                   <Badge variant="default" className="bg-green-600 hover:bg-green-700 gap-1">
