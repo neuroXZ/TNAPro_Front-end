@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useAuth } from "@/lib/auth-context"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
@@ -18,6 +18,7 @@ import {
 import { Input } from "@/components/ui/input"
 import { toast } from "sonner"
 import { IconEye, IconEyeOff } from "@tabler/icons-react"
+import { settingAPI } from "@/lib/api"
 
 export function LoginForm({
   className,
@@ -29,6 +30,27 @@ export function LoginForm({
   const [userType, setUserType] = useState<'staff' | 'admin'>('staff');
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [logoPath, setLogoPath] = useState<string | null>(null);
+
+  // Fetch logo from settings on component mount
+  useEffect(() => {
+    const fetchLogo = async () => {
+      try {
+        // Use direct fetch for public access (no auth required)
+        const response = await fetch('https://mmcsb-tnapro-postgres2-production.up.railway.app/api/setting');
+        if (response.ok) {
+          const settings = await response.json();
+          if (settings && settings.length > 0 && settings[0].logoPath) {
+            setLogoPath(settings[0].logoPath);
+          }
+        }
+      } catch (error) {
+        console.warn('Failed to fetch logo, using default');
+      }
+    };
+
+    fetchLogo();
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -51,9 +73,21 @@ export function LoginForm({
           <form className="p-6 md:p-8" onSubmit={handleSubmit}>
             <FieldGroup>
               <div className="flex flex-col items-center gap-2 text-center">
-                <div className="h-16 w-16 rounded-full bg-primary flex items-center justify-center text-white font-bold text-2xl shadow-lg">
-                  TNA
-                </div>
+                {logoPath ? (
+                  <div className="h-16 w-16 rounded-full overflow-hidden shadow-lg border-2 border-primary/10">
+                    <Image
+                      src={logoPath}
+                      alt="Company Logo"
+                      width={64}
+                      height={64}
+                      className="h-full w-full object-cover"
+                    />
+                  </div>
+                ) : (
+                  <div className="h-16 w-16 rounded-full bg-primary flex items-center justify-center text-white font-bold text-2xl shadow-lg">
+                    TNA
+                  </div>
+                )}
                 <h1 className="text-2xl font-bold">Welcome</h1>
                 <p className="text-muted-foreground text-balance">
                   Login to your TNAPro account

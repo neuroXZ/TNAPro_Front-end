@@ -8,6 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { positionCompetencyAPI } from "@/lib/api"
 import { toast } from "sonner"
 import { IconTarget, IconTrophy, IconBook } from "@tabler/icons-react"
+import { CompetencyDetailDialog } from "./competency-detail-dialog"
 
 interface PositionCompetency {
   id: string
@@ -35,6 +36,13 @@ export default function MyCompetencies() {
   const [isLoading, setIsLoading] = useState(true)
   const [userPositionId, setUserPositionId] = useState<string | null>(null)
   const [activeTab, setActiveTab] = useState<string>("all")
+  const [selectedCompetency, setSelectedCompetency] = useState<PositionCompetency | null>(null)
+  const [isDetailDialogOpen, setIsDetailDialogOpen] = useState(false)
+
+  const handleCompetencyClick = (competency: PositionCompetency) => {
+    setSelectedCompetency(competency)
+    setIsDetailDialogOpen(true)
+  }
 
   useEffect(() => {
     // Get user position from localStorage
@@ -247,7 +255,8 @@ export default function MyCompetencies() {
                     {clusterCompetencies.map((pc) => (
                       <div
                         key={pc.id}
-                        className="flex items-center justify-between p-3 border rounded-lg hover:bg-muted/50 transition-colors"
+                        className="flex items-center justify-between p-3 border rounded-lg hover:bg-muted/50 transition-colors cursor-pointer"
+                        onClick={() => handleCompetencyClick(pc)}
                       >
                         <div className="flex-1">
                           <div className="flex items-center gap-2">
@@ -294,7 +303,8 @@ export default function MyCompetencies() {
                   {groupedByCluster[cluster.name]?.map((pc) => (
                     <div
                       key={pc.id}
-                      className="flex items-center justify-between p-3 border rounded-lg hover:bg-muted/50 transition-colors"
+                      className="flex items-center justify-between p-3 border rounded-lg hover:bg-muted/50 transition-colors cursor-pointer"
+                      onClick={() => handleCompetencyClick(pc)}
                     >
                       <div className="flex-1">
                         <div className="flex items-center gap-2">
@@ -320,6 +330,12 @@ export default function MyCompetencies() {
           </TabsContent>
         ))}
       </Tabs>
+
+      <CompetencyDetailDialog
+        open={isDetailDialogOpen}
+        onOpenChange={setIsDetailDialogOpen}
+        competency={selectedCompetency}
+      />
     </div>
   )
 }

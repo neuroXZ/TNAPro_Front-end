@@ -18,11 +18,13 @@ import {
   IconUserCheck,
   IconFileText,
 } from "@tabler/icons-react"
+import Image from "next/image"
 
 import { NavMain } from "@/components/nav/nav-main"
 import { NavSecondary } from "@/components/nav/nav-secondary"
 import { NavUser } from "@/components/nav/nav-user"
 import { useAuth } from "@/lib/auth-context"
+import { settingAPI } from "@/lib/api"
 import {
   Sidebar,
   SidebarContent,
@@ -60,8 +62,8 @@ const navMainItems = [
         title: "Positions",
         url: "/admin/positions",
       },
-      
-      
+
+
 
     ],
   },
@@ -101,7 +103,7 @@ const navMainItems = [
         title: "Position Competencies",
         url: "/admin/position-competencies",
       },
-      
+
     ],
   },
   {
@@ -172,6 +174,23 @@ const navSecondaryItems = [
 
 export function AdminSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const { user } = useAuth()
+  const [logoPath, setLogoPath] = React.useState<string | null>(null)
+
+  // Fetch logo from settings on component mount
+  React.useEffect(() => {
+    const fetchLogo = async () => {
+      try {
+        const settings = await settingAPI.getAll();
+        if (settings && settings.length > 0 && settings[0].logoPath) {
+          setLogoPath(settings[0].logoPath);
+        }
+      } catch (error) {
+        console.warn('Failed to fetch logo, using default');
+      }
+    };
+
+    fetchLogo();
+  }, []);
 
   const userData = {
     name: user?.name || "Admin User",
@@ -183,17 +202,19 @@ export function AdminSidebar({ ...props }: React.ComponentProps<typeof Sidebar>)
     <Sidebar collapsible="offcanvas" {...props}>
       <SidebarHeader>
         <SidebarMenu>
-          <SidebarMenuItem>
-            <SidebarMenuButton
-              asChild
-              className="data-[slot=sidebar-menu-button]:p-1.5!"
-            >
-              <a href="/admin/dashboard">
-                <IconCertificate className="size-5!" />
-                <span className="text-base font-semibold">TNA Pro Admin</span>
-              </a>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
+          {logoPath ? (
+            <div >
+              <Image
+                src={logoPath}
+                alt="Company Logo"
+                width={24}
+                height={24}
+                className="h-full w-full object-contain"
+              />
+            </div>
+          ) : (
+            <IconCertificate />
+          )}
         </SidebarMenu>
       </SidebarHeader>
       <SidebarContent>

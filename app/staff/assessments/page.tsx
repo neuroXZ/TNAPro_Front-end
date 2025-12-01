@@ -249,7 +249,7 @@ export default function MyAssessments() {
         </p>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-3">
+      {/* <div className="grid gap-4 md:grid-cols-3">
         <Card>
           <CardHeader>
             <CardTitle>Average Score</CardTitle>
@@ -291,7 +291,7 @@ export default function MyAssessments() {
             </p>
           </CardContent>
         </Card>
-      </div>
+      </div> */}
 
       <Tabs defaultValue="all" className="space-y-4">
         <TabsList>
@@ -397,6 +397,27 @@ function AssessmentCard({ assessment }: { assessment: AssessmentWithStatus }) {
     window.location.href = `/staff/assessments/${assessmentId}`
   }
 
+  const getDateBasedStatus = () => {
+    const currentDate = new Date()
+    const startDate = new Date(assessment.startDate)
+    const endDate = new Date(assessment.endDate)
+    
+    // Remove time component for accurate date comparison
+    currentDate.setHours(0, 0, 0, 0)
+    startDate.setHours(0, 0, 0, 0)
+    endDate.setHours(0, 0, 0, 0)
+    
+    if (currentDate < startDate) {
+      return { status: "Coming Soon", variant: "secondary" as const, className: "bg-yellow-500 text-white hover:bg-yellow-900" }
+    } else if (currentDate >= startDate && currentDate <= endDate) {
+      return { status: "Open", variant: "default" as const, className: "bg-green-500 text-white hover:bg-green-600" }
+    } else {
+      return { status: "End", variant: "outline" as const, className: "bg-red-500 text-white hover:bg-red-600" }
+    }
+  }
+
+  const dateStatus = getDateBasedStatus()
+
   return (
     
     <div className="border rounded-lg p-4 hover:bg-muted/50 transition-colors">
@@ -405,20 +426,8 @@ function AssessmentCard({ assessment }: { assessment: AssessmentWithStatus }) {
           <div className="flex-1">
             <div className="flex items-center gap-2 mb-2 flex-wrap">
               <h3 className="font-semibold text-lg">{assessment.name}</h3>
-              <Badge 
-                variant={
-                  assessment.status === "completed" 
-                    ? "default" 
-                    : assessment.status === "pending" 
-                    ? "secondary" 
-                    : "outline"
-                }
-              >
-                {assessment.status === "completed" 
-                  ? "Completed" 
-                  : assessment.status === "pending" 
-                  ? "In Progress" 
-                  : "Not Started"}
+              <Badge variant={dateStatus.variant} className={dateStatus.className}>
+                {dateStatus.status}
               </Badge>
             </div>
             {assessment.description && (
@@ -466,16 +475,13 @@ function AssessmentCard({ assessment }: { assessment: AssessmentWithStatus }) {
           </div>
           <Button 
             size="sm" 
-            onClick={() => handleStartAssessment(assessment.id)}
-            variant={assessment.status === "not-started" ? "default" : "outline"}
+            onClick={() => dateStatus.status === "Open" ? handleStartAssessment(assessment.id) : undefined}
+            variant={dateStatus.status === "Open" ? "default" : "outline"}
             className="w-full sm:w-auto"
+            disabled={dateStatus.status !== "Open"}
           >
             <IconFileText className="size-4 mr-1" />
-            {assessment.status === "not-started" 
-              ? "Start" 
-              : assessment.status === "pending" 
-              ? "Continue" 
-              : "View Assessment Test"}
+            {dateStatus.status === "Open" ? "Start" : "Close"}
           </Button>
         </div>
       </div>
