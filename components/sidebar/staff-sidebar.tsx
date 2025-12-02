@@ -7,15 +7,13 @@ import {
   IconUserCheck,
   IconSchool,
   IconFileText,
-  IconSettings,
-  IconHelp,
   IconCertificate,
 } from "@tabler/icons-react"
 import Image from "next/image"
 
 import { NavMain } from "@/components/nav/nav-main"
-import { NavSecondary } from "@/components/nav/nav-secondary"
-import { NavUser } from "@/components/nav/nav-user"
+
+import { NavUser } from "@/components/nav/nav-staff"
 import { useAuth } from "@/lib/auth-context"
 import { settingAPI } from "@/lib/api"
 import {
@@ -67,13 +65,7 @@ const navMainItems = [
   },
 ]
 
-const navSecondaryItems = [
-  {
-    title: "Profile Settings",
-    url: "/staff/profile",
-    icon: IconSettings,
-  },
-]
+
 
 export function StaffSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const { user } = useAuth()
@@ -128,7 +120,7 @@ export function StaffSidebar({ ...props }: React.ComponentProps<typeof Sidebar>)
       </SidebarHeader>
       <SidebarContent>
         <NavMain items={navMainItems} />
-        <NavSecondary items={navSecondaryItems} className="mt-auto" />
+ 
       </SidebarContent>
       <SidebarFooter>
         <NavUser user={userData} />

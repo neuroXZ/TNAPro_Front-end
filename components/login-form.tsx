@@ -185,7 +185,7 @@ export function LoginForm({
             </FieldGroup>
           </form>
           {/* <div className="bg-linear-to-br from-blue-300 to-purple-400 relative hidden md:block overflow-hidden"> */}
-          <div className="bg-gray-200 relative hidden md:block overflow-hidden">
+          <div className="relative md:b overflow-hidden">
             <div className="absolute inset-0 opacity-20">
               <Image
               src={LoginImage}

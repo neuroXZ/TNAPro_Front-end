@@ -1,11 +1,11 @@
 "use client"
 
 import {
-  IconCreditCard,
   IconDotsVertical,
   IconLogout,
-  IconNotification,
   IconUserCircle,
+  IconSettings,
+  IconMail,
 } from "@tabler/icons-react"
 
 import { useAuth } from "@/lib/auth-context"
@@ -90,17 +90,18 @@ export function NavUser({
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
-              <DropdownMenuItem>
-                <IconUserCircle />
-                Account
+              
+              <DropdownMenuItem asChild>
+                <a href="/admin/mail" className="flex items-center gap-2 cursor-pointer">
+                  <IconMail />
+                  Mail Template
+                </a>
               </DropdownMenuItem>
-              <DropdownMenuItem>
-                <IconCreditCard />
-                Billing
-              </DropdownMenuItem>
-              <DropdownMenuItem>
-                <IconNotification />
-                Notifications
+              <DropdownMenuItem asChild>
+                <a href="/admin/settings" className="flex items-center gap-2 cursor-pointer">
+                  <IconSettings />
+                  Setting
+                </a>
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />

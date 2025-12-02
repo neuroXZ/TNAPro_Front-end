@@ -118,12 +118,24 @@ export default function MyTraining() {
       
     } catch (error: any) {
       console.error("Failed to fetch recommended trainings:", error)
+      
       if (error.response?.status === 404) {
-        setError("No training recommendations found. Your competency levels are meeting requirements!")
-        setTrainings([])
+        // Check if it's a "no recommendations" 404 vs missing endpoint 404
+        const message = error.response?.data?.message || ""
+        if (message.includes("No training recommendations found") || message.includes("gap > 1.5")) {
+          setError("No training recommendations found. Your competency levels are meeting requirements!")
+          setTrainings([])
+        } else {
+          setError("API endpoint not found. Please ensure the backend server is running and accessible.")
+          toast.error("Connection error - Backend may not be running")
+        }
+      } else if (error.code === 'ECONNREFUSED' || error.message.includes('Network Error')) {
+        setError("Unable to connect to server. Please check if the backend is running or try again later.")
+        toast.error("Connection error - Please check server connection")
       } else {
-        setError(error.response?.data?.error || "Failed to load recommended training programs")
-        toast.error("Failed to load recommended training programs")
+        const errorMessage = error.response?.data?.error || error.response?.data?.message || "Failed to load recommended training programs"
+        setError(errorMessage)
+        toast.error(errorMessage)
       }
     } finally {
       setIsLoading(false)
@@ -200,6 +212,8 @@ export default function MyTraining() {
   }
 
   if (error) {
+    const isSuccessMessage = error.includes("meeting requirements")
+    
     return (
       <div className="space-y-4">
         <div className="flex justify-between items-center">
@@ -210,16 +224,36 @@ export default function MyTraining() {
             </p>
           </div>
         </div>
-        <Alert variant={trainings.length === 0 ? "default" : "destructive"}>
-          <IconAlertCircle className="h-4 w-4" />
-          <AlertDescription className="ml-2">
-            {error}
-          </AlertDescription>
-        </Alert>
-        {trainings.length === 0 && (
-          <Button onClick={fetchData} className="mt-4">
-            Try Again
-          </Button>
+        
+        {isSuccessMessage ? (
+          <Card className="border-green-200 bg-green-50 dark:bg-green-950 dark:border-green-800">
+            <CardContent className="py-6">
+              <div className="text-center space-y-3">
+                <IconSparkles className="size-12 mx-auto text-green-600" />
+                <div>
+                  <h3 className="font-semibold text-green-800 dark:text-green-200">Excellent Performance!</h3>
+                  <p className="text-sm text-green-700 dark:text-green-300 mt-1">
+                    Your competency levels are meeting or exceeding requirements. No additional training recommendations at this time.
+                  </p>
+                </div>
+                <Button onClick={fetchData} variant="outline" className="mt-4 border-green-300 text-green-700 hover:bg-green-100">
+                  Refresh Assessment
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        ) : (
+          <>
+            <Alert variant="destructive">
+              <IconAlertCircle className="h-4 w-4" />
+              <AlertDescription className="ml-2">
+                {error}
+              </AlertDescription>
+            </Alert>
+            <Button onClick={fetchData} className="mt-4">
+              Try Again
+            </Button>
+          </>
         )}
       </div>
     )

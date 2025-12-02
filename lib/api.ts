@@ -1,7 +1,7 @@
 import axios from 'axios';
 
-// API Base URL
-const API_BASE_URL = 'https://mmcsb-tnapro-postgres2-production.up.railway.app/api';
+// API Base URL - Use environment variable or fallback to production
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'https://mmcsb-tnapro-postgres2-production.up.railway.app/api';
 
 // Create axios instance
 export const api = axios.create({
@@ -9,7 +9,35 @@ export const api = axios.create({
   headers: {
     'Content-Type': 'application/json',
   },
+  timeout: 10000, // 10 second timeout
 });
+
+// Add request interceptor for debugging
+api.interceptors.request.use(
+  (config) => {
+    console.log(`API Request: ${config.method?.toUpperCase()} ${config.baseURL}${config.url}`);
+    return config;
+  },
+  (error) => {
+    console.error('API Request Error:', error);
+    return Promise.reject(error);
+  }
+);
+
+// Add response interceptor for debugging
+api.interceptors.response.use(
+  (response) => {
+    return response;
+  },
+  (error) => {
+    if (error.code === 'ECONNREFUSED') {
+      console.error('Connection refused - Backend server may not be running');
+    } else if (error.response?.status === 404) {
+      console.error('404 Not Found - API endpoint may not exist:', error.config?.url);
+    }
+    return Promise.reject(error);
+  }
+);
 
 // Request interceptor to add token to headers
 api.interceptors.request.use(
@@ -122,6 +150,18 @@ export const staffAPI = {
   export: async () => {
     const response = await api.get('/staff/export', {
       responseType: 'blob',
+    });
+    return response.data;
+  },
+
+  uploadPhoto: async (file: File) => {
+    const formData = new FormData();
+    formData.append('photo', file);
+    
+    const response = await api.post('/staff/upload-photo', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
     });
     return response.data;
   },

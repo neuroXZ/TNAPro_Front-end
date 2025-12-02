@@ -4,25 +4,18 @@ import * as React from "react"
 import {
   IconUsers,
   IconDashboard,
-  IconBriefcase,
   IconTarget,
   IconSchool,
   IconClipboardList,
   IconChartBar,
-  IconSettings,
-  IconMail,
   IconBuilding,
-  IconHierarchy,
   IconCertificate,
-  IconStairs,
-  IconUserCheck,
-  IconFileText,
 } from "@tabler/icons-react"
 import Image from "next/image"
 
 import { NavMain } from "@/components/nav/nav-main"
-import { NavSecondary } from "@/components/nav/nav-secondary"
-import { NavUser } from "@/components/nav/nav-user"
+
+import { NavUser } from "@/components/nav/nav-admin"
 import { useAuth } from "@/lib/auth-context"
 import { settingAPI } from "@/lib/api"
 import {
@@ -159,18 +152,7 @@ const navMainItems = [
   },
 ]
 
-const navSecondaryItems = [
-  {
-    title: "Settings",
-    url: "/admin/settings",
-    icon: IconSettings,
-  },
-  {
-    title: "Mail Templates",
-    url: "/admin/mails",
-    icon: IconMail,
-  },
-]
+
 
 export function AdminSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const { user } = useAuth()
@@ -219,7 +201,7 @@ export function AdminSidebar({ ...props }: React.ComponentProps<typeof Sidebar>)
       </SidebarHeader>
       <SidebarContent>
         <NavMain items={navMainItems} />
-        <NavSecondary items={navSecondaryItems} className="mt-auto" />
+        
       </SidebarContent>
       <SidebarFooter>
         <NavUser user={userData} />
