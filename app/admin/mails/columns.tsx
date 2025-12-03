@@ -3,6 +3,7 @@
 import { ColumnDef } from "@tanstack/react-table"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
+import { Badge } from "@/components/ui/badge"
 import { IconEdit, IconTrash, IconArrowUp, IconArrowDown, IconArrowsSort } from "@tabler/icons-react"
 
 export interface Mail {
@@ -10,6 +11,13 @@ export interface Mail {
   name: string
   subject?: string
   body?: string
+  mailType?: 'ASSESSMENT_REMINDER' | 'PASSWORD_RESET' | 'WELCOME_STAFF' | 'GENERAL_ANNOUNCEMENT'
+  sendTrigger?: 'MANUAL' | 'RELATIVE_TO_ASSESSMENT_END' | 'RELATIVE_TO_ASSESSMENT_START'
+  daysOffset?: number
+  templateVariables?: Record<string, any>
+  isActive: boolean
+  createdAt: string
+  updatedAt: string
 }
 
 interface ColumnActions {
@@ -64,6 +72,32 @@ export const getColumns = (actions: ColumnActions): ColumnDef<Mail>[] => [
     },
   },
   {
+    accessorKey: "mailType",
+    header: "Type",
+    cell: ({ row }) => {
+      const mailType = row.original.mailType
+      if (!mailType) return <span className="text-muted-foreground">-</span>
+      return (
+        <Badge variant="outline" className="text-xs">
+          {mailType.replace(/_/g, ' ')}
+        </Badge>
+      )
+    },
+  },
+  {
+    accessorKey: "sendTrigger",
+    header: "Trigger",
+    cell: ({ row }) => {
+      const trigger = row.original.sendTrigger
+      if (!trigger) return <span className="text-muted-foreground">-</span>
+      return (
+        <Badge className="text-xs bg-yellow-300 text-black ">
+          {trigger.replace(/_/g, ' ')}
+        </Badge>
+      )
+    },
+  },
+  {
     accessorKey: "subject",
     header: "Subject",
     cell: ({ row }) => {
@@ -78,18 +112,36 @@ export const getColumns = (actions: ColumnActions): ColumnDef<Mail>[] => [
       )
     },
   },
+  // {
+  //   accessorKey: "body",
+  //   header: "Body",
+  //   cell: ({ row }) => {
+  //     const body = row.original.body
+  //     if (!body) return <span className="text-muted-foreground">-</span>
+      
+  //     // Strip HTML tags for preview
+  //     const textContent = body.replace(/<[^>]*>/g, '')
+  //     const words = textContent.split(" ")
+  //     const truncated = words.slice(0, 5).join(" ")
+  //     return (
+  //       <span className="text-sm text-muted-foreground">
+  //         {truncated}{words.length > 5 ? "..." : ""}
+  //       </span>
+  //     )
+  //   },
+  // },
   {
-    accessorKey: "body",
-    header: "Body",
+    accessorKey: "isActive",
+    header: "Status",
     cell: ({ row }) => {
-      const body = row.original.body
-      if (!body) return <span className="text-muted-foreground">-</span>
-      const words = body.split(" ")
-      const truncated = words.slice(0, 5).join(" ")
+      const isActive = row.original.isActive
       return (
-        <span className="text-sm text-muted-foreground">
-          {truncated}{words.length > 5 ? "..." : ""}
-        </span>
+        <Badge 
+          variant="outline" 
+          className={isActive ? "border-green-500 text-green-700 bg-green-50" : "border-red-500 text-red-700 bg-red-50"}
+        >
+          {isActive ? "Active" : "Inactive"}
+        </Badge>
       )
     },
   },

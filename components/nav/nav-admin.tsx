@@ -92,7 +92,7 @@ export function NavUser({
             <DropdownMenuGroup>
               
               <DropdownMenuItem asChild>
-                <a href="/admin/mail" className="flex items-center gap-2 cursor-pointer">
+                <a href="/admin/mails" className="flex items-center gap-2 cursor-pointer">
                   <IconMail />
                   Mail Template
                 </a>

@@ -553,6 +553,12 @@ export const settingAPI = {
     });
     return response.data;
   },
+
+  // Public API - no auth required
+  getPublicLogo: async () => {
+    const response = await api.get('/public/setting/logo');
+    return response.data;
+  },
 };
 
 // Assessment API

@@ -10,12 +10,26 @@ import {
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
+import { Switch } from "@/components/ui/switch"
+import { WysiwygEditor } from "@/components/ui/wysiwyg-editor"
 import { Mail } from "./columns"
 
 interface MailFormData {
   name: string
-  subject?: string
-  body?: string
+  subject: string
+  body: string
+  mailType: 'ASSESSMENT_REMINDER' | 'PASSWORD_RESET' | 'WELCOME_STAFF' | 'GENERAL_ANNOUNCEMENT'
+  sendTrigger: 'MANUAL' | 'RELATIVE_TO_ASSESSMENT_END' | 'RELATIVE_TO_ASSESSMENT_START'
+  daysOffset?: number
+  templateVariables?: Record<string, any>
+  isActive?: boolean
 }
 
 interface MailFormDialogProps {
@@ -36,6 +50,11 @@ export function MailFormDialog({
     name: editingMail?.name || "",
     subject: editingMail?.subject || "",
     body: editingMail?.body || "",
+    mailType: editingMail?.mailType || 'ASSESSMENT_REMINDER',
+    sendTrigger: editingMail?.sendTrigger || 'RELATIVE_TO_ASSESSMENT_END',
+    daysOffset: editingMail?.daysOffset || undefined,
+    templateVariables: editingMail?.templateVariables || undefined,
+    isActive: editingMail?.isActive ?? true,
   })
 
   // Update form when editingMail or open state changes
@@ -45,25 +64,71 @@ export function MailFormDialog({
         name: editingMail.name,
         subject: editingMail.subject || "",
         body: editingMail.body || "",
+        mailType: editingMail.mailType || 'ASSESSMENT_REMINDER',
+        sendTrigger: editingMail.sendTrigger || 'RELATIVE_TO_ASSESSMENT_END',
+        daysOffset: editingMail.daysOffset || undefined,
+        templateVariables: editingMail.templateVariables || undefined,
+        isActive: editingMail.isActive,
       })
     } else {
       setFormData({
         name: "",
         subject: "",
         body: "",
+        mailType: 'ASSESSMENT_REMINDER',
+        sendTrigger: 'RELATIVE_TO_ASSESSMENT_END',
+        daysOffset: undefined,
+        templateVariables: undefined,
+        isActive: true,
       })
     }
   }, [editingMail, open])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    setIsSaving(true)
+
+    // Helper function to strip HTML and check if content is empty
+    const stripHtml = (html: string) => {
+      const temp = document.createElement('div')
+      temp.innerHTML = html
+      return temp.textContent || temp.innerText || ''
+    }
+    
+    // Validate required fields
+    if (!formData.name.trim()) {
+      alert('Template name is required')
+      return
+    }
+    
+    if (!formData.subject.trim()) {
+      alert('Subject is required')
+      return
+    }
+    
+    // Check if body has actual content (not just HTML tags)
+    const bodyText = stripHtml(formData.body).trim()
+    if (!bodyText) {
+      alert('Body content is required')
+      return
+    }    setIsSaving(true)
 
     try {
-      await onSubmit(formData)
+      // Ensure we send proper data structure with fallbacks
+      const submitData = {
+        ...formData,
+        subject: formData.subject || 'Untitled',
+        body: formData.body || '<p></p>',
+        mailType: formData.mailType || 'SYSTEM_NOTIFICATION',
+        sendTrigger: formData.sendTrigger || 'MANUAL',
+        isActive: formData.isActive ?? true
+      }
+
+      console.log('Submitting mail data:', submitData)
+      await onSubmit(submitData)
       onOpenChange(false)
     } catch (error) {
-      console.error(error)
+      console.error('Form submission error:', error)
+      alert('Failed to save mail template. Please check console for details.')
     } finally {
       setIsSaving(false)
     }
@@ -97,7 +162,7 @@ export function MailFormDialog({
               />
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="subject">Subject</Label>
+              <Label htmlFor="subject">Subject *</Label>
               <Input
                 id="subject"
                 value={formData.subject}
@@ -105,21 +170,86 @@ export function MailFormDialog({
                   setFormData({ ...formData, subject: e.target.value })
                 }
                 placeholder="Enter email subject"
+                required
               />
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="body">Body</Label>
-              <textarea
-                id="body"
-                value={formData.body}
-                onChange={(e) =>
-                  setFormData({ ...formData, body: e.target.value })
+              <Label htmlFor="body">Body *</Label>
+              <WysiwygEditor
+                value={formData.body || ""}
+                onChange={(value) =>
+                  setFormData({ ...formData, body: value || "" })
                 }
-                placeholder="Enter email body content"
-                className="flex min-h-32 w-full rounded-md border border-input bg-background px-3 py-2 text-base ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
+                placeholder="Enter email body content..."
               />
             </div>
+            <div className="grid grid-cols-2 gap-4">
+
+
+              <div className="grid gap-2">
+                <Label htmlFor="sendTrigger">Send Trigger</Label>
+                <Select
+                  value={formData.sendTrigger}
+                  onValueChange={(value) =>
+                    setFormData({ ...formData, sendTrigger: value as any })
+                  }
+                >
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Select send trigger" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="MANUAL">Manual</SelectItem>
+                    <SelectItem value="RELATIVE_TO_ASSESSMENT_END">Relative to Assessment End</SelectItem>
+                    <SelectItem value="RELATIVE_TO_ASSESSMENT_START">Relative to Assessment Start</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="mailType">Mail Type</Label>
+                <Select
+                  value={formData.mailType}
+                  onValueChange={(value) =>
+                    setFormData({ ...formData, mailType: value as any })
+                  }
+                >
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Select mail type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="ASSESSMENT_REMINDER">Assessment Reminder</SelectItem>
+                    <SelectItem value="PASSWORD_RESET">Password Reset</SelectItem>
+                    <SelectItem value="WELCOME_STAFF">Welcome Staff</SelectItem>
+                    <SelectItem value="GENERAL_ANNOUNCEMENT">General Announcement</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="grid gap-2 w-full">
+                <Label htmlFor="daysOffset">Days Offset</Label>
+                <Input
+                  id="daysOffset"
+                  type="number"
+                  value={formData.daysOffset || ""}
+                  onChange={(e) =>
+                    setFormData({ ...formData, daysOffset: e.target.value ? Number(e.target.value) : undefined })
+                  }
+                  placeholder="Enter days offset (optional)"
+                />
+              </div>
+              <div className="flex items-center space-x-2 pt-5">
+                <Switch
+                  id="isActive"
+                  checked={formData.isActive}
+                  onCheckedChange={(checked) =>
+                    setFormData({ ...formData, isActive: checked })
+                  }
+                />
+                <Label htmlFor="isActive">Active</Label>
+              </div>
+            </div>
           </div>
+
           <DialogFooter>
             <Button
               type="button"

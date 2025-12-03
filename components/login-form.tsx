@@ -18,7 +18,7 @@ import {
 import { Input } from "@/components/ui/input"
 import { toast } from "sonner"
 import { IconEye, IconEyeOff } from "@tabler/icons-react"
-import { settingAPI } from "@/lib/api"
+// import { settingAPI, API_SERVER_URL } from "@/lib/api"
 
 export function LoginForm({
   className,
@@ -33,24 +33,22 @@ export function LoginForm({
   const [logoPath, setLogoPath] = useState<string | null>(null);
 
   // Fetch logo from settings on component mount
-  useEffect(() => {
-    const fetchLogo = async () => {
-      try {
-        // Use direct fetch for public access (no auth required)
-        const response = await fetch('https://mmcsb-tnapro-postgres2-production.up.railway.app/api/setting');
-        if (response.ok) {
-          const settings = await response.json();
-          if (settings && settings.length > 0 && settings[0].logoPath) {
-            setLogoPath(settings[0].logoPath);
-          }
-        }
-      } catch (error) {
-        console.warn('Failed to fetch logo, using default');
-      }
-    };
+  // useEffect(() => {
+  //   const fetchLogo = async () => {
+  //     try {
+  //       const data = await settingAPI.getPublicLogo();
+  //       if (data && data.logoPath) {
+  //         // Construct full URL for the logo
+  //         const fullLogoUrl = `${API_SERVER_URL}${data.logoPath}`;
+  //         setLogoPath(fullLogoUrl);
+  //       }
+  //     } catch (error) {
+  //       console.warn('Failed to fetch logo, using default');
+  //     }
+  //   };
 
-    fetchLogo();
-  }, []);
+  //   fetchLogo();
+  // }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
