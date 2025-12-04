@@ -20,6 +20,27 @@ import {
   CardTitle,
 } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command"
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover"
+import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { IconSearch } from "@tabler/icons-react"
@@ -42,6 +63,8 @@ export default function AssessorManagementPage() {
   const [editingAssessor, setEditingAssessor] = useState<Assessor | null>(null)
   const [deletingAssessor, setDeletingAssessor] = useState<Assessor | null>(null)
   const [viewingAssessor, setViewingAssessor] = useState<Assessor | null>(null)
+  const [selectedAssessorId, setSelectedAssessorId] = useState<string>("all")
+  const [assessorPopoverOpen, setAssessorPopoverOpen] = useState(false)
   const [activeTab, setActiveTab] = useState<'self' | 'superior'>('self')
   
   // TanStack Table states
@@ -51,10 +74,16 @@ export default function AssessorManagementPage() {
   const [rowSelection, setRowSelection] = useState({})
   const [globalFilter, setGlobalFilter] = useState("")
 
-  // Filter assessors by type
+  // Filter assessors by type and selected assessor
   const filteredAssessors = useMemo(() => {
-    return assessors.filter(assessor => assessor.type === activeTab)
-  }, [assessors, activeTab])
+    let filtered = assessors.filter(assessor => assessor.type === activeTab)
+    
+    if (selectedAssessorId && selectedAssessorId !== "all") {
+      filtered = filtered.filter(assessor => assessor.assessorId === selectedAssessorId)
+    }
+    
+    return filtered
+  }, [assessors, activeTab, selectedAssessorId])
 
   const selfCount = useMemo(() => {
     return assessors.filter(a => a.type === 'self').length
@@ -62,6 +91,17 @@ export default function AssessorManagementPage() {
 
   const superiorCount = useMemo(() => {
     return assessors.filter(a => a.type === 'superior').length
+  }, [assessors])
+
+  // Get unique assessors for filter dropdown
+  const uniqueAssessors = useMemo(() => {
+    const assessorMap = new Map()
+    assessors.forEach(item => {
+      if (item.assessor && item.assessor.id && item.assessor.name) {
+        assessorMap.set(item.assessor.id, item.assessor)
+      }
+    })
+    return Array.from(assessorMap.values())
   }, [assessors])
 
   useEffect(() => {
@@ -210,6 +250,54 @@ export default function AssessorManagementPage() {
               </CardDescription>
             </div>
             <div className="flex items-center gap-2">
+              <Popover open={assessorPopoverOpen} onOpenChange={setAssessorPopoverOpen}>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    role="combobox"
+                    aria-expanded={assessorPopoverOpen}
+                    className="w-[180px] justify-between"
+                  >
+                    {selectedAssessorId === "all" 
+                      ? "Filter by Assessor"
+                      : uniqueAssessors.find((a) => a.id === selectedAssessorId)?.name || "Filter by Assessor"
+                    }
+                    <IconSearch className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-[180px] p-0">
+                  <Command>
+                    <CommandInput placeholder="Search assessors..." />
+                    <CommandList className="max-h-[200px] overflow-y-auto">
+                      <CommandEmpty>No assessor found.</CommandEmpty>
+                      <CommandGroup>
+                        <CommandItem
+                          key="all"
+                          value="all"
+                          onSelect={() => {
+                            setSelectedAssessorId("all")
+                            setAssessorPopoverOpen(false)
+                          }}
+                        >
+                          All Assessors
+                        </CommandItem>
+                        {uniqueAssessors.map((assessor) => (
+                          <CommandItem
+                            key={assessor.id}
+                            value={assessor.name}
+                            onSelect={() => {
+                              setSelectedAssessorId(assessor.id)
+                              setAssessorPopoverOpen(false)
+                            }}
+                          >
+                            {assessor.name}
+                          </CommandItem>
+                        ))}
+                      </CommandGroup>
+                    </CommandList>
+                  </Command>
+                </PopoverContent>
+              </Popover>
               <div className="relative">
                 <IconSearch className="absolute left-2 top-2.5 size-4 text-muted-foreground" />
                 <Input

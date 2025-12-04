@@ -11,7 +11,7 @@ import {
   SortingState,
   VisibilityState,
 } from "@tanstack/react-table"
-import { unitAPI } from "@/lib/api"
+import { unitAPI, unitTypeAPI } from "@/lib/api"
 import {
   Card,
   CardContent,
@@ -20,6 +20,20 @@ import {
   CardTitle,
 } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
+import { Button } from "@/components/ui/button"
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command"
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover"
 import { IconSearch } from "@tabler/icons-react"
 import { toast } from "sonner"
 import { Unit, getColumns } from "./columns"
@@ -31,8 +45,14 @@ import { UnitDataTable } from "./unit-data-table"
 import { UnitTableActions } from "./unit-table-actions"
 import { UnitViewDialog } from "./unit-view-dialog"
 
+interface UnitType {
+  id: string
+  name: string
+}
+
 export default function UnitManagementPage() {
   const [units, setUnits] = useState<Unit[]>([])
+  const [unitTypes, setUnitTypes] = useState<UnitType[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
@@ -47,9 +67,12 @@ export default function UnitManagementPage() {
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({})
   const [rowSelection, setRowSelection] = useState({})
   const [globalFilter, setGlobalFilter] = useState("")
+  const [selectedUnitType, setSelectedUnitType] = useState<string>("all")
+  const [unitTypePopoverOpen, setUnitTypePopoverOpen] = useState(false)
 
   useEffect(() => {
     fetchUnits()
+    fetchUnitTypes()
   }, [])
 
   // ==================== DATA FETCHING ====================
@@ -66,6 +89,23 @@ export default function UnitManagementPage() {
       setIsLoading(false)
     }
   }
+
+  const fetchUnitTypes = async () => {
+    try {
+      const data = await unitTypeAPI.getAll()
+      setUnitTypes(data)
+    } catch (error: any) {
+      console.error("Failed to fetch unit types:", error)
+    }
+  }
+
+  // Filter units by selected unit type
+  const filteredUnits = useMemo(() => {
+    if (selectedUnitType === "all") {
+      return units
+    }
+    return units.filter(unit => unit.unitTypeId === selectedUnitType)
+  }, [units, selectedUnitType])
 
   // ==================== FORM HANDLERS ====================
   function handleOpenDialog(unit?: Unit) {
@@ -111,7 +151,7 @@ export default function UnitManagementPage() {
   // ==================== TABLE INITIALIZATION ====================
   // Initialize table after columns are defined
   const table = useReactTable({
-    data: units,
+    data: filteredUnits,
     columns,
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
@@ -194,6 +234,55 @@ export default function UnitManagementPage() {
               </CardDescription>
             </div>
             <div className="flex items-center gap-2">
+              
+              <Popover open={unitTypePopoverOpen} onOpenChange={setUnitTypePopoverOpen}>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    role="combobox"
+                    aria-expanded={unitTypePopoverOpen}
+                    className="w-[180px] justify-between"
+                  >
+                    {selectedUnitType === "all" 
+                      ? "Filter by unit type"
+                      : unitTypes.find((ut) => ut.id === selectedUnitType)?.name || "Filter by unit type"
+                    }
+                    <IconSearch className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-[180px] p-0">
+                  <Command>
+                    <CommandInput placeholder="Search unit types..." />
+                    <CommandList className="max-h-[200px] overflow-y-auto">
+                      <CommandEmpty>No unit type found.</CommandEmpty>
+                      <CommandGroup>
+                        <CommandItem
+                          key="all"
+                          value="all"
+                          onSelect={() => {
+                            setSelectedUnitType("all")
+                            setUnitTypePopoverOpen(false)
+                          }}
+                        >
+                          All Unit Types
+                        </CommandItem>
+                        {unitTypes.map((unitType) => (
+                          <CommandItem
+                            key={unitType.id}
+                            value={unitType.name}
+                            onSelect={() => {
+                              setSelectedUnitType(unitType.id)
+                              setUnitTypePopoverOpen(false)
+                            }}
+                          >
+                            {unitType.name}
+                          </CommandItem>
+                        ))}
+                      </CommandGroup>
+                    </CommandList>
+                  </Command>
+                </PopoverContent>
+              </Popover>
               <div className="relative">
                 <IconSearch className="absolute left-2 top-2.5 size-4 text-muted-foreground" />
                 <Input
@@ -216,7 +305,7 @@ export default function UnitManagementPage() {
                 columnsLength={columns.length}
                 onRowClick={handleRowClick}
               />
-              {units.length > 0 && <DataTablePagination table={table} />}
+              {filteredUnits.length > 0 && <DataTablePagination table={table} />}
             </>
           )}
         </CardContent>

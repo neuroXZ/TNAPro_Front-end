@@ -11,7 +11,7 @@ import {
   SortingState,
   VisibilityState,
 } from "@tanstack/react-table"
-import { positionAPI, importAPI } from "@/lib/api"
+import { positionAPI, importAPI, gradeAPI } from "@/lib/api"
 import {
   Card,
   CardContent,
@@ -20,6 +20,27 @@ import {
   CardTitle,
 } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command"
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover"
+import { Button } from "@/components/ui/button"
 import { IconSearch } from "@tabler/icons-react"
 import { toast } from "sonner"
 import { Position, getColumns } from "./columns"
@@ -34,6 +55,9 @@ import { PositionImportDialog } from "./position-import-dialog"
 
 export default function PositionManagementPage() {
   const [positions, setPositions] = useState<Position[]>([])
+  const [grades, setGrades] = useState<Array<{ id: string; name: string }>>([])
+  const [selectedGradeId, setSelectedGradeId] = useState<string>("all")
+  const [gradePopoverOpen, setGradePopoverOpen] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
@@ -50,8 +74,15 @@ export default function PositionManagementPage() {
   const [rowSelection, setRowSelection] = useState({})
   const [globalFilter, setGlobalFilter] = useState("")
 
+  // Filter positions based on selected grade
+  const filteredPositions = useMemo(() => {
+    if (!selectedGradeId || selectedGradeId === "all") return positions
+    return positions.filter(position => position.gradeId === selectedGradeId)
+  }, [positions, selectedGradeId])
+
   useEffect(() => {
     fetchPositions()
+    fetchGrades()
   }, [])
 
   // ==================== DATA FETCHING ====================
@@ -66,6 +97,15 @@ export default function PositionManagementPage() {
       console.error(error)
     } finally {
       setIsLoading(false)
+    }
+  }
+
+  const fetchGrades = async () => {
+    try {
+      const data = await gradeAPI.getAll()
+      setGrades(data)
+    } catch (error: any) {
+      console.error("Failed to fetch grades:", error)
     }
   }
 
@@ -113,7 +153,7 @@ export default function PositionManagementPage() {
   // ==================== TABLE INITIALIZATION ====================
   // Initialize table after columns are defined
   const table = useReactTable({
-    data: positions,
+    data: filteredPositions,
     columns,
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
@@ -225,6 +265,54 @@ export default function PositionManagementPage() {
               </CardDescription>
             </div>
             <div className="flex items-center gap-2">
+              <Popover open={gradePopoverOpen} onOpenChange={setGradePopoverOpen}>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    role="combobox"
+                    aria-expanded={gradePopoverOpen}
+                    className="w-[180px] justify-between"
+                  >
+                    {selectedGradeId === "all" 
+                      ? "Filter by Grade"
+                      : grades.find((g) => g.id === selectedGradeId)?.name || "Filter by Grade"
+                    }
+                    <IconSearch className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-[180px] p-0">
+                  <Command>
+                    <CommandInput placeholder="Search grades..." />
+                    <CommandList className="max-h-[200px] overflow-y-auto">
+                      <CommandEmpty>No grade found.</CommandEmpty>
+                      <CommandGroup>
+                        <CommandItem
+                          key="all"
+                          value="all"
+                          onSelect={() => {
+                            setSelectedGradeId("all")
+                            setGradePopoverOpen(false)
+                          }}
+                        >
+                          All Grades
+                        </CommandItem>
+                        {grades.map((grade) => (
+                          <CommandItem
+                            key={grade.id}
+                            value={grade.name}
+                            onSelect={() => {
+                              setSelectedGradeId(grade.id)
+                              setGradePopoverOpen(false)
+                            }}
+                          >
+                            {grade.name}
+                          </CommandItem>
+                        ))}
+                      </CommandGroup>
+                    </CommandList>
+                  </Command>
+                </PopoverContent>
+              </Popover>
               <div className="relative">
                 <IconSearch className="absolute left-2 top-2.5 size-4 text-muted-foreground" />
                 <Input
@@ -247,7 +335,7 @@ export default function PositionManagementPage() {
                 columnsLength={columns.length}
                 onRowClick={handleRowClick}
               />
-              {positions.length > 0 && <DataTablePagination table={table} />}
+              {filteredPositions.length > 0 && <DataTablePagination table={table} />}
             </>
           )}
         </CardContent>

@@ -69,7 +69,24 @@ export const getColumns = (actions: ColumnActions): ColumnDef<Unit>[] => [
   },
   {
     accessorKey: "unitType.name",
-    header: "Unit Type",
+    header: ({ column }) => {
+      return (
+        <Button
+          variant="ghost"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          className="-ml-4"
+        >
+          Unit Type
+          {column.getIsSorted() === "asc" ? (
+            <IconArrowUp className="ml-2 size-4" />
+          ) : column.getIsSorted() === "desc" ? (
+            <IconArrowDown className="ml-2 size-4" />
+          ) : (
+            <IconArrowsSort className="ml-2 size-4" />
+          )}
+        </Button>
+      )
+    },
     cell: ({ row }) => {
       const unitTypeName = row.original.unitType?.name
       return unitTypeName ? (

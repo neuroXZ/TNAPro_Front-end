@@ -12,7 +12,7 @@ import {
   VisibilityState,
   flexRender,
 } from "@tanstack/react-table"
-import { staffAPI, importAPI } from "@/lib/api"
+import { staffAPI, importAPI, positionAPI, unitAPI } from "@/lib/api"
 import { Button } from "@/components/ui/button"
 import {
   Card,
@@ -30,6 +30,26 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { Input } from "@/components/ui/input"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command"
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover"
 import { IconSearch } from "@tabler/icons-react"
 import { toast } from "sonner"
 import { Staff, getColumns } from "./columns"
@@ -44,6 +64,12 @@ import { StaffImportDialog } from "./staff-import-dialog"
 
 export default function StaffManagementPage() {
   const [staff, setStaff] = useState<Staff[]>([])
+  const [positions, setPositions] = useState<Array<{ id: string; name: string }>>([])
+  const [units, setUnits] = useState<Array<{ id: string; name: string }>>([])
+  const [selectedPositionId, setSelectedPositionId] = useState<string>("all")
+  const [selectedUnitId, setSelectedUnitId] = useState<string>("all")
+  const [positionPopoverOpen, setPositionPopoverOpen] = useState(false)
+  const [unitPopoverOpen, setUnitPopoverOpen] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
@@ -60,8 +86,25 @@ export default function StaffManagementPage() {
   const [rowSelection, setRowSelection] = useState({})
   const [globalFilter, setGlobalFilter] = useState("")
 
+  // Filter staff based on selected position and unit
+  const filteredStaff = useMemo(() => {
+    let filtered = staff
+
+    if (selectedPositionId && selectedPositionId !== "all") {
+      filtered = filtered.filter(s => s.positionId === selectedPositionId)
+    }
+
+    if (selectedUnitId && selectedUnitId !== "all") {
+      filtered = filtered.filter(s => s.unitId === selectedUnitId)
+    }
+
+    return filtered
+  }, [staff, selectedPositionId, selectedUnitId])
+
   useEffect(() => {
     fetchStaff()
+    fetchPositions()
+    fetchUnits()
   }, [])
 
   // ==================== DATA FETCHING ====================
@@ -76,6 +119,24 @@ export default function StaffManagementPage() {
       console.error(error)
     } finally {
       setIsLoading(false)
+    }
+  }
+
+  const fetchPositions = async () => {
+    try {
+      const data = await positionAPI.getAll()
+      setPositions(data)
+    } catch (error: any) {
+      console.error("Failed to fetch positions:", error)
+    }
+  }
+
+  const fetchUnits = async () => {
+    try {
+      const data = await unitAPI.getAll()
+      setUnits(data)
+    } catch (error: any) {
+      console.error("Failed to fetch units:", error)
     }
   }
 
@@ -140,7 +201,7 @@ export default function StaffManagementPage() {
   // ==================== TABLE INITIALIZATION ====================
   // Initialize table after columns are defined
   const table = useReactTable({
-    data: staff,
+    data: filteredStaff,
     columns,
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
@@ -252,6 +313,102 @@ export default function StaffManagementPage() {
               </CardDescription>
             </div>
             <div className="flex items-center gap-2">
+              <Popover open={positionPopoverOpen} onOpenChange={setPositionPopoverOpen}>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    role="combobox"
+                    aria-expanded={positionPopoverOpen}
+                    className="w-[180px] justify-between"
+                  >
+                    {selectedPositionId === "all" 
+                      ? "Filter by Position"
+                      : positions.find((p) => p.id === selectedPositionId)?.name || "Filter by Position"
+                    }
+                    <IconSearch className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-[180px] p-0">
+                  <Command>
+                    <CommandInput placeholder="Search positions..." />
+                    <CommandList className="max-h-[200px] overflow-y-auto">
+                      <CommandEmpty>No position found.</CommandEmpty>
+                      <CommandGroup>
+                        <CommandItem
+                          key="all"
+                          value="all"
+                          onSelect={() => {
+                            setSelectedPositionId("all")
+                            setPositionPopoverOpen(false)
+                          }}
+                        >
+                          All Positions
+                        </CommandItem>
+                        {positions.map((position) => (
+                          <CommandItem
+                            key={position.id}
+                            value={position.name}
+                            onSelect={() => {
+                              setSelectedPositionId(position.id)
+                              setPositionPopoverOpen(false)
+                            }}
+                          >
+                            {position.name}
+                          </CommandItem>
+                        ))}
+                      </CommandGroup>
+                    </CommandList>
+                  </Command>
+                </PopoverContent>
+              </Popover>
+              <Popover open={unitPopoverOpen} onOpenChange={setUnitPopoverOpen}>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    role="combobox"
+                    aria-expanded={unitPopoverOpen}
+                    className="w-[180px] justify-between"
+                  >
+                    {selectedUnitId === "all" 
+                      ? "Filter by Unit"
+                      : units.find((u) => u.id === selectedUnitId)?.name || "Filter by Unit"
+                    }
+                    <IconSearch className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-[180px] p-0">
+                  <Command>
+                    <CommandInput placeholder="Search units..." />
+                    <CommandList className="max-h-[200px] overflow-y-auto">
+                      <CommandEmpty>No unit found.</CommandEmpty>
+                      <CommandGroup>
+                        <CommandItem
+                          key="all"
+                          value="all"
+                          onSelect={() => {
+                            setSelectedUnitId("all")
+                            setUnitPopoverOpen(false)
+                          }}
+                        >
+                          All Units
+                        </CommandItem>
+                        {units.map((unit) => (
+                          <CommandItem
+                            key={unit.id}
+                            value={unit.name}
+                            onSelect={() => {
+                              setSelectedUnitId(unit.id)
+                              setUnitPopoverOpen(false)
+                            }}
+                          >
+                            {unit.name}
+                          </CommandItem>
+                        ))}
+                      </CommandGroup>
+                    </CommandList>
+                  </Command>
+                </PopoverContent>
+              </Popover>
               <div className="relative">
                 <IconSearch className="absolute left-2 top-2.5 size-4 text-muted-foreground" />
                 <Input
@@ -274,7 +431,7 @@ export default function StaffManagementPage() {
                 columnsLength={columns.length}
                 onRowClick={handleRowClick}
               />
-              {staff.length > 0 && <DataTablePagination table={table} />}
+              {filteredStaff.length > 0 && <DataTablePagination table={table} />}
             </>
           )}
         </CardContent>
