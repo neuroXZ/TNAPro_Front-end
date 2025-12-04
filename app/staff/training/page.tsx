@@ -5,40 +5,39 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { rtnAPI, assessmentAPI } from "@/lib/api"
+import { api, assessmentAPI } from "@/lib/api"
 import { toast } from "sonner"
 import { useAuth } from "@/lib/auth-context"
-import { IconSchool, IconCalendar, IconTarget, IconClock, IconAlertCircle, IconSparkles, IconDownload } from "@tabler/icons-react"
+import { IconSchool, IconCalendar, IconTarget, IconClock, IconAlertCircle, IconSparkles, IconDownload, IconRefresh } from "@tabler/icons-react"
 import { format, isBefore, isAfter } from "date-fns"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 
-interface RecommendedTraining {
+// Backend API response interfaces - matching exact structure
+interface RecommendedTrainingRecord {
   trainingId: string
-  trainingName: string
-  startDate: string
-  endDate: string
+  trainingName: string | null
+  startDate: Date | null
+  endDate: Date | null
   relatedCompetency: {
     competencyId: string
-    competencyName: string
-    clusterName: string
+    competencyName: string | null
+    clusterName: string | null
     requiredLevel: number
     weightedGap: number
   }
 }
 
-interface RtnReport {
+interface RtnReportResponse {
   staffId: string
-  staffName: string
-  positionName: string
+  staffName: string | null
+  positionName: string | null
   assessmentId: string
-  results: RecommendedTraining[]
-  generatedAt: string
+  results: RecommendedTrainingRecord[]
+  generatedAt: Date
 }
 
-type TrainingStatus = 'upcoming' | 'ongoing' | 'past'
-
-// Group trainings by training ID to avoid duplicates
-interface GroupedTraining {
+// Frontend display interfaces
+interface TrainingGroup {
   trainingId: string
   trainingName: string
   startDate: string
@@ -52,10 +51,12 @@ interface GroupedTraining {
   }[]
 }
 
+type TrainingStatus = 'upcoming' | 'ongoing' | 'past'
+
 export default function MyTraining() {
   const { user } = useAuth()
-  const [trainings, setTrainings] = useState<GroupedTraining[]>([])
-  const [rtnReport, setRtnReport] = useState<RtnReport | null>(null)
+  const [trainings, setTrainings] = useState<TrainingGroup[]>([])
+  const [rtnReport, setRtnReport] = useState<RtnReportResponse | null>(null)
   const [selectedAssessmentId, setSelectedAssessmentId] = useState<string>("")
   const [isLoading, setIsLoading] = useState(true)
   const [isExporting, setIsExporting] = useState(false)
@@ -64,76 +65,64 @@ export default function MyTraining() {
 
   useEffect(() => {
     if (user?.id) {
-      fetchData()
+      fetchRecommendedTrainings()
     }
   }, [user])
 
-  const fetchData = async () => {
+  const fetchRecommendedTrainings = async () => {
     try {
       setIsLoading(true)
       setError(null)
 
-      // Fetch latest assessment
+      // Get latest assessment
       const assessments = await assessmentAPI.getAll()
+      if (!assessments || assessments.length === 0) {
+        setError("No assessment found. Please complete an assessment first.")
+        return
+      }
+
       const latestAssessment = assessments.sort((a: any, b: any) => 
         new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
       )[0]
 
-      if (!latestAssessment) {
-        setError("No assessment found. Please complete an assessment first.")
-        setIsLoading(false)
-        return
-      }
-
       setSelectedAssessmentId(latestAssessment.id)
 
-      // Fetch RTN report
-      const report = await rtnAPI.getReport({
+      // Call backend API directly
+      const response = await api.post('/recommendedtraining/report', {
         staffId: user!.id,
         assessmentId: latestAssessment.id
       })
 
+      const report: RtnReportResponse = response.data
       setRtnReport(report)
 
-      // Group trainings by trainingId to avoid duplicates
-      const trainingMap = new Map<string, GroupedTraining>()
-      
-      report.results.forEach((item: RecommendedTraining) => {
-        if (trainingMap.has(item.trainingId)) {
-          // Add competency to existing training
-          trainingMap.get(item.trainingId)!.competencies.push(item.relatedCompetency)
-        } else {
-          // Create new training entry
-          trainingMap.set(item.trainingId, {
-            trainingId: item.trainingId,
-            trainingName: item.trainingName,
-            startDate: item.startDate,
-            endDate: item.endDate,
-            competencies: [item.relatedCompetency]
-          })
-        }
-      })
-
-      setTrainings(Array.from(trainingMap.values()))
+      // Group trainings to avoid duplicates
+      const trainingGroups = groupTrainingsByTrainingId(report.results)
+      setTrainings(trainingGroups)
       
     } catch (error: any) {
-      console.error("Failed to fetch recommended trainings:", error)
+      console.error("Error fetching recommended trainings:", error)
       
       if (error.response?.status === 404) {
-        // Check if it's a "no recommendations" 404 vs missing endpoint 404
         const message = error.response?.data?.message || ""
         if (message.includes("No training recommendations found") || message.includes("gap > 1.5")) {
-          setError("No training recommendations found. Your competency levels are meeting requirements!")
+          setError("Excellent! No training recommendations needed. Your competency levels are meeting requirements.")
           setTrainings([])
         } else {
-          setError("API endpoint not found. Please ensure the backend server is running and accessible.")
-          toast.error("Connection error - Backend may not be running")
+          setError("Backend endpoint not found. Please check if the server is running.")
+          toast.error("Connection error - Backend may not be accessible")
         }
+      } else if (error.response?.status === 400) {
+        setError("Invalid request. Please try again.")
+        toast.error("Invalid request parameters")
+      } else if (error.response?.status === 500) {
+        setError("Server error. Please try again later.")
+        toast.error("Server error occurred")
       } else if (error.code === 'ECONNREFUSED' || error.message.includes('Network Error')) {
-        setError("Unable to connect to server. Please check if the backend is running or try again later.")
-        toast.error("Connection error - Please check server connection")
+        setError("Unable to connect to server. Please check your internet connection.")
+        toast.error("Connection error")
       } else {
-        const errorMessage = error.response?.data?.error || error.response?.data?.message || "Failed to load recommended training programs"
+        const errorMessage = error.response?.data?.error || error.message || "Failed to load training recommendations"
         setError(errorMessage)
         toast.error(errorMessage)
       }
@@ -142,14 +131,57 @@ export default function MyTraining() {
     }
   }
 
+  const groupTrainingsByTrainingId = (results: RecommendedTrainingRecord[]): TrainingGroup[] => {
+    const trainingMap = new Map<string, TrainingGroup>()
+    
+    results.forEach((item) => {
+      const trainingId = item.trainingId
+      const startDate = item.startDate ? new Date(item.startDate).toISOString() : new Date().toISOString()
+      const endDate = item.endDate ? new Date(item.endDate).toISOString() : new Date().toISOString()
+      
+      if (trainingMap.has(trainingId)) {
+        // Add competency to existing training
+        trainingMap.get(trainingId)!.competencies.push({
+          competencyId: item.relatedCompetency.competencyId,
+          competencyName: item.relatedCompetency.competencyName || 'Unknown Competency',
+          clusterName: item.relatedCompetency.clusterName || 'Unknown Cluster',
+          requiredLevel: item.relatedCompetency.requiredLevel,
+          weightedGap: item.relatedCompetency.weightedGap
+        })
+      } else {
+        // Create new training entry
+        trainingMap.set(trainingId, {
+          trainingId: trainingId,
+          trainingName: item.trainingName || 'Unknown Training',
+          startDate: startDate,
+          endDate: endDate,
+          competencies: [{
+            competencyId: item.relatedCompetency.competencyId,
+            competencyName: item.relatedCompetency.competencyName || 'Unknown Competency',
+            clusterName: item.relatedCompetency.clusterName || 'Unknown Cluster',
+            requiredLevel: item.relatedCompetency.requiredLevel,
+            weightedGap: item.relatedCompetency.weightedGap
+          }]
+        })
+      }
+    })
+    
+    return Array.from(trainingMap.values())
+  }
+
   const handleExport = async () => {
-    if (!selectedAssessmentId || !user?.id) return
+    if (!selectedAssessmentId || !user?.id) {
+      toast.error("Missing required data for export")
+      return
+    }
     
     try {
       setIsExporting(true)
-      const response = await rtnAPI.export({
+      const response = await api.post('/recommendedtraining/export', {
         staffId: user.id,
         assessmentId: selectedAssessmentId
+      }, {
+        responseType: 'blob'
       })
       
       const blob = new Blob([response.data], { type: 'text/csv' })
@@ -174,7 +206,7 @@ export default function MyTraining() {
     }
   }
 
-  const getTrainingStatus = (training: GroupedTraining): TrainingStatus => {
+  const getTrainingStatus = (training: TrainingGroup): TrainingStatus => {
     const now = new Date()
     const start = new Date(training.startDate)
     const end = new Date(training.endDate)
@@ -236,7 +268,8 @@ export default function MyTraining() {
                     Your competency levels are meeting or exceeding requirements. No additional training recommendations at this time.
                   </p>
                 </div>
-                <Button onClick={fetchData} variant="outline" className="mt-4 border-green-300 text-green-700 hover:bg-green-100">
+                <Button onClick={fetchRecommendedTrainings} variant="outline" className="mt-4 border-green-300 text-green-700 hover:bg-green-100">
+                  <IconRefresh className="h-4 w-4 mr-2" />
                   Refresh Assessment
                 </Button>
               </div>
@@ -250,9 +283,12 @@ export default function MyTraining() {
                 {error}
               </AlertDescription>
             </Alert>
-            <Button onClick={fetchData} className="mt-4">
-              Try Again
-            </Button>
+            <div className="flex gap-2 mt-4">
+              <Button onClick={fetchRecommendedTrainings}>
+                <IconRefresh className="h-4 w-4 mr-2" />
+                Try Again
+              </Button>
+            </div>
           </>
         )}
       </div>
@@ -276,7 +312,9 @@ export default function MyTraining() {
           </p>
           {rtnReport && (
             <p className="text-xs text-muted-foreground mt-1">
-              Generated: {format(new Date(rtnReport.generatedAt), "dd MMM yyyy")}
+              Generated: {format(new Date(rtnReport.generatedAt), "dd MMM yyyy 'at' HH:mm")} | 
+              Staff: {rtnReport.staffName} | 
+              Position: {rtnReport.positionName}
             </p>
           )}
         </div>
@@ -409,7 +447,7 @@ export default function MyTraining() {
 }
 
 interface TrainingListProps {
-  trainings: GroupedTraining[]
+  trainings: TrainingGroup[]
   status: TrainingStatus
 }
 
@@ -446,7 +484,7 @@ function TrainingList({ trainings, status }: TrainingListProps) {
               <div className="flex-1">
                 <div className="flex items-center gap-2 flex-wrap">
                   <IconSparkles className="size-5 text-primary" />
-                  <CardTitle>{training.trainingName}</CardTitle>
+                  <CardTitle>{training.trainingName || 'Unknown Training'}</CardTitle>
                   {getStatusBadge(status)}
                   <Badge variant="outline" className="gap-1 border-primary/50 text-primary">
                     <IconTarget className="size-3" />
@@ -472,7 +510,7 @@ function TrainingList({ trainings, status }: TrainingListProps) {
             <div className="space-y-3">
               <p className="text-sm font-medium">Addresses Competency Gaps:</p>
               <div className="space-y-2">
-                {training.competencies.map((comp) => (
+                {training.competencies.map((comp: TrainingGroup['competencies'][0]) => (
                   <div key={comp.competencyId} className="flex items-start justify-between p-3 rounded-lg bg-muted/50 border border-primary/10">
                     <div className="flex-1">
                       <div className="flex items-center gap-2">

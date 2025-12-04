@@ -157,7 +157,7 @@ export default function MyCompetencies() {
       <div className="grid gap-4 md:grid-cols-3 mb-4">
         {clusters.map((cluster) => (
           <Card key={cluster.name}>
-            <CardContent className="pt-6">
+            <CardContent >
               <div className="flex items-center gap-4">
                 <div 
                   className="size-12 rounded-lg flex items-center justify-center"

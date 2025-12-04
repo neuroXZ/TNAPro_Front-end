@@ -258,7 +258,7 @@ export default function AssessmentDetailPage() {
           competencyId: scoreData.competencyId,
           assessorId: selfAssessorId,
           score: scoreData.score,
-          // remark: scoreData.remark || '', // TODO: Add remark field to backend schema
+          remark: scoreData.remark || '',
         }
 
         if (scoreData.resultId) {

@@ -34,11 +34,6 @@ const navMainItems = [
     icon: IconDashboard,
   },
   {
-    title: "My Profile",
-    url: "/staff/profile",
-    icon: IconUserCheck,
-  },
-  {
     title: "Self Assessment",
     url: "/staff/assessments",
     icon: IconClipboardCheck,

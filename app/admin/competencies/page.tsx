@@ -11,7 +11,7 @@ import {
   SortingState,
   VisibilityState,
 } from "@tanstack/react-table"
-import { competencyAPI, importAPI } from "@/lib/api"
+import { competencyAPI, importAPI, clusterAPI } from "@/lib/api"
 import {
   Card,
   CardContent,
@@ -20,6 +20,20 @@ import {
   CardTitle,
 } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command"
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover"
+import { Button } from "@/components/ui/button"
 import { IconSearch } from "@tabler/icons-react"
 import { toast } from "sonner"
 import { Competency, getColumns } from "./columns"
@@ -34,6 +48,9 @@ import { CompetencyImportDialog } from "./competency-import-dialog"
 
 export default function CompetencyManagementPage() {
   const [competencies, setCompetencies] = useState<Competency[]>([])
+  const [clusters, setClusters] = useState<Array<{ id: string; name: string }>>([])
+  const [selectedClusterId, setSelectedClusterId] = useState<string>("all")
+  const [clusterPopoverOpen, setClusterPopoverOpen] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
@@ -50,8 +67,15 @@ export default function CompetencyManagementPage() {
   const [rowSelection, setRowSelection] = useState({})
   const [globalFilter, setGlobalFilter] = useState("")
 
+  // Filter competencies based on selected cluster
+  const filteredCompetencies = useMemo(() => {
+    if (!selectedClusterId || selectedClusterId === "all") return competencies
+    return competencies.filter(competency => competency.clusterId === selectedClusterId)
+  }, [competencies, selectedClusterId])
+
   useEffect(() => {
     fetchCompetencies()
+    fetchClusters()
   }, [])
 
   // ==================== DATA FETCHING ====================
@@ -66,6 +90,15 @@ export default function CompetencyManagementPage() {
       console.error(error)
     } finally {
       setIsLoading(false)
+    }
+  }
+
+  const fetchClusters = async () => {
+    try {
+      const data = await clusterAPI.getAll()
+      setClusters(data)
+    } catch (error: any) {
+      console.error("Failed to fetch clusters:", error)
     }
   }
 
@@ -113,7 +146,7 @@ export default function CompetencyManagementPage() {
   // ==================== TABLE INITIALIZATION ====================
   // Initialize table after columns are defined
   const table = useReactTable({
-    data: competencies,
+    data: filteredCompetencies,
     columns,
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
@@ -225,6 +258,54 @@ export default function CompetencyManagementPage() {
               </CardDescription>
             </div>
             <div className="flex items-center gap-2">
+              <Popover open={clusterPopoverOpen} onOpenChange={setClusterPopoverOpen}>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    role="combobox"
+                    aria-expanded={clusterPopoverOpen}
+                    className="w-[180px] justify-between"
+                  >
+                    {selectedClusterId === "all" 
+                      ? "Filter by Cluster"
+                      : clusters.find((c) => c.id === selectedClusterId)?.name || "Filter by Cluster"
+                    }
+                    <IconSearch className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-[180px] p-0">
+                  <Command>
+                    <CommandInput placeholder="Search clusters..." />
+                    <CommandList className="max-h-[200px] overflow-y-auto">
+                      <CommandEmpty>No cluster found.</CommandEmpty>
+                      <CommandGroup>
+                        <CommandItem
+                          key="all"
+                          value="all"
+                          onSelect={() => {
+                            setSelectedClusterId("all")
+                            setClusterPopoverOpen(false)
+                          }}
+                        >
+                          All Clusters
+                        </CommandItem>
+                        {clusters.map((cluster) => (
+                          <CommandItem
+                            key={cluster.id}
+                            value={cluster.name}
+                            onSelect={() => {
+                              setSelectedClusterId(cluster.id)
+                              setClusterPopoverOpen(false)
+                            }}
+                          >
+                            {cluster.name}
+                          </CommandItem>
+                        ))}
+                      </CommandGroup>
+                    </CommandList>
+                  </Command>
+                </PopoverContent>
+              </Popover>
               <div className="relative">
                 <IconSearch className="absolute left-2 top-2.5 size-4 text-muted-foreground" />
                 <Input
@@ -247,7 +328,7 @@ export default function CompetencyManagementPage() {
                 columnsLength={columns.length}
                 onRowClick={handleRowClick}
               />
-              {competencies.length > 0 && <DataTablePagination table={table} />}
+              {filteredCompetencies.length > 0 && <DataTablePagination table={table} />}
             </>
           )}
         </CardContent>

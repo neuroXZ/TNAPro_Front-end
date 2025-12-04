@@ -64,6 +64,7 @@ interface Competency {
 interface CompetencyScore {
   competencyId: string
   score: number | null
+  remark?: string
   resultId?: string
 }
 
@@ -212,6 +213,7 @@ export default function SuperiorAssessmentDetailPage() {
         initialScores[pc.competency.id] = {
           competencyId: pc.competency.id,
           score: existingResult ? existingResult.score : null,
+          remark: existingResult?.remark || '',
           resultId: existingResult?.id,
         }
       })
@@ -235,6 +237,16 @@ export default function SuperiorAssessmentDetailPage() {
     }))
   }
 
+  const handleRemarkChange = (competencyId: string, remark: string) => {
+    setScores(prev => ({
+      ...prev,
+      [competencyId]: {
+        ...prev[competencyId],
+        remark,
+      }
+    }))
+  }
+
   const handleSaveAll = async () => {
     if (!superiorAssessorId || !subordinate?.positionId) {
       toast.error("Missing required data")
@@ -249,10 +261,11 @@ export default function SuperiorAssessmentDetailPage() {
 
         const payload = {
           assessmentId,
-          positionId: subordinate.positionId,
+          positionId: subordinate!.positionId!,
           competencyId: scoreData.competencyId,
           assessorId: superiorAssessorId,
           score: scoreData.score,
+          remark: scoreData.remark || '',
         }
 
         if (scoreData.resultId) {
@@ -458,6 +471,7 @@ export default function SuperiorAssessmentDetailPage() {
               scores={scores}
               levels={levels}
               onScoreChange={handleScoreChange}
+              onRemarkChange={handleRemarkChange}
               disabled={!withinPeriod}
             />
           )}
@@ -490,6 +504,7 @@ interface CompetencyAssessmentTableProps {
   scores: Record<string, CompetencyScore>
   levels: any[]
   onScoreChange: (competencyId: string, score: number) => void
+  onRemarkChange: (competencyId: string, remark: string) => void
   disabled?: boolean
 }
 
@@ -498,6 +513,7 @@ function CompetencyAssessmentTable({
   scores,
   levels,
   onScoreChange,
+  onRemarkChange,
   disabled
 }: CompetencyAssessmentTableProps) {
   // Group competencies by cluster
@@ -556,6 +572,7 @@ function CompetencyAssessmentTable({
                             {level.value}
                           </th>
                         ))}
+                        <th className="px-3 py-2 text-left text-sm font-medium min-w-[150px]">Remarks</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -593,6 +610,18 @@ function CompetencyAssessmentTable({
                                 />
                               </td>
                             ))}
+                            <td className="px-3 py-3">
+                              <div className="flex items-center gap-2">
+                                <Textarea
+                                  value={competencyScore?.remark || ''}
+                                  onChange={(e) => onRemarkChange(pc.competency.id, e.target.value)}
+                                  disabled={disabled}
+                                  placeholder="Add remark..."
+                                  className="min-h-[60px] text-sm resize-none"
+                                />
+                                <IconPencil className="size-4 text-muted-foreground shrink-0" />
+                              </div>
+                            </td>
                           </tr>
                         )
                       })}

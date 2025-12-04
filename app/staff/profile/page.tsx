@@ -60,63 +60,90 @@ export default function MyProfile() {
   const fetchProfile = async () => {
     try {
       setIsLoading(true)
-      const data = await authAPI.getProfile()
       
-      // Fetch subordinates data
-      if (data?.id) {
-        try {
-          const [allStaff, allAssessors] = await Promise.all([
-            staffAPI.getAll(),
-            assessorAPI.getAll(),
-          ])
-          
-          // Find subordinates: staff where current user is the superior assessor
-          const subordinateAssessors = allAssessors.filter(
-            (a: any) => a.assessorId === data.id && a.type === 'superior'
-          )
-          const subordinates = subordinateAssessors
-            .map((a: any) => {
-              const subordinateStaff = allStaff.find((s: any) => s.id === a.staffId)
-              return subordinateStaff ? {
-                id: subordinateStaff.id,
-                name: subordinateStaff.name,
-                position: subordinateStaff.position
-              } : null
-            })
-            .filter(Boolean)
-          
-          const enrichedData = {
-            ...data,
-            subordinates,
-          }
-          setProfile(enrichedData)
-          updateFormData(enrichedData)
-        } catch (err) {
-          console.error('Failed to fetch subordinates:', err)
-          setProfile(data)
-          updateFormData(data)
-        }
-      } else {
-        setProfile(data)
-        updateFormData(data)
-      }
-    } catch (error: any) {
-      // Fallback: Try to get user data from localStorage
+      // First, try to get user data from localStorage for immediate display
       const storedUser = localStorage.getItem('user')
+      let userData = null
+      
       if (storedUser) {
         try {
-          const userData = JSON.parse(storedUser)
-          
-          // If stored user has an id, fetch full staff details
-          if (userData.id) {
+          userData = JSON.parse(storedUser)
+        } catch (parseError) {
+          console.error("Failed to parse stored user:", parseError)
+        }
+      }
+      
+      // If no stored user data, redirect to login
+      if (!userData) {
+        toast.error("Please login to view your profile")
+        window.location.href = "/login"
+        return
+      }
+      
+      // Try to fetch from auth API first
+      try {
+        const data = await authAPI.getProfile()
+        console.log('Auth API data:', data) // Debug log
+        
+        // Fetch subordinates data
+        if (data?.id) {
+          try {
+            const [allStaff, allAssessors] = await Promise.all([
+              staffAPI.getAll(),
+              assessorAPI.getAll(),
+            ])
+            
+            // Find subordinates: staff where current user is the superior assessor
+            const subordinateAssessors = allAssessors.filter(
+              (a: any) => a.assessorId === data.id && a.type === 'superior'
+            )
+            const subordinates = subordinateAssessors
+              .map((a: any) => {
+                const subordinateStaff = allStaff.find((s: any) => s.id === a.staffId)
+                return subordinateStaff ? {
+                  id: subordinateStaff.id,
+                  name: subordinateStaff.name,
+                  position: subordinateStaff.position
+                } : null
+              })
+              .filter(Boolean)
+            
+            const enrichedData = {
+              ...data,
+              subordinates,
+            }
+            setProfile(enrichedData)
+            updateFormData(enrichedData)
+            return
+          } catch (err) {
+            console.error('Failed to fetch subordinates:', err)
+            setProfile(data)
+            updateFormData(data)
+            return
+          }
+        } else {
+          setProfile(data)
+          updateFormData(data)
+          return
+        }
+      } catch (authError: any) {
+        console.warn("Auth API failed, falling back to staff API:", authError.message)
+        
+        // Fallback: Use staff API with stored user data
+        if (userData.id) {
+          try {
             const [fullProfile, allStaff, allAssessors] = await Promise.all([
               staffAPI.getById(userData.id),
-              staffAPI.getAll(), // Get all staff to find relations
-              assessorAPI.getAll(), // Get assessors to find subordinates
+              staffAPI.getAll(),
+              assessorAPI.getAll(),
             ])
+            
+            console.log('Staff API fullProfile:', fullProfile) // Debug log
+            console.log('All staff data sample:', allStaff.slice(0, 2)) // Debug log
             
             // Find position, unit, supervisor from all staff data
             const staffWithRelations = allStaff.find((s: any) => s.id === userData.id)
+            console.log('Staff with relations:', staffWithRelations) // Debug log
             
             // Find subordinates: staff where current user is the superior assessor
             const subordinateAssessors = allAssessors.filter(
@@ -133,39 +160,75 @@ export default function MyProfile() {
               })
               .filter(Boolean)
             
+            // Find supervisor from assessor relationships if not in staff relation
+            let supervisorData = staffWithRelations?.supervisor
+            if (!supervisorData) {
+              const supervisorAssessor = allAssessors.find(
+                (a: any) => a.staffId === userData.id && a.type === 'superior'
+              )
+              if (supervisorAssessor && supervisorAssessor.assessor) {
+                supervisorData = supervisorAssessor.assessor
+              }
+            }
+            console.log('Supervisor from assessor relationship:', supervisorData) // Debug log
+            
             if (staffWithRelations) {
               const enrichedProfile = {
                 ...fullProfile,
                 position: staffWithRelations.position,
                 unit: staffWithRelations.unit,
-                supervisor: staffWithRelations.supervisor,
+                supervisor: supervisorData || staffWithRelations.supervisor,
                 subordinates,
               }
+              console.log('Final enriched profile:', enrichedProfile) // Debug log
+              console.log('Supervisor from enriched profile:', enrichedProfile.supervisor) // Debug log
               setProfile(enrichedProfile)
               updateFormData(enrichedProfile)
             } else {
-              setProfile({ ...fullProfile, subordinates })
-              updateFormData(fullProfile)
+              // If staff relation not found, try to use fullProfile with found supervisor
+              const basicProfile = {
+                ...fullProfile,
+                supervisor: supervisorData,
+                subordinates,
+              }
+              console.log('Basic profile with supervisor:', basicProfile) // Debug log
+              setProfile(basicProfile)
+              updateFormData(basicProfile)
             }
             return
-          } else {
-            // Use stored user data as-is
+          } catch (staffError: any) {
+            console.error("Staff API also failed:", staffError)
+            // Last fallback: use stored user data as-is
             setProfile(userData)
             updateFormData(userData)
+            toast.warning("Some profile data may be limited. Please refresh the page if issues persist.")
             return
           }
-        } catch (parseError) {
-          console.error("Failed to load profile:", parseError)
-          toast.error("Failed to load profile data")
+        } else {
+          // Use stored user data as-is
+          setProfile(userData)
+          updateFormData(userData)
+          toast.warning("Profile loaded from local storage. Some data may be outdated.")
+          return
         }
-      } else {
-        if (error.response?.status === 401) {
-          toast.error("Session expired. Please login again.")
+      }
+    } catch (error: any) {
+      console.error("Unexpected error in fetchProfile:", error)
+      toast.error("Failed to load profile data")
+      
+      // Final fallback to avoid white screen
+      const storedUser = localStorage.getItem('user')
+      if (storedUser) {
+        try {
+          const userData = JSON.parse(storedUser)
+          setProfile(userData)
+          updateFormData(userData)
+          toast.warning("Showing cached profile data")
+        } catch (parseError) {
+          toast.error("Unable to load profile. Please login again.")
           setTimeout(() => {
             window.location.href = "/login"
-          }, 1500)
-        } else {
-          toast.error("Failed to fetch profile")
+          }, 2000)
         }
       }
     } finally {
@@ -347,7 +410,7 @@ export default function MyProfile() {
             </div>
           </div>
           <div className="grid gap-2">
-            <Label htmlFor="supervisor">Supervisor</Label>
+            <Label htmlFor="supervisor">Superior</Label>
             <Input 
               id="supervisor" 
               value={profile?.supervisor?.name || "-"} 
@@ -359,7 +422,7 @@ export default function MyProfile() {
             <div className="grid gap-2">
               <Label className="flex items-center gap-2">
                 <IconUsers className="size-4" />
-                Staff Bawahan ({profile.subordinates.length})
+                Staff ({profile.subordinates.length})
               </Label>
               <div className="space-y-2">
                 {profile.subordinates.map((sub) => (
