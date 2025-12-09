@@ -64,7 +64,7 @@ export function AssessorFormDialog({
   const [staffList, setStaffList] = useState<any[]>([])
   const [staffPopoverOpen, setStaffPopoverOpen] = useState(false)
   const [formData, setFormData] = useState<AssessorFormData>({
-    staffIds: editingAssessor ? [editingAssessor.staffId] : [],
+    staffIds: editingAssessor && editingAssessor.staffId ? [editingAssessor.staffId] : [],
     assessorId: editingAssessor?.assessorId,
     type: "superior",
   })
@@ -86,7 +86,7 @@ export function AssessorFormDialog({
   useEffect(() => {
     if (editingAssessor) {
       setFormData({
-        staffIds: [editingAssessor.staffId],
+        staffIds: editingAssessor.staffId ? [editingAssessor.staffId] : [],
         assessorId: editingAssessor.assessorId,
         type: "superior",
       })
