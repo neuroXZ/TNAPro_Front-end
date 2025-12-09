@@ -18,6 +18,15 @@ import {
 import { Input } from "@/components/ui/input"
 import { toast } from "sonner"
 import { IconEye, IconEyeOff } from "@tabler/icons-react"
+import { authAPI } from "@/lib/api"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog"
 // import { settingAPI, API_SERVER_URL } from "@/lib/api"
 
 export function LoginForm({
@@ -31,6 +40,9 @@ export function LoginForm({
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [logoPath, setLogoPath] = useState<string | null>(null);
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
+  const [forgotPasswordEmail, setForgotPasswordEmail] = useState("");
+  const [isForgotPasswordLoading, setIsForgotPasswordLoading] = useState(false);
 
   // Fetch logo from settings on component mount
   // useEffect(() => {
@@ -61,6 +73,27 @@ export function LoginForm({
       toast.error(error.message || "Login failed. Please check your credentials.");
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleForgotPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsForgotPasswordLoading(true);
+
+    try {
+      const appBaseUrl = window.location.origin;
+      await authAPI.forgotPassword({
+        identifier: forgotPasswordEmail,
+        userType,
+        appBaseUrl
+      });
+      toast.success("Password reset link has been sent to your email!");
+      setShowForgotPassword(false);
+      setForgotPasswordEmail("");
+    } catch (error: any) {
+      toast.error(error.response?.data?.error || error.message || "Failed to send password reset email.");
+    } finally {
+      setIsForgotPasswordLoading(false);
     }
   };
 
@@ -135,8 +168,56 @@ export function LoginForm({
                 />
               </Field>
               <Field>
-                <div className="flex items-center">
+                <div className="flex items-center justify-between">
                   <FieldLabel htmlFor="password">Password</FieldLabel>
+                  <Dialog open={showForgotPassword} onOpenChange={setShowForgotPassword}>
+                    <DialogTrigger asChild>
+                      <button 
+                        type="button"
+                        className="text-sm text-primary hover:underline"
+                        disabled={isLoading}
+                      >
+                        Forgot Password?
+                      </button>
+                    </DialogTrigger>
+                    <DialogContent>
+                      <DialogHeader>
+                        <DialogTitle>Reset Password</DialogTitle>
+                        <DialogDescription>
+                          Enter your {userType === 'staff' ? 'email address' : 'username'} and we'll send you a link to reset your password.
+                        </DialogDescription>
+                      </DialogHeader>
+                      <form onSubmit={handleForgotPassword} className="space-y-4">
+                        <Field>
+                          <FieldLabel htmlFor="forgot-email">
+                            {userType === 'staff' ? 'Email Address' : 'Username'}
+                          </FieldLabel>
+                          <Input
+                            id="forgot-email"
+                            type={userType === 'staff' ? 'email' : 'text'}
+                            placeholder={userType === 'staff' ? 'Enter your email address' : 'Enter your username'}
+                            value={forgotPasswordEmail}
+                            onChange={(e) => setForgotPasswordEmail(e.target.value)}
+                            required
+                            disabled={isForgotPasswordLoading}
+                          />
+                        </Field>
+                        <div className="flex justify-end gap-2">
+                          <Button
+                            type="button"
+                            variant="outline"
+                            onClick={() => setShowForgotPassword(false)}
+                            disabled={isForgotPasswordLoading}
+                          >
+                            Cancel
+                          </Button>
+                          <Button type="submit" disabled={isForgotPasswordLoading}>
+                            {isForgotPasswordLoading ? "Sending..." : "Send Reset Link"}
+                          </Button>
+                        </div>
+                      </form>
+                    </DialogContent>
+                  </Dialog>
                 </div>
                 <div className="relative">
                   <Input 

@@ -27,6 +27,7 @@ interface PositionCompetency {
       id: string
       name: string
       color?: string
+      level?: number
     }
   }
 }
@@ -111,7 +112,7 @@ export default function MyCompetencies() {
     return acc
   }, {} as Record<string, number>)
 
-  // Get unique clusters with their colors
+  // Get unique clusters with their colors and sort by level
   const clusters = Array.from(
     new Map(
       competencies
@@ -119,11 +120,12 @@ export default function MyCompetencies() {
           pc.competency.cluster?.name || "Uncategorized",
           {
             name: pc.competency.cluster?.name || "Uncategorized",
-            color: pc.competency.cluster?.color || "#6b7280"
+            color: pc.competency.cluster?.color || "#6b7280",
+            level: pc.competency.cluster?.level || 999
           }
         ])
     ).values()
-  )
+  ).sort((a, b) => (a.level || 999) - (b.level || 999))
 
   if (isLoading) {
     return (
@@ -154,7 +156,7 @@ export default function MyCompetencies() {
         </p>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-3 mb-4">
+      {/* <div className="grid gap-4 md:grid-cols-3 mb-4">
         {clusters.map((cluster) => (
           <Card key={cluster.name}>
             <CardContent >
@@ -198,23 +200,24 @@ export default function MyCompetencies() {
             </Card>
           </>
         )}
-      </div>
+      </div> */}
 
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
-        <TabsList className="grid w-full" style={{ gridTemplateColumns: `repeat(${clusters.length + 1}, minmax(0, 1fr))` }}>
-          <TabsTrigger value="all">
-            All ({competencies.length})
-          </TabsTrigger>
-          {clusters.map((cluster) => (
-            <TabsTrigger key={cluster.name} value={cluster.name} className="gap-2">
-              <div 
-                className="size-3 rounded-full"
-                style={{ backgroundColor: cluster.color }}
-              />
-              {cluster.name} ({clusterCounts[cluster.name] || 0})
+      <div className="space-y-4">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
+          <TabsList className="grid w-full" style={{ gridTemplateColumns: `repeat(${clusters.length + 1}, minmax(0, 1fr))` }}>
+            <TabsTrigger value="all">
+              All ({competencies.length})
             </TabsTrigger>
-          ))}
-        </TabsList>
+            {clusters.map((cluster) => (
+              <TabsTrigger key={cluster.name} value={cluster.name} className="gap-2">
+                <div 
+                  className="size-3 rounded-full"
+                  style={{ backgroundColor: cluster.color }}
+                />
+                {cluster.name} ({clusterCounts[cluster.name] || 0})
+              </TabsTrigger>
+            ))}
+          </TabsList>
 
         <TabsContent value="all" className="space-y-4">
           {!userPositionId ? (
@@ -329,7 +332,8 @@ export default function MyCompetencies() {
             </Card>
           </TabsContent>
         ))}
-      </Tabs>
+        </Tabs>
+      </div>
 
       <CompetencyDetailDialog
         open={isDetailDialogOpen}

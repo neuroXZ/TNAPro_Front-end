@@ -207,7 +207,7 @@ export default function TrainingCompetencyDetailPage() {
                 />
               )}
               {cluster?.name || "Uncategorized"}
-              <Badge variant="secondary" className="ml-1">
+              <Badge className="ml-1">
                 {competencies.filter((c) => c.trainingCompetency).length}/{competencies.length}
               </Badge>
             </TabsTrigger>
@@ -226,7 +226,7 @@ export default function TrainingCompetencyDetailPage() {
                     />
                   )}
                   <CardTitle>{cluster?.name || "Uncategorized"}</CardTitle>
-                  <Badge variant="secondary">
+                  <Badge>
                     {competencies.filter((c) => c.trainingCompetency).length} / {competencies.length}
                   </Badge>
                 </div>

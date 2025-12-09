@@ -516,36 +516,68 @@ function CompetencyAssessmentTable({
   onRemarkChange,
   disabled
 }: CompetencyAssessmentTableProps) {
-  // Group competencies by cluster
+  const [currentTabIndex, setCurrentTabIndex] = useState(0)
+
+  // Group competencies by cluster with cluster info
   const groupedByCluster = competencies.reduce((acc, pc) => {
-    const clusterName = pc.competency?.cluster?.name || 'Uncategorized'
+    const cluster = pc.competency?.cluster
+    const clusterName = cluster?.name || 'Uncategorized'
     if (!acc[clusterName]) {
-      acc[clusterName] = []
+      acc[clusterName] = {
+        competencies: [],
+        cluster: cluster
+      }
     }
-    acc[clusterName].push(pc)
+    acc[clusterName].competencies.push(pc)
     return acc
-  }, {} as Record<string, Competency[]>)
+  }, {} as Record<string, { competencies: Competency[], cluster: any }>)
 
   // Sort levels by value
   const sortedLevels = levels.sort((a, b) => (a.value || 0) - (b.value || 0))
 
+  // Sort clusters by level, then convert to entries format
   const clusterEntries = Object.entries(groupedByCluster)
+    .sort(([, a], [, b]) => {
+      const levelA = a.cluster?.level || 999
+      const levelB = b.cluster?.level || 999
+      return levelA - levelB
+    })
+    .map(([clusterName, clusterData]) => [clusterName, clusterData.competencies] as [string, Competency[]])
+
+  // Navigation handlers
+  const handlePrevious = () => {
+    if (currentTabIndex > 0) {
+      setCurrentTabIndex(currentTabIndex - 1)
+    }
+  }
+
+  const handleNext = () => {
+    if (currentTabIndex < clusterEntries.length - 1) {
+      setCurrentTabIndex(currentTabIndex + 1)
+    }
+  }
 
   return (
-    <Tabs defaultValue={clusterEntries[0]?.[0]} className="w-full">
-      <TabsList className="grid w-full" style={{ gridTemplateColumns: `repeat(${clusterEntries.length}, minmax(0, 1fr))` }}>
-        {clusterEntries.map(([clusterName, clusterCompetencies], index) => {
-          const completed = clusterCompetencies.filter(pc => scores[pc.competency.id]?.score !== null).length
-          const total = clusterCompetencies.length
-          
-          return (
-            <TabsTrigger key={clusterName} value={clusterName} className="gap-2">
-              <span>{index + 1}. {clusterName}</span>
-              <span className="text-xs text-muted-foreground">({completed}/{total})</span>
-            </TabsTrigger>
-          )
-        })}
-      </TabsList>
+    <div className="w-full space-y-4">
+      <Tabs value={clusterEntries[currentTabIndex]?.[0]} onValueChange={(value) => {
+        const index = clusterEntries.findIndex(([clusterName]) => clusterName === value)
+        if (index !== -1) {
+          setCurrentTabIndex(index)
+        }
+      }} className="w-full">
+        <TabsList className="grid w-full" style={{ gridTemplateColumns: `repeat(${clusterEntries.length}, minmax(0, 1fr))` }}>
+          {clusterEntries.map(([clusterName, clusterCompetencies], index) => {
+            const completed = clusterCompetencies.filter(pc => scores[pc.competency.id]?.score !== null).length
+            const total = clusterCompetencies.length
+            
+            return (
+              <TabsTrigger key={clusterName} value={clusterName} className="gap-2">
+                <span>{index + 1}. {clusterName}</span>
+                <span className="text-xs text-muted-foreground">({completed}/{total})</span>
+              </TabsTrigger>
+            )
+          })}
+        </TabsList>
 
       {clusterEntries.map(([clusterName, clusterCompetencies]) => (
         <TabsContent key={clusterName} value={clusterName} className="mt-4">
@@ -633,6 +665,34 @@ function CompetencyAssessmentTable({
           </Card>
         </TabsContent>
       ))}
-    </Tabs>
+      </Tabs>
+
+      {/* Navigation Buttons */}
+      <div className="flex justify-between items-center mt-4">
+        <Button
+          variant="outline"
+          onClick={handlePrevious}
+          disabled={disabled || currentTabIndex === 0}
+          className="flex items-center gap-2"
+        >
+          <IconArrowLeft className="size-4" />
+          Previous
+        </Button>
+
+        <div className="text-sm text-muted-foreground">
+          Tab {currentTabIndex + 1} of {clusterEntries.length}
+        </div>
+
+        <Button
+          variant="outline"
+          onClick={handleNext}
+          disabled={disabled || currentTabIndex === clusterEntries.length - 1}
+          className="flex items-center gap-2"
+        >
+          Next
+          <IconArrowLeft className="size-4 rotate-180" />
+        </Button>
+      </div>
+    </div>
   )
 }

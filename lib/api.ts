@@ -78,6 +78,35 @@ export const authAPI = {
     const response = await api.get('/auth/profile');
     return response.data;
   },
+
+  forgotPassword: async (data: { identifier: string; userType: 'staff' | 'admin'; appBaseUrl: string }) => {
+    console.log('=== FORGOT PASSWORD DEBUG ===');
+    console.log('API Base URL:', API_BASE_URL);
+    console.log('Full Request URL:', `${API_BASE_URL}/auth/forgot-password`);
+    console.log('Request method:', 'POST');
+    console.log('Request data:', JSON.stringify(data, null, 2));
+    
+    try {
+      const response = await api.post('/auth/forgot-password', data);
+      console.log('✅ Success response:', response.data);
+      return response.data;
+    } catch (error: any) {
+      console.error('❌ Request failed with status:', error.response?.status);
+      console.error('❌ Response headers:', error.response?.headers);
+      console.error('❌ Error data:', JSON.stringify(error.response?.data, null, 2));
+      console.error('❌ Request config:', {
+        url: error.config?.url,
+        method: error.config?.method,
+        data: error.config?.data
+      });
+      throw error;
+    }
+  },
+
+  resetPassword: async (data: { token: string; userType: 'staff' | 'admin'; newPassword: string }) => {
+    const response = await api.post('/auth/reset-password', data);
+    return response.data;
+  },
 };
 
 // Admin API
