@@ -10,7 +10,7 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Accordion } from "@/components/ui/accordion"
 import { Badge } from "@/components/ui/badge"
-import { IconCheck, IconX, IconSearch, IconChartBar } from "@tabler/icons-react"
+import { IconCheck, IconX, IconSearch, IconChartBar, IconClock } from "@tabler/icons-react"
 import type { StaffMemberWithResults, StaffCompetencyMatrix, Position } from "../types"
 import { calculateAverages } from "../utils"
 import { StaffAccordionItem } from "./StaffAccordionItem"
@@ -20,9 +20,10 @@ interface StaffListProps {
   allStaff: StaffMemberWithResults[]
   matrix: StaffCompetencyMatrix
   positions: Position[]
+  onDataUpdate?: () => void
 }
 
-export function StaffList({ allStaff, matrix, positions }: StaffListProps) {
+export function StaffList({ allStaff, matrix, positions, onDataUpdate }: StaffListProps) {
   const [searchQuery, setSearchQuery] = useState("")
   const [selectedPosition, setSelectedPosition] = useState<string>("all")
 
@@ -59,11 +60,20 @@ export function StaffList({ allStaff, matrix, positions }: StaffListProps) {
           <TabsTrigger value="all">All Staff ({filteredStaff.length})</TabsTrigger>
           <TabsTrigger value="completed" className="gap-2">
             <IconCheck className="size-3" />
-            Completed ({completedCount})
+            Complete ({(() => {
+              return filteredStaff.filter(s => {
+                const staffData = matrix[s.id]
+                if (!staffData) return false
+                const competencyEntries = Object.values(staffData.competencies || {})
+                return competencyEntries.length > 0 && competencyEntries.every(
+                  comp => comp.scores.self !== undefined && comp.scores.superior !== undefined
+                )
+              }).length
+            })()})
           </TabsTrigger>
           <TabsTrigger value="pending" className="gap-2">
-            <IconX className="size-3" />
-            Incomplete ({incompleteCount})
+            <IconClock className="size-3" />
+            In Progress/Incomplete ({incompleteCount})
           </TabsTrigger>
           <TabsTrigger value="average" className="gap-2">
             <IconChartBar className="size-3" />
@@ -107,6 +117,7 @@ export function StaffList({ allStaff, matrix, positions }: StaffListProps) {
                 key={staffMember.id}
                 staffMember={staffMember}
                 staffData={matrix[staffMember.id]}
+                onDataUpdate={onDataUpdate}
               />
             ))}
           </Accordion>
@@ -114,23 +125,33 @@ export function StaffList({ allStaff, matrix, positions }: StaffListProps) {
       </TabsContent>
 
       <TabsContent value="completed" className="space-y-2">
-        {completedCount === 0 ? (
-          <div className="text-center py-8 text-muted-foreground">
-            No completed assessments yet.
-          </div>
-        ) : (
-          <Accordion type="single" collapsible className="w-full space-y-2">
-            {filteredStaff
-              .filter((s) => s.hasResults)
-              .map((staffMember) => (
+        {(() => {
+          const completeStaff = filteredStaff.filter(s => {
+            const staffData = matrix[s.id]
+            if (!staffData) return false
+            const competencyEntries = Object.values(staffData.competencies || {})
+            return competencyEntries.length > 0 && competencyEntries.every(
+              comp => comp.scores.self !== undefined && comp.scores.superior !== undefined
+            )
+          })
+          
+          return completeStaff.length === 0 ? (
+            <div className="text-center py-8 text-muted-foreground">
+              No completed assessments yet.
+            </div>
+          ) : (
+            <Accordion type="single" collapsible className="w-full space-y-2">
+              {completeStaff.map((staffMember) => (
                 <StaffAccordionItem
                   key={staffMember.id}
                   staffMember={staffMember}
                   staffData={matrix[staffMember.id]}
+                  onDataUpdate={onDataUpdate}
                 />
               ))}
-          </Accordion>
-        )}
+            </Accordion>
+          )
+        })()}
       </TabsContent>
 
       <TabsContent value="pending" className="space-y-4">

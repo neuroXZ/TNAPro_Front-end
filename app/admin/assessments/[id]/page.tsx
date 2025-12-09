@@ -21,6 +21,7 @@ export default function AssessmentDetailPage() {
     isLoading,
     buildMatrix,
     getAllStaffWithResults,
+    refreshData,
   } = useAssessmentData(assessmentId)
 
   const matrix = buildMatrix()
@@ -71,7 +72,12 @@ export default function AssessmentDetailPage() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <StaffList allStaff={allStaff} matrix={matrix} positions={positions} />
+          <StaffList 
+            allStaff={allStaff} 
+            matrix={matrix} 
+            positions={positions} 
+            onDataUpdate={refreshData}
+          />
         </CardContent>
       </Card>
     </div>

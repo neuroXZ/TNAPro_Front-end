@@ -57,6 +57,10 @@ export interface CompetencyData {
     self?: number
     superior?: number
   }
+  resultIds: {
+    self?: string
+    superior?: string
+  }
   finalScore?: number
   gap?: number
 }

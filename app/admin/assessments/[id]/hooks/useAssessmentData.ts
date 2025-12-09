@@ -107,14 +107,17 @@ export function useAssessmentData(assessmentId: string) {
           competency,
           requiredLevel,
           scores: {},
+          resultIds: {},
         }
       }
 
-      // Assign score based on assessor type
+      // Assign score and result ID based on assessor type
       if (assessorType === "self") {
         matrix[staffId].competencies[competencyId].scores.self = result.score
+        matrix[staffId].competencies[competencyId].resultIds.self = result.id
       } else if (assessorType === "superior") {
         matrix[staffId].competencies[competencyId].scores.superior = result.score
+        matrix[staffId].competencies[competencyId].resultIds.superior = result.id
       }
     })
 
@@ -171,5 +174,6 @@ export function useAssessmentData(assessmentId: string) {
     isLoading,
     buildMatrix,
     getAllStaffWithResults,
+    refreshData: fetchData,
   }
 }

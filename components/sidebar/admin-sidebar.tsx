@@ -124,10 +124,10 @@ const navMainItems = [
         title: "Assessments",
         url: "/admin/assessments",
       },
-      {
-        title: "Assessment Results",
-        url: "/admin/assessment-results",
-      },
+      // {
+      //   title: "Assessment Results",
+      //   url: "/admin/assessment-results",
+      // },
 
     ],
   },

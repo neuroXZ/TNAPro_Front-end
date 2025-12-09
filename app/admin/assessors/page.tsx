@@ -65,7 +65,7 @@ export default function AssessorManagementPage() {
   const [viewingAssessor, setViewingAssessor] = useState<Assessor | null>(null)
   const [selectedAssessorId, setSelectedAssessorId] = useState<string>("all")
   const [assessorPopoverOpen, setAssessorPopoverOpen] = useState(false)
-  const [activeTab, setActiveTab] = useState<'self' | 'superior'>('self')
+  const [activeTab, setActiveTab] = useState<'self' | 'superior'>('superior')
   
   // TanStack Table states
   const [sorting, setSorting] = useState<SortingState>([])
@@ -316,16 +316,16 @@ export default function AssessorManagementPage() {
           ) : (
             <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as 'self' | 'superior')}>
               <TabsList className="grid w-full grid-cols-2 mb-4">
-                <TabsTrigger value="self" className="gap-2">
-                  Self
-                  <Badge variant="secondary" className="ml-1 bg-blue-500 text-white">
-                    {selfCount}
-                  </Badge>
-                </TabsTrigger>
                 <TabsTrigger value="superior" className="gap-2">
                   Superior
                   <Badge variant="secondary" className="ml-1 bg-green-500 text-white">
                     {superiorCount}
+                  </Badge>
+                </TabsTrigger>
+                <TabsTrigger value="self" className="gap-2">
+                  Self
+                  <Badge variant="secondary" className="ml-1 bg-blue-500 text-white">
+                    {selfCount}
                   </Badge>
                 </TabsTrigger>
               </TabsList>

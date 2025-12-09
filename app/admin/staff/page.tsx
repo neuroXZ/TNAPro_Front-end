@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect, useRef, useMemo } from "react"
+import { useRouter } from "next/navigation"
 import {
   useReactTable,
   getCoreRowModel,
@@ -63,6 +64,7 @@ import { StaffViewDialog } from "./staff-view-dialog"
 import { StaffImportDialog } from "./staff-import-dialog"
 
 export default function StaffManagementPage() {
+  const router = useRouter()
   const [staff, setStaff] = useState<Staff[]>([])
   const [positions, setPositions] = useState<Array<{ id: string; name: string }>>([])
   const [units, setUnits] = useState<Array<{ id: string; name: string }>>([])
@@ -147,8 +149,7 @@ export default function StaffManagementPage() {
   }
 
   const handleRowClick = (staff: Staff) => {
-    setViewingStaff(staff)
-    setIsViewDialogOpen(true)
+    router.push(`/admin/staff/${staff.id}`)
   }
 
   const handleFormSubmit = async (formData: StaffFormData) => {

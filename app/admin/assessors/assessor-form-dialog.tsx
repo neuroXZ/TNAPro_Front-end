@@ -17,10 +17,31 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command"
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover"
+import { Badge } from "@/components/ui/badge"
+import { IconCheck, IconX } from "@tabler/icons-react"
 import { Assessor } from "./columns"
 import { staffAPI } from "@/lib/api"
 
 interface AssessorFormData {
+  staffIds?: string[]
+  assessorId?: string
+  type?: string
+}
+
+interface AssessorFormDataSingle {
   staffId?: string
   assessorId?: string
   type?: string
@@ -41,10 +62,11 @@ export function AssessorFormDialog({
 }: AssessorFormDialogProps) {
   const [isSaving, setIsSaving] = useState(false)
   const [staffList, setStaffList] = useState<any[]>([])
+  const [staffPopoverOpen, setStaffPopoverOpen] = useState(false)
   const [formData, setFormData] = useState<AssessorFormData>({
-    staffId: editingAssessor?.staffId,
+    staffIds: editingAssessor ? [editingAssessor.staffId] : [],
     assessorId: editingAssessor?.assessorId,
-    type: editingAssessor?.type || "",
+    type: "superior",
   })
 
   // Fetch staff list on mount
@@ -64,15 +86,15 @@ export function AssessorFormDialog({
   useEffect(() => {
     if (editingAssessor) {
       setFormData({
-        staffId: editingAssessor.staffId,
+        staffIds: [editingAssessor.staffId],
         assessorId: editingAssessor.assessorId,
-        type: editingAssessor.type || "",
+        type: "superior",
       })
     } else {
       setFormData({
-        staffId: undefined,
+        staffIds: [],
         assessorId: undefined,
-        type: "",
+        type: "superior",
       })
     }
   }, [editingAssessor, open])
@@ -82,12 +104,49 @@ export function AssessorFormDialog({
     setIsSaving(true)
 
     try {
-      await onSubmit(formData)
+      if (editingAssessor) {
+        // For editing, convert back to single staff format
+        const singleFormData: AssessorFormDataSingle = {
+          staffId: formData.staffIds?.[0],
+          assessorId: formData.assessorId,
+          type: formData.type,
+        }
+        await onSubmit(singleFormData as any)
+      } else {
+        // For creating new, handle multiple staff assignments
+        if (formData.staffIds && formData.staffIds.length > 0) {
+          for (const staffId of formData.staffIds) {
+            const singleFormData: AssessorFormDataSingle = {
+              staffId,
+              assessorId: formData.assessorId,
+              type: formData.type,
+            }
+            await onSubmit(singleFormData as any)
+          }
+        }
+      }
       onOpenChange(false)
     } catch (error) {
       console.error(error)
     } finally {
       setIsSaving(false)
+    }
+  }
+
+  const handleStaffToggle = (staffId: string) => {
+    const currentStaffIds = formData.staffIds || []
+    const isSelected = currentStaffIds.includes(staffId)
+    
+    if (isSelected) {
+      setFormData({
+        ...formData,
+        staffIds: currentStaffIds.filter(id => id !== staffId)
+      })
+    } else {
+      setFormData({
+        ...formData,
+        staffIds: [...currentStaffIds, staffId]
+      })
     }
   }
 
@@ -106,26 +165,6 @@ export function AssessorFormDialog({
             </DialogDescription>
           </DialogHeader>
           <div className="grid gap-4 py-4">
-            <div className="grid gap-2">
-              <Label htmlFor="staffId">Staff</Label>
-              <Select
-                value={formData.staffId || undefined}
-                onValueChange={(value) =>
-                  setFormData({ ...formData, staffId: value })
-                }
-              >
-                <SelectTrigger id="staffId">
-                  <SelectValue placeholder="Select staff" />
-                </SelectTrigger>
-                <SelectContent>
-                  {staffList.map((staff) => (
-                    <SelectItem key={staff.id} value={staff.id}>
-                      {staff.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
             <div className="grid gap-2">
               <Label htmlFor="assessorId">Assessor</Label>
               <Select
@@ -146,19 +185,102 @@ export function AssessorFormDialog({
                 </SelectContent>
               </Select>
             </div>
+            
+            <div className="grid gap-2">
+              <Label>Staff {editingAssessor ? "" : "(Multi-select)"}</Label>
+              {editingAssessor ? (
+                <Select
+                  value={formData.staffIds?.[0] || undefined}
+                  onValueChange={(value) =>
+                    setFormData({ ...formData, staffIds: value ? [value] : [] })
+                  }
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select staff" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {staffList.map((staff) => (
+                      <SelectItem key={staff.id} value={staff.id}>
+                        {staff.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              ) : (
+                <Popover open={staffPopoverOpen} onOpenChange={setStaffPopoverOpen}>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      role="combobox"
+                      aria-expanded={staffPopoverOpen}
+                      className="justify-between h-auto min-h-10"
+                    >
+                      <div className="flex flex-wrap gap-1">
+                        {formData.staffIds && formData.staffIds.length > 0 ? (
+                          formData.staffIds.map((staffId) => {
+                            const staff = staffList.find(s => s.id === staffId)
+                            return staff ? (
+                              <Badge key={staffId} className="text-xs">
+                                {staff.name}
+                                <button
+                                  type="button"
+                                  className="ml-1 hover:bg-gray-300 rounded-full"
+                                  onClick={(e) => {
+                                    e.stopPropagation()
+                                    handleStaffToggle(staffId)
+                                  }}
+                                >
+                                  <IconX className="size-3" />
+                                </button>
+                              </Badge>
+                            ) : null
+                          })
+                        ) : (
+                          <span className="text-muted-foreground">Select staff members...</span>
+                        )}
+                      </div>
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-full p-0">
+                    <Command>
+                      <CommandInput placeholder="Search staff..." />
+                      <CommandList>
+                        <CommandEmpty>No staff found.</CommandEmpty>
+                        <CommandGroup>
+                          {staffList.map((staff) => {
+                            const isSelected = formData.staffIds?.includes(staff.id) || false
+                            return (
+                              <CommandItem
+                                key={staff.id}
+                                onSelect={() => handleStaffToggle(staff.id)}
+                              >
+                                <IconCheck
+                                  className={`mr-2 size-4 ${
+                                    isSelected ? "opacity-100" : "opacity-0"
+                                  }`}
+                                />
+                                {staff.name}
+                              </CommandItem>
+                            )
+                          })}
+                        </CommandGroup>
+                      </CommandList>
+                    </Command>
+                  </PopoverContent>
+                </Popover>
+              )}
+            </div>
+            
             <div className="grid gap-2">
               <Label htmlFor="type">Type</Label>
               <Select
-                value={formData.type || undefined}
-                onValueChange={(value) =>
-                  setFormData({ ...formData, type: value })
-                }
+                value="superior"
+                disabled
               >
                 <SelectTrigger id="type">
-                  <SelectValue placeholder="Select type" />
+                  <SelectValue placeholder="superior" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="self">self</SelectItem>
                   <SelectItem value="superior">superior</SelectItem>
                 </SelectContent>
               </Select>

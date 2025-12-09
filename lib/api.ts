@@ -634,8 +634,25 @@ export const idpAPI = {
 // Recommended Training (RTN) API
 export const rtnAPI = {
   getReport: async (data: { staffId: string; assessmentId: string }) => {
-    const response = await api.post('/recommendedtraining/report', data);
-    return response.data;
+    try {
+      const response = await api.post('/recommendedtraining/report', data);
+      return response.data;
+    } catch (error: any) {
+      // If 404, endpoint not available in deployment
+      if (error.response?.status === 404) {
+        console.warn("RTN endpoint not available, returning mock data");
+        // Return empty response to trigger "no recommendations" flow
+        return {
+          staffId: data.staffId,
+          staffName: null,
+          positionName: null,
+          assessmentId: data.assessmentId,
+          results: [],
+          generatedAt: new Date()
+        };
+      }
+      throw error;
+    }
   },
   export: async (data: { staffId: string; assessmentId: string }) => {
     const response = await api.post('/recommendedtraining/export', data, {

@@ -6,7 +6,7 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { IconCheck, IconX, IconFileTypePdf } from "@tabler/icons-react"
+import { IconCheck, IconX, IconFileTypePdf, IconClock } from "@tabler/icons-react"
 import { toast } from "sonner"
 import type { StaffMemberWithResults, StaffCompetencyMatrix } from "../types"
 import { CompetencyTable } from "./CompetencyTable"
@@ -14,9 +14,10 @@ import { CompetencyTable } from "./CompetencyTable"
 interface StaffAccordionItemProps {
   staffMember: StaffMemberWithResults
   staffData?: StaffCompetencyMatrix[string]
+  onDataUpdate?: () => void
 }
 
-export function StaffAccordionItem({ staffMember, staffData }: StaffAccordionItemProps) {
+export function StaffAccordionItem({ staffMember, staffData, onDataUpdate }: StaffAccordionItemProps) {
   const clusterNames = staffData
     ? Array.from(
         new Set(
@@ -57,17 +58,38 @@ export function StaffAccordionItem({ staffMember, staffData }: StaffAccordionIte
                 Save PDF
               </Button>
             )}
-            {staffMember.hasResults ? (
-              <Badge className="gap-1 bg-green-600 hover:bg-green-700 text-white">
-                <IconCheck className="size-3" />
-                Completed
-              </Badge>
-            ) : (
-              <Badge className="gap-1 bg-red-600 hover:bg-red-700 text-white">
-                <IconX className="size-3" />
-                Incomplete
-              </Badge>
-            )}
+            {(() => {
+              if (!staffMember.hasResults) {
+                return (
+                  <Badge className="gap-1 bg-red-600 hover:bg-red-700 text-white">
+                    <IconX className="size-3" />
+                    Incomplete
+                  </Badge>
+                )
+              }
+              
+              // Check if all competencies have both self and superior scores
+              const competencyEntries = Object.values(staffData?.competencies || {})
+              const allComplete = competencyEntries.length > 0 && competencyEntries.every(
+                (comp) => comp.scores.self !== undefined && comp.scores.superior !== undefined
+              )
+              
+              if (allComplete) {
+                return (
+                  <Badge className="gap-1 bg-green-600 hover:bg-green-700 text-white">
+                    <IconCheck className="size-3" />
+                    Complete
+                  </Badge>
+                )
+              } else {
+                return (
+                  <Badge className="gap-1 bg-yellow-500 hover:bg-yellow-600 text-white">
+                    <IconClock className="size-3" />
+                    In Progress
+                  </Badge>
+                )
+              }
+            })()}
           </div>
         </div>
       </AccordionTrigger>
@@ -84,7 +106,12 @@ export function StaffAccordionItem({ staffMember, staffData }: StaffAccordionIte
             </TabsList>
 
             <TabsContent value="all-clusters">
-              <CompetencyTable competencies={staffData.competencies} />
+              <CompetencyTable 
+                competencies={staffData.competencies} 
+                onDataUpdate={onDataUpdate}
+                staffId={staffMember.id}
+                staffName={staffMember.name}
+              />
             </TabsContent>
 
             {clusterNames.map((clusterName) => (
@@ -92,6 +119,9 @@ export function StaffAccordionItem({ staffMember, staffData }: StaffAccordionIte
                 <CompetencyTable
                   competencies={staffData.competencies}
                   clusterName={clusterName}
+                  onDataUpdate={onDataUpdate}
+                  staffId={staffMember.id}
+                  staffName={staffMember.name}
                 />
               </TabsContent>
             ))}
