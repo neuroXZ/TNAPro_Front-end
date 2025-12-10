@@ -139,7 +139,7 @@ export default function TestingPage() {
         </Card>
 
         {/* Backend Connection Test */}
-        <Card>
+        {/* <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               🌐 Backend Connection Test
@@ -162,10 +162,10 @@ export default function TestingPage() {
               <code className="text-xs">https://mmcsb-tnapro-postgres2-production.up.railway.app/api</code>
             </div>
           </CardContent>
-        </Card>
+        </Card> */}
 
         {/* Debug Information */}
-        <Card>
+        {/* <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               🔧 Debug Information
@@ -179,7 +179,7 @@ export default function TestingPage() {
               <div><strong>Timeout Setting:</strong> 30 seconds</div>
             </div>
           </CardContent>
-        </Card>
+        </Card> */}
 
         {/* Back to Home */}
         <div className="text-center">
