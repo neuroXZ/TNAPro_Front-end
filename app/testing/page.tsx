@@ -11,7 +11,6 @@ import { toast } from 'sonner';
 
 export default function TestingPage() {
   const [identifier, setIdentifier] = useState('');
-  const [userType, setUserType] = useState<'staff' | 'admin'>('staff');
   const [isLoading, setIsLoading] = useState(false);
   const [mounted, setMounted] = useState(false);
 
@@ -42,7 +41,7 @@ export default function TestingPage() {
       
       await authAPI.forgotPassword({
         identifier: identifier.trim(),
-        userType,
+        userType: 'staff',
         appBaseUrl
       });
 
@@ -56,7 +55,7 @@ export default function TestingPage() {
       console.error('Reset password error:', error);
       
       if (error.response?.status === 404) {
-        toast.error(`${userType === 'staff' ? 'Staff' : 'Admin'} with this identifier not found`);
+        toast.error('Staff with this identifier not found');
       } else if (error.response?.status === 400) {
         toast.error('Invalid request. Please check your input.');
       } else if (error.message?.includes('timeout')) {
@@ -101,38 +100,21 @@ export default function TestingPage() {
               🔐 Password Reset Test
             </CardTitle>
             <CardDescription>
-              Test the forgot password functionality with different user types
+              Test the forgot password functionality for staff members
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="identifier">Username or Email</Label>
+                <Label htmlFor="identifier">Staff Username or Email</Label>
                 <Input
                   id="identifier"
                   type="text"
-                  placeholder="Enter username or email"
+                  placeholder="Enter staff username or email"
                   value={identifier}
                   onChange={(e) => setIdentifier(e.target.value)}
                   disabled={isLoading}
                 />
-              </div>
-              
-              <div className="space-y-2">
-                <Label>User Type</Label>
-                <Select 
-                  value={userType} 
-                  onValueChange={(value: 'staff' | 'admin') => setUserType(value)}
-                  disabled={isLoading}
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="staff">Staff</SelectItem>
-                    <SelectItem value="admin">Admin</SelectItem>
-                  </SelectContent>
-                </Select>
               </div>
             </div>
 
