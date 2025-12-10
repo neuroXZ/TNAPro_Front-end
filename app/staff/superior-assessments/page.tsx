@@ -266,14 +266,14 @@ export default function SuperiorAssessmentsPage() {
       ) : (
         <div className="space-y-4">
           {/* Assessment Selection Dropdown */}
-          <Card>
+          <Card className="bg-primary text-primary-foreground border-primary hover:bg-primary/90">
             <CardHeader>
               <CardTitle className="text-lg">Select Assessment</CardTitle>
-              <CardDescription>Choose an assessment to evaluate your subordinates</CardDescription>
+              <CardDescription className="text-white">Choose an assessment to evaluate your subordinates</CardDescription>
             </CardHeader>
             <CardContent>
-              <Select value={selectedAssessmentId} onValueChange={setSelectedAssessmentId}>
-                <SelectTrigger className="w-full">
+              <Select value={selectedAssessmentId} onValueChange={setSelectedAssessmentId} >
+                <SelectTrigger className="w-full bg-white text-black dark:bg-gray-800 dark:text-white">
                   <SelectValue placeholder="Select an assessment" />
                 </SelectTrigger>
                 <SelectContent>
