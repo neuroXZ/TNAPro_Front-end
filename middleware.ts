@@ -8,7 +8,7 @@ export function middleware(request: NextRequest) {
   const token = request.cookies.get('token')?.value
   
   // Public paths that don't require authentication
-  const publicPaths = ['/login', '/signup', '/']
+  const publicPaths = ['/login', '/signup', '/', '/testing']
   const isPublicPath = publicPaths.includes(pathname)
   
   // Check if path is admin or staff route
