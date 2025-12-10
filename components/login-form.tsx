@@ -82,16 +82,27 @@ export function LoginForm({
 
     try {
       const appBaseUrl = window.location.origin;
+      console.log('🚀 Starting forgot password with:', {
+        identifier: forgotPasswordEmail,
+        userType,
+        appBaseUrl
+      });
+      
       await authAPI.forgotPassword({
         identifier: forgotPasswordEmail,
         userType,
         appBaseUrl
       });
+      
       toast.success("Password reset link has been sent to your email!");
       setShowForgotPassword(false);
       setForgotPasswordEmail("");
     } catch (error: any) {
-      toast.error(error.response?.data?.error || error.message || "Failed to send password reset email.");
+      console.error('🔥 Forgot password error in component:', error);
+      const errorMessage = error.message?.includes('Cannot connect') 
+        ? "Cannot connect to server. Please check your network connection."
+        : error.response?.data?.error || error.message || "Failed to send password reset email.";
+      toast.error(errorMessage);
     } finally {
       setIsForgotPasswordLoading(false);
     }

@@ -9,7 +9,7 @@ export const api = axios.create({
   headers: {
     'Content-Type': 'application/json',
   },
-  timeout: 10000, // 10 second timeout
+  timeout: 30000, // 30 second timeout for slow Railway responses
 });
 
 // Add request interceptor for debugging
@@ -80,25 +80,35 @@ export const authAPI = {
   },
 
   forgotPassword: async (data: { identifier: string; userType: 'staff' | 'admin'; appBaseUrl: string }) => {
-    console.log('=== FORGOT PASSWORD DEBUG ===');
-    console.log('API Base URL:', API_BASE_URL);
-    console.log('Full Request URL:', `${API_BASE_URL}/auth/forgot-password`);
-    console.log('Request method:', 'POST');
-    console.log('Request data:', JSON.stringify(data, null, 2));
+    console.log('🔐 FORGOT PASSWORD REQUEST STARTING...');
+    console.log('🌐 API Base URL:', API_BASE_URL);
+    console.log('📡 Full Request URL:', `${API_BASE_URL}/auth/forgot-password`);
+    console.log('📨 Request data:', data);
     
     try {
+      console.log('🔍 Sending request to Railway server...');
       const response = await api.post('/auth/forgot-password', data);
-      console.log('✅ Success response:', response.data);
+      console.log('✅ SUCCESS! Response:', response.data);
       return response.data;
     } catch (error: any) {
-      console.error('❌ Request failed with status:', error.response?.status);
-      console.error('❌ Response headers:', error.response?.headers);
-      console.error('❌ Error data:', JSON.stringify(error.response?.data, null, 2));
-      console.error('❌ Request config:', {
-        url: error.config?.url,
-        method: error.config?.method,
-        data: error.config?.data
-      });
+      console.log('❌ FORGOT PASSWORD FAILED!');
+      console.log('❌ Error type:', error.name);
+      console.log('❌ Error message:', error.message);
+      console.log('❌ Error code:', error.code);
+      console.log('❌ Response status:', error.response?.status);
+      console.log('❌ Response data:', error.response?.data);
+      
+      // Handle different types of errors
+      if (error.code === 'ECONNREFUSED' || error.code === 'NETWORK_ERROR') {
+        throw new Error('Cannot connect to server. Please check your network connection.');
+      } else if (error.message?.includes('timeout')) {
+        throw new Error('Request timeout. The server is taking too long to respond. Please try again.');
+      } else if (error.response?.status === 404) {
+        throw new Error('Forgot password endpoint not found on the server.');
+      } else if (error.response?.status >= 500) {
+        throw new Error('Server error. Please try again later.');
+      }
+      
       throw error;
     }
   },
