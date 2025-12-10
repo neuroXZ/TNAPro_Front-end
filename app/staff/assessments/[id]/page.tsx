@@ -577,7 +577,7 @@ function CompetencyAssessmentTable({
             return (
               <TabsTrigger key={clusterName} value={clusterName} className="gap-2">
                 <span>{index + 1}. {clusterName}</span>
-                <span className="text-xs text-muted-foreground">({completed}/{total})</span>
+                <span className="text-xs text-muted-foreground hidden md:inline">({completed}/{total})</span>
               </TabsTrigger>
             )
           })}
@@ -596,7 +596,8 @@ function CompetencyAssessmentTable({
             </CardHeader>
             <CardContent>
               <div className="border rounded-lg overflow-hidden">
-                <div className="overflow-x-auto">
+                {/* Desktop Table View */}
+                <div className="hidden md:block overflow-x-auto">
                   <table className="w-full">
                     <thead className="bg-primary text-primary-foreground">
                       <tr>
@@ -704,6 +705,130 @@ function CompetencyAssessmentTable({
                       })}
                     </tbody>
                   </table>
+                </div>
+
+                {/* Mobile Card View */}
+                <div className="md:hidden space-y-4">
+                  {clusterCompetencies.map((pc, index) => {
+                    const competencyScore = scores[pc.competency.id]
+                    // RCL from position competency's level field (numeric value)
+                    const rcl = pc.level !== undefined && pc.level !== null ? pc.level.toString() : 'N/A'
+                    
+                    return (
+                      <Card key={pc.id} className="overflow-hidden">
+                        <CardContent className="p-4 space-y-4">
+                          {/* Competency Title with Info Button */}
+                          <div className="flex items-start gap-2">
+                            <div className="flex-1">
+                              <h3 className="font-semibold text-base leading-tight">{pc.competency?.name}</h3>
+                            </div>
+                            <Dialog>
+                              <DialogTrigger asChild>
+                                <button className="shrink-0 p-1 rounded-full hover:bg-muted transition-colors">
+                                  <IconAlertCircle className="size-5 text-primary" />
+                                </button>
+                              </DialogTrigger>
+                              <DialogContent className="max-w-sm mx-4">
+                                <DialogHeader>
+                                  <DialogTitle className="text-left">{pc.competency?.name}</DialogTitle>
+                                </DialogHeader>
+                                <div className="space-y-4">
+                                  {pc.competency?.description && (
+                                    <div>
+                                      <h4 className="font-medium text-sm mb-2">Description:</h4>
+                                      <p className="text-sm text-muted-foreground">
+                                        {pc.competency.description}
+                                      </p>
+                                    </div>
+                                  )}
+                                  <div>
+                                    <h4 className="font-medium text-sm mb-2">Required Competency Level (RCL): {rcl}</h4>
+                                    <div className="space-y-2">
+                                      {sortedLevels.map((level) => (
+                                        <div 
+                                          key={level.id}
+                                          className={`flex items-center gap-3 p-2 rounded-lg border ${
+                                            level.value?.toString() === rcl 
+                                              ? 'bg-primary/10 border-primary/30' 
+                                              : 'bg-muted/50 border-border'
+                                          }`}
+                                        >
+                                          <div className={`flex items-center justify-center w-6 h-6 rounded-full text-xs font-bold ${
+                                            level.value?.toString() === rcl
+                                              ? 'bg-primary text-primary-foreground'
+                                              : 'bg-muted-foreground/20 text-muted-foreground'
+                                          }`}>
+                                            {level.value}
+                                          </div>
+                                          <div className="flex-1">
+                                            <div className="text-sm font-medium">{level.name}</div>
+                                            {level.description && (
+                                              <div className="text-xs text-muted-foreground">{level.description}</div>
+                                            )}
+                                          </div>
+                                        </div>
+                                      ))}
+                                    </div>
+                                  </div>
+                                </div>
+                              </DialogContent>
+                            </Dialog>
+                          </div>
+
+                          {/* Rating Circles with RCL */}
+                          <div className="space-y-3">
+                            <div className="flex items-center justify-between">
+                              <Label className="text-sm font-medium">Select Level:</Label>
+                              <div className="flex items-center gap-2">
+                                <span className="text-xs text-muted-foreground">RCL:</span>
+                                <div className="flex items-center justify-center w-6 h-6 rounded-full bg-muted border text-xs font-semibold">
+                                  {rcl}
+                                </div>
+                              </div>
+                            </div>
+                            <div className="flex items-center justify-center gap-3">
+                              {sortedLevels.map((level) => (
+                                <button
+                                  key={level.id}
+                                  type="button"
+                                  onClick={() => onScoreChange(pc.competency.id, level.value)}
+                                  disabled={disabled}
+                                  className={`
+                                    relative flex items-center justify-center w-12 h-12 rounded-full border-2 transition-all font-semibold text-sm
+                                    ${competencyScore?.score === level.value
+                                      ? 'bg-primary border-primary text-primary-foreground shadow-lg scale-110'
+                                      : 'border-muted-foreground/40 hover:border-primary/60 hover:scale-105'
+                                    }
+                                    ${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}
+                                  `}
+                                  title={`${level.value} - ${level.name}`}
+                                >
+                                  {level.value}
+                                  {competencyScore?.score === level.value && (
+                                    <div className="absolute -top-1 -right-1 w-4 h-4 bg-green-500 rounded-full flex items-center justify-center">
+                                      <IconCheck className="size-3 text-white" />
+                                    </div>
+                                  )}
+                                </button>
+                              ))}
+                            </div>
+                          </div>
+
+                          {/* Remarks */}
+                          <div className="space-y-2">
+                            <Label className="text-sm font-medium">Remarks:</Label>
+                            <Textarea
+                              value={competencyScore?.remark || ''}
+                              onChange={(e) => onRemarkChange(pc.competency.id, e.target.value)}
+                              disabled={disabled}
+                              placeholder="Add your remarks here..."
+                              className="min-h-[80px] text-sm resize-none"
+                            />
+                          </div>
+                        </CardContent>
+                      </Card>
+                    )
+                  })}
                 </div>
               </div>
             </CardContent>

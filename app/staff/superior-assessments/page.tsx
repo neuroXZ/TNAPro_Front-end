@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { assessmentAPI, assessorAPI, staffAPI, assessmentResultAPI, positionCompetencyAPI } from "@/lib/api"
 import { toast } from "sonner"
 import { IconUsers, IconClipboardCheck, IconAlertCircle, IconCheck } from "@tabler/icons-react"
@@ -36,6 +36,7 @@ export default function SuperiorAssessmentsPage() {
   const router = useRouter()
   const [assessments, setAssessments] = useState<Assessment[]>([])
   const [subordinates, setSubordinates] = useState<Subordinate[]>([])
+  const [selectedAssessmentId, setSelectedAssessmentId] = useState<string>("")
   const [isLoading, setIsLoading] = useState(true)
   const [userId, setUserId] = useState<string | null>(null)
   const [assessmentResults, setAssessmentResults] = useState<any[]>([])
@@ -115,6 +116,11 @@ export default function SuperiorAssessmentsPage() {
       console.log("Subordinates data:", subordinatesData)
       setSubordinates(subordinatesData)
       setAssessmentResults(allResults)
+      
+      // Set the first assessment as selected by default
+      if (assessmentsData.length > 0) {
+        setSelectedAssessmentId(assessmentsData[0].id)
+      }
     } catch (error) {
       console.error("Failed to fetch data:", error)
       toast.error("Failed to load data")
@@ -258,107 +264,119 @@ export default function SuperiorAssessmentsPage() {
           </CardContent>
         </Card>
       ) : (
-        <Tabs defaultValue={assessments[0]?.id} className="flex flex-row gap-4">
-          <TabsList className="flex flex-col h-fit w-64 bg-muted p-2 shrink-0">
-            {assessments.map((assessment) => {
-              const withinPeriod = isWithinPeriod(assessment)
-              return (
-                <TabsTrigger
-                  key={assessment.id}
-                  value={assessment.id}
-                  className="w-full justify-start text-left data-[state=active]:bg-background"
-                >
-                  <div className="flex items-start justify-between w-full gap-2">
-                    <div className="flex-1 min-w-0">
-                      <div className="font-medium truncate">{assessment.name}</div>
-                      <div className="text-xs text-muted-foreground mt-0.5">
-                        {format(new Date(assessment.startDate), "dd MMM")} - {format(new Date(assessment.endDate), "dd MMM yyyy")}
-                      </div>
-                    </div>
-                    <Badge 
-                      variant={withinPeriod ? "default" : "secondary"}
-                      className={`shrink-0 h-5 text-xs ${withinPeriod ? 'bg-green-600 hover:bg-green-700' : 'bg-red-600 hover:bg-red-700 text-white'}`}
-                    >
-                      {withinPeriod ? "Active" : "Closed"}
-                    </Badge>
-                  </div>
-                </TabsTrigger>
-              )
-            })}
-          </TabsList>
+        <div className="space-y-4">
+          {/* Assessment Selection Dropdown */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg">Select Assessment</CardTitle>
+              <CardDescription>Choose an assessment to evaluate your subordinates</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Select value={selectedAssessmentId} onValueChange={setSelectedAssessmentId}>
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Select an assessment" />
+                </SelectTrigger>
+                <SelectContent>
+                  {assessments.map((assessment) => {
+                    const withinPeriod = isWithinPeriod(assessment)
+                    return (
+                      <SelectItem key={assessment.id} value={assessment.id}>
+                        <div className="flex items-center justify-between w-full gap-2">
+                          <div className="flex-1">
+                            <div className="font-medium">{assessment.name}</div>
+                            <div className="text-xs text-muted-foreground">
+                              {format(new Date(assessment.startDate), "dd MMM")} - {format(new Date(assessment.endDate), "dd MMM yyyy")}
+                            </div>
+                          </div>
+                          <Badge 
+                            variant={withinPeriod ? "default" : "secondary"}
+                            className={`shrink-0 h-5 text-xs ml-2 ${withinPeriod ? 'bg-green-600 hover:bg-green-700' : 'bg-red-600 hover:bg-red-700 text-white'}`}
+                          >
+                            {withinPeriod ? "Active" : "Closed"}
+                          </Badge>
+                        </div>
+                      </SelectItem>
+                    )
+                  })}
+                </SelectContent>
+              </Select>
+            </CardContent>
+          </Card>
 
-          {assessments.map((assessment) => {
-            const withinPeriod = isWithinPeriod(assessment)
+          {/* Assessment Details */}
+          {selectedAssessmentId && (() => {
+            const selectedAssessment = assessments.find(a => a.id === selectedAssessmentId)
+            if (!selectedAssessment) return null
+            
+            const withinPeriod = isWithinPeriod(selectedAssessment)
             
             return (
-              <TabsContent key={assessment.id} value={assessment.id} className="flex-1 mt-0">
-                <Card>
-                  <CardHeader>
-                    <CardTitle>{assessment.name}</CardTitle>
-                    {assessment.description && (
-                      <CardDescription>{assessment.description}</CardDescription>
-                    )}
-                    <div className="flex items-center gap-4 text-sm text-muted-foreground mt-2">
-                      <span>
-                        {format(new Date(assessment.startDate), "dd MMM yyyy")} - {format(new Date(assessment.endDate), "dd MMM yyyy")}
-                      </span>
-                      <Badge variant="outline">
-                        Superior: {(assessment.weightageSuperior * 100).toFixed(0)}%
-                      </Badge>
-                    </div>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-2">
-                      <p className="text-sm font-medium">Select a subordinate to assess:</p>
-                      <div className="grid gap-2">
-                        {subordinates.map((subordinate) => {
-                          // Check if assessment is completed for this subordinate
-                          const subordinateResults = assessmentResults.filter(
-                            (r: any) => 
-                              r.assessmentId === assessment.id && 
-                              r.assessorId === subordinate.assessorId &&
-                              r.positionId === subordinate.position?.id &&
-                              r.score !== null
-                          )
-                          
-                          const isCompleted = subordinate.position?.id && subordinateResults.length > 0
-                          
-                          return (
-                            <Button
-                              key={subordinate.id}
-                              variant="outline"
-                              className="justify-start h-auto py-3"
-                              onClick={() => router.push(`/staff/superior-assessments/${assessment.id}/${subordinate.id}`)}
-                              disabled={!withinPeriod}
-                            >
-                              <div className="flex items-center justify-between w-full">
-                                <div className="text-left">
-                                  <div className="font-semibold">{subordinate.name}</div>
-                                  <div className="text-xs text-muted-foreground">
-                                    {subordinate.staffOrgId} • {subordinate.position?.name || 'No Position'}
-                                  </div>
+              <Card>
+                <CardHeader>
+                  <CardTitle>{selectedAssessment.name}</CardTitle>
+                  {selectedAssessment.description && (
+                    <CardDescription>{selectedAssessment.description}</CardDescription>
+                  )}
+                  <div className="flex items-center gap-4 text-sm text-muted-foreground mt-2">
+                    <span>
+                      {format(new Date(selectedAssessment.startDate), "dd MMM yyyy")} - {format(new Date(selectedAssessment.endDate), "dd MMM yyyy")}
+                    </span>
+                    <Badge variant="outline">
+                      Superior: {(selectedAssessment.weightageSuperior * 100).toFixed(0)}%
+                    </Badge>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-2">
+                    <p className="text-sm font-medium">Select a subordinate to assess:</p>
+                    <div className="grid gap-2">
+                      {subordinates.map((subordinate) => {
+                        // Check if assessment is completed for this subordinate
+                        const subordinateResults = assessmentResults.filter(
+                          (r: any) => 
+                            r.assessmentId === selectedAssessment.id && 
+                            r.assessorId === subordinate.assessorId &&
+                            r.positionId === subordinate.position?.id &&
+                            r.score !== null
+                        )
+                        
+                        const isCompleted = subordinate.position?.id && subordinateResults.length > 0
+                        
+                        return (
+                          <Button
+                            key={subordinate.id}
+                            variant="outline"
+                            className="justify-start h-auto py-3"
+                            onClick={() => router.push(`/staff/superior-assessments/${selectedAssessment.id}/${subordinate.id}`)}
+                            disabled={!withinPeriod}
+                          >
+                            <div className="flex items-center justify-between w-full">
+                              <div className="text-left">
+                                <div className="font-semibold">{subordinate.name}</div>
+                                <div className="text-xs text-muted-foreground">
+                                  {subordinate.staffOrgId} • {subordinate.position?.name || 'No Position'}
                                 </div>
-                                {withinPeriod && !isCompleted && (
-                                  <Badge variant="destructive">Assess</Badge>
-                                )}
-                                {isCompleted && (
-                                  <Badge variant="default" className="bg-green-600 hover:bg-green-700 gap-1">
-                                    <IconCheck className="size-3" />
-                                    Completed
-                                  </Badge>
-                                )}
                               </div>
-                            </Button>
-                          )
-                        })}
-                      </div>
+                              {withinPeriod && !isCompleted && (
+                                <Badge variant="destructive">Assess</Badge>
+                              )}
+                              {isCompleted && (
+                                <Badge variant="default" className="bg-green-600 hover:bg-green-700 gap-1">
+                                  <IconCheck className="size-3" />
+                                  Completed
+                                </Badge>
+                              )}
+                            </div>
+                          </Button>
+                        )
+                      })}
                     </div>
-                  </CardContent>
-                </Card>
-              </TabsContent>
+                  </div>
+                </CardContent>
+              </Card>
             )
-          })}
-        </Tabs>
+          })()}
+        </div>
       )}
     </div>
   )
