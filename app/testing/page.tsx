@@ -129,10 +129,10 @@ export default function TestingPage() {
             <div className="text-sm text-gray-500 bg-gray-50 p-3 rounded-lg">
               <strong>Instructions:</strong>
               <ul className="list-disc list-inside mt-1 space-y-1">
-                <li>Enter a valid username or email from your database</li>
-                <li>Select the appropriate user type (Staff or Admin)</li>
+                <li>Enter a valid staff username or email from your database</li>
                 <li>Click "Test Reset Password" to send a reset email</li>
                 <li>Check the console for detailed request/response logs</li>
+                <li>Note: This test is only for staff members, not admin users</li>
               </ul>
             </div>
           </CardContent>
