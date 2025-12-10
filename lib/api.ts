@@ -85,37 +85,83 @@ export const authAPI = {
     console.log('📡 Full Request URL:', `${API_BASE_URL}/auth/forgot-password`);
     console.log('📨 Request data:', data);
     
+    // Retry mechanism for Railway cold start
+    const maxRetries = 2;
+    let lastError;
+    
+    for (let attempt = 1; attempt <= maxRetries; attempt++) {
+      try {
+        console.log(`🔍 Attempt ${attempt}/${maxRetries}: Sending request to Railway server...`);
+        
+        const response = await api.post('/auth/forgot-password', data, {
+          timeout: 60000, // 60 seconds for this specific request
+        })
+        
+        console.log('✅ SUCCESS! Response:', response);
+        return response;
+      } catch (error: any) {
+        lastError = error;
+        console.log(`❌ ATTEMPT ${attempt} FAILED!`);
+        console.log('❌ Error type:', error.name);
+        console.log('❌ Error message:', error.message);
+        console.log('❌ Error code:', error.code);
+        console.log('❌ Response status:', error.response?.status);
+        console.log('❌ Response data:', error.response);
+        
+        // If it's a timeout and we have retries left, continue
+        if (error.message?.includes('timeout') && attempt < maxRetries) {
+          console.log(`⏳ Timeout on attempt ${attempt}, retrying in 3 seconds...`);
+          await new Promise(resolve => setTimeout(resolve, 3000));
+          continue;
+        }
+        
+        // If it's not a timeout error, don't retry
+        if (!error.message?.includes('timeout')) {
+          break;
+        }
+      }
+    }
+    
+    // Handle final error after all retries
+    if (lastError.code === 'ECONNREFUSED' || lastError.code === 'NETWORK_ERROR') {
+      throw new Error('Cannot connect to server. Please check your network connection.');
+    } else if (lastError.message?.includes('timeout')) {
+      throw new Error('Railway server is slow to respond. This may be due to cold start. Please wait a moment and try again.');
+    } else if (lastError.response?.status === 404) {
+      throw new Error('Forgot password endpoint not found on the server.');
+    } else if (lastError.response?.status >= 500) {
+      throw new Error('Server error. Please try again later.');
+    }
+    
+    throw lastError;
+  },
+
+  resetPassword: async (data: { token: string; userType: 'staff' | 'admin'; newPassword: string }) => {
+    console.log('🔐 RESET PASSWORD REQUEST STARTING...');
+    console.log('📨 Request data:', { ...data, newPassword: '[HIDDEN]' });
+    
     try {
-      console.log('🔍 Sending request to Railway server...');
-      const response = await api.post('/auth/forgot-password', data);
-      console.log('✅ SUCCESS! Response:', response.data);
+      const response = await api.post('/auth/reset-password', data, {
+        timeout: 60000, // 60 seconds for password reset
+      });
+      console.log('✅ RESET PASSWORD SUCCESS!', response.data);
       return response.data;
     } catch (error: any) {
-      console.log('❌ FORGOT PASSWORD FAILED!');
-      console.log('❌ Error type:', error.name);
-      console.log('❌ Error message:', error.message);
-      console.log('❌ Error code:', error.code);
-      console.log('❌ Response status:', error.response?.status);
-      console.log('❌ Response data:', error.response?.data);
+      console.log('❌ RESET PASSWORD FAILED!');
+      console.log('❌ Error:', error.response?.data || error.message);
       
-      // Handle different types of errors
-      if (error.code === 'ECONNREFUSED' || error.code === 'NETWORK_ERROR') {
-        throw new Error('Cannot connect to server. Please check your network connection.');
-      } else if (error.message?.includes('timeout')) {
-        throw new Error('Request timeout. The server is taking too long to respond. Please try again.');
+      if (error.response?.status === 400) {
+        throw new Error(error.response.data?.error || 'Invalid request. Please check your input.');
       } else if (error.response?.status === 404) {
-        throw new Error('Forgot password endpoint not found on the server.');
+        throw new Error('Reset password endpoint not found.');
       } else if (error.response?.status >= 500) {
         throw new Error('Server error. Please try again later.');
+      } else if (error.message?.includes('timeout')) {
+        throw new Error('Railway server timeout. Please wait a moment and try again.');
       }
       
       throw error;
     }
-  },
-
-  resetPassword: async (data: { token: string; userType: 'staff' | 'admin'; newPassword: string }) => {
-    const response = await api.post('/auth/reset-password', data);
-    return response.data;
   },
 };
 
@@ -667,6 +713,32 @@ export const idpAPI = {
   generate: async (data: { staffId: string; assessmentId?: string }) => {
     const response = await api.post('/idp/generate', data);
     return response.data;
+  },
+  
+  exportCsv: async (data: { staffId: string; assessmentId?: string }) => {
+    const params = new URLSearchParams();
+    params.append('staffId', data.staffId);
+    if (data.assessmentId) {
+      params.append('assessmentId', data.assessmentId);
+    }
+    
+    const response = await api.get(`/idp/export-csv?${params.toString()}`, {
+      responseType: 'blob'
+    });
+    return response;
+  },
+  
+  exportPdf: async (data: { staffId: string; assessmentId?: string }) => {
+    const params = new URLSearchParams();
+    params.append('staffId', data.staffId);
+    if (data.assessmentId) {
+      params.append('assessmentId', data.assessmentId);
+    }
+    
+    const response = await api.get(`/idp/export-pdf/?${params.toString()}`, {
+      responseType: 'blob'
+    });
+    return response;
   },
 };
 

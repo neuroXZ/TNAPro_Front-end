@@ -8,11 +8,20 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { authAPI } from '@/lib/api';
 import { toast } from 'sonner';
+import { IconEye, IconEyeOff } from '@tabler/icons-react';
 
 export default function TestingPage() {
   const [identifier, setIdentifier] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [mounted, setMounted] = useState(false);
+  
+  // Reset password test states
+  const [resetToken, setResetToken] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [resetLoading, setResetLoading] = useState(false);
 
   useEffect(() => {
     setMounted(true);
@@ -67,6 +76,70 @@ export default function TestingPage() {
       }
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleTestResetPassword = async () => {
+    if (!resetToken.trim()) {
+      toast.error('Please enter a valid reset token');
+      return;
+    }
+
+    if (!newPassword.trim()) {
+      toast.error('Please enter a new password');
+      return;
+    }
+
+    if (newPassword.length < 8) {
+      toast.error('Password must be at least 8 characters long');
+      return;
+    }
+
+    if (newPassword !== confirmPassword) {
+      toast.error('Passwords do not match');
+      return;
+    }
+
+    // Check password strength
+    const hasUpperCase = /[A-Z]/.test(newPassword);
+    const hasLowerCase = /[a-z]/.test(newPassword);
+    const hasNumbers = /\d/.test(newPassword);
+    
+    if (!hasUpperCase || !hasLowerCase || !hasNumbers) {
+      toast.error('Password must contain uppercase, lowercase, and numbers');
+      return;
+    }
+
+    setResetLoading(true);
+    try {
+      const response = await authAPI.resetPassword({
+        token: resetToken.trim(),
+        userType: 'staff',
+        newPassword
+      });
+
+      toast.success(response.message || 'Password reset successful!');
+      
+      // Clear form after success
+      setResetToken('');
+      setNewPassword('');
+      setConfirmPassword('');
+    } catch (error: any) {
+      console.error('Reset password test error:', error);
+      
+      if (error.response?.status === 400) {
+        toast.error('Invalid or expired reset token');
+      } else if (error.response?.status === 404) {
+        toast.error('Reset password endpoint not found');
+      } else if (error.message?.includes('timeout')) {
+        toast.error('Request timeout. Please try again.');
+      } else if (error.message?.includes('network') || error.message?.includes('connect')) {
+        toast.error('Network error. Please check your connection.');
+      } else {
+        toast.error(error.message || 'Failed to reset password. Please try again.');
+      }
+    } finally {
+      setResetLoading(false);
     }
   };
 
@@ -133,6 +206,113 @@ export default function TestingPage() {
                 <li>Click "Test Reset Password" to send a reset email</li>
                 <li>Check the console for detailed request/response logs</li>
                 <li>Note: This test is only for staff members, not admin users</li>
+              </ul>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Reset Password Test */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              🔑 Reset Password Test
+            </CardTitle>
+            <CardDescription>
+              Test the reset password functionality with a token
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="resetToken">Reset Token</Label>
+                <Input
+                  id="resetToken"
+                  type="text"
+                  placeholder="Enter reset token from email link"
+                  value={resetToken}
+                  onChange={(e) => setResetToken(e.target.value)}
+                  disabled={resetLoading}
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="newPassword">New Password</Label>
+                <div className="relative">
+                  <Input
+                    id="newPassword"
+                    type={showPassword ? "text" : "password"}
+                    placeholder="Enter new password"
+                    value={newPassword}
+                    onChange={(e) => setNewPassword(e.target.value)}
+                    disabled={resetLoading}
+                    minLength={8}
+                  />
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                    onClick={() => setShowPassword(!showPassword)}
+                    disabled={resetLoading}
+                  >
+                    {showPassword ? (
+                      <IconEyeOff className="size-4 text-muted-foreground" />
+                    ) : (
+                      <IconEye className="size-4 text-muted-foreground" />
+                    )}
+                  </Button>
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="confirmPassword">Confirm Password</Label>
+                <div className="relative">
+                  <Input
+                    id="confirmPassword"
+                    type={showConfirmPassword ? "text" : "password"}
+                    placeholder="Confirm new password"
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    disabled={resetLoading}
+                    minLength={8}
+                  />
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                    disabled={resetLoading}
+                  >
+                    {showConfirmPassword ? (
+                      <IconEyeOff className="size-4 text-muted-foreground" />
+                    ) : (
+                      <IconEye className="size-4 text-muted-foreground" />
+                    )}
+                  </Button>
+                </div>
+                <div className="text-xs text-muted-foreground">
+                  Password must be at least 8 characters with uppercase, lowercase, and numbers
+                </div>
+              </div>
+            </div>
+
+            <Button 
+              onClick={handleTestResetPassword} 
+              disabled={resetLoading}
+              className="w-full"
+            >
+              {resetLoading ? 'Testing Reset Password...' : 'Test Reset Password'}
+            </Button>
+
+            <div className="text-sm text-gray-500 bg-gray-50 p-3 rounded-lg">
+              <strong>Instructions:</strong>
+              <ul className="list-disc list-inside mt-1 space-y-1">
+                <li>Get a reset token by using the "Test Reset Password" section above first</li>
+                <li>Copy the token from the email link (after token= in the URL)</li>
+                <li>Enter a new password that meets the requirements</li>
+                <li>Click "Test Reset Password" to complete the reset</li>
+                <li>Check the console for detailed request/response logs</li>
               </ul>
             </div>
           </CardContent>

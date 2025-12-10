@@ -18,7 +18,7 @@ import {
 import { Input } from "@/components/ui/input"
 import { toast } from "sonner"
 import { IconEye, IconEyeOff } from "@tabler/icons-react"
-import { authAPI } from "@/lib/api"
+import { authAPI, settingAPI } from "@/lib/api"
 import {
   Dialog,
   DialogContent,
@@ -27,7 +27,6 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog"
-// import { settingAPI, API_SERVER_URL } from "@/lib/api"
 
 export function LoginForm({
   className,
@@ -45,22 +44,22 @@ export function LoginForm({
   const [isForgotPasswordLoading, setIsForgotPasswordLoading] = useState(false);
 
   // Fetch logo from settings on component mount
-  // useEffect(() => {
-  //   const fetchLogo = async () => {
-  //     try {
-  //       const data = await settingAPI.getPublicLogo();
-  //       if (data && data.logoPath) {
-  //         // Construct full URL for the logo
-  //         const fullLogoUrl = `${API_SERVER_URL}${data.logoPath}`;
-  //         setLogoPath(fullLogoUrl);
-  //       }
-  //     } catch (error) {
-  //       console.warn('Failed to fetch logo, using default');
-  //     }
-  //   };
+  useEffect(() => {
+    const fetchLogo = async () => {
+      try {
+        const data = await settingAPI.getPublicLogo();
+        if (data && data.logoPath) {
+          setLogoPath(data.logoPath);
+        }
+      } catch (error) {
+        console.warn('Failed to fetch logo, using default TNA logo');
+        // Keep logoPath as null to show default TNA logo
+        setLogoPath(null);
+      }
+    };
 
-  //   fetchLogo();
-  // }, []);
+    fetchLogo();
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -116,13 +115,13 @@ export function LoginForm({
             <FieldGroup>
               <div className="flex flex-col items-center gap-2 text-center">
                 {logoPath ? (
-                  <div className="h-16 w-16 rounded-full overflow-hidden shadow-lg border-2 border-primary/10">
+                  <div>
                     <Image
                       src={logoPath}
                       alt="Company Logo"
-                      width={64}
-                      height={64}
-                      className="h-full w-full object-cover"
+                      width={40}
+                      height={40}
+                      className="h-[40px] w-full object-cover"
                     />
                   </div>
                 ) : (
@@ -289,8 +288,7 @@ export function LoginForm({
         </CardContent>
       </Card>
       <FieldDescription className="px-6 text-center">
-        By clicking continue, you agree to our <a href="#">Terms of Service</a>{" "}
-        and <a href="#">Privacy Policy</a>.
+        copywright © {new Date().getFullYear()} TNAPro. All rights reserved.
       </FieldDescription>
     </div>
   )

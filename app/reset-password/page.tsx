@@ -38,6 +38,12 @@ function ResetPasswordForm() {
       return
     }
 
+    // Enhanced password validation
+    if (!newPassword.trim()) {
+      toast.error("Password is required")
+      return
+    }
+
     if (newPassword.length < 8) {
       toast.error("Password must be at least 8 characters long")
       return
@@ -48,19 +54,46 @@ function ResetPasswordForm() {
       return
     }
 
+    // Check password strength
+    const hasUpperCase = /[A-Z]/.test(newPassword)
+    const hasLowerCase = /[a-z]/.test(newPassword)
+    const hasNumbers = /\d/.test(newPassword)
+    
+    if (!hasUpperCase || !hasLowerCase || !hasNumbers) {
+      toast.error("Password must contain at least one uppercase letter, lowercase letter, and number")
+      return
+    }
+
     setIsLoading(true)
 
     try {
-      await authAPI.resetPassword({
+      const response = await authAPI.resetPassword({
         token,
         userType,
         newPassword
       })
       
-      toast.success("Password reset successful! You can now login with your new password.")
-      router.push("/login")
+      toast.success(response.message || "Password reset successful! You can now login with your new password.")
+      
+      // Redirect to login after a brief delay
+      setTimeout(() => {
+        router.push("/login")
+      }, 2000)
+      
     } catch (error: any) {
-      toast.error(error.message || "Failed to reset password. The link may be expired.")
+      console.error('Reset password error:', error)
+      
+      if (error.response?.status === 400) {
+        toast.error(error.response.data?.error || "Invalid request. The reset link may be invalid or expired.")
+      } else if (error.response?.status === 404) {
+        toast.error("Reset password service not available. Please try again later.")
+      } else if (error.message?.includes('timeout')) {
+        toast.error("Request timeout. The server is taking too long. Please try again.")
+      } else if (error.message?.includes('network') || error.message?.includes('connect')) {
+        toast.error("Network error. Please check your connection and try again.")
+      } else {
+        toast.error(error.message || "Failed to reset password. Please try again or request a new reset link.")
+      }
     } finally {
       setIsLoading(false)
     }
@@ -122,6 +155,9 @@ function ResetPasswordForm() {
                       <IconEye className="size-4 text-muted-foreground" />
                     )}
                   </Button>
+                </div>
+                <div className="text-xs text-muted-foreground mt-1">
+                  Password must be at least 8 characters with uppercase, lowercase, and numbers
                 </div>
               </Field>
 

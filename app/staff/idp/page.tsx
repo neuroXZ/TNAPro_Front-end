@@ -71,6 +71,7 @@ export default function MyIdpPage() {
   const [idpResult, setIdpResult] = useState<IdpResult | null>(null)
   const [isLoading, setIsLoading] = useState(false)
   const [isLoadingAssessments, setIsLoadingAssessments] = useState(true)
+  const [isExporting, setIsExporting] = useState(false)
 
   useEffect(() => {
     fetchAssessments()
@@ -144,6 +145,80 @@ export default function MyIdpPage() {
       }
     } finally {
       setIsLoading(false)
+    }
+  }
+
+  const handleExportPdf = async () => {
+    if (!idpResult || !user?.id) {
+      toast.error("No IDP data to export")
+      return
+    }
+
+    try {
+      setIsExporting(true)
+      
+      const response = await idpAPI.exportPdf({
+        staffId: user.id,
+        assessmentId: selectedAssessmentId
+      })
+      
+      // Create blob and open in new tab
+      const blob = new Blob([response.data], { type: 'application/pdf' })
+      const url = window.URL.createObjectURL(blob)
+      
+      // Open PDF in new tab
+      window.open(url, '_blank')
+      
+      // Clean up URL object after a delay to ensure it opens
+      setTimeout(() => {
+        window.URL.revokeObjectURL(url)
+      }, 1000)
+      
+      toast.success("IDP opened in new tab!")
+    } catch (error: any) {
+      console.error("Export failed:", error)
+      toast.error(error.response?.data?.error || "Failed to export IDP")
+    } finally {
+      setIsExporting(false)
+    }
+  }
+
+  const handleExportCsv = async () => {
+    if (!idpResult || !user?.id) {
+      toast.error("No IDP data to export")
+      return
+    }
+
+    try {
+      setIsExporting(true)
+      
+      const response = await idpAPI.exportCsv({
+        staffId: user.id,
+        assessmentId: selectedAssessmentId
+      })
+      
+      // Create blob and download
+      const blob = new Blob([response.data], { type: 'text/csv' })
+      const url = window.URL.createObjectURL(blob)
+      const link = document.createElement('a')
+      link.href = url
+      
+      // Generate filename with staff name and date
+      const staffName = idpResult.staffName.replace(/\s/g, '_')
+      const dateStr = new Date().toISOString().slice(0, 10)
+      link.download = `IDP_${staffName}_${dateStr}.csv`
+      
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+      window.URL.revokeObjectURL(url)
+      
+      toast.success("IDP exported successfully!")
+    } catch (error: any) {
+      console.error("Export failed:", error)
+      toast.error(error.response?.data?.error || "Failed to export IDP")
+    } finally {
+      setIsExporting(false)
     }
   }
 
@@ -282,10 +357,26 @@ export default function MyIdpPage() {
             <CardHeader>
               <div className="flex items-center justify-between">
                 <CardTitle>Competency Gap Analysis</CardTitle>
-                <Button variant="outline" size="sm">
-                  <IconDownload className="size-4 mr-2" />
-                  Export PDF
-                </Button>
+                <div className="flex gap-2">
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={handleExportCsv}
+                    disabled={isExporting}
+                  >
+                    <IconDownload className="size-4 mr-2" />
+                    {isExporting ? "Exporting..." : "Export CSV"}
+                  </Button>
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={handleExportPdf}
+                    disabled={isExporting}
+                  >
+                    <IconDownload className="size-4 mr-2" />
+                    {isExporting ? "Opening..." : "View PDF"}
+                  </Button>
+                </div>
               </div>
             </CardHeader>
             <CardContent>
