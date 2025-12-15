@@ -187,7 +187,29 @@ export default function MyAssessments() {
 
   // Filter assessments
   const completedAssessments = assessments.filter(a => a.status === "completed")
-  const pendingAssessments = assessments.filter(a => a.status === "pending" || a.status === "not-started")
+  
+  // Filter pending assessments (only those that are available/open for answering)
+  const pendingAssessments = assessments.filter(a => {
+    const currentDate = new Date()
+    const startDate = new Date(a.startDate)
+    const endDate = new Date(a.endDate)
+    currentDate.setHours(0, 0, 0, 0)
+    startDate.setHours(0, 0, 0, 0)
+    endDate.setHours(0, 0, 0, 0)
+    
+    // Only show pending/not-started assessments that are within the assessment period
+    return (a.status === "pending" || a.status === "not-started") && 
+           currentDate >= startDate && currentDate <= endDate
+  })
+  
+  // Filter expired assessments (past end date)
+  const expiredAssessments = assessments.filter(a => {
+    const currentDate = new Date()
+    const endDate = new Date(a.endDate)
+    currentDate.setHours(0, 0, 0, 0)
+    endDate.setHours(0, 0, 0, 0)
+    return currentDate > endDate && a.status !== "completed"
+  })
 
   // Calculate overall averages
   const overallAverage = assessments.filter(a => a.averageScore > 0).length > 0
@@ -298,6 +320,7 @@ export default function MyAssessments() {
           <TabsTrigger value="all">All Assessments</TabsTrigger>
           <TabsTrigger value="completed">Completed</TabsTrigger>
           <TabsTrigger value="pending">Pending</TabsTrigger>
+          <TabsTrigger value="expired">Expired</TabsTrigger>
         </TabsList>
 
         <TabsContent value="all" className="space-y-4">
@@ -386,6 +409,35 @@ export default function MyAssessments() {
             </CardContent>
           </Card>
         </TabsContent>
+
+        <TabsContent value="expired" className="space-y-4">
+          <Card>
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <div>
+                  <CardTitle>Expired Assessments</CardTitle>
+                  <CardDescription>
+                    Assessments that have passed their due date
+                  </CardDescription>
+                </div>
+                <Badge variant="destructive" className="text-white">{expiredAssessments.length} Total</Badge>
+              </div>
+            </CardHeader>
+            <CardContent>
+              {expiredAssessments.length === 0 ? (
+                <div className="text-center py-8 text-muted-foreground">
+                  No expired assessments
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {expiredAssessments.map((assessment) => (
+                    <AssessmentCard key={assessment.id} assessment={assessment} />
+                  ))}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
       </Tabs>
     </div>
   )
@@ -412,7 +464,12 @@ function AssessmentCard({ assessment }: { assessment: AssessmentWithStatus }) {
     } else if (currentDate >= startDate && currentDate <= endDate) {
       return { status: "Open", variant: "default" as const, className: "bg-green-500 text-white hover:bg-green-600" }
     } else {
-      return { status: "End", variant: "outline" as const, className: "bg-red-500 text-white hover:bg-red-600" }
+      // Check if completed or expired
+      if (assessment.status === "completed") {
+        return { status: "Completed", variant: "outline" as const, className: "bg-blue-500 text-white hover:bg-blue-600" }
+      } else {
+        return { status: "Expired", variant: "destructive" as const, className: "bg-red-500 text-white hover:bg-red-600" }
+      }
     }
   }
 
