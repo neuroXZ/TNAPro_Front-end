@@ -205,9 +205,9 @@ export default function MyCompetencies() {
       <div className="space-y-4">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
           <TabsList className="grid w-full" style={{ gridTemplateColumns: `repeat(${clusters.length + 1}, minmax(0, 1fr))` }}>
-            <TabsTrigger value="all">
+            {/* <TabsTrigger value="all">
               All ({competencies.length})
-            </TabsTrigger>
+            </TabsTrigger> */}
             {clusters.map((cluster) => (
               <TabsTrigger key={cluster.name} value={cluster.name} className="gap-2">
                 <div 
@@ -219,7 +219,7 @@ export default function MyCompetencies() {
             ))}
           </TabsList>
 
-        <TabsContent value="all" className="space-y-4">
+        {/* <TabsContent value="all" className="space-y-4">
           {!userPositionId ? (
             <Card>
               <CardContent className="py-8">
@@ -284,7 +284,7 @@ export default function MyCompetencies() {
               </Card>
             ))
           )}
-        </TabsContent>
+        </TabsContent> */}
 
         {clusters.map((cluster) => (
           <TabsContent key={cluster.name} value={cluster.name} className="space-y-4">

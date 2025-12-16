@@ -1,154 +1,418 @@
 "use client"
 
-import { useEffect, useState } from "react"
-import { toast } from "sonner"
+import React, { useState, useEffect } from "react"
+import { rtnAPI, assessmentAPI } from "@/lib/api"
 import { useAuth } from "@/lib/auth-context"
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card"
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table"
 
-// Import types and components
-import { TrainingGroup, TrainingStatus, RtnReportResponse } from "./types"
-import { LoadingState, ErrorState, TrainingContent } from "./components"
-import { TrainingService } from "./services"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
+import { Input } from "@/components/ui/input"
+import { Badge } from "@/components/ui/badge"
+import { IconSearch, IconCalendar, IconUser, IconTarget, IconChevronRight, IconChevronDown } from "@tabler/icons-react"
+import { toast } from "sonner"
+import { format } from "date-fns"
 
-export default function MyTraining() {
-  // ===== STATE MANAGEMENT =====
+
+
+// Backend RTN Response structure
+interface RTNReportResponse {
+  staffId: string
+  staffName: string | null
+  positionName: string | null
+  assessmentId: string
+  results: RecommendedTrainingRecord[]
+  generatedAt: string
+}
+
+interface RecommendedTrainingRecord {
+  trainingId: string
+  trainingName: string | null
+  startDate: string | null
+  endDate: string | null
+  relatedCompetency: {
+    competencyId: string
+    competencyName: string | null
+    clusterName: string | null
+    requiredLevel: number
+    weightedGap: number
+  }
+}
+
+export default function StaffTrainingTestingPage() {
   const { user } = useAuth()
-  const [trainings, setTrainings] = useState<TrainingGroup[]>([])
-  const [rtnReport, setRtnReport] = useState<RtnReportResponse | null>(null)
+  const [recommendedTrainings, setRecommendedTrainings] = useState<RecommendedTrainingRecord[]>([])
+  const [isLoadingRecommended, setIsLoadingRecommended] = useState(false)
+  const [searchQuery, setSearchQuery] = useState("")
   const [selectedAssessmentId, setSelectedAssessmentId] = useState<string>("")
-  const [isLoading, setIsLoading] = useState(true)
-  const [isExporting, setIsExporting] = useState(false)
-  const [activeTab, setActiveTab] = useState<TrainingStatus>('ongoing')
-  const [error, setError] = useState<string | null>(null)
+  const [assessments, setAssessments] = useState<any[]>([])
+  const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set())
 
-  // ===== EFFECTS =====
+  const toggleRow = (trainingId: string) => {
+    const newExpanded = new Set(expandedRows)
+    if (newExpanded.has(trainingId)) {
+      newExpanded.delete(trainingId)
+    } else {
+      newExpanded.add(trainingId)
+    }
+    setExpandedRows(newExpanded)
+  }
+
   useEffect(() => {
-    if (user?.id) {
+    fetchAssessments()
+  }, [])
+
+  const fetchAssessments = async () => {
+    try {
+      const data = await assessmentAPI.getAll()
+      setAssessments(data)
+      // Auto-select the first assessment if available
+      if (data.length > 0) {
+        setSelectedAssessmentId(data[0].id)
+      }
+    } catch (error: any) {
+      console.error("Failed to fetch assessments:", error)
+    }
+  }
+
+  useEffect(() => {
+    if (user?.id && selectedAssessmentId) {
       fetchRecommendedTrainings()
     }
-  }, [user])
+  }, [user?.id, selectedAssessmentId])
 
-  // ===== MAIN DATA FETCHING =====
+
+
   const fetchRecommendedTrainings = async () => {
-    try {
-      setIsLoading(true)
-      setError(null)
-
-      const { report, assessmentId } = await TrainingService.fetchRecommendedTrainings(user!.id)
-      
-      setSelectedAssessmentId(assessmentId)
-      setRtnReport(report)
-
-      // Group trainings to avoid duplicates
-      const trainingGroups = TrainingService.groupTrainingsByTrainingId(report.results)
-      setTrainings(trainingGroups)
-      
-    } catch (error: any) {
-      handleFetchError(error)
-    } finally {
-      setIsLoading(false)
-    }
-  }
-
-  // ===== ERROR HANDLING =====
-  const handleFetchError = (error: any) => {
-    console.error("Error fetching recommended trainings:", error)
-    console.log("Error response:", error.response?.data)
-    console.log("Error status:", error.response?.status)
-    console.log("Error message:", error.message)
-    
-    if (error.response?.status === 404) {
-      const message = error.response?.data?.message || ""
-      console.log("404 Error message from backend:", message)
-      
-      if (message.includes("No training recommendations found") || message.includes("gap > 1.5")) {
-        console.log("⚠️ Backend says no training recommendations (gap <= 1.5)")
-        setError("Excellent! No training recommendations needed. Your competency levels are meeting requirements.")
-        setTrainings([])
-      } else {
-        console.log("⚠️ 404 - Recommended Training endpoint not available in Railway deployment")
-        setError("Recommended Training feature is currently unavailable. This feature may not be deployed to the current server yet.")
-        toast.error("Feature temporarily unavailable")
-      }
-    } else if (error.response?.status === 400) {
-      setError("Invalid request. Please try again.")
-      toast.error("Invalid request parameters")
-    } else if (error.response?.status === 500) {
-      const serverError = error.response?.data?.error || "Server error"
-      console.log("500 Server error details:", error.response?.data)
-      setError(`Server error: ${serverError}`)
-      toast.error("Server error occurred")
-    } else if (error.code === 'ECONNREFUSED' || error.message.includes('Network Error')) {
-      setError("Unable to connect to server. Please check your internet connection.")
-      toast.error("Connection error")
-    } else {
-      console.log("Unknown error details:", error.response?.data)
-      const errorMessage = error.response?.data?.error || error.message || "Failed to load training recommendations"
-      setError(`Error: ${errorMessage}`)
-      toast.error(errorMessage)
-    }
-  }
-
-  // ===== EXPORT HANDLING =====
-  const handleExport = async () => {
-    if (!selectedAssessmentId || !user?.id) {
-      toast.error("Missing required data for export")
+    if (!user?.id || !selectedAssessmentId) {
+      toast.error("Please select an assessment first")
       return
     }
     
     try {
-      setIsExporting(true)
-      await TrainingService.exportTrainingReport(user.id, selectedAssessmentId)
+      setIsLoadingRecommended(true)
+      
+      // Use RTN API directly - backend handles all the complex logic
+      const rtnReport: RTNReportResponse = await rtnAPI.getReport({ 
+        staffId: user.id, 
+        assessmentId: selectedAssessmentId
+      })
+      
+      // Backend already returns the complete recommended training records
+      setRecommendedTrainings(rtnReport.results || [])
+      
     } catch (error: any) {
-      console.error('Export error:', error)
-      toast.error("Failed to export training report")
+      if (error.response?.status === 404) {
+        toast.info("No training recommendations found. Complete your assessment to get personalized recommendations.")
+        setRecommendedTrainings([])
+      } else {
+        toast.error("Failed to fetch recommended trainings")
+        console.error(error)
+      }
     } finally {
-      setIsExporting(false)
+      setIsLoadingRecommended(false)
     }
   }
 
-  // ===== UTILITY FUNCTIONS =====
-  const getTrainingStatus = (training: TrainingGroup): TrainingStatus => {
-    return TrainingService.getTrainingStatus(training)
+
+
+  const filteredRecommendedTrainings = recommendedTrainings.filter((record) =>
+    record.trainingName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    record.relatedCompetency.competencyName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    record.relatedCompetency.clusterName?.toLowerCase().includes(searchQuery.toLowerCase())
+  )
+
+  const formatDate = (dateString?: string) => {
+    if (!dateString) return "No date set"
+    try {
+      return format(new Date(dateString), "MMM dd, yyyy")
+    } catch {
+      return "Invalid date"
+    }
   }
 
-  const filterTrainingsByStatus = (status: TrainingStatus) => {
-    return TrainingService.filterTrainingsByStatus(trainings, status)
+
+
+  const getStatusVariant = (status: string) => {
+    switch (status) {
+      case "Upcoming": return "default"
+      case "Ongoing": return "default"
+      case "Completed": return "secondary"
+      default: return "outline"
+    }
   }
 
-  // ===== COMPUTED VALUES =====
-  const upcomingCount = filterTrainingsByStatus('upcoming').length
-  const ongoingCount = filterTrainingsByStatus('ongoing').length
-  const pastCount = filterTrainingsByStatus('past').length
-  const isSuccessMessage = error?.includes("meeting requirements") || false
-
-  // ===== RENDER STATES =====
-  if (isLoading) {
-    return <LoadingState />
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case "Upcoming": return "text-blue-600 bg-blue-50"
+      case "Ongoing": return "text-green-600 bg-green-50"
+      case "Completed": return "text-gray-600 bg-gray-50"
+      default: return "text-yellow-600 bg-yellow-50"
+    }
   }
 
-  if (error) {
+  const getRecommendedTrainingStatus = (record: RecommendedTrainingRecord) => {
+    if (!record.startDate || !record.endDate) return "No dates"
+    
+    const now = new Date()
+    const start = new Date(record.startDate)
+    const end = new Date(record.endDate)
+    
+    if (now < start) return "Upcoming"
+    if (now > end) return "Completed"
+    return "Ongoing"
+  }
+
+
+
+
+
+  // Group recommended trainings by training ID
+  const groupedRecommendedTrainings = (recommendedData: RecommendedTrainingRecord[]) => {
+    const grouped = new Map<string, {
+      training: RecommendedTrainingRecord,
+      competencies: RecommendedTrainingRecord[]
+    }>()
+
+    recommendedData.forEach(record => {
+      const key = record.trainingId
+      if (!grouped.has(key)) {
+        grouped.set(key, {
+          training: record,
+          competencies: [record]
+        })
+      } else {
+        grouped.get(key)?.competencies.push(record)
+      }
+    })
+
+    return Array.from(grouped.values())
+  }
+
+  const renderRecommendedTrainingTable = (recommendedData: RecommendedTrainingRecord[]) => {
+    const groupedData = groupedRecommendedTrainings(recommendedData)
+
     return (
-      <ErrorState 
-        error={error} 
-        isSuccessMessage={isSuccessMessage}
-        onRetry={fetchRecommendedTrainings}
-      />
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead className="w-[50px]"></TableHead>
+            <TableHead className="w-[300px]">Training Name</TableHead>
+            <TableHead className="w-[120px]">Start Date</TableHead>
+            <TableHead className="w-[120px]">End Date</TableHead>
+            <TableHead className="w-[100px]">Status</TableHead>
+            <TableHead className="w-[100px]">Competencies</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {groupedData.map((group) => {
+            const { training, competencies } = group
+            const status = getRecommendedTrainingStatus(training)
+            const isExpanded = expandedRows.has(training.trainingId)
+            
+            return (
+              <React.Fragment key={training.trainingId}>
+                {/* Main Training Row */}
+                <TableRow 
+                  className="hover:bg-muted/50 cursor-pointer"
+                  onClick={() => toggleRow(training.trainingId)}
+                >
+                  <TableCell>
+                    <div className="flex items-center justify-center">
+                      {isExpanded ? (
+                        <IconChevronDown className="h-4 w-4 transition-transform" />
+                      ) : (
+                        <IconChevronRight className="h-4 w-4 transition-transform" />
+                      )}
+                    </div>
+                  </TableCell>
+                  <TableCell className="font-medium">
+                    <div className="flex items-center gap-2">
+                      <IconTarget className="h-4 w-4 text-blue-500" />
+                      {training.trainingName || "N/A"}
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    <div className="text-sm">
+                      {formatDate(training.startDate)}
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    <div className="text-sm">
+                      {formatDate(training.endDate)}
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    <Badge 
+                      variant={getStatusVariant(status)}
+                      className={getStatusColor(status)}
+                    >
+                      {status}
+                    </Badge>
+                  </TableCell>
+                  <TableCell>
+                    <Badge className="text-xs">
+                      {competencies.length} competenc{competencies.length === 1 ? 'y' : 'ies'}
+                    </Badge>
+                  </TableCell>
+                </TableRow>
+
+                {/* Expanded Competencies */}
+                {isExpanded && (
+                  <TableRow>
+                    <TableCell colSpan={6} className="p-0">
+                      <div className="bg-muted/30 px-6 py-4">
+                        <div className="space-y-3">
+                          <h4 className="text-sm font-medium text-muted-foreground mb-3">
+                            Related Competencies & Gap Analysis:
+                          </h4>
+                          <div className="grid gap-3">
+                            {competencies.map((record, index) => (
+                              <div 
+                                key={`${record.trainingId}-${record.relatedCompetency.competencyId}-${index}`}
+                                className="flex items-center justify-between p-3 bg-background rounded-md border"
+                              >
+                                <div className="flex-1">
+                                  <div className="flex items-center gap-2 mb-1">
+                                    <span className="font-medium text-sm">
+                                      {record.relatedCompetency.competencyName || "N/A"}
+                                    </span>
+                                    {record.relatedCompetency.clusterName && (
+                                      <Badge variant="outline" className="text-xs">
+                                        {record.relatedCompetency.clusterName}
+                                      </Badge>
+                                    )}
+                                  </div>
+                                  {/* <div className="text-xs text-muted-foreground">
+                                    Required Level: {record.relatedCompetency.requiredLevel}
+                                  </div> */}
+                                </div>
+                                <div className="text-right">
+                                  <Badge variant="destructive" className="text-xs">
+                                    {/* Gap: {record.relatedCompetency.weightedGap.toFixed(1)} */}
+                                    Required Level: {record.relatedCompetency.requiredLevel}
+                                  </Badge>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                )}
+              </React.Fragment>
+            )
+          })}
+        </TableBody>
+      </Table>
     )
   }
 
-  // ===== MAIN RENDER =====
   return (
-    <TrainingContent
-      trainings={trainings}
-      activeTab={activeTab}
-      setActiveTab={setActiveTab}
-      upcomingCount={upcomingCount}
-      ongoingCount={ongoingCount}
-      pastCount={pastCount}
-      isExporting={isExporting}
-      onExport={handleExport}
-      getTrainingStatus={getTrainingStatus}
-      filterTrainingsByStatus={filterTrainingsByStatus}
-    />
+    <div className="container mx-auto p-6">
+      <div className="mb-6">
+        <h1 className="text-2xl font-bold">Recommended Training Programs</h1>
+        <p className="text-muted-foreground">Personalized training recommendations based on your competency assessment</p>
+      </div>
+
+      {/* Search */}
+      <div className="mb-6">
+        <div className="relative">
+          <IconSearch className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+          <Input
+            placeholder="Search trainings..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="pl-9"
+          />
+        </div>
+      </div>
+
+      {/* Recommended Training Programs */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <IconTarget className="h-5 w-5 text-blue-500" />
+            Recommended Training Programs
+          </CardTitle>
+          <CardDescription>
+            Personalized training recommendations based on your IDP and competency assessment
+          </CardDescription>
+          
+          {/* Assessment Selector */}
+          <div className="flex items-center gap-4 mt-4">
+            <label className="text-sm font-medium">Select Assessment:</label>
+            <Select value={selectedAssessmentId} onValueChange={setSelectedAssessmentId}>
+              <SelectTrigger className="w-[300px]">
+                <SelectValue placeholder="Choose an assessment..." />
+              </SelectTrigger>
+              <SelectContent>
+                {assessments.map((assessment) => (
+                  <SelectItem key={assessment.id} value={assessment.id}>
+                    {assessment.name} 
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        </CardHeader>
+        <CardContent>
+          {isLoadingRecommended ? (
+            <div className="animate-pulse space-y-4">
+              <div className="h-4 bg-gray-200 rounded w-1/4"></div>
+              <div className="space-y-3">
+                {[...Array(3)].map((_, i) => (
+                  <div key={i} className="flex space-x-4">
+                    <div className="h-4 bg-gray-200 rounded flex-1"></div>
+                    <div className="h-4 bg-gray-200 rounded w-32"></div>
+                    <div className="h-4 bg-gray-200 rounded w-24"></div>
+                    <div className="h-4 bg-gray-200 rounded w-20"></div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ) : filteredRecommendedTrainings.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-12">
+              <IconTarget className="h-12 w-12 text-muted-foreground mb-4" />
+              <p className="text-muted-foreground text-center">
+                {searchQuery 
+                  ? "No recommended trainings found matching your search." 
+                  : "No personalized recommendations available. Complete your assessment to get training recommendations."}
+              </p>
+            </div>
+          ) : (
+            renderRecommendedTrainingTable(filteredRecommendedTrainings)
+          )}
+          
+          {/* Summary */}
+          {!isLoadingRecommended && (
+            <div className="mt-4 text-center text-sm text-muted-foreground">
+              Showing {filteredRecommendedTrainings.length} of {recommendedTrainings.length} recommended trainings
+              {searchQuery && ` for "${searchQuery}"`}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+    </div>
   )
 }

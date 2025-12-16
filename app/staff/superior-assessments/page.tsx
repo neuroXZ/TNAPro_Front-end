@@ -283,9 +283,10 @@ export default function SuperiorAssessmentsPage() {
                       <SelectItem key={assessment.id} value={assessment.id}>
                         <div className="flex items-center justify-between w-full gap-2">
                           <div className="flex-1">
-                            <div className="font-medium">{assessment.name}</div>
-                            <div className="text-xs text-muted-foreground">
-                              {format(new Date(assessment.startDate), "dd MMM")} - {format(new Date(assessment.endDate), "dd MMM yyyy")}
+                            <div className="font-medium">{assessment.name}
+                            <span className="text-xs text-muted-foreground ">
+                              -- {format(new Date(assessment.startDate), "dd MMM")} - {format(new Date(assessment.endDate), "dd MMM yyyy")}
+                            </span>
                             </div>
                           </div>
                           <Badge 
@@ -295,6 +296,7 @@ export default function SuperiorAssessmentsPage() {
                             {withinPeriod ? "Active" : "Closed"}
                           </Badge>
                         </div>
+                        
                       </SelectItem>
                     )
                   })}
