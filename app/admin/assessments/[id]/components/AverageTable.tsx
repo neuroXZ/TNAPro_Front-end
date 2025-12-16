@@ -66,7 +66,7 @@ export function AverageTable({ averages }: AverageTableProps) {
                   <TableRow key={avg.competencyId}>
                     <TableCell className="font-medium">{avg.competencyName}</TableCell>
                     <TableCell className="text-center">
-                      <Badge variant="secondary">{avg.staffCount}</Badge>
+                      {avg.staffCount}
                     </TableCell>
                     <TableCell className="text-center">{avg.averageRequiredLevel.toFixed(2)}</TableCell>
                     <TableCell className={`text-center ${getScoreColor(avg.averageScore)}`}>
