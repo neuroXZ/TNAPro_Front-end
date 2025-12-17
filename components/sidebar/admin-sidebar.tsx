@@ -93,7 +93,7 @@ const navMainItems = [
         url: "/admin/competencies",
       },
       {
-        title: "Position Competencies",
+        title: "Competency Mapping",
         url: "/admin/position-competencies",
       },
 
@@ -109,7 +109,7 @@ const navMainItems = [
         url: "/admin/trainings",
       },
       {
-        title: "Training Competencies",
+        title: "Training Mapping",
         url: "/admin/training-competencies",
       },
 

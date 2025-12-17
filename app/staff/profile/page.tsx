@@ -47,6 +47,8 @@ export default function MyProfile() {
   const [profile, setProfile] = useState<ProfileData | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [isEditing, setIsEditing] = useState(false)
+  const [isUploadingPhoto, setIsUploadingPhoto] = useState(false)
+  const [imageLoadError, setImageLoadError] = useState(false)
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -259,6 +261,67 @@ export default function MyProfile() {
     }
   }
 
+  const handlePhotoUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0]
+    if (!file) return
+
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      toast.error('Please select a valid image file')
+      return
+    }
+
+    // Validate file size (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error('Image size should be less than 5MB')
+      return
+    }
+
+    try {
+      setIsUploadingPhoto(true)
+      const result = await staffAPI.uploadPhoto(file)
+      
+      console.log('Upload result:', result) // Debug log
+      
+      // Get the image URL from response (check multiple possible fields)
+      const imageUrl = result.photoPath || result.path || result.url || result.secure_url
+      console.log('Extracted image URL:', imageUrl) // Debug log
+      
+      // Update profile with new image URL in database
+      if (profile && imageUrl) {
+        console.log('Updating profile with image URL:', imageUrl) // Debug log
+        await staffAPI.update(profile.id, { image: imageUrl })
+        
+        // Add timestamp to force image refresh and avoid cache issues
+        const imageUrlWithTimestamp = `${imageUrl}?t=${Date.now()}`
+        
+        setProfile({
+          ...profile,
+          image: imageUrlWithTimestamp
+        })
+        console.log('Profile updated with new image:', imageUrlWithTimestamp) // Debug log
+        
+        // Also refresh the page data to ensure sync
+        setTimeout(() => fetchProfile(), 1000)
+      }
+      
+      toast.success('Photo uploaded and saved successfully!')
+    } catch (error: any) {
+      console.error('Photo upload error:', error)
+      if (error.response?.status === 400) {
+        toast.error('Invalid image file or file too large (max 5MB)')
+      } else if (error.response?.status === 401) {
+        toast.error('Please login again to upload photo')
+      } else {
+        toast.error(error.response?.data?.error || 'Failed to upload photo. Please try again.')
+      }
+    } finally {
+      setIsUploadingPhoto(false)
+      // Reset file input
+      event.target.value = ''
+    }
+  }
+
   if (isLoading) {
     return <ProfileSkeleton />
   }
@@ -295,11 +358,42 @@ export default function MyProfile() {
                   : '/male-avatar.svg')
               }
               alt={profile?.name || 'Profile'}
-              className="size-32 rounded-full object-cover"
+              className="size-32 rounded-full object-cover border-2 border-gray-200"
+              onLoad={() => {
+                console.log('Image loaded successfully:', profile?.image)
+                setImageLoadError(false)
+              }}
+              onError={(e) => {
+                console.error('Image failed to load:', profile?.image)
+                setImageLoadError(true)
+                // Fallback to default avatar
+                e.currentTarget.src = profile?.gender?.toLowerCase() === 'female' 
+                  ? '/female-avatar.svg' 
+                  : '/male-avatar.svg'
+              }}
             />
-            <Button variant="outline" className="mt-4" disabled={!isEditing}>
-              Change Photo
-            </Button>
+            {imageLoadError && profile?.image && (
+              <p className="text-xs text-red-500 mt-1">
+                Failed to load profile image
+              </p>
+            )}
+            <div className="mt-4">
+              <input
+                type="file"
+                id="photo-upload"
+                accept="image/*"
+                onChange={handlePhotoUpload}
+                className="hidden"
+                disabled={!isEditing || isUploadingPhoto}
+              />
+              <Button 
+                variant="outline" 
+                disabled={!isEditing || isUploadingPhoto}
+                onClick={() => document.getElementById('photo-upload')?.click()}
+              >
+                {isUploadingPhoto ? 'Uploading...' : 'Change Photo'}
+              </Button>
+            </div>
           </CardContent>
         </Card>
 

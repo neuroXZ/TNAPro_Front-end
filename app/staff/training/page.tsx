@@ -156,7 +156,7 @@ export default function StaffTrainingTestingPage() {
     switch (status) {
       case "Upcoming": return "default"
       case "Ongoing": return "default"
-      case "Completed": return "secondary"
+      case "Closed": return "secondary"
       default: return "outline"
     }
   }
@@ -165,7 +165,7 @@ export default function StaffTrainingTestingPage() {
     switch (status) {
       case "Upcoming": return "text-blue-600 bg-blue-50"
       case "Ongoing": return "text-green-600 bg-green-50"
-      case "Completed": return "text-gray-600 bg-gray-50"
+      case "Closed": return "text-red-600 bg-red-50"
       default: return "text-yellow-600 bg-yellow-50"
     }
   }
@@ -178,7 +178,7 @@ export default function StaffTrainingTestingPage() {
     const end = new Date(record.endDate)
     
     if (now < start) return "Upcoming"
-    if (now > end) return "Completed"
+    if (now > end) return "Closed"
     return "Ongoing"
   }
 
@@ -253,12 +253,12 @@ export default function StaffTrainingTestingPage() {
                   </TableCell>
                   <TableCell>
                     <div className="text-sm">
-                      {formatDate(training.startDate)}
+                      {formatDate(training.startDate ?? undefined)}
                     </div>
                   </TableCell>
                   <TableCell>
                     <div className="text-sm">
-                      {formatDate(training.endDate)}
+                      {formatDate(training.endDate ?? undefined)}
                     </div>
                   </TableCell>
                   <TableCell>
