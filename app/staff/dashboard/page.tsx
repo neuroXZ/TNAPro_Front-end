@@ -17,7 +17,7 @@ import {
   IconChecks
 } from "@tabler/icons-react"
 import { useAuth } from "@/lib/auth-context"
-import { staffAPI, assessmentAPI, trainingAPI, idpAPI } from "@/lib/api"
+import { staffAPI, assessmentAPI, trainingAPI, idpAPI, rtnAPI } from "@/lib/api"
 import { useRouter } from "next/navigation"
 import { format } from "date-fns"
 
@@ -45,6 +45,29 @@ interface Training {
   description?: string
 }
 
+interface RecommendedTrainingRecord {
+  trainingId: string
+  trainingName: string | null
+  startDate: string | null
+  endDate: string | null
+  competencyId: string
+  competencyName: string | null
+  requiredLevel: number | null
+  selfScore: number | null
+  superiorScore: number | null
+  averageScore: number | null
+  gap: number | null
+}
+
+interface RTNReportResponse {
+  staffId: string
+  staffName: string | null
+  positionName: string | null
+  assessmentId: string
+  results: RecommendedTrainingRecord[]
+  generatedAt: string
+}
+
 interface IdpSummary {
   hasIdp: boolean
   totalCompetencies: number
@@ -65,6 +88,8 @@ export default function StaffDashboard() {
   })
   const [assessments, setAssessments] = useState<Assessment[]>([])
   const [trainings, setTrainings] = useState<Training[]>([])
+  const [recommendedTrainings, setRecommendedTrainings] = useState<RecommendedTrainingRecord[]>([])
+  const [selectedAssessmentId, setSelectedAssessmentId] = useState<string>('')
   const [idpSummary, setIdpSummary] = useState<IdpSummary>({
     hasIdp: false,
     totalCompetencies: 0,
@@ -88,6 +113,28 @@ export default function StaffDashboard() {
       // Fetch trainings
       const trainingsData = await trainingAPI.getAll()
       setTrainings(trainingsData)
+
+      // Set latest assessment for recommended training
+      if (assessmentsData.length > 0) {
+        const latestAssessment = assessmentsData.sort((a: Assessment, b: Assessment) => 
+          new Date(b.startDate).getTime() - new Date(a.startDate).getTime()
+        )[0]
+        setSelectedAssessmentId(latestAssessment.id)
+        
+        // Fetch recommended training
+        if (user?.id) {
+          try {
+            const rtnReport: RTNReportResponse = await rtnAPI.getReport({ 
+              staffId: user.id, 
+              assessmentId: latestAssessment.id
+            })
+            setRecommendedTrainings(rtnReport.results || [])
+          } catch (error) {
+            console.log('No recommended training available:', error)
+            setRecommendedTrainings([])
+          }
+        }
+      }
 
       // Try to fetch latest IDP if available
       if (user?.id && assessmentsData.length > 0) {
@@ -161,6 +208,28 @@ export default function StaffDashboard() {
     const startDate = new Date(t.startDate)
     return startDate > now
   }).slice(0, 3)
+
+  // Get recommended training status
+  const getRecommendedTrainingStatus = (record: RecommendedTrainingRecord) => {
+    if (!record.startDate || !record.endDate) return "Recommended"
+    
+    const now = new Date()
+    const start = new Date(record.startDate)
+    const end = new Date(record.endDate)
+    
+    if (now < start) return "Upcoming"
+    if (now > end) return "Closed"
+    return "Ongoing"
+  }
+
+  // Group recommended trainings by training name to avoid duplicates
+  const uniqueRecommendedTrainings = recommendedTrainings.reduce((acc: RecommendedTrainingRecord[], current) => {
+    const existingTraining = acc.find(item => item.trainingId === current.trainingId)
+    if (!existingTraining) {
+      acc.push(current)
+    }
+    return acc
+  }, []).slice(0, 3)
 
   return (
     <div className="space-y-6">
@@ -404,9 +473,9 @@ export default function StaffDashboard() {
           <CardHeader>
             <div className="flex items-center justify-between">
               <div>
-                <CardTitle>Upcoming Training</CardTitle>
+                <CardTitle>Recommended Training</CardTitle>
                 <CardDescription>
-                  Training sessions scheduled for you
+                  Training recommendations based on your assessment
                 </CardDescription>
               </div>
               <Button
@@ -426,75 +495,52 @@ export default function StaffDashboard() {
                   <div key={i} className="h-20 bg-muted animate-pulse rounded-lg" />
                 ))}
               </div>
-            ) : upcomingTrainings.length > 0 ? (
+            ) : uniqueRecommendedTrainings.length > 0 ? (
               <div className="space-y-3">
-                {upcomingTrainings.map((training) => (
+                {uniqueRecommendedTrainings.map((training) => (
                   <div
-                    key={training.id}
+                    key={training.trainingId}
                     className="flex items-start justify-between p-3 border rounded-lg hover:bg-muted/50 transition-colors"
                   >
                     <div className="flex-1">
-                      <h4 className="font-medium text-sm">{training.name}</h4>
-                      <p className="text-xs text-muted-foreground mt-1">
-                        {format(new Date(training.startDate), "dd MMM yyyy")} - {format(new Date(training.endDate), "dd MMM yyyy")}
-                      </p>
+                      <h4 className="font-medium text-sm">{training.trainingName || 'Unknown Training'}</h4>
+                      <div className="flex items-center gap-2 mt-1">
+                        <Badge 
+                          variant={getRecommendedTrainingStatus(training) === 'Upcoming' ? 'default' : 
+                                  getRecommendedTrainingStatus(training) === 'Ongoing' ? 'secondary' : 
+                                  getRecommendedTrainingStatus(training) === 'Closed' ? 'destructive' : 'outline'}
+                          className={`text-xs ${
+                            getRecommendedTrainingStatus(training) === 'Ongoing' ? 'bg-green-500 hover:bg-green-600' : 
+                            getRecommendedTrainingStatus(training) === 'Closed' ? 'bg-red-500 hover:bg-red-600' : ''
+                          }`}
+                        >
+                          {getRecommendedTrainingStatus(training)}
+                        </Badge>
+                        {training.startDate && training.endDate && (
+                          <p className="text-xs text-muted-foreground">
+                            {format(new Date(training.startDate), "dd MMM")} - {format(new Date(training.endDate), "dd MMM yyyy")}
+                          </p>
+                        )}
+                      </div>
                     </div>
-                    <IconCalendar className="size-4 text-muted-foreground" />
+                    <IconTarget className="size-4 text-muted-foreground" />
                   </div>
                 ))}
               </div>
             ) : (
               <div className="text-center py-8">
-                <IconCalendar className="size-12 mx-auto text-muted-foreground mb-2" />
+                <IconTarget className="size-12 mx-auto text-muted-foreground mb-2" />
                 <p className="text-sm text-muted-foreground">
-                  No upcoming training
+                  No recommended training available
+                </p>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Complete your assessment to get personalized recommendations
                 </p>
               </div>
             )}
           </CardContent>
         </Card>
-
       </div>
-
-      
-
-      {/* Quick Actions */}
-      {/* <Card>
-        <CardHeader>
-          <CardTitle>Quick Actions</CardTitle>
-          <CardDescription>
-            Shortcuts to common tasks
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="grid gap-3 md:grid-cols-3">
-            <Button 
-              variant="outline" 
-              className="justify-start gap-2"
-              onClick={() => router.push('/staff/assessments')}
-            >
-              <IconTrophy className="size-4" />
-              View Assessments
-            </Button>
-            <Button 
-              variant="outline" 
-              className="justify-start gap-2"
-              onClick={() => router.push('/staff/idp')}
-            >
-              <IconTarget className="size-4" />
-              My IDP
-            </Button>
-            <Button 
-              variant="outline" 
-              className="justify-start gap-2"
-              onClick={() => router.push('/staff/profile')}
-            >
-              <IconUser className="size-4" />
-              View Profile
-            </Button>
-          </div>
-        </CardContent>
-      </Card> */}
     </div>
   )
 }
