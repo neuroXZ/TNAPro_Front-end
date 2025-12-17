@@ -445,7 +445,7 @@ export default function StaffDashboard() {
                       <div className="flex-1">
                         <div className="flex items-center gap-2">
                           <h4 className="font-medium text-sm">{assessment.name}</h4>
-                          <Badge className={`${status.color} text-white text-xs`}>
+                          <Badge className={`bg-green-100 text-green-800 text-xs`}>
                             {status.label}
                           </Badge>
                         </div>
@@ -503,19 +503,20 @@ export default function StaffDashboard() {
                     className="flex items-start justify-between p-3 border rounded-lg hover:bg-muted/50 transition-colors"
                   >
                     <div className="flex-1">
-                      <h4 className="font-medium text-sm">{training.trainingName || 'Unknown Training'}</h4>
-                      <div className="flex items-center gap-2 mt-1">
+                      <div className="font-medium text-sm gap-2 flex">{training.trainingName || 'Unknown Training'}
                         <Badge 
                           variant={getRecommendedTrainingStatus(training) === 'Upcoming' ? 'default' : 
                                   getRecommendedTrainingStatus(training) === 'Ongoing' ? 'secondary' : 
                                   getRecommendedTrainingStatus(training) === 'Closed' ? 'destructive' : 'outline'}
                           className={`text-xs ${
-                            getRecommendedTrainingStatus(training) === 'Ongoing' ? 'bg-green-500 hover:bg-green-600' : 
-                            getRecommendedTrainingStatus(training) === 'Closed' ? 'bg-red-500 hover:bg-red-600' : ''
+                            getRecommendedTrainingStatus(training) === 'Ongoing' ? 'text-green-800 bg-green-100 ' : 
+                            getRecommendedTrainingStatus(training) === 'Closed' ? 'text-red-800 bg-red-100 ' : ''
                           }`}
                         >
                           {getRecommendedTrainingStatus(training)}
                         </Badge>
+                      </div>
+                      <div className="flex items-center gap-2 mt-1">
                         {training.startDate && training.endDate && (
                           <p className="text-xs text-muted-foreground">
                             {format(new Date(training.startDate), "dd MMM")} - {format(new Date(training.endDate), "dd MMM yyyy")}

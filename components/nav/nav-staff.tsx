@@ -39,11 +39,18 @@ export function NavUser({
     avatar: string
   }
 }) {
-  const { isMobile } = useSidebar()
+  const { isMobile, setOpenMobile } = useSidebar()
   const { logout } = useAuth()
 
   const handleLogout = () => {
     logout()
+  }
+
+  const handleLinkClick = () => {
+    // Close mobile sidebar when navigating on mobile
+    if (isMobile) {
+      setOpenMobile(false)
+    }
   }
 
   return (
@@ -91,7 +98,7 @@ export function NavUser({
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
               <DropdownMenuItem asChild>
-                <a href="/staff/profile" className="flex items-center gap-2 cursor-pointer">
+                <a href="/staff/profile" className="flex items-center gap-2 cursor-pointer" onClick={handleLinkClick}>
                   <IconUserCircle />
                   Profile Settings
                 </a>

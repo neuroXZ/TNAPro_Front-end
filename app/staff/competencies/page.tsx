@@ -127,6 +127,13 @@ export default function MyCompetencies() {
     ).values()
   ).sort((a, b) => (a.level || 999) - (b.level || 999))
 
+  // Auto-activate first tab when clusters are loaded
+  useEffect(() => {
+    if (clusters.length > 0 && activeTab === "all") {
+      setActiveTab(clusters[0].name)
+    }
+  }, [clusters.length, activeTab])
+
   if (isLoading) {
     return (
       <div className="space-y-4">
@@ -155,137 +162,20 @@ export default function MyCompetencies() {
           View your assigned competencies and proficiency levels
         </p>
       </div>
-
-      {/* <div className="grid gap-4 md:grid-cols-3 mb-4">
-        {clusters.map((cluster) => (
-          <Card key={cluster.name}>
-            <CardContent >
-              <div className="flex items-center gap-4">
-                <div 
-                  className="size-12 rounded-lg flex items-center justify-center"
-                  style={{ backgroundColor: `${cluster.color}20` }}
-                >
-                  <div 
-                    className="size-6 rounded-full"
-                    style={{ backgroundColor: cluster.color }}
-                  />
-                </div>
-                <div>
-                  <p className="text-sm text-muted-foreground">{cluster.name}</p>
-                  <p className="text-2xl font-bold">{clusterCounts[cluster.name] || 0}</p>
-                  <p className="text-xs text-muted-foreground">
-                    {clusterCounts[cluster.name] === 1 ? 'competency' : 'competencies'}
-                  </p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
-        
-        {clusters.length === 0 && (
-          <>
-            <Card>
-              <CardContent className="pt-6">
-                <div className="flex items-center gap-4">
-                  <div className="p-2 bg-gray-500/10 rounded-lg">
-                    <IconBook className="size-6 text-gray-500" />
-                  </div>
-                  <div>
-                    <p className="text-sm text-muted-foreground">Total</p>
-                    <p className="text-2xl font-bold">0</p>
-                    <p className="text-xs text-muted-foreground">competencies</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </>
-        )}
-      </div> */}
-
       <div className="space-y-4">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
-          <TabsList className="grid w-full" style={{ gridTemplateColumns: `repeat(${clusters.length + 1}, minmax(0, 1fr))` }}>
-            {/* <TabsTrigger value="all">
-              All ({competencies.length})
-            </TabsTrigger> */}
+          <TabsList className="grid w-full" style={{ gridTemplateColumns: `repeat(${clusters.length}, minmax(0, 1fr))` }}>
             {clusters.map((cluster) => (
               <TabsTrigger key={cluster.name} value={cluster.name} className="gap-2">
                 <div 
-                  className="size-3 rounded-full"
+                  className="hidden sm:block size-3 sm:size-4 rounded-full border border-white/20 shadow-sm"
                   style={{ backgroundColor: cluster.color }}
                 />
-                {cluster.name} ({clusterCounts[cluster.name] || 0})
+                <span className="hidden sm:inline">{cluster.name} ({clusterCounts[cluster.name] || 0})</span>
+                <span className="sm:hidden">{cluster.name.split(' ')[0]} ({clusterCounts[cluster.name] || 0})</span>
               </TabsTrigger>
             ))}
           </TabsList>
-
-        {/* <TabsContent value="all" className="space-y-4">
-          {!userPositionId ? (
-            <Card>
-              <CardContent className="py-8">
-                <div className="text-center text-muted-foreground">
-                  No position assigned. Please contact your administrator.
-                </div>
-              </CardContent>
-            </Card>
-          ) : competencies.length === 0 ? (
-            <Card>
-              <CardContent className="py-8">
-                <div className="text-center text-muted-foreground">
-                  No competencies assigned to your position yet
-                </div>
-              </CardContent>
-            </Card>
-          ) : (
-            Object.entries(groupedByCluster).map(([clusterName, clusterCompetencies]) => (
-              <Card key={clusterName}>
-                <CardHeader>
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      {clusters.find(c => c.name === clusterName) && (
-                        <div 
-                          className="size-4 rounded-full"
-                          style={{ backgroundColor: clusters.find(c => c.name === clusterName)?.color }}
-                        />
-                      )}
-                      <CardTitle>{clusterName}</CardTitle>
-                    </div>
-                    <Badge variant="outline">{clusterCompetencies.length} Competencies</Badge>
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-3">
-                    {clusterCompetencies.map((pc) => (
-                      <div
-                        key={pc.id}
-                        className="flex items-center justify-between p-3 border rounded-lg hover:bg-muted/50 transition-colors cursor-pointer"
-                        onClick={() => handleCompetencyClick(pc)}
-                      >
-                        <div className="flex-1">
-                          <div className="flex items-center gap-2">
-                            <p className="font-medium">{pc.competency.name}</p>
-                            <Badge variant="secondary" className="text-xs">
-                              {pc.competency.code}
-                            </Badge>
-                          </div>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <div className="text-right mr-2">
-                            <p className="text-xs text-muted-foreground">RCL</p>
-                            <p className="text-sm font-semibold">
-                              {pc.level !== undefined && pc.level !== null ? pc.level : "N/A"}
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-            ))
-          )}
-        </TabsContent> */}
-
         {clusters.map((cluster) => (
           <TabsContent key={cluster.name} value={cluster.name} className="space-y-4">
             <Card>
@@ -293,10 +183,10 @@ export default function MyCompetencies() {
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <div 
-                      className="size-4 rounded-full"
+                      className="size-4 sm:size-5 rounded-full border border-white/20 shadow-sm"
                       style={{ backgroundColor: cluster.color }}
                     />
-                    <CardTitle>{cluster.name}</CardTitle>
+                    <CardTitle className="text-base sm:text-lg">{cluster.name}</CardTitle>
                   </div>
                   <Badge variant="outline">{clusterCounts[cluster.name] || 0} Competencies</Badge>
                 </div>

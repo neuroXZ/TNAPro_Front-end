@@ -39,11 +39,18 @@ export function NavUser({
     avatar: string
   }
 }) {
-  const { isMobile } = useSidebar()
+  const { isMobile, setOpenMobile } = useSidebar()
   const { logout } = useAuth()
 
   const handleLogout = () => {
     logout()
+  }
+
+  const handleLinkClick = () => {
+    // Close mobile sidebar when navigating on mobile
+    if (isMobile) {
+      setOpenMobile(false)
+    }
   }
 
   return (
@@ -92,13 +99,13 @@ export function NavUser({
             <DropdownMenuGroup>
               
               <DropdownMenuItem asChild>
-                <a href="/admin/mails" className="flex items-center gap-2 cursor-pointer">
+                <a href="/admin/mails" className="flex items-center gap-2 cursor-pointer" onClick={handleLinkClick}>
                   <IconMail />
                   Mail Template
                 </a>
               </DropdownMenuItem>
               <DropdownMenuItem asChild>
-                <a href="/admin/settings" className="flex items-center gap-2 cursor-pointer">
+                <a href="/admin/settings" className="flex items-center gap-2 cursor-pointer" onClick={handleLinkClick}>
                   <IconSettings />
                   Setting
                 </a>
