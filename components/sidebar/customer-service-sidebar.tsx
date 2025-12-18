@@ -8,6 +8,10 @@ import {
   IconSchool,
   IconFileText,
   IconCertificate,
+  IconAppWindow,
+  IconUserCog,
+  IconMessages,
+  IconMessagePlus,
 } from "@tabler/icons-react"
 import Image from "next/image"
 
@@ -30,22 +34,22 @@ const navMainItems = [
   {
     title: "Main Page",
     url: "/",
-    icon: IconDashboard,
+    icon: IconAppWindow,
   },
   {
     title: "Customer Service",
     url: "/customer-service",
-    icon: IconClipboardCheck,
+    icon: IconUserCog,
   },
   {
     title: "FAQ",
     url: "/customer-service/faq",
-    icon: IconClipboardCheck,
+    icon: IconMessages,
   },
   {
     title: "Contact Support",
     url: "/customer-service/contact-us",
-    icon: IconUserCheck,
+    icon: IconMessagePlus,
   },
   
 ]
