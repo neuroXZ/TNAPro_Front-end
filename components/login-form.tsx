@@ -288,7 +288,7 @@ export function LoginForm({
         </CardContent>
       </Card>
       <FieldDescription className="px-6 text-center">
-        copywright © {new Date().getFullYear()} TNAPro. All rights reserved.
+        copywright © {new Date().getFullYear()} TNAPro. All rights reserved. | <a href="/customer-service/contact-us" className="text-primary hover:underline">Customer Service</a>
       </FieldDescription>
     </div>
   )

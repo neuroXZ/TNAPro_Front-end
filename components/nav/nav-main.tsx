@@ -1,7 +1,9 @@
 "use client"
 
-import { IconCirclePlusFilled, IconMail, IconChevronRight, type Icon } from "@tabler/icons-react"
+import { IconCirclePlusFilled, IconMessages, IconChevronRight, IconBooks, type Icon } from "@tabler/icons-react"
 import Link from "next/link"
+import { useRouter } from "next/navigation"
+import { useEffect, useState } from "react"
 
 import { Button } from "@/components/ui/button"
 import {
@@ -18,7 +20,6 @@ import {
   SidebarMenuSub,
   SidebarMenuSubButton,
   SidebarMenuSubItem,
-  useSidebar,
 } from "@/components/ui/sidebar"
 
 export function NavMain({
@@ -34,12 +35,34 @@ export function NavMain({
     }[]
   }[]
 }) {
-  const { isMobile, setOpenMobile } = useSidebar()
+  const router = useRouter()
+  const [userRole, setUserRole] = useState<string | null>(null)
 
-  const handleLinkClick = () => {
-    // Close mobile sidebar when navigating on mobile
-    if (isMobile) {
-      setOpenMobile(false)
+  useEffect(() => {
+    // Get user role from localStorage
+    const storedUser = localStorage.getItem('user')
+    if (storedUser) {
+      try {
+        const userData = JSON.parse(storedUser)
+        console.log('User data:', userData) // Debug: check user data structure
+        console.log('User role:', userData.role) // Debug: check role value
+        console.log('User userType:', userData.userType) // Debug: check if userType exists
+        setUserRole(userData.role || userData.userType) // Try both role and userType fields
+      } catch (error) {
+        console.error("Failed to parse user data:", error)
+      }
+    }
+  }, [])
+
+  const handleDocumentationClick = () => {
+    // Navigate to appropriate documentation page based on user role
+    console.log('Current userRole:', userRole) // Debug: check what role is detected
+    if (userRole === 'admin' || userRole === 'Admin' || userRole === 'ADMIN') {
+      console.log('Navigating to admin documentation') // Debug
+      router.push('/admin/documentation')
+    } else {
+      console.log('Navigating to staff documentation') // Debug
+      router.push('/staff/documentation')
     }
   }
 
@@ -49,18 +72,20 @@ export function NavMain({
         <SidebarMenu>
           <SidebarMenuItem className="flex items-center gap-2">
             <SidebarMenuButton
-              tooltip="Quick Create"
-              className="bg-primary text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground active:bg-primary/90 active:text-primary-foreground min-w-8 duration-200 ease-linear"
+              tooltip="Documentation"
+              className="bg-primary text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground active:bg-primary/90 active:text-primary-foreground min-w-8 duration-200 ease-linear cursor-pointer"
+              onClick={handleDocumentationClick}
             >
-              <IconCirclePlusFilled />
-              <span>Quick Create</span>
+              <IconBooks />
+              <span>Documentation</span>
             </SidebarMenuButton>
             <Button
               size="icon"
               className="size-8 group-data-[collapsible=icon]:opacity-0"
               variant="outline"
+              onClick={() => router.push('/customer-service')}
             >
-              <IconMail />
+              <IconMessages />
               <span className="sr-only">Inbox</span>
             </Button>
           </SidebarMenuItem>
@@ -82,7 +107,7 @@ export function NavMain({
                       {item.items.map((subItem) => (
                         <SidebarMenuSubItem key={subItem.title}>
                           <SidebarMenuSubButton asChild>
-                            <Link href={subItem.url} onClick={handleLinkClick}>
+                            <Link href={subItem.url}>
                               <span>{subItem.title}</span>
                             </Link>
                           </SidebarMenuSubButton>
@@ -95,7 +120,7 @@ export function NavMain({
             ) : (
               <SidebarMenuItem key={item.title}>
                 <SidebarMenuButton asChild tooltip={item.title}>
-                  <Link href={item.url} onClick={handleLinkClick}>
+                  <Link href={item.url}>
                     {item.icon && <item.icon />}
                     <span>{item.title}</span>
                   </Link>
