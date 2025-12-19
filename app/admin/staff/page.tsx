@@ -153,33 +153,54 @@ export default function StaffManagementPage() {
   }
 
   const handleFormSubmit = async (formData: StaffFormData) => {
-    const submitData = {
-      name: formData.name,
-      email: formData.email,
-      staffOrgId: formData.staffOrgId,
-      gender: formData.gender || undefined,
-      image: formData.image || undefined,
-      password: formData.password,
-      positionId: formData.positionId || undefined,
-      unitId: formData.unitId || undefined,
-      supervisorId: formData.supervisorId || undefined,
-    }
+    try {
+      const submitData = {
+        name: formData.name,
+        email: formData.email,
+        staffOrgId: formData.staffOrgId,
+        gender: formData.gender || undefined,
+        image: formData.image || undefined,
+        password: formData.password,
+        positionId: formData.positionId || undefined,
+        unitId: formData.unitId || undefined,
+        supervisorId: formData.supervisorId || undefined,
+      }
 
-    // Remove password if empty (for edit)
-    if (!submitData.password) {
-      delete submitData.password
-    }
+      // Remove password if empty (for edit)
+      if (!submitData.password) {
+        delete submitData.password
+      }
 
-    if (editingStaff) {
-      await staffAPI.update(editingStaff.id, submitData)
-      toast.success("Staff updated successfully")
-    } else {
-      await staffAPI.create(submitData)
-      toast.success("Staff created successfully")
-    }
+      if (editingStaff) {
+        await staffAPI.update(editingStaff.id, submitData)
+        toast.success("Staff updated successfully")
+      } else {
+        await staffAPI.create(submitData)
+        toast.success("Staff created successfully")
+      }
 
-    setEditingStaff(null)
-    fetchStaff()
+      setEditingStaff(null)
+      setIsDialogOpen(false)
+      fetchStaff()
+    } catch (error: any) {
+      console.error('Staff form submission error:', error)
+      
+      // Handle subscription limit error specifically
+      if (error.response?.data?.message && error.response.data.message.includes('Subscription limit reached')) {
+        toast.error(error.response.data.message)
+      } else if (error.response?.data?.error && error.response.data.error.includes('Subscription limit reached')) {
+        toast.error(error.response.data.error)
+      } else if (error.message && error.message.includes('Subscription limit reached')) {
+        toast.error(error.message)
+      } else {
+        // Handle other types of errors
+        const errorMessage = error.response?.data?.message || 
+                           error.response?.data?.error || 
+                           error.message || 
+                           'Failed to save staff member. Please try again.'
+        toast.error(errorMessage)
+      }
+    }
   }
 
   // ==================== DELETE HANDLERS ====================

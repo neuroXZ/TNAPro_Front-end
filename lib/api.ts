@@ -336,6 +336,34 @@ export const unitTypeAPI = {
   },
 };
 
+// PositionCategory API
+export const positionCategoryAPI = {
+  getAll: async () => {
+    const response = await api.get('/positioncategory');
+    return response.data;
+  },
+  
+  getById: async (id: string) => {
+    const response = await api.get(`/positioncategory/${id}`);
+    return response.data;
+  },
+  
+  create: async (data: any) => {
+    const response = await api.post('/positioncategory', data);
+    return response.data;
+  },
+  
+  update: async (id: string, data: any) => {
+    const response = await api.put(`/positioncategory/${id}`, data);
+    return response.data;
+  },
+  
+  delete: async (id: string) => {
+    const response = await api.delete(`/positioncategory/${id}`);
+    return response.data;
+  },
+};
+
 // Grade API
 export const gradeAPI = {
   getAll: async () => {

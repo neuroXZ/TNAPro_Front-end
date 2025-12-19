@@ -24,7 +24,7 @@ const CustomerServicePage = () => {
       <div className="relative px-6 lg:px-8 bg-gradient-to-b from-muted/50 to-background">
         <div className="mx-auto max-w-7xl pt-20 pb-16 sm:pt-24 sm:pb-20">
           <div className="text-center space-y-6">
-            <Badge variant="primary">
+            <Badge>
               Training Needs Analysis System
             </Badge>
             <h1 className="text-4xl font-bold tracking-tight sm:text-6xl">

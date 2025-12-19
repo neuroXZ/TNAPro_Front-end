@@ -47,9 +47,14 @@ const navMainItems = [
         title: "Units",
         url: "/admin/units",
       },
+      
       {
         title: "Grades",
         url: "/admin/grades",
+      },
+      {
+        title: "Position Categories",
+        url: "/admin/position-category",
       },
       {
         title: "Positions",
