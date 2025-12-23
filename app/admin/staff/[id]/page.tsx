@@ -31,6 +31,7 @@ import {
     IconEdit
 } from "@tabler/icons-react"
 import { format } from "date-fns"
+import { StaffFormDialog, type StaffFormData } from "../staff-form-dialog"
 
 interface Staff {
     id: string
@@ -105,6 +106,7 @@ export default function StaffProfilePage() {
     const [superior, setSuperior] = useState<any>(null)
     const [subordinates, setSubordinates] = useState<any[]>([])
     const [isLoading, setIsLoading] = useState(true)
+    const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
 
     useEffect(() => {
         fetchStaffData()
@@ -254,6 +256,25 @@ export default function StaffProfilePage() {
             .slice(0, 2)
     }
 
+    const getAvatarImage = () => {
+        if (staff?.image) return staff.image
+        if (staff?.gender?.toLowerCase() === 'female') return '/female-avatar.svg'
+        return '/male-avatar.svg'
+    }
+
+    const handleFormSubmit = async (formData: StaffFormData) => {
+        try {
+            await staffAPI.update(staffId, formData)
+            toast.success("Staff profile updated successfully")
+            setIsEditDialogOpen(false)
+            // Refresh data
+            fetchStaffData()
+        } catch (error: any) {
+            console.error("Failed to update staff:", error)
+            toast.error(error.response?.data?.error || "Failed to update staff profile")
+        }
+    }
+
     // Group competencies by cluster
     const groupedCompetencies = positionCompetencies.reduce((acc, pc) => {
         const clusterName = pc.competency?.cluster?.name || 'Uncategorized'
@@ -307,7 +328,7 @@ export default function StaffProfilePage() {
                     <IconArrowLeft className="size-4 mr-2" />
                     Back to Staff Management
                 </Button>
-                <Button onClick={() => router.push(`/admin/staff/${staffId}/edit`)}>
+                <Button onClick={() => setIsEditDialogOpen(true)}>
                     <IconEdit className="size-4 mr-2" />
                     Edit Profile
                 </Button>
@@ -319,7 +340,7 @@ export default function StaffProfilePage() {
                     <div className="flex items-start gap-6">
                         <Avatar className="h-24 w-24">
                             <AvatarImage
-                                src={staff.image || undefined}
+                                src={getAvatarImage()}
                                 alt={staff.name}
                                 onError={(e) => console.log("Image load error:", e)}
                             />
@@ -567,6 +588,14 @@ export default function StaffProfilePage() {
                 </Card>
                 
             </div>
+
+            {/* Staff Edit Dialog */}
+            <StaffFormDialog
+                open={isEditDialogOpen}
+                onOpenChange={setIsEditDialogOpen}
+                editingStaff={staff}
+                onSubmit={handleFormSubmit}
+            />
         </div>
     )
 }
