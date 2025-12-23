@@ -365,7 +365,7 @@ export default function StaffProfilePage() {
                                             {staff.unit?.name || (staff.unitId ? 'Unit Assigned' : 'No Unit')}
                                         </span>
                                         {staff.unit?.unitType?.name && (
-                                            <Badge variant="outline" className="text-xs text-white">
+                                            <Badge >
                                                 {staff.unit.unitType.name}
                                             </Badge>
                                         )}
