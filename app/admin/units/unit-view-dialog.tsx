@@ -41,6 +41,12 @@ export function UnitViewDialog({
               <p className="text-sm font-medium">{unit.unitType.name}</p>
             </div>
           )}
+          {unit.parent && (
+            <div className="grid gap-2">
+              <Label className="text-muted-foreground">Parent Unit</Label>
+              <p className="text-sm font-medium">{unit.parent.name}</p>
+            </div>
+          )}
           {unit.description && (
             <div className="grid gap-2">
               <Label className="text-muted-foreground">Description</Label>

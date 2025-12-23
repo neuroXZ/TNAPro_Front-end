@@ -143,26 +143,26 @@ export function StaffSidebar({ ...props }: React.ComponentProps<typeof Sidebar>)
               
               <div className="space-y-2 text-xs text-muted-foreground leading-relaxed">
                 <p>
-                  Sistem komprehensif untuk analisis keperluan latihan pekerja yang membantu organisasi mengenal pasti jurang kemahiran dan merancang program latihan yang berkesan.
+                  A comprehensive system for employee training needs analysis that helps organizations identify skill gaps and plan effective training programs.
                 </p>
                 
                 <div className="bg-muted/50 rounded-lg p-3 mt-3">
                   <div className="flex items-center gap-2 mb-2">
                     <div className="size-2 bg-primary rounded-full"></div>
-                    <span className="font-medium text-xs">Versi 2.0</span>
+                    <span className="font-medium text-xs">Version 2.0</span>
                   </div>
                   <p className="text-[11px]">
-                    Dilengkapi dengan antaramuka mudah alih yang dioptimumkan untuk kemudahan penggunaan.
+                    Equipped with a mobile interface optimized for ease of use.
                   </p>
                 </div>
 
                 <div className="space-y-1 mt-3">
-                  <p className="font-medium text-xs text-foreground">Ciri-ciri utama:</p>
+                  <p className="font-medium text-xs text-foreground">Key features:</p>
                   <ul className="text-[11px] space-y-0.5 ml-2">
-                    <li>• Penilaian kendiri & atasan</li>
-                    <li>• Pelan pembangunan individu (IDP)</li>
-                    <li>• Pengurusan latihan</li>
-                    <li>• Analisis jurang kemahiran</li>
+                    <li>• Self & superior assessments</li>
+                    <li>• Individual development plan (IDP)</li>
+                    <li>• Training management</li>
+                    <li>• Competency gap analysis</li>
                   </ul>
                 </div>
               </div>

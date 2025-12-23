@@ -18,12 +18,13 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { Unit } from "./columns"
-import { unitTypeAPI } from "@/lib/api"
+import { unitTypeAPI, unitAPI } from "@/lib/api"
 
 interface UnitFormData {
   name: string
   description?: string
   unitTypeId?: string
+  parentId?: string
 }
 
 interface UnitFormDialogProps {
@@ -46,26 +47,37 @@ export function UnitFormDialog({
 }: UnitFormDialogProps) {
   const [isSaving, setIsSaving] = useState(false)
   const [unitTypes, setUnitTypes] = useState<UnitType[]>([])
+  const [parentUnits, setParentUnits] = useState<Unit[]>([])
   const [formData, setFormData] = useState<UnitFormData>({
     name: editingUnit?.name || "",
     description: editingUnit?.description || "",
     unitTypeId: editingUnit?.unitTypeId || "",
+    parentId: editingUnit?.parentId || "",
   })
 
-  // Fetch unit types
+  // Fetch unit types and parent units
   useEffect(() => {
-    const fetchUnitTypes = async () => {
+    const fetchData = async () => {
       try {
-        const data = await unitTypeAPI.getAll()
-        setUnitTypes(data)
+        // Fetch unit types
+        const unitTypesData = await unitTypeAPI.getAll()
+        setUnitTypes(unitTypesData)
+        
+        // Fetch all units for parent selection
+        const allUnits = await unitAPI.getAll()
+        // Filter out current unit if editing (prevent self-reference)
+        const availableParents = editingUnit 
+          ? allUnits.filter(unit => unit.id !== editingUnit.id)
+          : allUnits
+        setParentUnits(availableParents)
       } catch (error) {
-        console.error("Failed to fetch unit types:", error)
+        console.error("Failed to fetch data:", error)
       }
     }
     if (open) {
-      fetchUnitTypes()
+      fetchData()
     }
-  }, [open])
+  }, [open, editingUnit])
 
   // Update form when editingUnit or open state changes
   useEffect(() => {
@@ -74,12 +86,14 @@ export function UnitFormDialog({
         name: editingUnit.name,
         description: editingUnit.description || "",
         unitTypeId: editingUnit.unitTypeId || "",
+        parentId: editingUnit.parentId || "",
       })
     } else {
       setFormData({
         name: "",
         description: "",
         unitTypeId: "",
+        parentId: "",
       })
     }
   }, [editingUnit, open])
@@ -128,18 +142,41 @@ export function UnitFormDialog({
             <div className="grid gap-2">
               <Label htmlFor="unitTypeId">Unit Type</Label>
               <Select
-                value={formData.unitTypeId}
+                value={formData.unitTypeId || "none"}
                 onValueChange={(value) =>
-                  setFormData({ ...formData, unitTypeId: value })
+                  setFormData({ ...formData, unitTypeId: value === "none" ? "" : value })
                 }
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Select unit type (optional)" />
                 </SelectTrigger>
                 <SelectContent>
+                  <SelectItem value="none">No Unit Type</SelectItem>
                   {unitTypes.map((unitType) => (
                     <SelectItem key={unitType.id} value={unitType.id}>
                       {unitType.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="parentId">Parent Unit</Label>
+              <Select
+                value={formData.parentId || "none"}
+                onValueChange={(value) =>
+                  setFormData({ ...formData, parentId: value === "none" ? "" : value })
+                }
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select parent unit (optional)" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="none">No Parent Unit</SelectItem>
+                  {parentUnits.map((unit) => (
+                    <SelectItem key={unit.id} value={unit.id}>
+                      {unit.name}
+                      {unit.unitType && ` (${unit.unitType.name})`}
                     </SelectItem>
                   ))}
                 </SelectContent>

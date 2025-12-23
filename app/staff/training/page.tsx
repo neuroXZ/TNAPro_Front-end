@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react"
 import { rtnAPI, assessmentAPI } from "@/lib/api"
 import { useAuth } from "@/lib/auth-context"
+import { useIsMobile } from "@/hooks/use-mobile"
 import {
   Card,
   CardContent,
@@ -10,6 +11,12 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
+import {
+  MobileCard,
+  MobileCardHeader,
+  MobileCardTitle,
+  MobileCardContent
+} from "@/components/ui/mobile-card"
 import {
   Table,
   TableBody,
@@ -60,6 +67,7 @@ interface RecommendedTrainingRecord {
 
 export default function StaffTrainingTestingPage() {
   const { user } = useAuth()
+  const isMobile = useIsMobile()
   const [recommendedTrainings, setRecommendedTrainings] = useState<RecommendedTrainingRecord[]>([])
   const [isLoadingRecommended, setIsLoadingRecommended] = useState(false)
   const [searchQuery, setSearchQuery] = useState("")
@@ -208,6 +216,105 @@ export default function StaffTrainingTestingPage() {
     return Array.from(grouped.values())
   }
 
+  // Mobile-friendly training card view
+  const renderMobileTrainingCards = (recommendedData: RecommendedTrainingRecord[]) => {
+    const groupedData = groupedRecommendedTrainings(recommendedData)
+
+    return (
+      <div className="space-y-3">
+        {groupedData.map((group) => {
+          const { training, competencies } = group
+          const status = getRecommendedTrainingStatus(training)
+          const isExpanded = expandedRows.has(training.trainingId)
+          
+          return (
+            <MobileCard key={training.trainingId} className="overflow-hidden">
+              <MobileCardContent className="p-0">
+                {/* Main training info */}
+                <div 
+                  className="p-3 cursor-pointer"
+                  onClick={() => toggleRow(training.trainingId)}
+                >
+                  <div className="flex items-start justify-between mb-2">
+                    <div className="flex items-start gap-2 flex-1 min-w-0">
+                      <IconTarget className="h-4 w-4 text-blue-500 mt-0.5 shrink-0" />
+                      <div className="min-w-0 flex-1">
+                        <h3 className="font-medium text-sm leading-tight truncate">
+                          {training.trainingName || "N/A"}
+                        </h3>
+                        <div className="flex items-center gap-2 mt-1">
+                          <Badge 
+                            variant={getStatusVariant(status)}
+                            className={`text-[10px] h-5 ${getStatusColor(status)}`}
+                          >
+                            {status}
+                          </Badge>
+                          <span className="text-xs text-muted-foreground">
+                            {competencies.length} competenc{competencies.length === 1 ? 'y' : 'ies'}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="shrink-0">
+                      {isExpanded ? (
+                        <IconChevronDown className="h-4 w-4 text-muted-foreground transition-transform" />
+                      ) : (
+                        <IconChevronRight className="h-4 w-4 text-muted-foreground transition-transform" />
+                      )}
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-center gap-4 text-xs text-muted-foreground">
+                    <span className="flex items-center gap-1">
+                      <IconCalendar className="h-3 w-3" />
+                      {formatDate(training.startDate ?? undefined)}
+                    </span>
+                    {training.endDate && (
+                      <span>- {formatDate(training.endDate)}</span>
+                    )}
+                  </div>
+                </div>
+
+                {/* Expanded competencies view */}
+                {isExpanded && (
+                  <div className="border-t bg-muted/20 p-3">
+                    <h4 className="text-xs font-medium text-foreground mb-2">
+                      Related Competencies & Gap Analysis:
+                    </h4>
+                    <div className="space-y-2">
+                      {competencies.map((record) => (
+                        <div 
+                          key={`${record.trainingId}-${record.relatedCompetency.competencyId}`}
+                          className="bg-background rounded-lg p-3 border"
+                        >
+                          <div className="flex items-start justify-between mb-1">
+                            <div className="flex-1 min-w-0">
+                              <div className="text-xs font-medium text-foreground truncate">
+                                {record.relatedCompetency.competencyName}
+                              </div>
+                              {record.relatedCompetency.clusterName && (
+                                <Badge variant="outline" className="text-[10px] h-4 mt-1">
+                                  {record.relatedCompetency.clusterName}
+                                </Badge>
+                              )}
+                            </div>
+                            <Badge variant="destructive" className="text-[10px] h-5 ml-2">
+                              Required: {record.relatedCompetency.requiredLevel}
+                            </Badge>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </MobileCardContent>
+            </MobileCard>
+          )
+        })}
+      </div>
+    )
+  }
+
   const renderRecommendedTrainingTable = (recommendedData: RecommendedTrainingRecord[]) => {
     const groupedData = groupedRecommendedTrainings(recommendedData)
 
@@ -329,90 +436,157 @@ export default function StaffTrainingTestingPage() {
   }
 
   return (
-    <div className="container mx-auto p-6">
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold">Recommended Training Programs</h1>
-        <p className="text-muted-foreground">Personalized training recommendations based on your competency assessment</p>
+    <div className={`container mx-auto ${isMobile ? 'p-3' : 'p-6'}`}>
+      <div className={`mb-4 ${isMobile ? 'mb-3' : 'mb-6'}`}>
+        <h1 className={`font-bold ${isMobile ? 'text-lg' : 'text-2xl'}`}>
+          {isMobile ? 'Programs' : 'Recommended Training Programs'}
+        </h1>
+        <p className={`text-muted-foreground ${isMobile ? 'text-xs mt-1' : 'text-sm'}`}>
+          Personalized training recommendations based on your competency assessment
+        </p>
       </div>
 
       {/* Search */}
-      <div className="mb-6">
+      <div className={`mb-4 ${isMobile ? 'mb-3' : 'mb-6'}`}>
         <div className="relative">
-          <IconSearch className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+          <IconSearch className={`absolute left-3 top-1/2 text-muted-foreground -translate-y-1/2 ${isMobile ? 'h-3 w-3' : 'h-4 w-4'}`} />
           <Input
             placeholder="Search trainings..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-9"
+            className={`pl-9 ${isMobile ? 'h-9 text-sm' : ''}`}
           />
         </div>
       </div>
 
       {/* Recommended Training Programs */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <IconTarget className="h-5 w-5 text-blue-500" />
-            Recommended Training Programs
-          </CardTitle>
-          <CardDescription>
-            Personalized training recommendations based on your IDP and competency assessment
-          </CardDescription>
-          
-          {/* Assessment Selector */}
-          <div className="flex items-center gap-4 mt-4">
-            <label className="text-sm font-medium">Select Assessment:</label>
-            <Select value={selectedAssessmentId} onValueChange={setSelectedAssessmentId}>
-              <SelectTrigger className="w-[300px]">
-                <SelectValue placeholder="Choose an assessment..." />
-              </SelectTrigger>
-              <SelectContent>
-                {assessments.map((assessment) => (
-                  <SelectItem key={assessment.id} value={assessment.id}>
-                    {assessment.name} 
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-        </CardHeader>
-        <CardContent>
-          {isLoadingRecommended ? (
-            <div className="animate-pulse space-y-4">
-              <div className="h-4 bg-gray-200 rounded w-1/4"></div>
-              <div className="space-y-3">
+      {isMobile ? (
+        <MobileCard>
+          <MobileCardHeader>
+            <MobileCardTitle className="flex items-center gap-2">
+              <IconTarget className="h-4 w-4 text-blue-500" />
+              Recommended Training Programs
+            </MobileCardTitle>
+            <p className="text-xs text-muted-foreground mt-1">
+              Personalized training recommendations based on competency assessment
+            </p>
+            
+            {/* Mobile Assessment Selector */}
+            <div className="space-y-2 mt-3">
+              <label className="text-xs font-medium">Select Assessment:</label>
+              <Select value={selectedAssessmentId} onValueChange={setSelectedAssessmentId}>
+                <SelectTrigger className="w-full h-9">
+                  <SelectValue placeholder="Choose an assessment..." />
+                </SelectTrigger>
+                <SelectContent>
+                  {assessments.map((assessment) => (
+                    <SelectItem key={assessment.id} value={assessment.id}>
+                      <span className="text-sm">{assessment.name}</span>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </MobileCardHeader>
+          <MobileCardContent>
+            {isLoadingRecommended ? (
+              <div className="animate-pulse space-y-3">
                 {[...Array(3)].map((_, i) => (
-                  <div key={i} className="flex space-x-4">
-                    <div className="h-4 bg-gray-200 rounded flex-1"></div>
-                    <div className="h-4 bg-gray-200 rounded w-32"></div>
-                    <div className="h-4 bg-gray-200 rounded w-24"></div>
-                    <div className="h-4 bg-gray-200 rounded w-20"></div>
+                  <div key={i} className="space-y-2">
+                    <div className="h-3 bg-gray-200 rounded w-3/4"></div>
+                    <div className="h-2 bg-gray-200 rounded w-1/2"></div>
+                    <div className="h-2 bg-gray-200 rounded w-2/3"></div>
                   </div>
                 ))}
               </div>
+            ) : filteredRecommendedTrainings.length === 0 ? (
+              <div className="flex flex-col items-center justify-center py-8">
+                <IconTarget className="h-8 w-8 text-muted-foreground mb-3" />
+                <p className="text-xs text-muted-foreground text-center">
+                  {searchQuery 
+                    ? "No recommended trainings found matching your search." 
+                    : "No personalized recommendations available. Complete your assessment to get training recommendations."}
+                </p>
+              </div>
+            ) : (
+              renderMobileTrainingCards(filteredRecommendedTrainings)
+            )}
+            
+            {/* Mobile Summary */}
+            {!isLoadingRecommended && filteredRecommendedTrainings.length > 0 && (
+              <div className="mt-3 text-center text-xs text-muted-foreground">
+                Showing {filteredRecommendedTrainings.length} of {recommendedTrainings.length} recommended trainings
+                {searchQuery && ` for "${searchQuery}"`}
+              </div>
+            )}
+          </MobileCardContent>
+        </MobileCard>
+      ) : (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <IconTarget className="h-5 w-5 text-blue-500" />
+              Recommended Training Programs
+            </CardTitle>
+            <CardDescription>
+              Personalized training recommendations based on your IDP and competency assessment
+            </CardDescription>
+            
+            {/* Desktop Assessment Selector */}
+            <div className="flex items-center gap-4 mt-4">
+              <label className="text-sm font-medium">Select Assessment:</label>
+              <Select value={selectedAssessmentId} onValueChange={setSelectedAssessmentId}>
+                <SelectTrigger className="w-[300px]">
+                  <SelectValue placeholder="Choose an assessment..." />
+                </SelectTrigger>
+                <SelectContent>
+                  {assessments.map((assessment) => (
+                    <SelectItem key={assessment.id} value={assessment.id}>
+                      {assessment.name} 
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
-          ) : filteredRecommendedTrainings.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-12">
-              <IconTarget className="h-12 w-12 text-muted-foreground mb-4" />
-              <p className="text-muted-foreground text-center">
-                {searchQuery 
-                  ? "No recommended trainings found matching your search." 
-                  : "No personalized recommendations available. Complete your assessment to get training recommendations."}
-              </p>
-            </div>
-          ) : (
-            renderRecommendedTrainingTable(filteredRecommendedTrainings)
-          )}
-          
-          {/* Summary */}
-          {!isLoadingRecommended && (
-            <div className="mt-4 text-center text-sm text-muted-foreground">
-              Showing {filteredRecommendedTrainings.length} of {recommendedTrainings.length} recommended trainings
-              {searchQuery && ` for "${searchQuery}"`}
-            </div>
-          )}
-        </CardContent>
-      </Card>
+          </CardHeader>
+          <CardContent>
+            {isLoadingRecommended ? (
+              <div className="animate-pulse space-y-4">
+                <div className="h-4 bg-gray-200 rounded w-1/4"></div>
+                <div className="space-y-3">
+                  {[...Array(3)].map((_, i) => (
+                    <div key={i} className="flex space-x-4">
+                      <div className="h-4 bg-gray-200 rounded flex-1"></div>
+                      <div className="h-4 bg-gray-200 rounded w-32"></div>
+                      <div className="h-4 bg-gray-200 rounded w-24"></div>
+                      <div className="h-4 bg-gray-200 rounded w-20"></div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ) : filteredRecommendedTrainings.length === 0 ? (
+              <div className="flex flex-col items-center justify-center py-12">
+                <IconTarget className="h-12 w-12 text-muted-foreground mb-4" />
+                <p className="text-muted-foreground text-center">
+                  {searchQuery 
+                    ? "No recommended trainings found matching your search." 
+                    : "No personalized recommendations available. Complete your assessment to get training recommendations."}
+                </p>
+              </div>
+            ) : (
+              renderRecommendedTrainingTable(filteredRecommendedTrainings)
+            )}
+            
+            {/* Desktop Summary */}
+            {!isLoadingRecommended && (
+              <div className="mt-4 text-center text-sm text-muted-foreground">
+                Showing {filteredRecommendedTrainings.length} of {recommendedTrainings.length} recommended trainings
+                {searchQuery && ` for "${searchQuery}"`}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      )}
     </div>
   )
 }

@@ -10,7 +10,12 @@ export interface Unit {
   name: string
   description?: string
   unitTypeId?: string
+  parentId?: string
   unitType?: {
+    id: string
+    name: string
+  }
+  parent?: {
     id: string
     name: string
   }
@@ -91,6 +96,35 @@ export const getColumns = (actions: ColumnActions): ColumnDef<Unit>[] => [
       const unitTypeName = row.original.unitType?.name
       return unitTypeName ? (
         <span>{unitTypeName}</span>
+      ) : (
+        <span className="text-muted-foreground">-</span>
+      )
+    },
+  },
+  {
+    accessorKey: "parent.name",
+    header: ({ column }) => {
+      return (
+        <Button
+          variant="ghost"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          className="-ml-4"
+        >
+          Parent Unit
+          {column.getIsSorted() === "asc" ? (
+            <IconArrowUp className="ml-2 size-4" />
+          ) : column.getIsSorted() === "desc" ? (
+            <IconArrowDown className="ml-2 size-4" />
+          ) : (
+            <IconArrowsSort className="ml-2 size-4" />
+          )}
+        </Button>
+      )
+    },
+    cell: ({ row }) => {
+      const parentName = row.original.parent?.name
+      return parentName ? (
+        <span>{parentName}</span>
       ) : (
         <span className="text-muted-foreground">-</span>
       )
