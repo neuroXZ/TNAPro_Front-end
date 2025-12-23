@@ -12,9 +12,7 @@ import {
   IconCertificate,
 } from "@tabler/icons-react"
 import Image from "next/image"
-
 import { NavMain } from "@/components/nav/nav-main"
-
 import { NavUser } from "@/components/nav/nav-admin"
 import { useAuth } from "@/lib/auth-context"
 import { settingAPI } from "@/lib/api"

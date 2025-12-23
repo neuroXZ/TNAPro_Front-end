@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { MobileCard, MobileCardHeader, MobileCardTitle, MobileCardContent } from "@/components/ui/mobile-card"
+import { MobileGrid, MobileContainer } from "@/components/ui/mobile-grid"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Progress } from "@/components/ui/progress"
@@ -20,6 +22,7 @@ import { useAuth } from "@/lib/auth-context"
 import { staffAPI, assessmentAPI, trainingAPI, idpAPI, rtnAPI } from "@/lib/api"
 import { useRouter } from "next/navigation"
 import { format } from "date-fns"
+import { useIsMobile } from "@/hooks/use-mobile"
 
 interface DashboardStats {
   totalCompetencies: number
@@ -79,6 +82,7 @@ interface IdpSummary {
 export default function StaffDashboard() {
   const { user } = useAuth()
   const router = useRouter()
+  const isMobile = useIsMobile()
   const [stats, setStats] = useState<DashboardStats>({
     totalCompetencies: 0,
     completedAssessments: 0,
@@ -242,67 +246,67 @@ export default function StaffDashboard() {
       </div>
 
       {/* Stats Cards */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
-              Pending Assessments
-            </CardTitle>
-            <IconClipboardCheck className="size-4 text-orange-500" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.pendingAssessments}</div>
-            <p className="text-xs text-muted-foreground">
-              Assessments to complete
+      <MobileGrid cols={{ mobile: 2, tablet: 2, desktop: 4 }} gap="md">
+        <MobileCard>
+          <MobileCardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <MobileCardTitle>
+              {isMobile ? "Pending" : "Pending Assessments"}
+            </MobileCardTitle>
+            <IconClipboardCheck className={`text-orange-500 ${isMobile ? 'size-3' : 'size-4'}`} />
+          </MobileCardHeader>
+          <MobileCardContent>
+            <div className={`font-bold ${isMobile ? 'text-lg' : 'text-2xl'}`}>{stats.pendingAssessments}</div>
+            <p className={`text-muted-foreground ${isMobile ? 'text-[10px]' : 'text-xs'}`}>
+              {isMobile ? "To complete" : "Assessments to complete"}
             </p>
-          </CardContent>
-        </Card>
+          </MobileCardContent>
+        </MobileCard>
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
-              Completed Assessments
-            </CardTitle>
-            <IconChecks className="size-4 text-green-500" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.completedAssessments}</div>
-            <p className="text-xs text-muted-foreground">
-              Total completed
+        <MobileCard>
+          <MobileCardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <MobileCardTitle>
+              {isMobile ? "Completed" : "Completed Assessments"}
+            </MobileCardTitle>
+            <IconChecks className={`text-green-500 ${isMobile ? 'size-3' : 'size-4'}`} />
+          </MobileCardHeader>
+          <MobileCardContent>
+            <div className={`font-bold ${isMobile ? 'text-lg' : 'text-2xl'}`}>{stats.completedAssessments}</div>
+            <p className={`text-muted-foreground ${isMobile ? 'text-[10px]' : 'text-xs'}`}>
+              {isMobile ? "Done" : "Total completed"}
             </p>
-          </CardContent>
-        </Card>
+          </MobileCardContent>
+        </MobileCard>
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
-              Training Sessions
-            </CardTitle>
-            <IconBriefcase className="size-4 text-blue-500" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.trainingAttended}</div>
-            <p className="text-xs text-muted-foreground">
-              Training attended
+        <MobileCard>
+          <MobileCardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <MobileCardTitle>
+              {isMobile ? "Training" : "Training Sessions"}
+            </MobileCardTitle>
+            <IconBriefcase className={`text-blue-500 ${isMobile ? 'size-3' : 'size-4'}`} />
+          </MobileCardHeader>
+          <MobileCardContent>
+            <div className={`font-bold ${isMobile ? 'text-lg' : 'text-2xl'}`}>{stats.trainingAttended}</div>
+            <p className={`text-muted-foreground ${isMobile ? 'text-[10px]' : 'text-xs'}`}>
+              {isMobile ? "Attended" : "Training attended"}
             </p>
-          </CardContent>
-        </Card>
+          </MobileCardContent>
+        </MobileCard>
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
-              Upcoming Training
-            </CardTitle>
-            <IconCalendar className="size-4 text-purple-500" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.upcomingTraining}</div>
-            <p className="text-xs text-muted-foreground">
-              Scheduled sessions
+        <MobileCard>
+          <MobileCardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <MobileCardTitle>
+              {isMobile ? "Upcoming" : "Upcoming Training"}
+            </MobileCardTitle>
+            <IconCalendar className={`text-purple-500 ${isMobile ? 'size-3' : 'size-4'}`} />
+          </MobileCardHeader>
+          <MobileCardContent>
+            <div className={`font-bold ${isMobile ? 'text-lg' : 'text-2xl'}`}>{stats.upcomingTraining}</div>
+            <p className={`text-muted-foreground ${isMobile ? 'text-[10px]' : 'text-xs'}`}>
+              {isMobile ? "Scheduled" : "Training scheduled"}
             </p>
-          </CardContent>
-        </Card>
-      </div>
+          </MobileCardContent>
+        </MobileCard>
+      </MobileGrid>
 
       {/* Main Content Grid */}
       <div className="grid gap-4">

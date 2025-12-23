@@ -253,3 +253,70 @@
 .ProseMirror ol ol {
   list-style-type: lower-alpha;
 }
+
+/* Mobile-specific styles for staff portal */
+@media (max-width: 767px) {
+  /* Ensure proper safe area support for devices with notches/home indicator */
+  body {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  /* Mobile card optimizations */
+  .mobile-card {
+    padding: 0.75rem !important;
+    margin: 0.5rem 0 !important;
+  }
+
+  .mobile-card-header {
+    padding-bottom: 0.25rem !important;
+  }
+
+  .mobile-card-content {
+    padding: 0.5rem 0 0.25rem 0 !important;
+  }
+
+  /* Touch-friendly button sizes */
+  .mobile-touch-target {
+    min-height: 44px !important;
+    min-width: 44px !important;
+  }
+
+  /* Improved text sizes for mobile readability */
+  .mobile-text-sm {
+    font-size: 0.75rem !important;
+    line-height: 1rem !important;
+  }
+
+  .mobile-text-xs {
+    font-size: 0.625rem !important;
+    line-height: 0.75rem !important;
+  }
+
+  /* Grid adjustments for mobile */
+  .mobile-grid-1 {
+    grid-template-columns: repeat(1, minmax(0, 1fr)) !important;
+  }
+
+  .mobile-grid-2 {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+
+  /* Mobile spacing adjustments */
+  .mobile-gap-2 {
+    gap: 0.5rem !important;
+  }
+
+  .mobile-gap-3 {
+    gap: 0.75rem !important;
+  }
+
+  /* Sidebar adjustments for mobile */
+  .mobile-sidebar-hidden {
+    display: none !important;
+  }
+
+  /* Bottom navigation safe area */
+  .bottom-nav-safe {
+    padding-bottom: calc(env(safe-area-inset-bottom) + 0.5rem);
+  }
+}

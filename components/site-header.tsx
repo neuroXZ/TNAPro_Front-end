@@ -1,11 +1,12 @@
-'use client';
+'use client'
 
 import { usePathname } from "next/navigation"
 import { useEffect, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Separator } from "@/components/ui/separator"
 import { SidebarTrigger } from "@/components/ui/sidebar"
-import { IconUser } from "@tabler/icons-react"
+import { IconUser, IconChevronDown } from "@tabler/icons-react"
+import { useIsMobile } from "@/hooks/use-mobile"
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -14,10 +15,17 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 
 export function SiteHeader() {
   const pathname = usePathname()
   const [user, setUser] = useState<{ name: string; userType: string } | null>(null)
+  const isMobile = useIsMobile()
   
   useEffect(() => {
     // Get user data from localStorage
@@ -54,38 +62,76 @@ export function SiteHeader() {
   
   const breadcrumbs = generateBreadcrumbs()
 
+  // Get current page title for mobile
+  const getCurrentPageTitle = () => {
+    const paths = pathname.split('/').filter(Boolean)
+    if (paths.length === 0) return "Home"
+    const lastPath = paths[paths.length - 1]
+    return lastPath.charAt(0).toUpperCase() + lastPath.slice(1)
+  }
+
   return (
-    <header className="flex h-(--header-height) shrink-0 items-center gap-2 border-b transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-(--header-height)">
-      <div className="flex w-full items-center gap-1 px-4 lg:gap-2 lg:px-6">
+    <header className="flex h-[var(--header-height)] shrink-0 items-center gap-2 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-[var(--header-height)]">
+      <div className="flex w-full items-center gap-1 px-3 md:gap-2 md:px-6">
         <SidebarTrigger className="-ml-1" />
         <Separator
           orientation="vertical"
           className="mx-2 data-[orientation=vertical]:h-4"
         />
-        <Breadcrumb>
-          <BreadcrumbList>
-            {breadcrumbs.map((crumb, index) => (
-              <div key={crumb.href} className="flex items-center gap-2">
-                {index > 0 && <BreadcrumbSeparator />}
-                <BreadcrumbItem>
-                  {crumb.isLast ? (
-                    <BreadcrumbPage>{crumb.label}</BreadcrumbPage>
-                  ) : (
-                    <BreadcrumbLink href={crumb.href}>{crumb.label}</BreadcrumbLink>
-                  )}
-                </BreadcrumbItem>
-              </div>
-            ))}
-          </BreadcrumbList>
-        </Breadcrumb>
+        
+        {/* Mobile: Show current page title only */}
+        {isMobile ? (
+          <div className="flex-1 min-w-0">
+            <h1 className="text-sm font-medium truncate">{getCurrentPageTitle()}</h1>
+          </div>
+        ) : (
+          /* Desktop: Show full breadcrumbs */
+          <Breadcrumb className="flex-1 min-w-0">
+            <BreadcrumbList>
+              {breadcrumbs.map((crumb, index) => (
+                <div key={crumb.href} className="flex items-center gap-2">
+                  {index > 0 && <BreadcrumbSeparator />}
+                  <BreadcrumbItem>
+                    {crumb.isLast ? (
+                      <BreadcrumbPage>{crumb.label}</BreadcrumbPage>
+                    ) : (
+                      <BreadcrumbLink href={crumb.href}>{crumb.label}</BreadcrumbLink>
+                    )}
+                  </BreadcrumbItem>
+                </div>
+              ))}
+            </BreadcrumbList>
+          </Breadcrumb>
+        )}
+        
+        {/* User menu */}
         <div className="ml-auto flex items-center gap-2">
           {user && (
-            <Button variant="ghost" size="sm" className="gap-2">
-              <IconUser className="size-4" />
-              <span className="hidden sm:inline-flex">
-                {user.name || (user.userType === 'admin' ? 'Admin' : 'Staff')}
-              </span>
-            </Button>
+            isMobile ? (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="sm" className="gap-1 px-2">
+                    <IconUser className="size-4" />
+                    <IconChevronDown className="size-3" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem disabled>
+                    <div className="flex flex-col">
+                      <span className="text-sm font-medium">{user.name}</span>
+                      <span className="text-xs text-muted-foreground">{user.userType === 'admin' ? 'Admin' : 'Staff'}</span>
+                    </div>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            ) : (
+              <Button variant="ghost" size="sm" className="gap-2">
+                <IconUser className="size-4" />
+                <span className="hidden sm:inline-flex">
+                  {user.name || (user.userType === 'admin' ? 'Admin' : 'Staff')}
+                </span>
+              </Button>
+            )
           )}
         </div>
       </div>
