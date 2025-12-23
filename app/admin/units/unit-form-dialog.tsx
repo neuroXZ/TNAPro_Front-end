@@ -67,7 +67,7 @@ export function UnitFormDialog({
         const allUnits = await unitAPI.getAll()
         // Filter out current unit if editing (prevent self-reference)
         const availableParents = editingUnit 
-          ? allUnits.filter(unit => unit.id !== editingUnit.id)
+          ? allUnits.filter((unit: Unit) => unit.id !== editingUnit.id)
           : allUnits
         setParentUnits(availableParents)
       } catch (error) {
