@@ -823,4 +823,17 @@ export const importAPI = {
   },
 };
 
+// Email API
+export const emailAPI = {
+  sendContactMessage: async (data: {
+    name: string;
+    email: string;
+    subject: string;
+    message: string;
+  }) => {
+    const response = await api.post('/email/contact', data);
+    return response.data;
+  },
+};
+
 export default api;

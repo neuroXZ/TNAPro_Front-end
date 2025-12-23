@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label"
 import { toast } from "sonner"
 import { IconMail, IconPhone, IconClock, IconMapPin, IconSend, IconArrowLeft } from "@tabler/icons-react"
 import { useRouter } from "next/navigation"
+import emailjs from '@emailjs/browser'
 
 
 export default function CustomerServicePage() {
@@ -20,6 +21,12 @@ export default function CustomerServicePage() {
     message: ''
   })
   const [isSubmitting, setIsSubmitting] = useState(false)
+
+  // Initialize EmailJS
+  useEffect(() => {
+    // Initialize EmailJS with public key 
+    emailjs.init("rGxvYtK8V-fLHjjdO") // Public key for TNA Pro
+  }, [])
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target
@@ -34,39 +41,76 @@ export default function CustomerServicePage() {
     setIsSubmitting(true)
 
     try {
-      // Simulate email sending to tester@franco.com
-      const emailData = {
-        to: 'enquiry@mmcsb.com.my',
-        from: formData.email,
+      // EmailJS configuration for TNA Pro
+      const serviceID = 'service_tnapro123'
+      const templateID = 'template_contact_form'
+      
+      // Prepare email template parameters
+      const templateParams = {
+        from_name: formData.name,
+        from_email: formData.email,
+        to_email: 'tnaprosupport@mmcsb.com.my',
         subject: `Customer Service: ${formData.subject}`,
-        message: `
-Name: ${formData.name}
+        message: formData.message,
+        reply_to: formData.email,
+        // Additional formatting
+        formatted_message: `Name: ${formData.name}
 Email: ${formData.email}
 Subject: ${formData.subject}
 
 Message:
 ${formData.message}
-        `
+
+---
+This message was sent from the TNA Pro Customer Service contact form.`
       }
 
-      // Here you would typically call your email API
-      console.log('Sending email to tester@franco.com:', emailData)
+      // Send email directly via EmailJS
+      const result = await emailjs.send(serviceID, templateID, templateParams)
       
-      // Simulate API call delay
-      await new Promise(resolve => setTimeout(resolve, 2000))
-
-      toast.success("Your message has been sent successfully! We'll get back to you soon.")
+      if (result.status === 200) {
+        toast.success("Your message has been sent successfully! We'll get back to you soon.", {
+          description: "Email sent directly to our support team.",
+          duration: 5000,
+        })
+        
+        // Reset form
+        setFormData({
+          name: '',
+          email: '',
+          subject: '',
+          message: ''
+        })
+      } else {
+        throw new Error('Failed to send email')
+      }
       
-      // Reset form
-      setFormData({
-        name: '',
-        email: '',
-        subject: '',
-        message: ''
+    } catch (error: any) {
+      console.error('Error sending email:', error)
+      
+      // Fallback to mailto if EmailJS fails
+      toast.error("Direct email failed. Opening your email client as backup.", {
+        description: "Please send the message manually.",
+        duration: 6000,
       })
-    } catch (error) {
-      console.error('Error sending message:', error)
-      toast.error("Failed to send message. Please try again.")
+      
+      // Create mailto link as fallback
+      const subject = `Customer Service: ${formData.subject}`
+      const body = `Name: ${formData.name}
+Email: ${formData.email}
+Subject: ${formData.subject}
+
+Message:
+${formData.message}
+
+---
+This message was sent from the TNA Pro Customer Service contact form.`
+
+      const mailtoLink = `mailto:tnaprosupport@mmcsb.com.my?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`
+      
+      if (typeof window !== 'undefined') {
+        window.open(mailtoLink, '_blank')
+      }
     } finally {
       setIsSubmitting(false)
     }
@@ -219,7 +263,7 @@ ${formData.message}
               </Button>
               
               <p className="text-xs text-muted-foreground text-center">
-                * Required fields. Your message will be sent to tester@franco.com
+                * Required fields. Your message will be sent to tnaprosupport@mmcsb.com.my
               </p>
             </form>
           </CardContent>

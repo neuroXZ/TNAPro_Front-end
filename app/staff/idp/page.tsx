@@ -386,9 +386,9 @@ export default function MyIdpPage() {
                     <div className="text-lg font-bold">{idpResult.competencyAnalysis.length}</div>
                   </div>
                   <div className="bg-muted/50 rounded-lg p-3">
-                    <div className="text-xs text-muted-foreground">Need Development</div>
+                    <div className="text-xs text-muted-foreground">Need Training</div>
                     <div className="text-lg font-bold text-red-600">
-                      {idpResult.competencyAnalysis.filter(c => c.gap > 0).length}
+                      {idpResult.competencyAnalysis.filter(c => c.developmentStrategies?.training === true).length}
                     </div>
                   </div>
                 </div>
