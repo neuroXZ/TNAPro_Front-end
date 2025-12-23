@@ -470,7 +470,7 @@ export default function MyIdpPage() {
                           {comp.competencyName}
                         </h4>
                         <Badge 
-                          variant={comp.gap > 0 ? "destructive" : "primary"} 
+                          variant={comp.gap > 0 ? "destructive" : "secondary"} 
                           className="text-xs ml-2 shrink-0"
                         >
                           Gap: {comp.gap}
