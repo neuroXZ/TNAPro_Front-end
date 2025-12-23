@@ -470,7 +470,7 @@ export default function MyIdpPage() {
                           {comp.competencyName}
                         </h4>
                         <Badge 
-                          variant={comp.gap > 0 ? "destructive" : "secondary"} 
+                          variant={comp.gap > 0 ? "destructive" : "primary"} 
                           className="text-xs ml-2 shrink-0"
                         >
                           Gap: {comp.gap}
@@ -627,98 +627,100 @@ export default function MyIdpPage() {
                 </Card>
           )}
 
-          {/* Competency Gap Analysis Table */}
-          <Card>
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <CardTitle>Competency Gap Analysis</CardTitle>
-                <div className="flex gap-2">
-                  <Button 
-                    variant="outline" 
-                    size="sm"
-                    onClick={handleExportCsv}
-                    disabled={isExporting}
-                  >
-                    <IconDownload className="size-4 mr-2" />
-                    {isExporting ? "Exporting..." : "Export CSV"}
-                  </Button>
-                  <Button 
-                    variant="outline" 
-                    size="sm"
-                    onClick={handleExportPdf}
-                    disabled={isExporting}
-                  >
-                    <IconDownload className="size-4 mr-2" />
-                    {isExporting ? "Opening..." : "View PDF"}
-                  </Button>
+          {/* Competency Gap Analysis Table - Hidden on Mobile */}
+          {!isMobile && (
+            <Card>
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <CardTitle>Competency Gap Analysis</CardTitle>
+                  <div className="flex gap-2">
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      onClick={handleExportCsv}
+                      disabled={isExporting}
+                    >
+                      <IconDownload className="size-4 mr-2" />
+                      {isExporting ? "Exporting..." : "Export CSV"}
+                    </Button>
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      onClick={handleExportPdf}
+                      disabled={isExporting}
+                    >
+                      <IconDownload className="size-4 mr-2" />
+                      {isExporting ? "Opening..." : "View PDF"}
+                    </Button>
+                  </div>
                 </div>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className="border rounded-lg overflow-hidden">
-                <div className="overflow-x-auto">
-                  <table className="w-full">
-                    <thead className="bg-muted">
-                      <tr>
-                        <th rowSpan={2} className="px-4 py-3 text-left text-sm font-medium border-r align-middle">Competency</th>
-                        <th rowSpan={2} className="px-3 py-3 text-center text-sm font-medium border-r align-middle">RCL</th>
-                        <th colSpan={3} className="px-3 py-2 text-center text-sm font-medium border-r border-b">Assessment Result</th>
-                        <th colSpan={4} className="px-3 py-2 text-center text-sm font-medium">Development Strategy</th>
-                      </tr>
-                      <tr>
-                        <th className="px-3 py-2 text-center text-sm font-medium">Self</th>
-                        <th className="px-3 py-2 text-center text-sm font-medium">Superior</th>
-                        <th className="px-3 py-2 text-center text-sm font-medium border-r">Gap</th>
-                        <th className="px-3 py-2 text-center text-sm font-medium">Training</th>
-                        <th className="px-3 py-2 text-center text-sm font-medium">Coaching</th>
-                        <th className="px-3 py-2 text-center text-sm font-medium">Self Learning</th>
-                        <th className="px-3 py-2 text-center text-sm font-medium">
-                          <div className="flex items-center justify-center gap-1">
-                            <span>Work Experience</span>
-                            <TooltipProvider>
-                              <Tooltip>
-                                <TooltipTrigger asChild>
-                                  <IconInfoCircle className="size-3.5 cursor-help" />
-                                </TooltipTrigger>
-                                <TooltipContent>
-                                  <p>Enhance Competency Through Working Experience</p>
-                                </TooltipContent>
-                              </Tooltip>
-                            </TooltipProvider>
-                          </div>
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {idpResult.competencyAnalysis.map((comp, index) => (
-                        <tr key={comp.competencyId} className="border-t hover:bg-muted/50">
-                          <td className="px-4 py-3 text-sm font-medium border-r">{comp.competencyName}</td>
-                          <td className="px-3 py-3 text-sm text-center border-r">{comp.requiredLevel}</td>
-                          <td className="px-3 py-3 text-sm text-center">{comp.selfScore || 'N/A'}</td>
-                          <td className="px-3 py-3 text-sm text-center">{comp.superiorScore || 'N/A'}</td>
-                          <td className={`px-3 py-3 text-sm text-center border-r font-medium ${getGapColor(comp.gap)}`}>
-                            {comp.gap}
-                          </td>
-                          <td className="px-3 py-3 text-center">
-                            {comp.developmentStrategies.training && <span className="text-green-600 text-lg">✓</span>}
-                          </td>
-                          <td className="px-3 py-3 text-center">
-                            {comp.developmentStrategies.coaching && <span className="text-green-600 text-lg">✓</span>}
-                          </td>
-                          <td className="px-3 py-3 text-center">
-                            {comp.developmentStrategies.selfLearning && <span className="text-green-600 text-lg">✓</span>}
-                          </td>
-                          <td className="px-3 py-3 text-center">
-                            {comp.developmentStrategies.workExperience && <span className="text-green-600 text-lg">✓</span>}
-                          </td>
+              </CardHeader>
+              <CardContent>
+                <div className="border rounded-lg overflow-hidden">
+                  <div className="overflow-x-auto">
+                    <table className="w-full">
+                      <thead className="bg-muted">
+                        <tr>
+                          <th rowSpan={2} className="px-4 py-3 text-left text-sm font-medium border-r align-middle">Competency</th>
+                          <th rowSpan={2} className="px-3 py-3 text-center text-sm font-medium border-r align-middle">RCL</th>
+                          <th colSpan={3} className="px-3 py-2 text-center text-sm font-medium border-r border-b">Assessment Result</th>
+                          <th colSpan={4} className="px-3 py-2 text-center text-sm font-medium">Development Strategy</th>
                         </tr>
-                      ))}
-                    </tbody>
-                  </table>
+                        <tr>
+                          <th className="px-3 py-2 text-center text-sm font-medium">Self</th>
+                          <th className="px-3 py-2 text-center text-sm font-medium">Superior</th>
+                          <th className="px-3 py-2 text-center text-sm font-medium border-r">Gap</th>
+                          <th className="px-3 py-2 text-center text-sm font-medium">Training</th>
+                          <th className="px-3 py-2 text-center text-sm font-medium">Coaching</th>
+                          <th className="px-3 py-2 text-center text-sm font-medium">Self Learning</th>
+                          <th className="px-3 py-2 text-center text-sm font-medium">
+                            <div className="flex items-center justify-center gap-1">
+                              <span>Work Experience</span>
+                              <TooltipProvider>
+                                <Tooltip>
+                                  <TooltipTrigger asChild>
+                                    <IconInfoCircle className="size-3.5 cursor-help" />
+                                  </TooltipTrigger>
+                                  <TooltipContent>
+                                    <p>Enhance Competency Through Working Experience</p>
+                                  </TooltipContent>
+                                </Tooltip>
+                              </TooltipProvider>
+                            </div>
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {idpResult.competencyAnalysis.map((comp, index) => (
+                          <tr key={comp.competencyId} className="border-t hover:bg-muted/50">
+                            <td className="px-4 py-3 text-sm font-medium border-r">{comp.competencyName}</td>
+                            <td className="px-3 py-3 text-sm text-center border-r">{comp.requiredLevel}</td>
+                            <td className="px-3 py-3 text-sm text-center">{comp.selfScore || 'N/A'}</td>
+                            <td className="px-3 py-3 text-sm text-center">{comp.superiorScore || 'N/A'}</td>
+                            <td className={`px-3 py-3 text-sm text-center border-r font-medium ${getGapColor(comp.gap)}`}>
+                              {comp.gap}
+                            </td>
+                            <td className="px-3 py-3 text-center">
+                              {comp.developmentStrategies.training && <span className="text-green-600 text-lg">✓</span>}
+                            </td>
+                            <td className="px-3 py-3 text-center">
+                              {comp.developmentStrategies.coaching && <span className="text-green-600 text-lg">✓</span>}
+                            </td>
+                            <td className="px-3 py-3 text-center">
+                              {comp.developmentStrategies.selfLearning && <span className="text-green-600 text-lg">✓</span>}
+                            </td>
+                            <td className="px-3 py-3 text-center">
+                              {comp.developmentStrategies.workExperience && <span className="text-green-600 text-lg">✓</span>}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
                 </div>
-              </div>
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
+          )}
 
           {/* Legend */}
           <Card className="bg-muted/50">
