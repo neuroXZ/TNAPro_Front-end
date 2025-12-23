@@ -148,7 +148,7 @@ const AdminDocumentationPage = () => {
                   </div>
                   <div className="flex flex-wrap gap-1">
                     {section.items.map((item, idx) => (
-                      <Badge key={idx} variant="secondary" className="text-xs">
+                      <Badge key={idx}  className="text-xs">
                         {item}
                       </Badge>
                     ))}
