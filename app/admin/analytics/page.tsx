@@ -147,7 +147,7 @@ export default function AnalyticsPage() {
               <Calendar className="w-5 h-5 text-primary" />
               Expected Launch
             </h3>
-            <div className="text-3xl font-bold text-primary">Q1 2025</div>
+            <div className="text-3xl font-bold text-primary">Q1 2026</div>
             <p className="text-muted-foreground">
               Be the first to know when our analytics dashboard goes live
             </p>
