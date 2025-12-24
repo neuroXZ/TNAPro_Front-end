@@ -68,7 +68,7 @@ export default function AnalyticsPage() {
           </div>
         </div>
         
-        <Badge variant="secondary" className="mb-4">
+        <Badge variant="destructive" className="mb-4">
           <Clock className="w-3 h-3 mr-1" />
           Coming Soon
         </Badge>
@@ -118,7 +118,7 @@ export default function AnalyticsPage() {
                       <Badge 
                         variant={
                           feature.status === "In Development" ? "default" : 
-                          feature.status === "Coming Soon" ? "secondary" : 
+                          feature.status === "Coming Soon" ? "destructive" : 
                           "outline"
                         }
                         className="text-xs"
