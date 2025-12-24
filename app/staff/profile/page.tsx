@@ -35,6 +35,8 @@ interface ProfileData {
   supervisor?: {
     id: string
     name: string
+    position?: { name: string }
+    positionName?: string
   }
   subordinates?: Array<{
     id: string
@@ -62,11 +64,11 @@ export default function MyProfile() {
   const fetchProfile = async () => {
     try {
       setIsLoading(true)
-      
+
       // First, try to get user data from localStorage for immediate display
       const storedUser = localStorage.getItem('user')
       let userData = null
-      
+
       if (storedUser) {
         try {
           userData = JSON.parse(storedUser)
@@ -74,150 +76,105 @@ export default function MyProfile() {
           console.error("Failed to parse stored user:", parseError)
         }
       }
-      
+
       // If no stored user data, redirect to login
       if (!userData) {
         toast.error("Please login to view your profile")
         window.location.href = "/login"
         return
       }
-      
-      // Try to fetch from auth API first
-      try {
-        const data = await authAPI.getProfile()
-        console.log('Auth API data:', data) // Debug log
-        
-        // Fetch subordinates data
-        if (data?.id) {
-          try {
-            const [allStaff, allAssessors] = await Promise.all([
-              staffAPI.getAll(),
-              assessorAPI.getAll(),
-            ])
-            
-            // Find subordinates: staff where current user is the superior assessor
-            const subordinateAssessors = allAssessors.filter(
-              (a: any) => a.assessorId === data.id && a.type === 'superior'
+
+      // Try to fetch from staff API directly since auth API doesn't exist
+      if (userData.id) {
+        try {
+          const [fullProfile, allStaff, allAssessors] = await Promise.all([
+            staffAPI.getById(userData.id),
+            staffAPI.getAll(),
+            assessorAPI.getAll(),
+          ])
+
+          console.log('Staff API fullProfile:', fullProfile) // Debug log
+          console.log('All staff data sample:', allStaff.slice(0, 2)) // Debug log
+
+          // Find position, unit, supervisor from all staff data
+          const staffWithRelations = allStaff.find((s: any) => s.id === userData.id)
+          console.log('Staff with relations:', staffWithRelations) // Debug log
+
+          // Find subordinates: staff where current user is the superior assessor
+          const subordinateAssessors = allAssessors.filter(
+            (a: any) => a.assessorId === userData.id && a.type === 'superior'
+          )
+          const subordinates = subordinateAssessors
+            .map((a: any) => {
+              const subordinateStaff = allStaff.find((s: any) => s.id === a.staffId)
+              return subordinateStaff ? {
+                id: subordinateStaff.id,
+                name: subordinateStaff.name,
+                position: subordinateStaff.position
+              } : null
+            })
+            .filter(Boolean)
+
+          // Find supervisor from assessor relationships if not in staff relation
+          let supervisorData = staffWithRelations?.supervisor
+          if (!supervisorData) {
+            const supervisorAssessor = allAssessors.find(
+              (a: any) => a.staffId === userData.id && a.type === 'superior'
             )
-            const subordinates = subordinateAssessors
-              .map((a: any) => {
-                const subordinateStaff = allStaff.find((s: any) => s.id === a.staffId)
-                return subordinateStaff ? {
-                  id: subordinateStaff.id,
-                  name: subordinateStaff.name,
-                  position: subordinateStaff.position
-                } : null
-              })
-              .filter(Boolean)
-            
-            const enrichedData = {
-              ...data,
+            if (supervisorAssessor && supervisorAssessor.assessor) {
+              // Get full supervisor data from staff list to include position
+              const supervisorStaffData = allStaff.find((s: any) => s.id === supervisorAssessor.assessor.id)
+              supervisorData = {
+                ...supervisorAssessor.assessor,
+                position: supervisorStaffData?.position || supervisorAssessor.assessor.position
+              }
+            }
+          }
+          console.log('Supervisor from assessor relationship:', supervisorData) // Debug log
+
+          if (staffWithRelations) {
+            const enrichedProfile = {
+              ...fullProfile,
+              position: staffWithRelations.position,
+              unit: staffWithRelations.unit,
+              supervisor: supervisorData || staffWithRelations.supervisor,
               subordinates,
             }
-            setProfile(enrichedData)
-            updateFormData(enrichedData)
-            return
-          } catch (err) {
-            console.error('Failed to fetch subordinates:', err)
-            setProfile(data)
-            updateFormData(data)
-            return
+            console.log('Final enriched profile:', enrichedProfile) // Debug log
+            console.log('Supervisor from enriched profile:', enrichedProfile.supervisor) // Debug log
+            setProfile(enrichedProfile)
+            updateFormData(enrichedProfile)
+          } else {
+            // If staff relation not found, try to use fullProfile with found supervisor
+            const basicProfile = {
+              ...fullProfile,
+              supervisor: supervisorData,
+              subordinates,
+            }
+            console.log('Basic profile with supervisor:', basicProfile) // Debug log
+            setProfile(basicProfile)
+            updateFormData(basicProfile)
           }
-        } else {
-          setProfile(data)
-          updateFormData(data)
           return
-        }
-      } catch (authError: any) {
-        console.warn("Auth API failed, falling back to staff API:", authError.message)
-        
-        // Fallback: Use staff API with stored user data
-        if (userData.id) {
-          try {
-            const [fullProfile, allStaff, allAssessors] = await Promise.all([
-              staffAPI.getById(userData.id),
-              staffAPI.getAll(),
-              assessorAPI.getAll(),
-            ])
-            
-            console.log('Staff API fullProfile:', fullProfile) // Debug log
-            console.log('All staff data sample:', allStaff.slice(0, 2)) // Debug log
-            
-            // Find position, unit, supervisor from all staff data
-            const staffWithRelations = allStaff.find((s: any) => s.id === userData.id)
-            console.log('Staff with relations:', staffWithRelations) // Debug log
-            
-            // Find subordinates: staff where current user is the superior assessor
-            const subordinateAssessors = allAssessors.filter(
-              (a: any) => a.assessorId === userData.id && a.type === 'superior'
-            )
-            const subordinates = subordinateAssessors
-              .map((a: any) => {
-                const subordinateStaff = allStaff.find((s: any) => s.id === a.staffId)
-                return subordinateStaff ? {
-                  id: subordinateStaff.id,
-                  name: subordinateStaff.name,
-                  position: subordinateStaff.position
-                } : null
-              })
-              .filter(Boolean)
-            
-            // Find supervisor from assessor relationships if not in staff relation
-            let supervisorData = staffWithRelations?.supervisor
-            if (!supervisorData) {
-              const supervisorAssessor = allAssessors.find(
-                (a: any) => a.staffId === userData.id && a.type === 'superior'
-              )
-              if (supervisorAssessor && supervisorAssessor.assessor) {
-                supervisorData = supervisorAssessor.assessor
-              }
-            }
-            console.log('Supervisor from assessor relationship:', supervisorData) // Debug log
-            
-            if (staffWithRelations) {
-              const enrichedProfile = {
-                ...fullProfile,
-                position: staffWithRelations.position,
-                unit: staffWithRelations.unit,
-                supervisor: supervisorData || staffWithRelations.supervisor,
-                subordinates,
-              }
-              console.log('Final enriched profile:', enrichedProfile) // Debug log
-              console.log('Supervisor from enriched profile:', enrichedProfile.supervisor) // Debug log
-              setProfile(enrichedProfile)
-              updateFormData(enrichedProfile)
-            } else {
-              // If staff relation not found, try to use fullProfile with found supervisor
-              const basicProfile = {
-                ...fullProfile,
-                supervisor: supervisorData,
-                subordinates,
-              }
-              console.log('Basic profile with supervisor:', basicProfile) // Debug log
-              setProfile(basicProfile)
-              updateFormData(basicProfile)
-            }
-            return
-          } catch (staffError: any) {
-            console.error("Staff API also failed:", staffError)
-            // Last fallback: use stored user data as-is
-            setProfile(userData)
-            updateFormData(userData)
-            toast.warning("Some profile data may be limited. Please refresh the page if issues persist.")
-            return
-          }
-        } else {
-          // Use stored user data as-is
+        } catch (staffError: any) {
+          console.error("Staff API failed:", staffError)
+          // Last fallback: use stored user data as-is
           setProfile(userData)
           updateFormData(userData)
-          toast.warning("Profile loaded from local storage. Some data may be outdated.")
+          toast.warning("Some profile data may be limited. Please refresh the page if issues persist.")
           return
         }
+      } else {
+        // Use stored user data as-is
+        setProfile(userData)
+        updateFormData(userData)
+        toast.warning("Profile loaded from local storage. Some data may be outdated.")
+        return
       }
     } catch (error: any) {
       console.error("Unexpected error in fetchProfile:", error)
       toast.error("Failed to load profile data")
-      
+
       // Final fallback to avoid white screen
       const storedUser = localStorage.getItem('user')
       if (storedUser) {
@@ -248,7 +205,7 @@ export default function MyProfile() {
 
   const handleSaveChanges = async () => {
     if (!profile?.id) return
-    
+
     try {
       await staffAPI.update(profile.id, formData)
       toast.success("Profile updated successfully")
@@ -280,31 +237,31 @@ export default function MyProfile() {
     try {
       setIsUploadingPhoto(true)
       const result = await staffAPI.uploadPhoto(file)
-      
+
       console.log('Upload result:', result) // Debug log
-      
+
       // Get the image URL from response (check multiple possible fields)
       const imageUrl = result.photoPath || result.path || result.url || result.secure_url
       console.log('Extracted image URL:', imageUrl) // Debug log
-      
+
       // Update profile with new image URL in database
       if (profile && imageUrl) {
         console.log('Updating profile with image URL:', imageUrl) // Debug log
         await staffAPI.update(profile.id, { image: imageUrl })
-        
+
         // Add timestamp to force image refresh and avoid cache issues
         const imageUrlWithTimestamp = `${imageUrl}?t=${Date.now()}`
-        
+
         setProfile({
           ...profile,
           image: imageUrlWithTimestamp
         })
         console.log('Profile updated with new image:', imageUrlWithTimestamp) // Debug log
-        
+
         // Also refresh the page data to ensure sync
         setTimeout(() => fetchProfile(), 1000)
       }
-      
+
       toast.success('Photo uploaded and saved successfully!')
     } catch (error: any) {
       console.error('Photo upload error:', error)
@@ -352,9 +309,9 @@ export default function MyProfile() {
           <CardContent className="flex flex-col items-center">
             <img
               src={
-                profile?.image || 
-                (profile?.gender?.toLowerCase() === 'female' 
-                  ? '/female-avatar.svg' 
+                profile?.image ||
+                (profile?.gender?.toLowerCase() === 'female'
+                  ? '/female-avatar.svg'
                   : '/male-avatar.svg')
               }
               alt={profile?.name || 'Profile'}
@@ -367,8 +324,8 @@ export default function MyProfile() {
                 console.error('Image failed to load:', profile?.image)
                 setImageLoadError(true)
                 // Fallback to default avatar
-                e.currentTarget.src = profile?.gender?.toLowerCase() === 'female' 
-                  ? '/female-avatar.svg' 
+                e.currentTarget.src = profile?.gender?.toLowerCase() === 'female'
+                  ? '/female-avatar.svg'
                   : '/male-avatar.svg'
               }}
             />
@@ -377,6 +334,7 @@ export default function MyProfile() {
                 Failed to load profile image
               </p>
             )}
+
             <div className="mt-4">
               <input
                 type="file"
@@ -386,14 +344,41 @@ export default function MyProfile() {
                 className="hidden"
                 disabled={!isEditing || isUploadingPhoto}
               />
-              <Button 
-                variant="outline" 
+              <Button
+                variant="outline"
                 disabled={!isEditing || isUploadingPhoto}
                 onClick={() => document.getElementById('photo-upload')?.click()}
               >
                 {isUploadingPhoto ? 'Uploading...' : 'Change Photo'}
               </Button>
             </div>
+            <Card className="mt-6 w-full p-2 gap-2">
+              <div className="grid gap-2">
+                <div className="flex items-center gap-2">
+                  <Label htmlFor="position">Position</Label>
+                  <IconBriefcase className="size-4 text-muted-foreground" />
+                  <Input
+                    id="position"
+                    value={profile?.position?.name || "-"}
+                    disabled
+                    readOnly
+                  />
+                </div>
+              </div>
+
+              <div className="grid gap-2">
+                <div className="flex items-center gap-2">
+                  <Label htmlFor="unit">Unit</Label>
+                  <IconBuilding className="size-4 text-muted-foreground" />
+                  <Input
+                    id="unit"
+                    value={profile?.unit?.name || "-"}
+                    disabled
+                    readOnly
+                  />
+                </div>
+              </div>
+            </Card>
           </CardContent>
         </Card>
 
@@ -409,9 +394,9 @@ export default function MyProfile() {
               <Label htmlFor="name">Full Name</Label>
               <div className="flex items-center gap-2">
                 <IconUser className="size-4 text-muted-foreground" />
-                <Input 
-                  id="name" 
-                  value={isEditing ? formData.name : (profile?.name || "-")} 
+                <Input
+                  id="name"
+                  value={isEditing ? formData.name : (profile?.name || "-")}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                   disabled={!isEditing}
                   readOnly={!isEditing}
@@ -422,10 +407,10 @@ export default function MyProfile() {
               <Label htmlFor="email">Email</Label>
               <div className="flex items-center gap-2">
                 <IconMail className="size-4 text-muted-foreground" />
-                <Input 
-                  id="email" 
-                  type="email" 
-                  value={isEditing ? formData.email : (profile?.email || "-")} 
+                <Input
+                  id="email"
+                  type="email"
+                  value={isEditing ? formData.email : (profile?.email || "-")}
                   onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                   disabled={!isEditing}
                   readOnly={!isEditing}
@@ -434,10 +419,10 @@ export default function MyProfile() {
             </div>
             <div className="grid gap-2">
               <Label htmlFor="staffId">Staff ID</Label>
-              <Input 
-                id="staffId" 
-                value={profile?.staffOrgId || "-"} 
-                disabled 
+              <Input
+                id="staffId"
+                value={profile?.staffOrgId || "-"}
+                disabled
                 readOnly
               />
             </div>
@@ -457,9 +442,9 @@ export default function MyProfile() {
                   </SelectContent>
                 </Select>
               ) : (
-                <Input 
-                  id="gender" 
-                  value={profile?.gender || "-"} 
+                <Input
+                  id="gender"
+                  value={profile?.gender || "-"}
                   disabled
                   readOnly
                 />
@@ -468,70 +453,60 @@ export default function MyProfile() {
           </CardContent>
         </Card>
       </div>
-
       <Card>
         <CardHeader>
-          <CardTitle>Work Information</CardTitle>
+          <CardTitle>Supervisor</CardTitle>
           <CardDescription>
-            Your position and unit details
+            Your reporting manager
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="grid gap-4 md:grid-cols-2">
-            <div className="grid gap-2">
-              <Label htmlFor="position">Position</Label>
+          {profile?.supervisor ? (
+            <div className="flex items-center justify-between rounded-md border px-3 py-2 text-sm">
               <div className="flex items-center gap-2">
-                <IconBriefcase className="size-4 text-muted-foreground" />
-                <Input 
-                  id="position" 
-                  value={profile?.position?.name || "-"} 
-                  disabled 
-                  readOnly
-                />
+                <IconUsers className="size-4 text-muted-foreground" />
+                <span className="font-medium">{profile.supervisor.name}</span>
               </div>
+              <span className="text-muted-foreground">
+                {(() => {
+                  console.log('Supervisor data:', profile.supervisor);
+                  console.log('Position object:', profile.supervisor.position);
+                  console.log('Position name:', profile.supervisor.position?.name);
+                  console.log('Position name direct:', profile.supervisor.positionName);
+                  return profile.supervisor.position?.name || profile.supervisor.positionName || '-';
+                })()}
+              </span>
             </div>
-            <div className="grid gap-2">
-              <Label htmlFor="unit">Unit</Label>
-              <div className="flex items-center gap-2">
-                <IconBuilding className="size-4 text-muted-foreground" />
-                <Input 
-                  id="unit" 
-                  value={profile?.unit?.name || "-"} 
-                  disabled 
-                  readOnly
-                />
-              </div>
+          ) : (
+            <p className="text-muted-foreground">No supervisor assigned.</p>
+          )}
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Subordinates</CardTitle>
+          <CardDescription>
+            Staff members you supervise
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {profile?.subordinates && profile.subordinates.length > 0 ? (
+            <div className="space-y-2">
+              {profile.subordinates.map((sub) => (
+                <div
+                  key={sub.id}
+                  className="flex items-center justify-between rounded-md border px-3 py-2 text-sm"
+                >
+                  <span className="font-medium">{sub.name}</span>
+                  <span className="text-muted-foreground">
+                    {sub.position?.name || '-'}
+                  </span>
+                </div>
+              ))}
             </div>
-          </div>
-          <div className="grid gap-2">
-            <Label htmlFor="supervisor">Superior</Label>
-            <Input 
-              id="supervisor" 
-              value={profile?.supervisor?.name || "-"} 
-              disabled 
-              readOnly
-            />
-          </div>
-          {profile?.subordinates && profile.subordinates.length > 0 && (
-            <div className="grid gap-2">
-              <Label className="flex items-center gap-2">
-                <IconUsers className="size-4" />
-                Staff ({profile.subordinates.length})
-              </Label>
-              <div className="space-y-2">
-                {profile.subordinates.map((sub) => (
-                  <div 
-                    key={sub.id} 
-                    className="flex items-center justify-between rounded-md border px-3 py-2 text-sm"
-                  >
-                    <span className="font-medium">{sub.name}</span>
-                    <span className="text-muted-foreground">
-                      {sub.position?.name || '-'}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            </div>
+          ) : (
+            <p className="text-muted-foreground">You have no subordinates assigned.</p>
           )}
         </CardContent>
       </Card>

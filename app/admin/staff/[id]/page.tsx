@@ -181,7 +181,9 @@ export default function StaffProfilePage() {
                     superiorData = {
                         id: superiorStaff.id,
                         name: superiorStaff.name,
-                        position: superiorStaff.position?.name || 'No Position'
+                        position: superiorStaff.position?.name || 'No Position',
+                        image: superiorStaff.image,
+                        gender: superiorStaff.gender
                     }
                 }
             }
@@ -198,7 +200,9 @@ export default function StaffProfilePage() {
                     return subordinateStaff ? {
                         id: subordinateStaff.id,
                         name: subordinateStaff.name,
-                        position: subordinateStaff.position?.name || 'No Position'
+                        position: subordinateStaff.position?.name || 'No Position',
+                        image: subordinateStaff.image,
+                        gender: subordinateStaff.gender
                     } : null
                 })
                 .filter(Boolean)
@@ -259,6 +263,12 @@ export default function StaffProfilePage() {
     const getAvatarImage = () => {
         if (staff?.image) return staff.image
         if (staff?.gender?.toLowerCase() === 'female') return '/female-avatar.svg'
+        return '/male-avatar.svg'
+    }
+
+    const getStaffAvatarImage = (staffMember: any) => {
+        if (staffMember?.image) return staffMember.image
+        if (staffMember?.gender?.toLowerCase() === 'female') return '/female-avatar.svg'
         return '/male-avatar.svg'
     }
 
@@ -403,10 +413,10 @@ export default function StaffProfilePage() {
                                 )}
                             </div>
 
-                            <div className="flex items-center gap-4 text-xs text-muted-foreground">
+                            {/* <div className="flex items-center gap-4 text-xs text-muted-foreground">
                                 <span>Joined: {format(new Date(staff.createdAt), "dd MMM yyyy")}</span>
                                 <span>Updated: {format(new Date(staff.updatedAt), "dd MMM yyyy")}</span>
-                            </div>
+                            </div> */}
                         </div>
                     </div>
                 </CardContent>
@@ -532,61 +542,79 @@ export default function StaffProfilePage() {
             <div>
                 {/* Superior & Subordinates */}
                 <Card>
-                    <CardHeader className="pb-3">
+                    <CardHeader>
                         <CardTitle className="text-sm font-medium flex items-center gap-2">
                             <IconUser className="size-4" />
                             Reporting Structure
                         </CardTitle>
                     </CardHeader>
-                    <CardContent className="grid grid-cols-2 gap-6">
-                        {/* Superior */}
-                        <div>
-                            <p className="text-xs text-muted-foreground mb-2">Superior</p>
-                            {superior ? (
-                                <div className="flex items-center gap-2 p-2 bg-muted/50 rounded">
-                                    <Avatar className="size-6">
-                                        <AvatarFallback className="text-xs">
-                                            {getInitials(superior.name)}
-                                        </AvatarFallback>
-                                    </Avatar>
-                                    <div>
-                                        <p className="text-xs font-medium">{superior.name}</p>
-                                        <p className="text-xs text-muted-foreground">{superior.position}</p>
-                                    </div>
-                                </div>
-                            ) : (
-                                <p className="text-xs text-muted-foreground">No superior assigned</p>
-                            )}
-                        </div>
-
-                        {/* Subordinates */}
-                        <div>
-                            <p className="text-xs text-muted-foreground mb-2">
-                                Subordinates ({subordinates.length})
-                            </p>
-                            {subordinates.length > 0 ? (
-                                <div className="space-y-1">
-                                    {subordinates.map((subordinate: any) => (
-                                        <div key={subordinate.id} className="flex items-center gap-2 p-2 bg-muted/30 rounded">
-                                            <Avatar className="size-5">
+                    <CardDescription className="px-6 text-xs text-muted-foreground">
+                        View this staff member's superior and subordinates within the organization.
+                    </CardDescription>
+                    <CardContent className="gap-6">
+                        <Card className="gap-2 p-4 bg-muted-foreground/3">
+                            {/* Superior */}
+                            <div>
+                                <p className="text-xs text-muted-foreground mb-2">Superior</p>
+                                {superior ? (
+                                    <div className="bg-white flex items-center justify-between p-2 rounded border">
+                                        <div className="flex items-center gap-2">
+                                            <Avatar className="size-9">
+                                                <AvatarImage
+                                                    src={getStaffAvatarImage(superior)}
+                                                    alt={superior.name}
+                                                />
                                                 <AvatarFallback className="text-xs">
-                                                    {getInitials(subordinate.name)}
+                                                    {getInitials(superior.name)}
                                                 </AvatarFallback>
                                             </Avatar>
-                                            <div>
-                                                <p className="text-xs font-medium">{subordinate.name}</p>
-                                                <p className="text-xs text-muted-foreground">{subordinate.position}</p>
-                                            </div>
+                                            <p className="text-xs font-medium">{superior.name}</p>
                                         </div>
-                                    ))}
-                                </div>
-                            ) : (
-                                <p className="text-xs text-muted-foreground">No subordinates assigned</p>
-                            )}
-                        </div>
+                                        <Badge>
+                                            {superior.position}
+                                        </Badge>
+                                    </div>
+                                ) : (
+                                    <p className="text-xs text-muted-foreground">No superior assigned</p>
+                                )}
+                            </div>
+                        </Card>
+                        <Card className="gap-2 p-4 mt-4 bg-muted-foreground/3">
+                            {/* Subordinates */}
+                            <div>
+                                <p className="text-xs text-muted-foreground mb-2">
+                                    Subordinates ({subordinates.length})
+                                </p>
+                                {subordinates.length > 0 ? (
+                                    <div className="space-y-2 bg-white">
+                                        {subordinates.map((subordinate: any) => (
+                                            <div key={subordinate.id} className="flex items-center justify-between rounded p-2 border">
+                                                <div className="flex items-center gap-2">
+                                                    <Avatar className="size-9">
+                                                        <AvatarImage
+                                                            src={getStaffAvatarImage(subordinate)}
+                                                            alt={subordinate.name}
+                                                        />
+                                                        <AvatarFallback className="text-xs">
+                                                            {getInitials(subordinate.name)}
+                                                        </AvatarFallback>
+                                                    </Avatar>
+                                                    <p className="text-xs font-medium">{subordinate.name}</p>
+                                                </div>
+                                                <Badge>
+                                                    {subordinate.position}
+                                                </Badge>
+                                            </div>
+                                        ))}
+                                    </div>
+                                ) : (
+                                    <p className="text-xs text-muted-foreground">No subordinates assigned</p>
+                                )}
+                            </div>
+                        </Card>
                     </CardContent>
                 </Card>
-                
+
             </div>
 
             {/* Staff Edit Dialog */}
