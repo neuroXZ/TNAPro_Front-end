@@ -144,11 +144,7 @@ const navMainItems = [
         url: "/admin/idp",
       },
       {
-        title: "Reports",
-        url: "/admin/reports",
-      },
-      {
-        title: "Analytics",
+        title: "Report & Analytics",
         url: "/admin/analytics",
       },
     ],
