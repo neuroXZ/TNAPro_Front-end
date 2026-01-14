@@ -29,7 +29,7 @@ const CustomerServicePage = () => {
             </Badge>
             <h1 className="text-4xl font-bold tracking-tight sm:text-6xl">
               Welcome to{' '}
-              <span className="text-primary">TNA Pro</span>
+              <span className="text-primary">TNAPro</span>
             </h1>
             <p className="text-lg text-muted-foreground max-w-3xl mx-auto leading-relaxed">
               Leading competency assessment platform that helps organizations identify 
@@ -56,7 +56,7 @@ const CustomerServicePage = () => {
         <div className="mx-auto max-w-7xl px-6 lg:px-8">
           <div className="mx-auto max-w-2xl text-center space-y-4">
             <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
-              Why Choose TNA Pro?
+              Why Choose TNAPro?
             </h2>
             <p className="text-lg text-muted-foreground">
               Innovative solution to optimize human resource development in your organization
@@ -124,7 +124,7 @@ const CustomerServicePage = () => {
                   Benefits You Get
                 </h2>
                 <p className="text-lg text-muted-foreground">
-                  TNA Pro is designed to provide maximum value for your organization's human resource development.
+                  TNAPro is designed to provide maximum value for your organization's human resource development.
                 </p>
               </div>
               
@@ -170,7 +170,7 @@ const CustomerServicePage = () => {
             <Card>
               <CardHeader>
                 <CardTitle>Usage Statistics</CardTitle>
-                <CardDescription>TNA Pro system performance data</CardDescription>
+                <CardDescription>TNAPro system performance data</CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
                 <div className="space-y-4">

@@ -120,7 +120,7 @@ export function StaffSidebar({ ...props }: React.ComponentProps<typeof Sidebar>)
                 </div>
                 {/* {isMobile && (
                   <div className="flex flex-col gap-0.5 leading-none">
-                    <span className="font-semibold">TNA Pro</span>
+                    <span className="font-semibold">TNAPro</span>
                     <span className="text-xs text-muted-foreground">Staff Portal v2.0</span>
                   </div>
                 )} */}
@@ -135,7 +135,7 @@ export function StaffSidebar({ ...props }: React.ComponentProps<typeof Sidebar>)
           <div className="flex flex-col gap-4 p-4">
             <div className="space-y-3">
               <div className="border-l-4 border-primary pl-3">
-                <h3 className="font-semibold text-sm text-foreground">TNA Pro System</h3>
+                <h3 className="font-semibold text-sm text-foreground">TNAPro System</h3>
                 <p className="text-xs text-muted-foreground mt-1">
                   Training Needs Analysis Professional
                 </p>

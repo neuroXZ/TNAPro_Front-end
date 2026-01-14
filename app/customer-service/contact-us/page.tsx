@@ -25,7 +25,7 @@ export default function CustomerServicePage() {
   // Initialize EmailJS
   useEffect(() => {
     // Initialize EmailJS with public key 
-    emailjs.init("rGxvYtK8V-fLHjjdO") // Public key for TNA Pro
+    emailjs.init("rGxvYtK8V-fLHjjdO") // Public key for TNAPro
   }, [])
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -41,7 +41,7 @@ export default function CustomerServicePage() {
     setIsSubmitting(true)
 
     try {
-      // EmailJS configuration for TNA Pro
+      // EmailJS configuration for TNAPro
       const serviceID = 'service_tnapro123'
       const templateID = 'template_contact_form'
       
@@ -62,7 +62,7 @@ Message:
 ${formData.message}
 
 ---
-This message was sent from the TNA Pro Customer Service contact form.`
+This message was sent from the TNAPro Customer Service contact form.`
       }
 
       // Send email directly via EmailJS
@@ -104,7 +104,7 @@ Message:
 ${formData.message}
 
 ---
-This message was sent from the TNA Pro Customer Service contact form.`
+This message was sent from the TNAPro Customer Service contact form.`
 
       const mailtoLink = `mailto:tnaprosupport@mmcsb.com.my?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`
       

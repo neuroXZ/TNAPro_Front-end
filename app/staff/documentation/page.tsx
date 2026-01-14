@@ -97,7 +97,7 @@ const StaffDocumentationPage = () => {
       <div className="space-y-4">
         <div className="flex items-center gap-3">
           <FileText className="h-8 w-8 text-primary" />
-          <h1 className="text-3xl font-bold">TNA Pro Staff Guide</h1>
+          <h1 className="text-3xl font-bold">TNAPro Staff Guide</h1>
         </div>
         <p className="text-lg text-muted-foreground">
           Complete guide for staff members to effectively use the Training Needs Analysis system
@@ -113,7 +113,7 @@ const StaffDocumentationPage = () => {
             Getting Started
           </CardTitle>
           <CardDescription>
-            Essential steps to begin using TNA Pro as a staff member
+            Essential steps to begin using TNAPro as a staff member
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -740,7 +740,7 @@ const StaffDocumentationPage = () => {
                 Success Tips & Best Practices
               </CardTitle>
               <CardDescription>
-                Maximize your experience with the TNA Pro system
+                Maximize your experience with the TNAPro system
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">

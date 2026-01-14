@@ -41,6 +41,12 @@ export function PositionViewDialog({
               <p className="text-sm font-medium">{position.grade.name}</p>
             </div>
           )}
+          {position.category?.name && (
+            <div className="grid gap-2">
+              <Label className="text-muted-foreground">Category</Label>
+              <p className="text-sm font-medium">{position.category.name}</p>
+            </div>
+          )}
           {position.description && (
             <div className="grid gap-2">
               <Label className="text-muted-foreground">Description</Label>

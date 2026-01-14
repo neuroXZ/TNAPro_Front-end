@@ -24,6 +24,7 @@ interface PositionFormData {
   name: string
   description?: string
   gradeId?: string
+  categoryId?: string
 }
 
 interface PositionFormDialogProps {
@@ -41,10 +42,12 @@ export function PositionFormDialog({
 }: PositionFormDialogProps) {
   const [isSaving, setIsSaving] = useState(false)
   const [grades, setGrades] = useState<any[]>([])
+  const [categories, setCategories] = useState<any[]>([])
   const [formData, setFormData] = useState<PositionFormData>({
     name: editingPosition?.name || "",
     description: editingPosition?.description || "",
     gradeId: editingPosition?.gradeId,
+    categoryId: editingPosition?.categoryId,
   })
 
   // Fetch grades on mount
@@ -60,6 +63,30 @@ export function PositionFormDialog({
     fetchGrades()
   }, [])
 
+  // Fetch categories on mount
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const response = await fetch("/api/positioncategory")
+        
+        // Check if response is OK before parsing as JSON
+        if (!response.ok) {
+          console.warn(`Position categories endpoint not available (${response.status}). Using empty categories.`)
+          setCategories([])
+          return
+        }
+        
+        const data = await response.json()
+        setCategories(data)
+      } catch (error) {
+        console.warn("Position categories endpoint not available. Using empty categories.")
+        // Set empty array if fetch fails - this is expected until backend is deployed
+        setCategories([])
+      }
+    }
+    fetchCategories()
+  }, [])
+
   // Update form when editingPosition or open state changes
   useEffect(() => {
     if (editingPosition) {
@@ -67,12 +94,14 @@ export function PositionFormDialog({
         name: editingPosition.name,
         description: editingPosition.description || "",
         gradeId: editingPosition.gradeId,
+        categoryId: editingPosition.categoryId,
       })
     } else {
       setFormData({
         name: "",
         description: "",
         gradeId: undefined,
+        categoryId: undefined,
       })
     }
   }, [editingPosition, open])
@@ -138,6 +167,28 @@ export function PositionFormDialog({
                 </SelectContent>
               </Select>
             </div>
+            {categories.length > 0 && (
+              <div className="grid gap-2">
+                <Label htmlFor="categoryId">Category</Label>
+                <Select
+                  value={formData.categoryId || undefined}
+                  onValueChange={(value) =>
+                    setFormData({ ...formData, categoryId: value })
+                  }
+                >
+                  <SelectTrigger id="categoryId">
+                    <SelectValue placeholder="Select category (optional)" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {categories.map((category) => (
+                      <SelectItem key={category.id} value={category.id}>
+                        {category.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
             <div className="grid gap-2">
               <Label htmlFor="description">Description</Label>
               <textarea

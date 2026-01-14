@@ -11,7 +11,7 @@ import {
   SortingState,
   VisibilityState,
 } from "@tanstack/react-table"
-import { positionAPI, importAPI, gradeAPI } from "@/lib/api"
+import { positionAPI, importAPI, gradeAPI, positionCategoryAPI } from "@/lib/api"
 import {
   Card,
   CardContent,
@@ -20,13 +20,6 @@ import {
   CardTitle,
 } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
 import {
   Command,
   CommandEmpty,
@@ -58,6 +51,10 @@ export default function PositionManagementPage() {
   const [grades, setGrades] = useState<Array<{ id: string; name: string }>>([])
   const [selectedGradeId, setSelectedGradeId] = useState<string>("all")
   const [gradePopoverOpen, setGradePopoverOpen] = useState(false)
+  const [categories, setCategories] = useState<Array<{ id: string; name: string }>>([])
+  const [selectedCategoryId, setSelectedCategoryId] = useState<string>("all")
+  const [categoryPopoverOpen, setCategoryPopoverOpen] = useState(false)
+  
   const [isLoading, setIsLoading] = useState(true)
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
@@ -74,15 +71,25 @@ export default function PositionManagementPage() {
   const [rowSelection, setRowSelection] = useState({})
   const [globalFilter, setGlobalFilter] = useState("")
 
-  // Filter positions based on selected grade
+  // Filter positions based on selected grade and category
   const filteredPositions = useMemo(() => {
-    if (!selectedGradeId || selectedGradeId === "all") return positions
-    return positions.filter(position => position.gradeId === selectedGradeId)
-  }, [positions, selectedGradeId])
+    let filtered = positions
+    
+    if (selectedGradeId && selectedGradeId !== "all") {
+      filtered = filtered.filter(position => position.gradeId === selectedGradeId)
+    }
+    
+    if (selectedCategoryId && selectedCategoryId !== "all") {
+      filtered = filtered.filter(position => position.categoryId === selectedCategoryId)
+    }
+    
+    return filtered
+  }, [positions, selectedGradeId, selectedCategoryId])
 
   useEffect(() => {
     fetchPositions()
     fetchGrades()
+    fetchCategories()
   }, [])
 
   // ==================== DATA FETCHING ====================
@@ -108,6 +115,16 @@ export default function PositionManagementPage() {
       console.error("Failed to fetch grades:", error)
     }
   }
+  const fetchCategories = async () => {
+    try {
+      const data = await positionCategoryAPI.getAll()
+      setCategories(data)
+    } catch (error: any) {
+      console.error("Failed to fetch categories:", error)
+    }
+  }
+
+ 
 
   // ==================== FORM HANDLERS ====================
   function handleOpenDialog(position?: Position) {
@@ -313,6 +330,56 @@ export default function PositionManagementPage() {
                   </Command>
                 </PopoverContent>
               </Popover>
+              {categories.length > 0 && (
+                <Popover open={categoryPopoverOpen} onOpenChange={setCategoryPopoverOpen}>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      role="combobox"
+                      aria-expanded={categoryPopoverOpen}
+                      className="w-[180px] justify-between"
+                    >
+                      {selectedCategoryId === "all" 
+                        ? "Filter by Category"
+                        : categories.find((c) => c.id === selectedCategoryId)?.name || "Filter by Category"
+                      }
+                      <IconSearch className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-[180px] p-0">
+                    <Command>
+                      <CommandInput placeholder="Search categories..." />
+                      <CommandList className="max-h-[200px] overflow-y-auto">
+                        <CommandEmpty>No category found.</CommandEmpty>
+                        <CommandGroup>
+                          <CommandItem
+                            key="all"
+                            value="all"
+                            onSelect={() => {
+                              setSelectedCategoryId("all")
+                              setCategoryPopoverOpen(false)
+                            }}
+                          >
+                            All Categories
+                          </CommandItem>
+                          {categories.map((category) => (
+                            <CommandItem
+                              key={category.id}
+                              value={category.name}
+                              onSelect={() => {
+                                setSelectedCategoryId(category.id)
+                                setCategoryPopoverOpen(false)
+                              }}
+                            >
+                              {category.name}
+                            </CommandItem>
+                          ))}
+                        </CommandGroup>
+                      </CommandList>
+                    </Command>
+                  </PopoverContent>
+                </Popover>
+              )}
               <div className="relative">
                 <IconSearch className="absolute left-2 top-2.5 size-4 text-muted-foreground" />
                 <Input

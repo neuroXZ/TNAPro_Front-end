@@ -614,7 +614,6 @@ export default function StaffProfilePage() {
                         </Card>
                     </CardContent>
                 </Card>
-
             </div>
 
             {/* Staff Edit Dialog */}

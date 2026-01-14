@@ -115,7 +115,7 @@ const AdminDocumentationPage = () => {
       <div className="space-y-4">
         <div className="flex items-center gap-3">
           <FileText className="h-8 w-8 text-primary" />
-          <h1 className="text-3xl font-bold">TNA Pro Admin Documentation</h1>
+          <h1 className="text-3xl font-bold">TNAPro Admin Documentation</h1>
         </div>
         <p className="text-lg text-muted-foreground">
           Complete guide for administrators to effectively manage the Training Needs Analysis system
@@ -178,7 +178,7 @@ const AdminDocumentationPage = () => {
             <CardHeader>
               <CardTitle>System Overview</CardTitle>
               <CardDescription>
-                Understanding the TNA Pro admin interface and common operations
+                Understanding the TNAPro admin interface and common operations
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">

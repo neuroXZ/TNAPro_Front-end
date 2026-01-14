@@ -16,8 +16,8 @@ interface FAQItem {
 const faqData: FAQItem[] = [
   {
     id: 'item-1',
-    question: "What is the TNA Pro assessment system?",
-    answer: "TNA Pro is a competency assessment system that helps organizations identify training needs and employee development based on competency gap analysis."
+    question: "What is the TNAPro assessment system?",
+    answer: "TNAPro is a competency assessment system that helps organizations identify training needs and employee development based on competency gap analysis."
   },
   {
     id: 'item-2',
@@ -54,7 +54,7 @@ const FAQ = () => {
           Frequently Asked Questions (FAQ)
         </h1>
         <p className="text-muted-foreground">
-          Find answers to frequently asked questions about the TNA Pro system
+          Find answers to frequently asked questions about the TNAPro system
         </p>
       </div>
 

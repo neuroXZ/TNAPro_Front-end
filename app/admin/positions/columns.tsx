@@ -14,6 +14,11 @@ export interface Position {
     id: string
     name: string
   }
+  categoryId?: string
+  category?: {
+    id: string
+    name: string
+  }
 }
 
 interface ColumnActions {
@@ -74,6 +79,18 @@ export const getColumns = (actions: ColumnActions): ColumnDef<Position>[] => [
       const grade = row.original.grade
       return grade?.name ? (
         <span>{grade.name}</span>
+      ) : (
+        <span className="text-muted-foreground">-</span>
+      )
+    },
+  },
+  {
+    accessorKey: "category.name",
+    header: "Category",
+    cell: ({ row }) => {
+      const category = row.original.category
+      return category?.name ? (
+        <span>{category.name}</span>
       ) : (
         <span className="text-muted-foreground">-</span>
       )

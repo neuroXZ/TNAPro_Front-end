@@ -137,7 +137,7 @@ export default function AdminDashboard() {
         <div>
           <h1 className="text-3xl font-bold text-primary">Admin Dashboard</h1>
           <p className="text-muted-foreground">
-            Overview of your TNA Pro system
+            Overview of your TNAPro system
           </p>
         </div>
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
@@ -161,7 +161,7 @@ export default function AdminDashboard() {
       <div>
         <h1 className="text-3xl font-bold text-primary">Admin Dashboard</h1>
         <p className="text-muted-foreground">
-          Overview of your TNA Pro system performance and key metrics
+          Overview of your TNAPro system performance and key metrics
         </p>
       </div>
 
@@ -183,7 +183,7 @@ export default function AdminDashboard() {
                     <DialogDescription className="space-y-2">
                       <p>Total number of registered employees in the system.</p>
                       <p className="text-xs text-muted-foreground">
-                        This includes all staff members who have been added to the TNA Pro system, regardless of their position assignment status.
+                        This includes all staff members who have been added to the TNAPro system, regardless of their position assignment status.
                       </p>
                     </DialogDescription>
                   </DialogHeader>

@@ -16,7 +16,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "TNA Pro - Talent & Competency Management",
+  title: "TNAPro - Talent & Competency Management",
   description: "Training Needs Analysis Professional System",
 };
 
