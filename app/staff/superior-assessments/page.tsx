@@ -73,7 +73,14 @@ export default function SuperiorAssessmentsPage() {
         assessmentResultAPI.getAll(),
       ])
 
-      setAssessments(assessmentsData)
+      // Sort assessments by startDate (latest first)
+      const sortedAssessments = assessmentsData.sort((a: Assessment, b: Assessment) => {
+        const dateA = a.startDate ? new Date(a.startDate).getTime() : 0
+        const dateB = b.startDate ? new Date(b.startDate).getTime() : 0
+        return dateB - dateA // Descending order (latest first)
+      })
+
+      setAssessments(sortedAssessments)
 
       console.log("=== SUPERIOR ASSESSMENT DEBUG ===")
       console.log("Current staffId (superior):", staffId)
@@ -117,9 +124,9 @@ export default function SuperiorAssessmentsPage() {
       setSubordinates(subordinatesData)
       setAssessmentResults(allResults)
       
-      // Set the first assessment as selected by default
-      if (assessmentsData.length > 0) {
-        setSelectedAssessmentId(assessmentsData[0].id)
+      // Set the first assessment (latest) as selected by default
+      if (sortedAssessments.length > 0) {
+        setSelectedAssessmentId(sortedAssessments[0].id)
       }
     } catch (error) {
       console.error("Failed to fetch data:", error)
@@ -360,7 +367,7 @@ export default function SuperiorAssessmentsPage() {
                                 </div>
                               </div>
                               {withinPeriod && !isCompleted && (
-                                <Badge variant="destructive">Assess</Badge>
+                                <Badge className="bg-yellow-500 hover:bg-yellow-600 text-white">Pending</Badge>
                               )}
                               {isCompleted && (
                                 <Badge variant="default" className="bg-green-600 hover:bg-green-700 gap-1">

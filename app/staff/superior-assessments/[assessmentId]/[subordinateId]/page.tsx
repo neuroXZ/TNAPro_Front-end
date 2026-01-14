@@ -334,6 +334,13 @@ export default function SuperiorAssessmentDetailPage() {
     return now >= start && now <= end
   }
 
+  const isAssessmentSubmitted = () => {
+    // Check if all competencies have been rated AND have existing resultId (indicating saved to database)
+    const totalCompetencies = competencies.length
+    const completedWithResults = Object.values(scores).filter(s => s.score !== null && s.resultId).length
+    return totalCompetencies > 0 && completedWithResults === totalCompetencies
+  }
+
   if (isLoading) {
     return (
       <div className="space-y-4">
@@ -372,6 +379,7 @@ export default function SuperiorAssessmentDetailPage() {
   const completedCount = getCompletedCount()
   const totalCount = competencies.length
   const withinPeriod = isWithinPeriod()
+  const isSubmitted = isAssessmentSubmitted()
 
   return (
     <div className="space-y-4">
@@ -500,9 +508,17 @@ export default function SuperiorAssessmentDetailPage() {
           </Button>
           <Button 
             onClick={handleSubmit}
-            disabled={isSaving || !withinPeriod || completedCount < totalCount}
+            disabled={isSaving || !withinPeriod || completedCount < totalCount || isSubmitted}
+            variant={isSubmitted ? "outline" : "default"}
+            className={isSubmitted ? "bg-green-50 border-green-500 text-green-700 hover:bg-green-100" : ""}
           >
-            {isSaving ? "Submitting..." : "Submit Assessment"}
+            {isSubmitted && <IconCheck className="size-4 mr-1" />}
+            {isSubmitted 
+              ? "Assessment Submitted" 
+              : isSaving 
+                ? "Submitting..." 
+                : "Submit Assessment"
+            }
           </Button>
         </div>
       )}

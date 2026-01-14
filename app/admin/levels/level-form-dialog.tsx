@@ -101,6 +101,8 @@ export function LevelFormDialog({
               <Input
                 id="value"
                 type="number"
+                min={0}
+                max={10}
                 value={formData.value ?? ""}
                 onChange={(e) =>
                   setFormData({

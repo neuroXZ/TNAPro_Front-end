@@ -105,6 +105,8 @@ export function ClusterFormDialog({
               <Input
                 id="level"
                 type="number"
+                min={0}
+                max={10}
                 value={formData.level ?? ""}
                 onChange={(e) =>
                   setFormData({

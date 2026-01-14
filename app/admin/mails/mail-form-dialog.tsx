@@ -230,6 +230,7 @@ export function MailFormDialog({
                 <Input
                   id="daysOffset"
                   type="number"
+                  min={0}
                   value={formData.daysOffset || ""}
                   onChange={(e) =>
                     setFormData({ ...formData, daysOffset: e.target.value ? Number(e.target.value) : undefined })

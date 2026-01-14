@@ -7,7 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Button } from "@/components/ui/button"
 import { assessmentAPI, assessmentResultAPI, assessorAPI, positionCompetencyAPI } from "@/lib/api"
 import { toast } from "sonner"
-import { IconCalendar, IconClipboardCheck, IconFileText } from "@tabler/icons-react"
+import { IconCalendar, IconClipboardCheck, IconFileText, IconCheck } from "@tabler/icons-react"
 import { format } from "date-fns"
 
 interface Assessment {
@@ -473,7 +473,13 @@ function AssessmentCard({ assessment }: { assessment: AssessmentWithStatus }) {
     }
   }
 
+  const getSelfAssessmentStatus = () => {
+    // Check if self assessment is completed (has selfScore)
+    return assessment.selfScore > 0
+  }
+
   const dateStatus = getDateBasedStatus()
+  const hasSelfAssessment = getSelfAssessmentStatus()
 
   return (
     
@@ -532,13 +538,36 @@ function AssessmentCard({ assessment }: { assessment: AssessmentWithStatus }) {
           </div>
           <Button 
             size="sm" 
-            onClick={() => dateStatus.status === "Open" ? handleStartAssessment(assessment.id) : undefined}
-            variant={dateStatus.status === "Open" ? "default" : "outline"}
-            className="w-full sm:w-auto"
+            onClick={() => {
+              if (dateStatus.status === "Open" && !hasSelfAssessment) {
+                handleStartAssessment(assessment.id)
+              } else if (dateStatus.status === "Open" && hasSelfAssessment) {
+                handleStartAssessment(assessment.id) // Allow re-access to view/edit
+              }
+            }}
+            variant={
+              hasSelfAssessment && dateStatus.status === "Open" 
+                ? "outline" 
+                : dateStatus.status === "Open" 
+                  ? "default" 
+                  : "outline"
+            }
+            className={`w-full sm:w-auto ${
+              hasSelfAssessment && dateStatus.status === "Open" 
+                ? "bg-green-50 border-green-500 text-green-700 hover:bg-green-100" 
+                : ""
+            }`}
             disabled={dateStatus.status !== "Open"}
           >
-            <IconFileText className="size-4 mr-1" />
-            {dateStatus.status === "Open" ? "Start" : "Close"}
+            {hasSelfAssessment && dateStatus.status === "Open" ? (
+              <IconCheck className="size-4 mr-1" />
+            ) : (
+              <IconFileText className="size-4 mr-1" />
+            )}
+            {dateStatus.status === "Open" 
+              ? (hasSelfAssessment ? "Submitted" : "Start")
+              : "Close"
+            }
           </Button>
         </div>
       </div>
