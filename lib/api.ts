@@ -803,14 +803,14 @@ export const rtnAPI = {
 
 // Import API
 export const importAPI = {
-  downloadTemplate: async (modelType: 'staff' | 'position' | 'grade' | 'competency') => {
+  downloadTemplate: async (modelType: 'staff' | 'position' | 'grade' | 'competency' | 'training') => {
     const response = await api.get(`/import/template/${modelType}`, {
       responseType: 'blob',
     });
     return response.data;
   },
   
-  import: async (modelType: 'staff' | 'position' | 'grade' | 'competency', file: File) => {
+  import: async (modelType: 'staff' | 'position' | 'grade' | 'competency' | 'training', file: File) => {
     const formData = new FormData();
     formData.append('file', file);
     

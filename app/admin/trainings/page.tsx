@@ -11,7 +11,7 @@ import {
   SortingState,
   VisibilityState,
 } from "@tanstack/react-table"
-import { trainingAPI } from "@/lib/api"
+import { trainingAPI, importAPI } from "@/lib/api"
 import {
   Card,
   CardContent,
@@ -30,6 +30,7 @@ import { TrainingTableSkeleton } from "./training-table-skeleton"
 import { TrainingDataTable } from "./training-data-table"
 import { TrainingTableActions } from "./training-table-actions"
 import { TrainingViewDialog } from "./training-view-dialog"
+import { TrainingImportDialog } from "./training-import-dialog"
 
 export default function TrainingManagementPage() {
   const [trainings, setTrainings] = useState<Training[]>([])
@@ -37,6 +38,7 @@ export default function TrainingManagementPage() {
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
   const [isViewDialogOpen, setIsViewDialogOpen] = useState(false)
+  const [isImportDialogOpen, setIsImportDialogOpen] = useState(false)
   const [editingTraining, setEditingTraining] = useState<Training | null>(null)
   const [deletingTraining, setDeletingTraining] = useState<Training | null>(null)
   const [viewingTraining, setViewingTraining] = useState<Training | null>(null)
@@ -167,6 +169,31 @@ export default function TrainingManagementPage() {
     }
   }
 
+  const handleDownloadTemplate = async () => {
+    try {
+      const blob = await importAPI.downloadTemplate('training')
+      const url = window.URL.createObjectURL(blob)
+      const link = document.createElement('a')
+      link.href = url
+      link.download = 'training_import_template.csv'
+      document.body.appendChild(link)
+      link.click()
+      setTimeout(() => {
+        document.body.removeChild(link)
+        window.URL.revokeObjectURL(url)
+      }, 100)
+      toast.success('Template downloaded successfully')
+    } catch (error) {
+      console.error('Download error:', error)
+      toast.error('Failed to download template')
+    }
+  }
+
+  const handleImport = () => {
+    setIsImportDialogOpen(true)
+  }
+
+
   // ==================== RENDER ====================
   return (
     <div className="space-y-4">
@@ -181,6 +208,8 @@ export default function TrainingManagementPage() {
           selectedCount={table.getFilteredSelectedRowModel().rows.length}
           onAdd={() => handleOpenDialog()}
           onBulkDelete={handleBulkDelete}
+          onDownloadTemplate={handleDownloadTemplate}
+          onImport={handleImport}
         />
       </div>
 
@@ -241,6 +270,12 @@ export default function TrainingManagementPage() {
         open={isViewDialogOpen}
         onOpenChange={setIsViewDialogOpen}
         training={viewingTraining}
+      />
+
+      <TrainingImportDialog
+        open={isImportDialogOpen}
+        onOpenChange={setIsImportDialogOpen}
+        onImportComplete={fetchTrainings}
       />
     </div>
   )

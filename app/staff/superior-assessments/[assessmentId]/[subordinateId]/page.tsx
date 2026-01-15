@@ -626,7 +626,48 @@ function CompetencyAssessmentTable({
                       <tr>
                         <th className="px-3 py-2 text-left text-sm font-medium w-12">No</th>
                         <th className="px-3 py-2 text-left text-sm font-medium min-w-[200px]">Competency</th>
-                        <th className="px-3 py-2 text-center text-sm font-medium w-16">RCL</th>
+                        {/* <th className="px-3 py-2 text-center text-sm font-medium w-16">RCL</th> */}
+                        <th className="px-3 py-2 text-center text-sm font-medium w-16">
+                          <div className="flex items-center justify-center gap-1">
+                            <span>RCL</span>
+                            <Dialog>
+                              <DialogTrigger asChild>
+                                <button className="hover:bg-primary-foreground/10 rounded-full p-1 transition-colors">
+                                  <IconInfoCircle className="size-4" />
+                                </button>
+                              </DialogTrigger>
+                              <DialogContent className="max-w-lg">
+                                <DialogHeader>
+                                  <DialogTitle>Required Competency Level (RCL)</DialogTitle>
+                                  <DialogDescription className="text-sm mb-4">
+                                    RCL indicates the minimum competency level required for your position in this specific competency.
+                                  </DialogDescription>
+                                </DialogHeader>
+                                <div className="space-y-3">
+                                  {sortedLevels.map((level) => (
+                                    <div 
+                                      key={level.id} 
+                                      className="flex items-center justify-between p-4 rounded-lg border-2 bg-muted/50 border-border transition-all"
+                                    >
+                                      <div className="flex-1">
+                                        <h3 className="font-semibold text-base mb-1">{level.name}</h3>
+                                        {level.description && (
+                                          <p className="text-sm text-muted-foreground">
+                                            {level.description}
+                                          </p>
+                                        )}
+                                      </div>
+                                      <div className="flex items-center justify-center w-10 h-10 rounded-full font-bold text-lg bg-primary text-primary-foreground">
+                                        {level.value}
+                                      </div>
+                                    </div>
+                                  ))}
+                                </div>
+                                
+                              </DialogContent>
+                            </Dialog>
+                          </div>
+                        </th>
                         {sortedLevels.map((level) => (
                           <th key={level.id} className="px-3 py-2 text-center text-sm font-medium w-12">
                             {level.value}
