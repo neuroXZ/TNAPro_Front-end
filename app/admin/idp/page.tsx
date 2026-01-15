@@ -433,8 +433,8 @@ export default function AdminIdpPage() {
                   <CardContent>
                     <div className="text-2xl font-bold">
                       {filteredCompetencies.length > 0 
-                        ? (filteredCompetencies.reduce((sum, c) => sum + c.gap, 0) / filteredCompetencies.length).toFixed(2)
-                        : "0"
+                        ? (filteredCompetencies.reduce((sum, c) => sum + c.gap, 0) / filteredCompetencies.length).toFixed(1)
+                        : "0.0"
                       }
                     </div>
                   </CardContent>
@@ -531,7 +531,7 @@ export default function AdminIdpPage() {
                             <td className="px-3 py-3 text-sm text-center">{comp.selfScore || 'N/A'}</td>
                             <td className="px-3 py-3 text-sm text-center">{comp.superiorScore || 'N/A'}</td>
                             <td className={`px-3 py-3 text-sm text-center border-r font-medium ${getGapColor(comp.gap)}`}>
-                              {comp.gap}
+                              {comp.gap.toFixed(1)}
                             </td>
                             <td className="px-3 py-3 text-center">
                               {comp.developmentStrategies.training && <span className="text-green-600 text-lg">✓</span>}

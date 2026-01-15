@@ -473,7 +473,7 @@ export default function MyIdpPage() {
                           variant={comp.gap > 0 ? "destructive" : "secondary"} 
                           className="text-xs ml-2 shrink-0"
                         >
-                          Gap: {comp.gap}
+                          Gap: {comp.gap.toFixed(1)}
                         </Badge>
                       </div>
                       
@@ -609,7 +609,7 @@ export default function MyIdpPage() {
                             <td className="px-3 py-3 text-sm text-center">{comp.selfScore || 'N/A'}</td>
                             <td className="px-3 py-3 text-sm text-center">{comp.superiorScore || 'N/A'}</td>
                             <td className={`px-3 py-3 text-sm text-center border-r font-medium ${getGapColor(comp.gap)}`}>
-                              {comp.gap}
+                              {comp.gap.toFixed(1)}
                             </td>
                             <td className="px-3 py-3 text-center">
                               {comp.developmentStrategies.training && <span className="text-green-600 text-lg">✓</span>}
