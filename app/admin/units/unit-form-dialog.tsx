@@ -93,7 +93,7 @@ export function UnitFormDialog({
         name: "",
         description: "",
         unitTypeId: "",
-        parentId: "",
+        parentId: "none",
       })
     }
   }, [editingUnit, open])

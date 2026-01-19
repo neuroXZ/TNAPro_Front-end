@@ -18,6 +18,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog"
 import { staffAPI, assessmentAPI, idpAPI, unitAPI, competencyAPI } from "@/lib/api"
 import { toast } from "sonner"
 import { IconFileText, IconDownload, IconUserCheck, IconTarget, IconTrendingUp, IconInfoCircle } from "@tabler/icons-react"
@@ -97,6 +105,7 @@ export default function AdminIdpPage() {
   const [idpResult, setIdpResult] = useState<IdpResult | null>(null)
   const [isLoading, setIsLoading] = useState(false)
   const [isGenerating, setIsGenerating] = useState(false)
+  const [isTrainingPopupOpen, setIsTrainingPopupOpen] = useState(false)
 
   useEffect(() => {
     fetchInitialData()
@@ -461,6 +470,69 @@ export default function AdminIdpPage() {
                       ))}
                     </SelectContent>
                   </Select>
+                  <Dialog open={isTrainingPopupOpen} onOpenChange={setIsTrainingPopupOpen}>
+                    <DialogTrigger asChild>
+                      <Button variant="outline" size="sm">
+                        <IconTarget className="size-4 mr-2" />
+                        Recommended Training
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent className="max-w-4xl">
+                      <DialogHeader>
+                        <DialogTitle>Recommended Training Programs</DialogTitle>
+                        <DialogDescription>
+                          Training recommendations based on competency gaps for {idpResult?.staffName}
+                        </DialogDescription>
+                      </DialogHeader>
+                      <div className="space-y-4">
+                        <div className="border rounded-lg overflow-hidden">
+                          <div className="overflow-x-auto">
+                            <table className="w-full">
+                              <thead className="bg-muted">
+                                <tr>
+                                  <th className="px-4 py-3 text-left text-sm font-medium">Competency</th>
+                                  <th className="px-3 py-3 text-center text-sm font-medium">Gap</th>
+                                  <th className="px-3 py-3 text-left text-sm font-medium">Training Program</th>
+                                  <th className="px-3 py-3 text-center text-sm font-medium">Priority</th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                {filteredCompetencies
+                                  .filter(comp => comp.developmentStrategies.training)
+                                  .sort((a, b) => b.gap - a.gap)
+                                  .map((comp, index) => (
+                                    <tr key={comp.competencyId} className="border-t hover:bg-muted/50">
+                                      <td className="px-4 py-3 text-sm font-medium">{comp.competencyName}</td>
+                                      <td className={`px-3 py-3 text-sm text-center font-medium ${getGapColor(comp.gap)}`}>
+                                        {comp.gap.toFixed(1)}
+                                      </td>
+                                      <td className="px-3 py-3 text-sm">
+                                        {comp.trainingName || `${comp.competencyName} Training Program`}
+                                      </td>
+                                      <td className="px-3 py-3 text-center">
+                                        <Badge 
+                                          variant={comp.gap >= 2 ? "destructive" : comp.gap >= 1.5 ? "default" : "default"}
+                                        >
+                                          {comp.gap >= 2 ? "High" : comp.gap >= 1.5 ? "Medium" : "Low"}
+                                        </Badge>
+                                      </td>
+                                    </tr>
+                                  ))
+                                }
+                                {filteredCompetencies.filter(comp => comp.developmentStrategies.training).length === 0 && (
+                                  <tr>
+                                    <td colSpan={4} className="px-4 py-8 text-center text-muted-foreground">
+                                      No training recommendations found for selected competencies
+                                    </td>
+                                  </tr>
+                                )}
+                              </tbody>
+                            </table>
+                          </div>
+                        </div>
+                      </div>
+                    </DialogContent>
+                  </Dialog>
                   <Button variant="outline" size="sm">
                     <IconDownload className="size-4 mr-2" />
                     Export PDF

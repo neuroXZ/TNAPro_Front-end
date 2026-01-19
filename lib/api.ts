@@ -823,6 +823,14 @@ export const importAPI = {
   },
 };
 
+// Dashboard API
+export const dashboardAPI = {
+  getOverview: async () => {
+    const response = await api.get('/dashboard/overview');
+    return response.data;
+  },
+};
+
 // Email API
 export const emailAPI = {
   sendContactMessage: async (data: {

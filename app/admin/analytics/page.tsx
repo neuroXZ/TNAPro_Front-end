@@ -1,153 +1,183 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { TrendingUp } from "lucide-react"
+import { Bar, BarChart, XAxis, YAxis, LabelList, Pie, PieChart } from "recharts"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
+import { Progress } from "@/components/ui/progress"
+import { Skeleton } from "@/components/ui/skeleton"
+import { Alert, AlertDescription } from "@/components/ui/alert"
+import {
+  ChartContainer,
+  ChartTooltip,
+  ChartTooltipContent,
+  type ChartConfig,
+} from "@/components/ui/chart"
 import { 
-  staffAPI, 
-  assessmentAPI, 
-  assessmentResultAPI, 
-  assessorAPI,
-  positionAPI,
-  unitAPI,
-  competencyAPI
+  dashboardAPI 
 } from "@/lib/api"
 import { 
   IconUsers, 
-  IconClipboardCheck, 
-  IconTrendingUp, 
-  IconAlertCircle,
   IconBuilding,
-  IconBriefcase,
-  IconTarget,
-  IconClock,
-  IconInfoCircle
+  IconLicense,
+  IconAlertTriangle,
+  IconChartBar,
+  IconChartPie,
+  IconTrendingUp,
+  IconCalendar,
+  IconRefresh
 } from "@tabler/icons-react"
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog"
 
-interface DashboardStats {
+// Dashboard Types based on backend model
+interface DashboardSummary {
   totalStaff: number
-  activeAssessments: number
-  completionRate: number
-  pendingEvaluations: number
-  totalPositions: number
   totalUnits: number
-  averageScore: number
-  overdueAssessments: number
+  licenseUsage: {
+    used: number
+    max: number
+    percentage: number
+    expiryDate: string | null
+  }
 }
 
-export default function AdminDashboard() {
-  const [stats, setStats] = useState<DashboardStats>({
-    totalStaff: 0,
-    activeAssessments: 0,
-    completionRate: 0,
-    pendingEvaluations: 0,
-    totalPositions: 0,
-    totalUnits: 0,
-    averageScore: 0,
-    overdueAssessments: 0
+interface ChartData {
+  label: string
+  value: number
+}
+
+interface DashboardResponse {
+  summary: DashboardSummary
+  unitDistribution: ChartData[]
+  genderDistribution: ChartData[]
+  gradeDistribution: ChartData[]
+}
+
+// Chart configuration for mixed bar charts
+const createUnitChartConfig = (data: ChartData[]) => {
+  const config: ChartConfig = {
+    value: {
+      label: "Staff Count",
+    },
+  }
+  
+  data.forEach((item, index) => {
+    config[item.label.toLowerCase().replace(/[^a-z0-9]/g, '')] = {
+      label: item.label,
+      color: `var(--chart-${(index % 5) + 1})`,
+    }
   })
-  const [isLoading, setIsLoading] = useState(true)
+  
+  return config
+}
 
-  useEffect(() => {
-    fetchDashboardStats()
-  }, [])
+const createGradeChartConfig = (data: ChartData[]) => {
+  const config: ChartConfig = {
+    value: {
+      label: "Staff Count",
+    },
+  }
+  
+  data.forEach((item, index) => {
+    config[item.label.toLowerCase()] = {
+      label: item.label,
+      color: `var(--chart-${(index % 5) + 1})`,
+    }
+  })
+  
+  return config
+}
 
-  const fetchDashboardStats = async () => {
+const createGenderChartConfig = (data: ChartData[]) => {
+  const config: ChartConfig = {
+    value: {
+      label: "Staff Count",
+    },
+  }
+  
+  data.forEach((item, index) => {
+    config[item.label.toLowerCase()] = {
+      label: item.label,
+      color: `var(--chart-${(index % 3) + 1})`,
+    }
+  })
+  
+  return config
+}
+
+export default function AdminAnalytics() {
+  const [dashboardData, setDashboardData] = useState<DashboardResponse | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+
+  const fetchDashboardData = async () => {
+    setLoading(true)
+    setError(null)
+    
     try {
-      setIsLoading(true)
-
-      const [
-        staffData,
-        assessmentData,
-        assessmentResults,
-        assessorsData,
-        positionsData,
-        unitsData
-      ] = await Promise.all([
-        staffAPI.getAll(),
-        assessmentAPI.getAll(),
-        assessmentResultAPI.getAll(),
-        assessorAPI.getAll(),
-        positionAPI.getAll(),
-        unitAPI.getAll()
-      ])
-
-      // Calculate active assessments (within date range)
-      const currentDate = new Date()
-      const activeAssessments = assessmentData.filter((assessment: any) => {
-        const startDate = new Date(assessment.startDate)
-        const endDate = new Date(assessment.endDate)
-        return currentDate >= startDate && currentDate <= endDate
-      })
-
-      // Calculate overdue assessments
-      const overdueAssessments = assessmentData.filter((assessment: any) => {
-        const endDate = new Date(assessment.endDate)
-        return currentDate > endDate
-      })
-
-      // Calculate completion rate
-      const totalPossibleResults = staffData.length * assessmentData.length
-      const completionRate = totalPossibleResults > 0 
-        ? (assessmentResults.length / totalPossibleResults) * 100 
-        : 0
-
-      // Calculate pending evaluations (assessments with partial results)
-      const staffWithResults = new Set(assessmentResults.map((result: any) => result.assessorId))
-      const totalAssessors = assessorsData.length
-      const pendingEvaluations = Math.max(0, totalAssessors - staffWithResults.size)
-
-      // Calculate average score
-      const validScores = assessmentResults.filter((result: any) => 
-        result.score !== null && result.score !== undefined && result.score > 0
-      )
-      const averageScore = validScores.length > 0
-        ? validScores.reduce((sum: number, result: any) => sum + result.score, 0) / validScores.length
-        : 0
-
-      setStats({
-        totalStaff: staffData.length,
-        activeAssessments: activeAssessments.length,
-        completionRate: Math.round(completionRate),
-        pendingEvaluations,
-        totalPositions: positionsData.length,
-        totalUnits: unitsData.length,
-        averageScore: Math.round(averageScore * 100) / 100,
-        overdueAssessments: overdueAssessments.length
-      })
-
-    } catch (error) {
-      console.error("Failed to fetch dashboard stats:", error)
+      const data = await dashboardAPI.getOverview()
+      setDashboardData(data)
+    } catch (err: any) {
+      console.error('Failed to fetch dashboard data:', err)
+      setError(err.response?.data?.error || 'Failed to load dashboard data')
     } finally {
-      setIsLoading(false)
+      setLoading(false)
     }
   }
 
-  if (isLoading) {
+  useEffect(() => {
+    fetchDashboardData()
+  }, [])
+
+  const getLicenseStatusColor = (percentage: number) => {
+    if (percentage >= 90) return "text-red-600"
+    if (percentage >= 75) return "text-yellow-600"
+    return "text-green-600"
+  }
+
+  const getLicenseStatusText = (percentage: number) => {
+    if (percentage >= 90) return "Critical"
+    if (percentage >= 75) return "Warning"
+    return "Good"
+  }
+
+  const formatDate = (dateString: string | null) => {
+    if (!dateString) return "Not Set"
+    return new Date(dateString).toLocaleDateString()
+  }
+
+  if (loading) {
     return (
-      <div className="space-y-6">
-        <div>
-          <h1 className="text-3xl font-bold text-primary">Admin Dashboard</h1>
-          <p className="text-muted-foreground">
-            Overview of your TNAPro system
-          </p>
+      <div className="flex-1 space-y-4 p-4 pt-6">
+        <div className="flex items-center justify-between">
+          <h2 className="text-3xl font-bold tracking-tight">Reports & Analytics</h2>
         </div>
+        
+        {/* Loading Skeleton */}
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-          {Array.from({ length: 8 }).map((_, i) => (
+          {Array.from({ length: 4 }).map((_, i) => (
             <Card key={i}>
-              <CardContent className="py-6">
-                <div className="animate-pulse">
-                  <div className="h-4 bg-muted rounded w-3/4 mb-2"></div>
-                  <div className="h-8 bg-muted rounded w-1/2"></div>
-                </div>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <Skeleton className="h-4 w-[100px]" />
+                <Skeleton className="h-4 w-4" />
+              </CardHeader>
+              <CardContent>
+                <Skeleton className="h-8 w-[60px] mb-2" />
+                <Skeleton className="h-3 w-[120px]" />
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          {Array.from({ length: 3 }).map((_, i) => (
+            <Card key={i}>
+              <CardHeader>
+                <Skeleton className="h-5 w-[150px] mb-2" />
+                <Skeleton className="h-3 w-[200px]" />
+              </CardHeader>
+              <CardContent>
+                <Skeleton className="h-[200px] w-full" />
               </CardContent>
             </Card>
           ))}
@@ -157,569 +187,309 @@ export default function AdminDashboard() {
   }
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold text-primary">Report & Analysis</h1>
-        <p className="text-muted-foreground">
-          Overview of your TNAPro system performance and key metrics
-        </p>
+    <div className="flex-1 space-y-4 p-4 pt-6">
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="text-3xl font-bold tracking-tight">Reports & Analytics</h2>
+          <p className="text-muted-foreground">
+            Dashboard overview and organizational insights
+          </p>
+        </div>
       </div>
 
-      {/* Key Metrics Cards */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <div className="flex items-center gap-2">
-              <CardTitle className="text-sm font-medium">Total Staff</CardTitle>
-              <Dialog>
-                <DialogTrigger asChild>
-                  <button className="hover:bg-muted rounded-full p-1 transition-colors">
-                    <IconInfoCircle className="h-3 w-3 text-muted-foreground" />
-                  </button>
-                </DialogTrigger>
-                <DialogContent className="max-w-sm">
-                  <DialogHeader>
-                    <DialogTitle>Total Staff</DialogTitle>
-                    <DialogDescription className="space-y-2">
-                      <p>Total number of registered employees in the system.</p>
-                      <p className="text-xs text-muted-foreground">
-                        This includes all staff members who have been added to the TNAPro system, regardless of their position assignment status.
-                      </p>
-                    </DialogDescription>
-                  </DialogHeader>
-                </DialogContent>
-              </Dialog>
-            </div>
-            <IconUsers className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.totalStaff}</div>
-            <p className="text-xs text-muted-foreground">
-              Registered employees
-            </p>
-          </CardContent>
-        </Card>
+      {error && (
+        <Alert variant="destructive">
+          <IconAlertTriangle className="h-4 w-4" />
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
+      )}
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <div className="flex items-center gap-2">
-              <CardTitle className="text-sm font-medium">Active Assessments</CardTitle>
-              <Dialog>
-                <DialogTrigger asChild>
-                  <button className="hover:bg-muted rounded-full p-1 transition-colors">
-                    <IconInfoCircle className="h-3 w-3 text-muted-foreground" />
-                  </button>
-                </DialogTrigger>
-                <DialogContent className="max-w-sm">
-                  <DialogHeader>
-                    <DialogTitle>Active Assessments</DialogTitle>
-                    <DialogDescription className="space-y-2">
-                      <p>Number of assessments currently within their assessment period.</p>
-                      <p className="text-xs text-muted-foreground">
-                        These are assessments where the current date falls between the start date and end date, meaning staff can actively participate in them.
-                      </p>
-                    </DialogDescription>
-                  </DialogHeader>
-                </DialogContent>
-              </Dialog>
-            </div>
-            <IconClipboardCheck className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-green-600">{stats.activeAssessments}</div>
-            <p className="text-xs text-muted-foreground">
-              Currently running
-            </p>
-          </CardContent>
-        </Card>
+      {dashboardData && (
+        <>
+          {/* Summary Cards */}
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Total Staff</CardTitle>
+                <IconUsers className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{dashboardData.summary.totalStaff}</div>
+                <p className="text-xs text-muted-foreground">
+                  Registered employees
+                </p>
+              </CardContent>
+            </Card>
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <div className="flex items-center gap-2">
-              <CardTitle className="text-sm font-medium">Completion Rate</CardTitle>
-              <Dialog>
-                <DialogTrigger asChild>
-                  <button className="hover:bg-muted rounded-full p-1 transition-colors">
-                    <IconInfoCircle className="h-3 w-3 text-muted-foreground" />
-                  </button>
-                </DialogTrigger>
-                <DialogContent className="max-w-sm">
-                  <DialogHeader>
-                    <DialogTitle>Completion Rate</DialogTitle>
-                    <DialogDescription className="space-y-2">
-                      <p>Percentage of completed assessment results versus total possible assessments.</p>
-                      <p className="text-xs text-muted-foreground">
-                        Calculated as: (Total Assessment Results / (Total Staff × Total Assessments)) × 100%. Higher percentages indicate better participation.
-                      </p>
-                    </DialogDescription>
-                  </DialogHeader>
-                </DialogContent>
-              </Dialog>
-            </div>
-            <IconTrendingUp className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-blue-600">{stats.completionRate}%</div>
-            <p className="text-xs text-muted-foreground">
-              Overall completion
-            </p>
-          </CardContent>
-        </Card>
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Total Units</CardTitle>
+                <IconBuilding className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{dashboardData.summary.totalUnits}</div>
+                <p className="text-xs text-muted-foreground">
+                  Organizational units
+                </p>
+              </CardContent>
+            </Card>
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <div className="flex items-center gap-2">
-              <CardTitle className="text-sm font-medium">Pending Evaluations</CardTitle>
-              <Dialog>
-                <DialogTrigger asChild>
-                  <button className="hover:bg-muted rounded-full p-1 transition-colors">
-                    <IconInfoCircle className="h-3 w-3 text-muted-foreground" />
-                  </button>
-                </DialogTrigger>
-                <DialogContent className="max-w-sm">
-                  <DialogHeader>
-                    <DialogTitle>Pending Evaluations</DialogTitle>
-                    <DialogDescription className="space-y-2">
-                      <p>Number of assessors who haven't completed their evaluations yet.</p>
-                      <p className="text-xs text-muted-foreground">
-                        This includes self-assessments, superior evaluations, and peer reviews that are still incomplete. Requires follow-up action.
-                      </p>
-                    </DialogDescription>
-                  </DialogHeader>
-                </DialogContent>
-              </Dialog>
-            </div>
-            <IconAlertCircle className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-orange-600">{stats.pendingEvaluations}</div>
-            <p className="text-xs text-muted-foreground">
-              Awaiting completion
-            </p>
-          </CardContent>
-        </Card>
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">License Usage</CardTitle>
+                <IconLicense className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className={`text-2xl font-bold ${getLicenseStatusColor(dashboardData.summary.licenseUsage.percentage)}`}>
+                  {dashboardData.summary.licenseUsage.used}/{dashboardData.summary.licenseUsage.max}
+                </div>
+                <div className="mt-2">
+                  <Progress 
+                    value={dashboardData.summary.licenseUsage.percentage} 
+                    className="h-2"
+                  />
+                  <p className="text-xs text-muted-foreground mt-1">
+                    {Math.round(dashboardData.summary.licenseUsage.percentage)}% used • {getLicenseStatusText(dashboardData.summary.licenseUsage.percentage)}
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <div className="flex items-center gap-2">
-              <CardTitle className="text-sm font-medium">Total Positions</CardTitle>
-              <Dialog>
-                <DialogTrigger asChild>
-                  <button className="hover:bg-muted rounded-full p-1 transition-colors">
-                    <IconInfoCircle className="h-3 w-3 text-muted-foreground" />
-                  </button>
-                </DialogTrigger>
-                <DialogContent className="max-w-sm">
-                  <DialogHeader>
-                    <DialogTitle>Total Positions</DialogTitle>
-                    <DialogDescription className="space-y-2">
-                      <p>Total number of job positions configured in the system.</p>
-                      <p className="text-xs text-muted-foreground">
-                        Each position has specific competency requirements. Staff members are assigned to positions to determine their required competencies for assessment.
-                      </p>
-                    </DialogDescription>
-                  </DialogHeader>
-                </DialogContent>
-              </Dialog>
-            </div>
-            <IconBriefcase className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.totalPositions}</div>
-            <p className="text-xs text-muted-foreground">
-              Available positions
-            </p>
-          </CardContent>
-        </Card>
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">License Expiry</CardTitle>
+                <IconCalendar className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">
+                  {formatDate(dashboardData.summary.licenseUsage.expiryDate)}
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  System license validity
+                </p>
+              </CardContent>
+            </Card>
+          </div>
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <div className="flex items-center gap-2">
-              <CardTitle className="text-sm font-medium">Total Units</CardTitle>
-              <Dialog>
-                <DialogTrigger asChild>
-                  <button className="hover:bg-muted rounded-full p-1 transition-colors">
-                    <IconInfoCircle className="h-3 w-3 text-muted-foreground" />
-                  </button>
-                </DialogTrigger>
-                <DialogContent className="max-w-sm">
-                  <DialogHeader>
-                    <DialogTitle>Total Units</DialogTitle>
-                    <DialogDescription className="space-y-2">
-                      <p>Total number of organizational units in your company structure.</p>
-                      <p className="text-xs text-muted-foreground">
-                        Units represent departments, divisions, or teams. Staff members belong to units for organizational hierarchy and reporting purposes.
-                      </p>
-                    </DialogDescription>
-                  </DialogHeader>
-                </DialogContent>
-              </Dialog>
-            </div>
-            <IconBuilding className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.totalUnits}</div>
-            <p className="text-xs text-muted-foreground">
-              Organizational units
-            </p>
-          </CardContent>
-        </Card>
+          {/* Charts Section */}
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+            {/* Unit Distribution Chart */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <IconChartBar className="h-5 w-5 text-blue-600" />
+                  Staff per Unit
+                </CardTitle>
+                <CardDescription>Distribution of staff across organizational units</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <ChartContainer config={createUnitChartConfig(dashboardData.unitDistribution.slice(0, 8))}>
+                  <BarChart
+                    accessibilityLayer
+                    data={dashboardData.unitDistribution.slice(0, 8).map((item, index) => ({
+                      category: item.label.toLowerCase().replace(/[^a-z0-9]/g, ''),
+                      label: item.label,
+                      value: item.value,
+                      fill: `var(--color-${item.label.toLowerCase().replace(/[^a-z0-9]/g, '')})`
+                    }))}
+                    layout="vertical"
+                    margin={{
+                      left: 0,
+                    }}
+                  >
+                    <YAxis
+                      dataKey="category"
+                      type="category"
+                      tickLine={false}
+                      tickMargin={10}
+                      axisLine={false}
+                      tickFormatter={(value) => {
+                        const config = createUnitChartConfig(dashboardData.unitDistribution.slice(0, 8))
+                        return config[value as keyof typeof config]?.label || value
+                      }}
+                    />
+                    <XAxis dataKey="value" type="number" hide />
+                    <ChartTooltip
+                      cursor={false}
+                      content={<ChartTooltipContent hideLabel />}
+                    />
+                    <Bar dataKey="value" layout="vertical" radius={5}>
+                      <LabelList
+                        dataKey="value"
+                        position="right"
+                        offset={8}
+                        className="fill-foreground"
+                        fontSize={12}
+                      />
+                    </Bar>
+                  </BarChart>
+                </ChartContainer>
+              </CardContent>
+              <CardFooter className="flex-col items-start gap-2 text-sm">
+                <div className="flex gap-2 leading-none font-medium">
+                  {dashboardData.unitDistribution.length > 8 ? `Showing top 8 of ${dashboardData.unitDistribution.length} units` : `Total ${dashboardData.unitDistribution.length} units`}
+                  <TrendingUp className="h-4 w-4" />
+                </div>
+                <div className="text-muted-foreground leading-none">
+                  Staff distribution across organizational units
+                </div>
+              </CardFooter>
+            </Card>
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <div className="flex items-center gap-2">
-              <CardTitle className="text-sm font-medium">Average Score</CardTitle>
-              <Dialog>
-                <DialogTrigger asChild>
-                  <button className="hover:bg-muted rounded-full p-1 transition-colors">
-                    <IconInfoCircle className="h-3 w-3 text-muted-foreground" />
-                  </button>
-                </DialogTrigger>
-                <DialogContent className="max-w-sm">
-                  <DialogHeader>
-                    <DialogTitle>Average Score</DialogTitle>
-                    <DialogDescription className="space-y-2">
-                      <p>System-wide average competency score across all completed assessments.</p>
-                      <p className="text-xs text-muted-foreground">
-                        Calculated from all valid assessment scores. Helps track overall competency performance and identify areas for organizational improvement.
-                      </p>
-                    </DialogDescription>
-                  </DialogHeader>
-                </DialogContent>
-              </Dialog>
-            </div>
-            <IconTarget className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-purple-600">{stats.averageScore}</div>
-            <p className="text-xs text-muted-foreground">
-              System-wide average
-            </p>
-          </CardContent>
-        </Card>
+            {/* Gender Distribution Chart */}
+            <Card className="flex flex-col">
+              <CardHeader className="items-center pb-0">
+                <CardTitle className="flex items-center gap-2">
+                  <IconChartPie className="h-5 w-5 text-green-600" />
+                  Gender Distribution
+                </CardTitle>
+                <CardDescription>Staff distribution by gender</CardDescription>
+              </CardHeader>
+              <CardContent className="flex-1 pb-0">
+                <ChartContainer
+                  config={createGenderChartConfig(dashboardData.genderDistribution)}
+                  className="[&_.recharts-text]:fill-background mx-auto aspect-square max-h-[250px]"
+                >
+                  <PieChart>
+                    <ChartTooltip
+                      content={<ChartTooltipContent nameKey="value" hideLabel />}
+                    />
+                    <Pie 
+                      data={dashboardData.genderDistribution.map(item => ({
+                        category: item.label.toLowerCase(),
+                        label: item.label,
+                        value: item.value,
+                        fill: `var(--color-${item.label.toLowerCase()})`
+                      }))} 
+                      dataKey="value"
+                    >
+                      <LabelList
+                        dataKey="category"
+                        className="fill-background"
+                        stroke="none"
+                        fontSize={12}
+                        formatter={(value: string) => {
+                          const config = createGenderChartConfig(dashboardData.genderDistribution)
+                          return config[value as keyof typeof config]?.label || value
+                        }}
+                      />
+                    </Pie>
+                  </PieChart>
+                </ChartContainer>
+              </CardContent>
+              <CardFooter className="flex-col gap-2 text-sm">
+                <div className="flex items-center gap-2 leading-none font-medium">
+                  Total: {dashboardData.genderDistribution.reduce((acc, item) => acc + item.value, 0)} staff
+                  <TrendingUp className="h-4 w-4" />
+                </div>
+                <div className="text-muted-foreground leading-none">
+                  Gender distribution across organization
+                </div>
+              </CardFooter>
+            </Card>
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <div className="flex items-center gap-2">
-              <CardTitle className="text-sm font-medium">Overdue Assessments</CardTitle>
-              <Dialog>
-                <DialogTrigger asChild>
-                  <button className="hover:bg-muted rounded-full p-1 transition-colors">
-                    <IconInfoCircle className="h-3 w-3 text-muted-foreground" />
-                  </button>
-                </DialogTrigger>
-                <DialogContent className="max-w-sm">
-                  <DialogHeader>
-                    <DialogTitle>Overdue Assessments</DialogTitle>
-                    <DialogDescription className="space-y-2">
-                      <p>Number of assessments that have passed their end date.</p>
-                      <p className="text-xs text-muted-foreground">
-                        These assessments are no longer accepting submissions. Consider extending deadlines or following up on incomplete assessments.
-                      </p>
-                    </DialogDescription>
-                  </DialogHeader>
-                </DialogContent>
-              </Dialog>
-            </div>
-            <IconClock className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-red-600">{stats.overdueAssessments}</div>
-            <p className="text-xs text-muted-foreground">
-              Past deadline
-            </p>
-          </CardContent>
-        </Card>
-      </div>
+            {/* Grade Distribution Chart */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <IconTrendingUp className="h-5 w-5 text-purple-600" />
+                  Grade Distribution
+                </CardTitle>
+                <CardDescription>Staff distribution across grade levels</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <ChartContainer config={createGradeChartConfig(dashboardData.gradeDistribution)}>
+                  <BarChart
+                    accessibilityLayer
+                    data={dashboardData.gradeDistribution.map((item, index) => ({
+                      category: item.label.toLowerCase().replace(/[^a-z0-9]/g, ''),
+                      label: item.label,
+                      value: item.value,
+                      fill: `var(--color-${item.label.toLowerCase().replace(/[^a-z0-9]/g, '')})`
+                    }))}
+                    layout="vertical"
+                    margin={{
+                      left: 0,
+                    }}
+                  >
+                    <YAxis
+                      dataKey="category"
+                      type="category"
+                      tickLine={false}
+                      tickMargin={10}
+                      axisLine={false}
+                      tickFormatter={(value) => {
+                        const config = createGradeChartConfig(dashboardData.gradeDistribution)
+                        return config[value as keyof typeof config]?.label || value
+                      }}
+                    />
+                    <XAxis dataKey="value" type="number" hide />
+                    <ChartTooltip
+                      cursor={false}
+                      content={<ChartTooltipContent hideLabel />}
+                    />
+                    <Bar dataKey="value" layout="vertical" radius={5} />
+                  </BarChart>
+                </ChartContainer>
+              </CardContent>
+              <CardFooter className="flex-col items-start gap-2 text-sm">
+                <div className="flex gap-2 leading-none font-medium">
+                  Total {dashboardData.gradeDistribution.length} grades
+                  <TrendingUp className="h-4 w-4" />
+                </div>
+                <div className="text-muted-foreground leading-none">
+                  Staff distribution across grade levels
+                </div>
+              </CardFooter>
+            </Card>
+          </div>
 
-      {/* Data Tables Preview */}
-      <DataTablesPreview />
-
-      {/* Status Indicators */}
-      <div className="grid gap-4 md:grid-cols-3">
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg">System Status</CardTitle>
-            <CardDescription>Current system health indicators</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            <div className="flex items-center justify-between">
-              <span className="text-sm">Active Assessments</span>
-              <Badge variant={stats.activeAssessments > 0 ? "default" : "secondary"}>
-                {stats.activeAssessments > 0 ? "Running" : "None Active"}
-              </Badge>
-            </div>
-            <div className="flex items-center justify-between">
-              <span className="text-sm">Completion Rate</span>
-              <Badge variant={stats.completionRate >= 75 ? "default" : stats.completionRate >= 50 ? "secondary" : "destructive"}>
-                {stats.completionRate >= 75 ? "Good" : stats.completionRate >= 50 ? "Fair" : "Low"}
-              </Badge>
-            </div>
-            <div className="flex items-center justify-between">
-              <span className="text-sm">Overdue Items</span>
-              <Badge variant={stats.overdueAssessments === 0 ? "default" : "destructive"}>
-                {stats.overdueAssessments === 0 ? "All Current" : `${stats.overdueAssessments} Overdue`}
-              </Badge>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg">Quick Actions</CardTitle>
-            <CardDescription>Common administrative tasks</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-2">
-            <button className="w-full text-left p-2 rounded hover:bg-muted text-sm">
-              → Create New Assessment
-            </button>
-            <button className="w-full text-left p-2 rounded hover:bg-muted text-sm">
-              → Import Staff Data
-            </button>
-            <button className="w-full text-left p-2 rounded hover:bg-muted text-sm">
-              → Generate Reports
-            </button>
-            <button className="w-full text-left p-2 rounded hover:bg-muted text-sm">
-              → System Settings
-            </button>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg">Recent Activity</CardTitle>
-            <CardDescription>Latest system activities</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-2 text-sm text-muted-foreground">
-              <div>• Assessment submissions: {stats.completionRate > 0 ? 'Active' : 'None today'}</div>
-              <div>• New staff registrations: Monitoring</div>
-              <div>• Pending approvals: {stats.pendingEvaluations} items</div>
-              <div>• System alerts: {stats.overdueAssessments > 0 ? `${stats.overdueAssessments} overdue` : 'None'}</div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-    </div>
-  )
-}
-
-// Data Tables Preview Component
-function DataTablesPreview() {
-  const [upcomingDeadlines, setUpcomingDeadlines] = useState<any[]>([])
-  const [lowPerformingAreas, setLowPerformingAreas] = useState<any[]>([])
-  const [staffWithoutPositions, setStaffWithoutPositions] = useState<any[]>([])
-  const [isLoading, setIsLoading] = useState(true)
-
-  useEffect(() => {
-    fetchPreviewData()
-  }, [])
-
-  const fetchPreviewData = async () => {
-    try {
-      const [
-        assessments,
-        assessmentResults,
-        staffData,
-        competenciesData
-      ] = await Promise.all([
-        assessmentAPI.getAll(),
-        assessmentResultAPI.getAll(),
-        staffAPI.getAll(),
-        competencyAPI.getAll()
-      ])
-
-      // Upcoming Assessment Deadlines (next 7 days)
-      const currentDate = new Date()
-      const nextWeek = new Date()
-      nextWeek.setDate(currentDate.getDate() + 7)
-      
-      const upcoming = assessments
-        .filter((assessment: any) => {
-          const endDate = new Date(assessment.endDate)
-          return endDate >= currentDate && endDate <= nextWeek
-        })
-        .sort((a: any, b: any) => new Date(a.endDate).getTime() - new Date(b.endDate).getTime())
-        .slice(0, 5)
-
-      setUpcomingDeadlines(upcoming)
-
-      // Low Performing Areas (competencies with average score < 3)
-      const competencyScores: Record<string, number[]> = {}
-      
-      assessmentResults.forEach((result: any) => {
-        if (result.score && result.score > 0) {
-          if (!competencyScores[result.competencyId]) {
-            competencyScores[result.competencyId] = []
-          }
-          competencyScores[result.competencyId].push(result.score)
-        }
-      })
-
-      const lowPerforming = Object.entries(competencyScores)
-        .map(([competencyId, scores]) => {
-          const average = scores.reduce((sum, score) => sum + score, 0) / scores.length
-          const competency = competenciesData.find((c: any) => c.id === competencyId)
-          return {
-            id: competencyId,
-            name: competency?.name || 'Unknown',
-            code: competency?.code || 'N/A',
-            averageScore: Math.round(average * 100) / 100,
-            assessmentCount: scores.length
-          }
-        })
-        .filter(item => item.averageScore < 3)
-        .sort((a, b) => a.averageScore - b.averageScore)
-        .slice(0, 5)
-
-      setLowPerformingAreas(lowPerforming)
-
-      // Staff Without Positions
-      const unassigned = staffData
-        .filter((staff: any) => !staff.positionId)
-        .slice(0, 5)
-
-      setStaffWithoutPositions(unassigned)
-
-    } catch (error) {
-      console.error("Failed to fetch preview data:", error)
-    } finally {
-      setIsLoading(false)
-    }
-  }
-
-  if (isLoading) {
-    return (
-      <div className="grid gap-4 lg:grid-cols-3">
-        {Array.from({ length: 3 }).map((_, i) => (
-          <Card key={i}>
+          {/* Quick Insights */}
+          <Card>
             <CardHeader>
-              <div className="animate-pulse">
-                <div className="h-4 bg-muted rounded w-3/4 mb-2"></div>
-                <div className="h-3 bg-muted rounded w-1/2"></div>
-              </div>
+              <CardTitle>Quick Insights</CardTitle>
+              <CardDescription>Key organizational metrics and observations</CardDescription>
             </CardHeader>
-            <CardContent>
-              <div className="animate-pulse space-y-2">
-                {Array.from({ length: 3 }).map((_, j) => (
-                  <div key={j} className="h-3 bg-muted rounded"></div>
-                ))}
+            <CardContent className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+              <div className="text-center">
+                <div className="text-2xl font-bold text-blue-600">
+                  {Math.round(dashboardData.summary.totalStaff / dashboardData.summary.totalUnits * 100) / 100}
+                </div>
+                <div className="text-sm text-muted-foreground">
+                  Average Staff per Unit
+                </div>
+              </div>
+              
+              <div className="text-center">
+                <div className="text-2xl font-bold text-green-600">
+                  {dashboardData.unitDistribution.length}
+                </div>
+                <div className="text-sm text-muted-foreground">
+                  Active Units
+                </div>
+              </div>
+
+              <div className="text-center">
+                <div className="text-2xl font-bold text-purple-600">
+                  {dashboardData.gradeDistribution.length}
+                </div>
+                <div className="text-sm text-muted-foreground">
+                  Grade Levels
+                </div>
+              </div>
+
+              <div className="text-center">
+                <div className={`text-2xl font-bold ${getLicenseStatusColor(dashboardData.summary.licenseUsage.percentage)}`}>
+                  {dashboardData.summary.licenseUsage.max - dashboardData.summary.licenseUsage.used}
+                </div>
+                <div className="text-sm text-muted-foreground">
+                  Available Licenses
+                </div>
               </div>
             </CardContent>
           </Card>
-        ))}
-      </div>
-    )
-  }
-
-  return (
-    <div className="grid gap-4 lg:grid-cols-3">
-      {/* Upcoming Assessment Deadlines */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-lg flex items-center gap-2">
-            <IconClock className="h-4 w-4" />
-            Upcoming Deadlines
-          </CardTitle>
-          <CardDescription>Assessments ending within 7 days</CardDescription>
-        </CardHeader>
-        <CardContent>
-          {upcomingDeadlines.length === 0 ? (
-            <p className="text-sm text-muted-foreground text-center py-4">
-              No upcoming deadlines
-            </p>
-          ) : (
-            <div className="space-y-3">
-              {upcomingDeadlines.map((assessment: any) => {
-                const endDate = new Date(assessment.endDate)
-                const daysLeft = Math.ceil((endDate.getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24))
-                
-                return (
-                  <div key={assessment.id} className="flex items-center justify-between p-2 rounded border">
-                    <div className="flex-1">
-                      <p className="text-sm font-medium">{assessment.name}</p>
-                      <p className="text-xs text-muted-foreground">
-                        Ends: {endDate.toLocaleDateString()}
-                      </p>
-                    </div>
-                    <Badge variant={daysLeft <= 2 ? "destructive" : daysLeft <= 5 ? "secondary" : "outline"}>
-                      {daysLeft} day{daysLeft !== 1 ? 's' : ''}
-                    </Badge>
-                  </div>
-                )
-              })}
-            </div>
-          )}
-        </CardContent>
-      </Card>
-
-      {/* Low Performing Areas */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-lg flex items-center gap-2">
-            <IconAlertCircle className="h-4 w-4" />
-            Low Performing Areas
-          </CardTitle>
-          <CardDescription>Competencies with scores below 3.0</CardDescription>
-        </CardHeader>
-        <CardContent>
-          {lowPerformingAreas.length === 0 ? (
-            <p className="text-sm text-muted-foreground text-center py-4">
-              No low performing areas identified
-            </p>
-          ) : (
-            <div className="space-y-3">
-              {lowPerformingAreas.map((competency: any) => (
-                <div key={competency.id} className="flex items-center justify-between p-2 rounded border">
-                  <div className="flex-1">
-                    <p className="text-sm font-medium">{competency.name}</p>
-                    <p className="text-xs text-muted-foreground">
-                      {competency.code} • {competency.assessmentCount} assessments
-                    </p>
-                  </div>
-                  <Badge variant="destructive">
-                    {competency.averageScore}
-                  </Badge>
-                </div>
-              ))}
-            </div>
-          )}
-        </CardContent>
-      </Card>
-
-      {/* Staff Without Positions */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-lg flex items-center gap-2">
-            <IconUsers className="h-4 w-4" />
-            Unassigned Staff
-          </CardTitle>
-          <CardDescription>Staff members without position assignments</CardDescription>
-        </CardHeader>
-        <CardContent>
-          {staffWithoutPositions.length === 0 ? (
-            <p className="text-sm text-muted-foreground text-center py-4">
-              All staff have assigned positions
-            </p>
-          ) : (
-            <div className="space-y-3">
-              {staffWithoutPositions.map((staff: any) => (
-                <div key={staff.id} className="flex items-center justify-between p-2 rounded border">
-                  <div className="flex-1">
-                    <p className="text-sm font-medium">{staff.name}</p>
-                    <p className="text-xs text-muted-foreground">
-                      ID: {staff.orgId || staff.id}
-                    </p>
-                  </div>
-                  <Badge variant="secondary">
-                    Unassigned
-                  </Badge>
-                </div>
-              ))}
-            </div>
-          )}
-        </CardContent>
-      </Card>
+        </>
+      )}
     </div>
   )
 }

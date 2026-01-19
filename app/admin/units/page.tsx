@@ -119,11 +119,19 @@ export default function UnitManagementPage() {
   }
 
   const handleFormSubmit = async (formData: UnitFormData) => {
+    // Clean up the form data to handle empty strings properly
+    const cleanFormData = {
+      ...formData,
+      unitTypeId: formData.unitTypeId === "" ? null : formData.unitTypeId,
+      parentId: formData.parentId === "" ? null : formData.parentId,
+      description: formData.description === "" ? null : formData.description,
+    }
+    
     if (editingUnit) {
-      await unitAPI.update(editingUnit.id, formData)
+      await unitAPI.update(editingUnit.id, cleanFormData)
       toast.success("Unit updated successfully")
     } else {
-      await unitAPI.create(formData)
+      await unitAPI.create(cleanFormData)
       toast.success("Unit created successfully")
     }
 
