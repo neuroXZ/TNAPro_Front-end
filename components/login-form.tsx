@@ -221,7 +221,7 @@ export function LoginForm({
                           >
                             Cancel
                           </Button>
-                          <Button type="submit" disabled={isForgotPasswordLoading}>
+                          <Button disabled={isForgotPasswordLoading}>
                             {isForgotPasswordLoading ? "Sending..." : "Send Reset Link"}
                           </Button>
                         </div>
