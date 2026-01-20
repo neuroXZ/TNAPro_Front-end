@@ -185,13 +185,7 @@ export function CompetencyTable({ competencies, clusterName, onDataUpdate, staff
                   </TableCell>
                   <TableCell className={`text-center ${getScoreColor(finalScore)}`}>
                     <Badge
-                      variant={
-                        finalScore && finalScore >= 4
-                          ? "default"
-                          : finalScore && finalScore >= 3
-                          ? "secondary"
-                          : "destructive"
-                      }
+                      variant="default"
                     >
                       {finalScore?.toFixed(2) || "-"}
                     </Badge>

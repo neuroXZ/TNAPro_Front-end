@@ -25,11 +25,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { idpAPI, assessmentAPI } from "@/lib/api"
+import { idpAPI, assessmentAPI, clusterAPI, competencyAPI } from "@/lib/api"
 import { useAuth } from "@/lib/auth-context"
 import { toast } from "sonner"
-import { 
-  IconTarget, 
+import {
+  IconTarget,
   IconFileText,
   IconDownload,
   IconUserCheck,
@@ -70,6 +70,10 @@ interface Assessment {
   startDate?: string
   endDate?: string
 }
+interface Cluster {
+  id: string
+  name: string
+}
 
 export default function MyIdpPage() {
   const { user } = useAuth()
@@ -80,9 +84,17 @@ export default function MyIdpPage() {
   const [isLoading, setIsLoading] = useState(false)
   const [isLoadingAssessments, setIsLoadingAssessments] = useState(true)
   const [isExporting, setIsExporting] = useState(false)
+  const [clusterList, setClusterList] = useState<Cluster[]>([])
+  const [competenciesData, setCompetenciesData] = useState<any[]>([])
+
+
+  const [selectedResultCluster, setSelectedResultCluster] = useState<string>("all")
+
 
   useEffect(() => {
     fetchAssessments()
+    fetchClusters()
+    fetchCompetencies()
   }, [])
 
   const fetchAssessments = async () => {
@@ -90,11 +102,11 @@ export default function MyIdpPage() {
       setIsLoadingAssessments(true)
       const data = await assessmentAPI.getAll()
       // Sort by latest
-      const sortedAssessments = data.sort((a: Assessment, b: Assessment) => 
+      const sortedAssessments = data.sort((a: Assessment, b: Assessment) =>
         new Date(b.startDate || 0).getTime() - new Date(a.startDate || 0).getTime()
       )
       setAssessments(sortedAssessments)
-      
+
       // Auto-select latest assessment
       if (sortedAssessments.length > 0) {
         setSelectedAssessmentId(sortedAssessments[0].id)
@@ -107,6 +119,24 @@ export default function MyIdpPage() {
     }
   }
 
+  const fetchClusters = async () => {
+    try {
+      const data = await clusterAPI.getAll()
+      setClusterList(data)
+    } catch (error) {
+      console.error("Failed to fetch clusters:", error)
+    }
+  }
+
+  const fetchCompetencies = async () => {
+    try {
+      const data = await competencyAPI.getAll()
+      setCompetenciesData(data)
+    } catch (error) {
+      console.error("Failed to fetch competencies:", error)
+    }
+  }
+
   const generateIdp = async () => {
     if (!selectedAssessmentId || !user?.id) {
       toast.error("Please select an assessment")
@@ -115,12 +145,12 @@ export default function MyIdpPage() {
 
     try {
       setIsLoading(true)
-      
+
       const response = await idpAPI.generate({
         staffId: user.id,
         assessmentId: selectedAssessmentId
       })
-      
+
       if (response.data) {
         setIdpResult(response.data)
         toast.success(response.message || "IDP generated successfully!")
@@ -131,7 +161,7 @@ export default function MyIdpPage() {
     } catch (err: any) {
       console.error("IDP generation failed:", err)
       const errorMessage = err.response?.data?.error || err.message || "Failed to generate IDP"
-      
+
       // User-friendly error messages
       if (errorMessage.includes("assessment score missing")) {
         toast.error(
@@ -164,24 +194,24 @@ export default function MyIdpPage() {
 
     try {
       setIsExporting(true)
-      
+
       const response = await idpAPI.exportPdf({
         staffId: user.id,
         assessmentId: selectedAssessmentId
       })
-      
+
       // Create blob and open in new tab
       const blob = new Blob([response.data], { type: 'application/pdf' })
       const url = window.URL.createObjectURL(blob)
-      
+
       // Open PDF in new tab
       window.open(url, '_blank')
-      
+
       // Clean up URL object after a delay to ensure it opens
       setTimeout(() => {
         window.URL.revokeObjectURL(url)
       }, 1000)
-      
+
       toast.success("IDP opened in new tab!")
     } catch (error: any) {
       console.error("Export failed:", error)
@@ -190,6 +220,31 @@ export default function MyIdpPage() {
       setIsExporting(false)
     }
   }
+  const getFilteredCompetencies = () => {
+    if (!idpResult) return []
+
+    if (selectedResultCluster === "all") {
+      return idpResult.competencyAnalysis
+    }
+
+    return idpResult.competencyAnalysis.filter(comp => {
+      // Find the competency data to get cluster info
+      const competencyData = competenciesData.find(c => c.id === comp.competencyId)
+
+      // Try different possible cluster reference paths
+      let clusterId = null
+      if (competencyData) {
+        clusterId = competencyData.clusterId ||
+          competencyData.cluster?.id ||
+          competencyData.clusterID ||
+          competencyData.cluster_id
+      }
+
+      return clusterId === selectedResultCluster
+    })
+  }
+
+  const filteredCompetencies = getFilteredCompetencies()
 
   const handleExportCsv = async () => {
     if (!idpResult || !user?.id) {
@@ -199,28 +254,28 @@ export default function MyIdpPage() {
 
     try {
       setIsExporting(true)
-      
+
       const response = await idpAPI.exportCsv({
         staffId: user.id,
         assessmentId: selectedAssessmentId
       })
-      
+
       // Create blob and download
       const blob = new Blob([response.data], { type: 'text/csv' })
       const url = window.URL.createObjectURL(blob)
       const link = document.createElement('a')
       link.href = url
-      
+
       // Generate filename with staff name and date
       const staffName = idpResult.staffName.replace(/\s/g, '_')
       const dateStr = new Date().toISOString().slice(0, 10)
       link.download = `IDP_${staffName}_${dateStr}.csv`
-      
+
       document.body.appendChild(link)
       link.click()
       document.body.removeChild(link)
       window.URL.revokeObjectURL(url)
-      
+
       toast.success("IDP exported successfully!")
     } catch (error: any) {
       console.error("Export failed:", error)
@@ -317,6 +372,7 @@ export default function MyIdpPage() {
             <CardDescription>
               Select an assessment to generate your development plan
             </CardDescription>
+
           </CardHeader>
           <CardContent>
             <div className="flex items-center gap-4">
@@ -383,12 +439,15 @@ export default function MyIdpPage() {
                 <div className="grid grid-cols-2 gap-3">
                   <div className="bg-muted/50 rounded-lg p-3">
                     <div className="text-xs text-muted-foreground">Total Competencies</div>
-                    <div className="text-lg font-bold">{idpResult.competencyAnalysis.length}</div>
+                    <div className="text-lg font-bold">{filteredCompetencies.length}</div>
+                    {selectedResultCluster !== "all" && (
+                      <div className="text-[10px] text-muted-foreground">of {idpResult.competencyAnalysis.length} total</div>
+                    )}
                   </div>
                   <div className="bg-muted/50 rounded-lg p-3">
                     <div className="text-xs text-muted-foreground">Need Training</div>
                     <div className="text-lg font-bold text-red-600">
-                      {idpResult.competencyAnalysis.filter(c => c.developmentStrategies?.training === true).length}
+                      {filteredCompetencies.filter(c => c.developmentStrategies?.training === true).length}
                     </div>
                   </div>
                 </div>
@@ -419,7 +478,10 @@ export default function MyIdpPage() {
                       <CardTitle className="text-sm font-medium">Total Competencies</CardTitle>
                     </CardHeader>
                     <CardContent>
-                      <div className="text-2xl font-bold">{idpResult.competencyAnalysis.length}</div>
+                      <div className="text-2xl font-bold">{filteredCompetencies.length}</div>
+                      {selectedResultCluster !== "all" && (
+                        <div className="text-xs text-muted-foreground">of {idpResult.competencyAnalysis.length} total</div>
+                      )}
                     </CardContent>
                   </Card>
 
@@ -429,7 +491,7 @@ export default function MyIdpPage() {
                     </CardHeader>
                     <CardContent>
                       <div className="text-2xl font-bold text-red-600">
-                        {idpResult.competencyAnalysis.filter((c: CompetencyAnalysis) => c.developmentStrategies.training).length}
+                        {filteredCompetencies.filter((c: CompetencyAnalysis) => c.developmentStrategies.training).length}
                       </div>
                     </CardContent>
                   </Card>
@@ -440,7 +502,10 @@ export default function MyIdpPage() {
                     </CardHeader>
                     <CardContent>
                       <div className="text-2xl font-bold text-orange-600">
-                        {(idpResult.competencyAnalysis.reduce((acc, c) => acc + c.gap, 0) / idpResult.competencyAnalysis.length).toFixed(1)}
+                        {filteredCompetencies.length > 0 ? 
+                          (filteredCompetencies.reduce((acc, c) => acc + c.gap, 0) / filteredCompetencies.length).toFixed(1) : 
+                          '0.0'
+                        }
                       </div>
                     </CardContent>
                   </Card>
@@ -463,20 +528,20 @@ export default function MyIdpPage() {
               </MobileCardHeader>
               <MobileCardContent>
                 <div className="space-y-3">
-                  {idpResult.competencyAnalysis.map((comp) => (
+                  {filteredCompetencies.map((comp) => (
                     <div key={comp.competencyId} className="border rounded-lg p-3 bg-background">
                       <div className="flex items-start justify-between mb-2">
                         <h4 className="text-sm font-medium text-foreground leading-tight">
                           {comp.competencyName}
                         </h4>
-                        <Badge 
-                          variant={comp.gap > 0 ? "destructive" : "secondary"} 
+                        <Badge
+                          variant={comp.gap > 0 ? "destructive" : "secondary"}
                           className="text-xs ml-2 shrink-0"
                         >
                           Gap: {comp.gap.toFixed(1)}
                         </Badge>
                       </div>
-                      
+
                       <div className="grid grid-cols-3 gap-2 mb-2 text-xs">
                         <div className="text-center">
                           <div className="text-muted-foreground">Required</div>
@@ -514,9 +579,23 @@ export default function MyIdpPage() {
                     </div>
                   ))}
                 </div>
-
+                <Select value={selectedResultCluster} onValueChange={setSelectedResultCluster}>
+                  <SelectTrigger className="w-[200px]">
+                    <SelectValue placeholder="Filter by Cluster" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Clusters</SelectItem>
+                    {clusterList.map((cluster) => (
+                      <SelectItem key={cluster.id} value={cluster.id}>
+                        {cluster.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
                 {/* Mobile Export Button */}
                 <div className="mt-4 pt-3 border-t">
+
+
                   <Button
                     onClick={handleExportPdf}
                     disabled={isExporting}
@@ -534,6 +613,11 @@ export default function MyIdpPage() {
                     )}
                   </Button>
                 </div>
+                {selectedResultCluster !== "all" && (
+                  <div className="text-sm text-muted-foreground">
+                    Showing {filteredCompetencies.length} of {idpResult.competencyAnalysis.length} competencies
+                  </div>
+                )}
               </MobileCardContent>
             </MobileCard>
           ) : null}
@@ -545,8 +629,22 @@ export default function MyIdpPage() {
                 <div className="flex items-center justify-between">
                   <CardTitle>Competency Gap Analysis</CardTitle>
                   <div className="flex gap-2">
-                    <Button 
-                      variant="outline" 
+                    <div>
+                      <Select value={selectedResultCluster} onValueChange={setSelectedResultCluster}>
+                        <SelectTrigger className="w-[200px]">
+                          <SelectValue placeholder="Filter by Cluster" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="all">All Clusters</SelectItem>
+                          {clusterList.map((cluster) => (
+                            <SelectItem key={cluster.id} value={cluster.id}>
+                              {cluster.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>                    <Button
+                      variant="outline"
                       size="sm"
                       onClick={handleExportCsv}
                       disabled={isExporting}
@@ -554,8 +652,8 @@ export default function MyIdpPage() {
                       <IconDownload className="size-4 mr-2" />
                       {isExporting ? "Exporting..." : "Export CSV"}
                     </Button>
-                    <Button 
-                      variant="outline" 
+                    <Button
+                      variant="outline"
                       size="sm"
                       onClick={handleExportPdf}
                       disabled={isExporting}
@@ -602,7 +700,7 @@ export default function MyIdpPage() {
                         </tr>
                       </thead>
                       <tbody>
-                        {idpResult.competencyAnalysis.map((comp, index) => (
+                        {filteredCompetencies.map((comp, index) => (
                           <tr key={comp.competencyId} className="border-t hover:bg-muted/50">
                             <td className="px-4 py-3 text-sm font-medium border-r">{comp.competencyName}</td>
                             <td className="px-3 py-3 text-sm text-center border-r">{comp.requiredLevel}</td>
@@ -629,6 +727,11 @@ export default function MyIdpPage() {
                     </table>
                   </div>
                 </div>
+                {selectedResultCluster !== "all" && (
+                  <div className="text-sm text-muted-foreground mt-2">
+                    Showing {filteredCompetencies.length} of {idpResult.competencyAnalysis.length} competencies
+                  </div>
+                )}
               </CardContent>
             </Card>
           )}
