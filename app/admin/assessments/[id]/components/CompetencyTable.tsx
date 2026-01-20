@@ -184,16 +184,19 @@ export function CompetencyTable({ competencies, clusterName, onDataUpdate, staff
                     {scores.superior?.toFixed(1) || "-"}
                   </TableCell>
                   <TableCell className={`text-center ${getScoreColor(finalScore)}`}>
-                    <Badge
-                      variant="default"
-                    >
+                    
                       {finalScore?.toFixed(2) || "-"}
+                    
+                  </TableCell>
+                  <TableCell className={`text-center`}>
+                    <Badge
+                      variant="outline" className= {`${getGapColor(gap)}`}
+                    >
+                    {gap !== undefined ? gap.toFixed(2) : "-"}
                     </Badge>
                   </TableCell>
-                  <TableCell className={`text-center ${getGapColor(gap)}`}>
-                    {gap !== undefined ? gap.toFixed(2) : "-"}
-                  </TableCell>
                   <TableCell className="text-center">
+                    
                     <div className="flex items-center justify-center gap-1">
                       {scores.self && scores.superior ? (
                         <span className="text-xs text-green-600 font-medium">Complete</span>
