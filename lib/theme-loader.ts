@@ -4,7 +4,8 @@
  * Falls back to default CSS values if not found
  */
 
-const API_BASE_URL = 'https://mmcsb-tnapro-postgres2-production.up.railway.app/api';
+// API Base URL - Use environment variable or fallback to production
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
 interface ThemeSettings {
   primaryColor?: string;
