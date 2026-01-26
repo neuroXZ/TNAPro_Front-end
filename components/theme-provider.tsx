@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
+import { ThemeProvider as NextThemesProvider } from "next-themes";
+import type { ThemeProviderProps } from "next-themes";
 import { loadAndApplyTheme } from "@/lib/theme-loader";
 
 /**
@@ -39,6 +41,10 @@ export function ConditionalThemeProvider({ children }: { children: React.ReactNo
 /**
  * Legacy ThemeProvider for backward compatibility
  */
-export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  return <ConditionalThemeProvider>{children}</ConditionalThemeProvider>;
+export function ThemeProvider({ children, ...props }: ThemeProviderProps) {
+  return (
+    <NextThemesProvider {...props}>
+      <ConditionalThemeProvider>{children}</ConditionalThemeProvider>
+    </NextThemesProvider>
+  );
 }

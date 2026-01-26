@@ -2,10 +2,11 @@
 
 import { usePathname } from "next/navigation"
 import { useEffect, useState } from "react"
+import { useTheme } from "next-themes"
 import { Button } from "@/components/ui/button"
 import { Separator } from "@/components/ui/separator"
 import { SidebarTrigger } from "@/components/ui/sidebar"
-import { IconUser, IconChevronDown } from "@tabler/icons-react"
+import { IconUser, IconChevronDown, IconMoon, IconSun } from "@tabler/icons-react"
 import { useIsMobile } from "@/hooks/use-mobile"
 import {
   Breadcrumb,
@@ -26,6 +27,7 @@ export function SiteHeader() {
   const pathname = usePathname()
   const [user, setUser] = useState<{ name: string; userType: string } | null>(null)
   const isMobile = useIsMobile()
+  const { theme, setTheme } = useTheme()
   
   useEffect(() => {
     // Get user data from localStorage
@@ -106,6 +108,18 @@ export function SiteHeader() {
         
         {/* User menu */}
         <div className="ml-auto flex items-center gap-2">
+          {/* Dark mode toggle */}
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+            className="gap-2"
+          >
+            <IconSun className="size-4 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
+            <IconMoon className="absolute size-4 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
+            <span className="sr-only">Toggle theme</span>
+          </Button>
+          
           {user && (
             isMobile ? (
               <DropdownMenu>

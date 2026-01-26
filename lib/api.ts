@@ -9,7 +9,7 @@ export const api = axios.create({
   headers: {
     'Content-Type': 'application/json',
   },
-  timeout: 30000, // 30 second timeout for slow Railway responses
+  timeout: 30000, // 30 second timeout for slow Server responses
 });
 
 // Add request interceptor for debugging
@@ -85,13 +85,13 @@ export const authAPI = {
     console.log('📡 Full Request URL:', `${API_BASE_URL}/auth/forgot-password`);
     console.log('📨 Request data:', data);
     
-    // Retry mechanism for Railway cold start
+    // Retry mechanism for Server cold start
     const maxRetries = 2;
     let lastError;
     
     for (let attempt = 1; attempt <= maxRetries; attempt++) {
       try {
-        console.log(`🔍 Attempt ${attempt}/${maxRetries}: Sending request to Railway server...`);
+        console.log(`🔍 Attempt ${attempt}/${maxRetries}: Sending request to server...`);
         
         const response = await api.post('/auth/forgot-password', data, {
           timeout: 60000, // 60 seconds for this specific request
@@ -126,7 +126,7 @@ export const authAPI = {
     if (lastError.code === 'ECONNREFUSED' || lastError.code === 'NETWORK_ERROR') {
       throw new Error('Cannot connect to server. Please check your network connection.');
     } else if (lastError.message?.includes('timeout')) {
-      throw new Error('Railway server is slow to respond. This may be due to cold start. Please wait a moment and try again.');
+      throw new Error('Server is slow to respond. This may be due to cold start. Please wait a moment and try again.');
     } else if (lastError.response?.status === 404) {
       throw new Error('Forgot password endpoint not found on the server.');
     } else if (lastError.response?.status >= 500) {
@@ -157,7 +157,7 @@ export const authAPI = {
       } else if (error.response?.status >= 500) {
         throw new Error('Server error. Please try again later.');
       } else if (error.message?.includes('timeout')) {
-        throw new Error('Railway server timeout. Please wait a moment and try again.');
+        throw new Error('server timeout. Please wait a moment and try again.');
       }
       
       throw error;
