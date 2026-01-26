@@ -557,7 +557,7 @@ export default function StaffProfilePage() {
                             <div>
                                 <p className="text-xs text-muted-foreground mb-2">Superior</p>
                                 {superior ? (
-                                    <div className="bg-white flex items-center justify-between p-2 rounded border">
+                                    <div className=" flex items-center justify-between p-2 rounded border">
                                         <div className="flex items-center gap-2">
                                             <Avatar className="size-9">
                                                 <AvatarImage
@@ -586,7 +586,7 @@ export default function StaffProfilePage() {
                                     Subordinates ({subordinates.length})
                                 </p>
                                 {subordinates.length > 0 ? (
-                                    <div className="space-y-2 bg-white">
+                                    <div className="space-y-2">
                                         {subordinates.map((subordinate: any) => (
                                             <div key={subordinate.id} className="flex items-center justify-between rounded p-2 border">
                                                 <div className="flex items-center gap-2">
