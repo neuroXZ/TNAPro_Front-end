@@ -357,10 +357,10 @@ export default function PositionCompetencyDetailPage() {
             </div>
             <TabsList className="flex flex-col h-fit w-full">
               {Object.entries(groupedCompetencies).map(([clusterId, { cluster, competencies }]) => (
-                <TabsTrigger key={clusterId} value={clusterId} className="justify-start gap-2 w-full">
+                <TabsTrigger key={clusterId} value={clusterId} className="justify-start gap-3 w-full">
                   {cluster?.color && (
                     <div
-                      className="size-3 rounded shrink-0"
+                      className="size-4 rounded shrink-0"
                       style={{ backgroundColor: cluster.color }}
                     />
                   )}
