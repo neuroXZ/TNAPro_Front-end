@@ -5,6 +5,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command"
 import {
   Tooltip,
   TooltipContent,
@@ -28,6 +30,8 @@ import {
 } from "@/components/ui/dialog"
 import { staffAPI, assessmentAPI, idpAPI, unitAPI, competencyAPI } from "@/lib/api"
 import { toast } from "sonner"
+import { IconCheck, IconSelector } from "@tabler/icons-react"
+import { cn } from "@/lib/utils"
 import { IconFileText, IconDownload, IconUserCheck, IconTarget, IconTrendingUp, IconInfoCircle } from "@tabler/icons-react"
 import { format } from "date-fns"
 import { useEffect } from "react"
@@ -106,6 +110,7 @@ export default function AdminIdpPage() {
   const [isLoading, setIsLoading] = useState(false)
   const [isGenerating, setIsGenerating] = useState(false)
   const [isTrainingPopupOpen, setIsTrainingPopupOpen] = useState(false)
+  const [openStaffCombobox, setOpenStaffCombobox] = useState(false)
 
   useEffect(() => {
     fetchInitialData()
@@ -405,20 +410,58 @@ export default function AdminIdpPage() {
 
             <div className="space-y-2">
               <Label htmlFor="staff">Staff Member *</Label>
-              <Select value={selectedStaff} onValueChange={setSelectedStaff}>
-                <SelectTrigger id="staff" className="w-full">
-                  <SelectValue placeholder="Select staff member" className="truncate" />
-                </SelectTrigger>
-                <SelectContent className="max-w-[450px]">
-                  {filteredStaffList.map((staff) => (
-                    <SelectItem key={staff.id} value={staff.id} className="max-w-[430px]">
-                      <span className="truncate block">
-                        {staff.name} ({staff.staffOrgId}) - {staff.position?.name || 'No Position'}
+              <Popover open={openStaffCombobox} onOpenChange={setOpenStaffCombobox}>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    role="combobox"
+                    aria-expanded={openStaffCombobox}
+                    className="w-full justify-between font-normal"
+                  >
+                    {selectedStaff ? (
+                      <span className="truncate">
+                        {(() => {
+                          const staff = filteredStaffList.find(s => s.id === selectedStaff)
+                          return staff ? `${staff.name} (${staff.staffOrgId}) - ${staff.position?.name || 'No Position'}` : "Select staff member"
+                        })()}
                       </span>
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+                    ) : (
+                      "Select staff member"
+                    )}
+                    <IconSelector className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-[450px] p-0">
+                  <Command>
+                    <CommandInput placeholder="Search staff..." />
+                    <CommandList>
+                      <CommandEmpty>No staff found.</CommandEmpty>
+                      <CommandGroup>
+                        {filteredStaffList.map((staff) => (
+                          <CommandItem
+                            key={staff.id}
+                            value={`${staff.name} ${staff.staffOrgId} ${staff.position?.name || ''}`}
+                            onSelect={() => {
+                              setSelectedStaff(staff.id)
+                              setOpenStaffCombobox(false)
+                            }}
+                          >
+                            <IconCheck
+                              className={cn(
+                                "mr-2 h-4 w-4",
+                                selectedStaff === staff.id ? "opacity-100" : "opacity-0"
+                              )}
+                            />
+                            <span className="truncate">
+                              {staff.name} ({staff.staffOrgId}) - {staff.position?.name || 'No Position'}
+                            </span>
+                          </CommandItem>
+                        ))}
+                      </CommandGroup>
+                    </CommandList>
+                  </Command>
+                </PopoverContent>
+              </Popover>
             </div>
 
             <div className="space-y-2">
@@ -548,7 +591,7 @@ export default function AdminIdpPage() {
                       </DialogHeader>
                       <div className="space-y-4">
                         <div className="border rounded-lg overflow-hidden">
-                          <div className="overflow-x-auto">
+                          <div className="overflow-x-auto  scroll-auto max-h-[500px]">
                             <table className="w-full">
                               <thead className="bg-muted">
                                 <tr>
