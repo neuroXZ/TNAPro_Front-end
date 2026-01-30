@@ -35,7 +35,6 @@ import {
 interface DashboardStats {
   totalStaff: number
   activeAssessments: number
-  completionRate: number
   pendingEvaluations: number
   totalPositions: number
   totalUnits: number
@@ -47,7 +46,6 @@ export default function AdminDashboard() {
   const [stats, setStats] = useState<DashboardStats>({
     totalStaff: 0,
     activeAssessments: 0,
-    completionRate: 0,
     pendingEvaluations: 0,
     totalPositions: 0,
     totalUnits: 0,
@@ -94,12 +92,6 @@ export default function AdminDashboard() {
         return currentDate > endDate
       })
 
-      // Calculate completion rate
-      const totalPossibleResults = staffData.length * assessmentData.length
-      const completionRate = totalPossibleResults > 0 
-        ? (assessmentResults.length / totalPossibleResults) * 100 
-        : 0
-
       // Calculate pending evaluations (assessments with partial results)
       const staffWithResults = new Set(assessmentResults.map((result: any) => result.assessorId))
       const totalAssessors = assessorsData.length
@@ -116,7 +108,6 @@ export default function AdminDashboard() {
       setStats({
         totalStaff: staffData.length,
         activeAssessments: activeAssessments.length,
-        completionRate: Math.round(completionRate),
         pendingEvaluations,
         totalPositions: positionsData.length,
         totalUnits: unitsData.length,
@@ -229,39 +220,6 @@ export default function AdminDashboard() {
             <div className="text-2xl font-bold text-green-600">{stats.activeAssessments}</div>
             <p className="text-xs text-muted-foreground">
               Currently running
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <div className="flex items-center gap-2">
-              <CardTitle className="text-sm font-medium">Completion Rate</CardTitle>
-              <Dialog>
-                <DialogTrigger asChild>
-                  <button className="hover:bg-muted rounded-full p-1 transition-colors">
-                    <IconInfoCircle className="h-3 w-3 text-muted-foreground" />
-                  </button>
-                </DialogTrigger>
-                <DialogContent className="max-w-sm">
-                  <DialogHeader>
-                    <DialogTitle>Completion Rate</DialogTitle>
-                    <DialogDescription className="space-y-2">
-                      <p>Percentage of completed assessment results versus total possible assessments.</p>
-                      <p className="text-xs text-muted-foreground">
-                        Calculated as: (Total Assessment Results / (Total Staff × Total Assessments)) × 100%. Higher percentages indicate better participation.
-                      </p>
-                    </DialogDescription>
-                  </DialogHeader>
-                </DialogContent>
-              </Dialog>
-            </div>
-            <IconTrendingUp className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-blue-600">{stats.completionRate}%</div>
-            <p className="text-xs text-muted-foreground">
-              Overall completion
             </p>
           </CardContent>
         </Card>
@@ -449,12 +407,12 @@ export default function AdminDashboard() {
                 {stats.activeAssessments > 0 ? "Running" : "None Active"}
               </Badge>
             </div>
-            <div className="flex items-center justify-between">
+            {/* <div className="flex items-center justify-between">
               <span className="text-sm">Completion Rate</span>
               <Badge variant={stats.completionRate >= 75 ? "default" : stats.completionRate >= 50 ? "secondary" : "destructive"}>
                 {stats.completionRate >= 75 ? "Good" : stats.completionRate >= 50 ? "Fair" : "Low"}
               </Badge>
-            </div>
+            </div> */}
             <div className="flex items-center justify-between">
               <span className="text-sm">Overdue Items</span>
               <Badge variant={stats.overdueAssessments === 0 ? "default" : "destructive"}>
@@ -492,7 +450,7 @@ export default function AdminDashboard() {
           </CardHeader>
           <CardContent>
             <div className="space-y-2 text-sm text-muted-foreground">
-              <div>• Assessment submissions: {stats.completionRate > 0 ? 'Active' : 'None today'}</div>
+              {/* <div>• Assessment submissions: {stats.completionRate > 0 ? 'Active' : 'None today'}</div> */}
               <div>• New staff registrations: Monitoring</div>
               <div>• Pending approvals: {stats.pendingEvaluations} items</div>
               <div>• System alerts: {stats.overdueAssessments > 0 ? `${stats.overdueAssessments} overdue` : 'None'}</div>

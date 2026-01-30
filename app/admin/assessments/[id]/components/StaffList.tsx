@@ -20,10 +20,11 @@ interface StaffListProps {
   allStaff: StaffMemberWithResults[]
   matrix: StaffCompetencyMatrix
   positions: Position[]
+  assessmentId: string
   onDataUpdate?: () => void
 }
 
-export function StaffList({ allStaff, matrix, positions, onDataUpdate }: StaffListProps) {
+export function StaffList({ allStaff, matrix, positions, assessmentId, onDataUpdate }: StaffListProps) {
   const [searchQuery, setSearchQuery] = useState("")
   const [selectedPosition, setSelectedPosition] = useState<string>("all")
 
@@ -117,6 +118,7 @@ export function StaffList({ allStaff, matrix, positions, onDataUpdate }: StaffLi
                 key={staffMember.id}
                 staffMember={staffMember}
                 staffData={matrix[staffMember.id]}
+                assessmentId={assessmentId}
                 onDataUpdate={onDataUpdate}
               />
             ))}
@@ -146,6 +148,7 @@ export function StaffList({ allStaff, matrix, positions, onDataUpdate }: StaffLi
                   key={staffMember.id}
                   staffMember={staffMember}
                   staffData={matrix[staffMember.id]}
+                  assessmentId={assessmentId}
                   onDataUpdate={onDataUpdate}
                 />
               ))}

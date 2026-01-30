@@ -34,7 +34,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover"
 import { Button } from "@/components/ui/button"
-import { IconSearch } from "@tabler/icons-react"
+import { IconSearch, IconFilter } from "@tabler/icons-react"
 import { toast } from "sonner"
 import { Position, getColumns } from "./columns"
 import { DataTablePagination } from "@/components/data-table-pagination"
@@ -294,7 +294,7 @@ export default function PositionManagementPage() {
                       ? "Filter by Grade"
                       : grades.find((g) => g.id === selectedGradeId)?.name || "Filter by Grade"
                     }
-                    <IconSearch className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                    <IconFilter className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-[180px] p-0">
@@ -343,7 +343,7 @@ export default function PositionManagementPage() {
                         ? "Filter by Category"
                         : categories.find((c) => c.id === selectedCategoryId)?.name || "Filter by Category"
                       }
-                      <IconSearch className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                      <IconFilter className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                     </Button>
                   </PopoverTrigger>
                   <PopoverContent className="w-[180px] p-0">

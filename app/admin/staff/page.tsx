@@ -51,7 +51,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover"
-import { IconSearch } from "@tabler/icons-react"
+import { IconSearch, IconFilter } from "@tabler/icons-react"
 import { toast } from "sonner"
 import { Staff, getColumns } from "./columns"
 import { DataTablePagination } from "@/components/data-table-pagination"
@@ -347,7 +347,7 @@ export default function StaffManagementPage() {
                       ? "Filter by Position"
                       : positions.find((p) => p.id === selectedPositionId)?.name || "Filter by Position"
                     }
-                    <IconSearch className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                    <IconFilter className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-[180px] p-0">
@@ -395,7 +395,7 @@ export default function StaffManagementPage() {
                       ? "Filter by Unit"
                       : units.find((u) => u.id === selectedUnitId)?.name || "Filter by Unit"
                     }
-                    <IconSearch className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                    <IconFilter className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-[180px] p-0">

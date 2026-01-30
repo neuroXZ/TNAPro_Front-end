@@ -75,7 +75,8 @@ export default function AssessmentDetailPage() {
           <StaffList 
             allStaff={allStaff} 
             matrix={matrix} 
-            positions={positions} 
+            positions={positions}
+            assessmentId={assessmentId}
             onDataUpdate={refreshData}
           />
         </CardContent>

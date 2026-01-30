@@ -43,7 +43,7 @@ import {
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { IconSearch } from "@tabler/icons-react"
+import { IconSearch, IconFilter } from "@tabler/icons-react"
 import { toast } from "sonner"
 import { Assessor, getColumns } from "./columns"
 import { DataTablePagination } from "@/components/data-table-pagination"
@@ -256,16 +256,18 @@ export default function AssessorManagementPage() {
                     variant="outline"
                     role="combobox"
                     aria-expanded={assessorPopoverOpen}
-                    className="w-[180px] justify-between"
+                    className="min-w-[180px] max-w-[300px] justify-between"
                   >
-                    {selectedAssessorId === "all" 
-                      ? "Filter by Assessor"
-                      : uniqueAssessors.find((a) => a.id === selectedAssessorId)?.name || "Filter by Assessor"
-                    }
-                    <IconSearch className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                    <span className="truncate">
+                      {selectedAssessorId === "all" 
+                        ? "Filter by Assessor"
+                        : uniqueAssessors.find((a) => a.id === selectedAssessorId)?.name || "Filter by Assessor"
+                      }
+                    </span>
+                    <IconFilter className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                   </Button>
                 </PopoverTrigger>
-                <PopoverContent className="w-[180px] p-0">
+                <PopoverContent className="w-auto min-w-[180px] max-w-[400px] p-0">
                   <Command>
                     <CommandInput placeholder="Search assessors..." />
                     <CommandList className="max-h-[200px] overflow-y-auto">

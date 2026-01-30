@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { settingAPI } from "@/lib/api"
+import { settingAPI, dashboardAPI } from "@/lib/api"
 import {
   Card,
   CardContent,
@@ -13,9 +13,19 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { IconSettings, IconPalette, IconDeviceFloppy, IconRefresh } from "@tabler/icons-react"
-import { toast } from "sonner"
+import { Progress } from "@/components/ui/progress"
 import { Skeleton } from "@/components/ui/skeleton"
+import { 
+  IconSettings, 
+  IconPalette, 
+  IconDeviceFloppy, 
+  IconRefresh,
+  IconUsers,
+  IconBuilding,
+  IconLicense,
+  IconCalendar
+} from "@tabler/icons-react"
+import { toast } from "sonner"
 import { hexToOklch, oklchToHex } from "@/lib/color-utils"
 import { applyThemeColors } from "@/lib/theme-loader"
 
@@ -32,16 +42,26 @@ interface Setting {
   infoColor?: string
 }
 
+interface DashboardSummary {
+  totalStaff: number
+  totalUnits: number
+  licenseUsage: {
+    used: number
+    max: number
+    percentage: number
+    expiryDate: string | null
+  }
+}
+
 export default function SettingsPage() {
   const [settings, setSettings] = useState<Setting | null>(null)
+  const [dashboardData, setDashboardData] = useState<DashboardSummary | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [isSaving, setIsSaving] = useState(false)
   const [isUploading, setIsUploading] = useState(false)
 
   // Form states
   const [companyName, setCompanyName] = useState("")
-  const [appTitle, setAppTitle] = useState("")
-  const [contactEmail, setContactEmail] = useState("")
   const [logoPath, setLogoPath] = useState("")
   
   // Theme colors
@@ -54,7 +74,17 @@ export default function SettingsPage() {
 
   useEffect(() => {
     fetchSettings()
+    fetchDashboardData()
   }, [])
+
+  const fetchDashboardData = async () => {
+    try {
+      const data = await dashboardAPI.getOverview()
+      setDashboardData(data.summary)
+    } catch (error) {
+      console.error('Failed to fetch dashboard data:', error)
+    }
+  }
 
   const fetchSettings = async () => {
     try {
@@ -68,8 +98,6 @@ export default function SettingsPage() {
         
         // Parse key-value pairs
         if (setting.key === "company_name") setCompanyName(setting.value || "")
-        if (setting.key === "app_title") setAppTitle(setting.value || "")
-        if (setting.key === "contact_email") setContactEmail(setting.value || "")
         
         // Set logo
         setLogoPath(setting.logoPath || "")
@@ -182,6 +210,23 @@ export default function SettingsPage() {
     }
   }
 
+  const getLicenseStatusColor = (percentage: number) => {
+    if (percentage >= 90) return "text-red-600"
+    if (percentage >= 75) return "text-yellow-600"
+    return "text-green-600"
+  }
+
+  const getLicenseStatusText = (percentage: number) => {
+    if (percentage >= 90) return "Critical"
+    if (percentage >= 75) return "Warning"
+    return "Good"
+  }
+
+  const formatDate = (dateString: string | null) => {
+    if (!dateString) return "Not Set"
+    return new Date(dateString).toLocaleDateString()
+  }
+
   if (isLoading) {
     return (
       <div className="space-y-4">
@@ -199,6 +244,73 @@ export default function SettingsPage() {
           Manage application settings and preferences
         </p>
       </div>
+
+      {/* System Summary Cards */}
+      {dashboardData && (
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Total Staff</CardTitle>
+              <IconUsers className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{dashboardData.totalStaff}</div>
+              <p className="text-xs text-muted-foreground">
+                Registered employees
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Total Units</CardTitle>
+              <IconBuilding className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{dashboardData.totalUnits}</div>
+              <p className="text-xs text-muted-foreground">
+                Organizational units
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">License Usage</CardTitle>
+              <IconLicense className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className={`text-2xl font-bold ${getLicenseStatusColor(dashboardData.licenseUsage.percentage)}`}>
+                {dashboardData.licenseUsage.used}/{dashboardData.licenseUsage.max}
+              </div>
+              <div className="mt-2">
+                <Progress 
+                  value={dashboardData.licenseUsage.percentage} 
+                  className="h-2"
+                />
+                <p className="text-xs text-muted-foreground mt-1">
+                  {Math.round(dashboardData.licenseUsage.percentage)}% used • {getLicenseStatusText(dashboardData.licenseUsage.percentage)}
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">License Expiry</CardTitle>
+              <IconCalendar className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">
+                {formatDate(dashboardData.licenseUsage.expiryDate)}
+              </div>
+              <p className="text-xs text-muted-foreground">
+                System license validity
+              </p>
+            </CardContent>
+          </Card>
+        </div>
+      )}
 
       <Tabs defaultValue="general" className="w-full">
         <TabsList className="grid w-full grid-cols-2">
@@ -229,27 +341,6 @@ export default function SettingsPage() {
                     placeholder="Enter company name"
                     value={companyName}
                     onChange={(e) => setCompanyName(e.target.value)}
-                  />
-                </div>
-
-                <div className="grid gap-2">
-                  <Label htmlFor="appTitle">Application Title</Label>
-                  <Input
-                    id="appTitle"
-                    placeholder="Enter application title"
-                    value={appTitle}
-                    onChange={(e) => setAppTitle(e.target.value)}
-                  />
-                </div>
-
-                <div className="grid gap-2">
-                  <Label htmlFor="contactEmail">Contact Email</Label>
-                  <Input
-                    id="contactEmail"
-                    type="email"
-                    placeholder="Enter contact email"
-                    value={contactEmail}
-                    onChange={(e) => setContactEmail(e.target.value)}
                   />
                 </div>
 
@@ -330,7 +421,7 @@ export default function SettingsPage() {
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
-              <div className="grid gap-6 md:grid-cols-2">
+              <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
                 <div className="grid gap-2">
                   <Label htmlFor="primaryColor">Primary Color</Label>
                   <div className="flex gap-2">

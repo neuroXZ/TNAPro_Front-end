@@ -6,18 +6,20 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { IconCheck, IconX, IconFileTypePdf, IconClock } from "@tabler/icons-react"
+import { IconCheck, IconX, IconFileTypePdf, IconFileTypeCsv, IconClock } from "@tabler/icons-react"
 import { toast } from "sonner"
 import type { StaffMemberWithResults, StaffCompetencyMatrix } from "../types"
 import { CompetencyTable } from "./CompetencyTable"
+import { cgaAPI } from "@/lib/api"
 
 interface StaffAccordionItemProps {
   staffMember: StaffMemberWithResults
   staffData?: StaffCompetencyMatrix[string]
+  assessmentId: string
   onDataUpdate?: () => void
 }
 
-export function StaffAccordionItem({ staffMember, staffData, onDataUpdate }: StaffAccordionItemProps) {
+export function StaffAccordionItem({ staffMember, staffData, assessmentId, onDataUpdate }: StaffAccordionItemProps) {
   const clusterNames = staffData
     ? Array.from(
         new Set(
@@ -27,6 +29,30 @@ export function StaffAccordionItem({ staffMember, staffData, onDataUpdate }: Sta
         )
       )
     : []
+
+  const handleExportCSV = async () => {
+    try {
+      const response = await cgaAPI.exportCsv({
+        staffId: staffMember.id,
+        assessmentId: assessmentId
+      });
+      
+      // Create download link
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `CGA_Report_${staffMember.name.replace(/\s/g, '_')}_${new Date().toISOString().slice(0, 10)}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+      
+      toast.success("CSV exported successfully");
+    } catch (error) {
+      console.error('Export CSV error:', error);
+      toast.error("Failed to export CSV");
+    }
+  };
 
   return (
     <AccordionItem
@@ -45,18 +71,28 @@ export function StaffAccordionItem({ staffMember, staffData, onDataUpdate }: Sta
           </div>
           <div className="flex items-center gap-2 mr-4">
             {staffMember.hasResults && (
-              <Button
-                size="sm"
-                variant="outline"
-                className="h-7 gap-1.5"
-                onClick={(e) => {
-                  e.stopPropagation()
-                  toast.info("PDF export feature coming soon")
-                }}
-              >
-                <IconFileTypePdf className="size-4" />
-                Save PDF
-              </Button>
+              <>
+                <div
+                  className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-7 px-3 gap-1.5 cursor-pointer"
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    handleExportCSV()
+                  }}
+                >
+                  <IconFileTypeCsv className="size-4" />
+                  Export CSV
+                </div>
+                <div
+                  className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-7 px-3 gap-1.5 cursor-pointer"
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    toast.info("PDF export feature coming soon")
+                  }}
+                >
+                  <IconFileTypePdf className="size-4" />
+                  Save PDF
+                </div>
+              </>
             )}
             {(() => {
               if (!staffMember.hasResults) {

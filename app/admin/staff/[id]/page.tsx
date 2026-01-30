@@ -274,14 +274,46 @@ export default function StaffProfilePage() {
 
     const handleFormSubmit = async (formData: StaffFormData) => {
         try {
-            await staffAPI.update(staffId, formData)
+            const submitData = {
+                name: formData.name,
+                email: formData.email,
+                staffOrgId: formData.staffOrgId,
+                gender: formData.gender || undefined,
+                image: formData.image || undefined,
+                password: formData.password,
+                positionId: formData.positionId || undefined,
+                unitId: formData.unitId || undefined,
+                supervisorId: formData.supervisorId || undefined,
+            }
+
+            // Remove password if empty (for edit)
+            if (!submitData.password) {
+                delete submitData.password
+            }
+
+            await staffAPI.update(staffId, submitData)
             toast.success("Staff profile updated successfully")
             setIsEditDialogOpen(false)
             // Refresh data
             fetchStaffData()
         } catch (error: any) {
             console.error("Failed to update staff:", error)
-            toast.error(error.response?.data?.error || "Failed to update staff profile")
+            
+            // Handle subscription limit error specifically
+            if (error.response?.data?.message && error.response.data.message.includes('Subscription limit reached')) {
+                toast.error(error.response.data.message)
+            } else if (error.response?.data?.error && error.response.data.error.includes('Subscription limit reached')) {
+                toast.error(error.response.data.error)
+            } else if (error.message && error.message.includes('Subscription limit reached')) {
+                toast.error(error.message)
+            } else {
+                // Handle other types of errors
+                const errorMessage = error.response?.data?.message || 
+                                   error.response?.data?.error || 
+                                   error.message || 
+                                   'Failed to update staff profile. Please try again.'
+                toast.error(errorMessage)
+            }
         }
     }
 
@@ -348,10 +380,11 @@ export default function StaffProfilePage() {
             <Card>
                 <CardContent className="p-6">
                     <div className="flex items-start gap-6">
-                        <Avatar className="h-24 w-24">
+                        <Avatar className="h-24 w-24 aspect-square">
                             <AvatarImage
                                 src={getAvatarImage()}
                                 alt={staff.name}
+                                className="object-cover w-full h-full"
                                 onError={(e) => console.log("Image load error:", e)}
                             />
                             <AvatarFallback className="text-2xl font-semibold bg-primary text-primary-foreground">
@@ -423,7 +456,7 @@ export default function StaffProfilePage() {
             </Card>
             <div className="grid gap-6 md:grid-cols-[30%_68%]">
                 {/* Statistics */}
-                <div className="grid gap-4 w-full">
+                <div className="grid gap-4 w-full ">
                     <Card>
                         <CardHeader className="pb-3">
                             <CardTitle className="text-sm font-medium">Total Competencies</CardTitle>
@@ -483,8 +516,8 @@ export default function StaffProfilePage() {
                             <CardContent>
                                 <Tabs defaultValue={Object.keys(groupedCompetencies)[0]} className="w-full">
                                     <TabsList className="grid w-full" style={{ gridTemplateColumns: `repeat(${Object.keys(groupedCompetencies).length}, minmax(0, 1fr))` }}>
-                                        {Object.entries(groupedCompetencies).map(([clusterName, competencies]) => (
-                                            <TabsTrigger key={clusterName} value={clusterName} className="gap-2">
+                                        {Object.entries(groupedCompetencies).map(([clusterName, competencies], index) => (
+                                            <TabsTrigger key={`tab-trigger-${clusterName}-${index}`} value={clusterName} className="gap-2">
                                                 <span>{clusterName}</span>
                                                 <Badge className="ml-1 text-xs text-white">
                                                     {competencies.length}
@@ -493,11 +526,11 @@ export default function StaffProfilePage() {
                                         ))}
                                     </TabsList>
 
-                                    {Object.entries(groupedCompetencies).map(([clusterName, competencies]) => (
-                                        <TabsContent key={clusterName} value={clusterName} className="mt-4">
+                                    {Object.entries(groupedCompetencies).map(([clusterName, competencies], index) => (
+                                        <TabsContent key={`tab-content-${clusterName}-${index}`} value={clusterName} className="mt-4">
                                             <div className="space-y-3">
                                                 {competencies.map((pc) => (
-                                                    <div key={pc.id} className="flex items-center justify-between p-4 border border-l-4 border-l-primary rounded-lg bg-muted/20 hover:bg-muted/40 transition-colors">
+                                                    <div key={`competency-${pc.id}-${pc.competencyId}`} className="flex items-center justify-between p-4 border border-l-4 border-l-primary rounded-lg bg-muted/20 hover:bg-muted/40 transition-colors">
                                                         <div className="flex items-center gap-3">
                                                             <div className="w-2 h-2 bg-primary rounded-full"></div>
                                                             <h4 className="font-medium">{pc.competency.name}</h4>
@@ -559,10 +592,11 @@ export default function StaffProfilePage() {
                                 {superior ? (
                                     <div className=" flex items-center justify-between p-2 rounded border">
                                         <div className="flex items-center gap-2">
-                                            <Avatar className="size-9">
+                                            <Avatar className="size-9 aspect-square">
                                                 <AvatarImage
                                                     src={getStaffAvatarImage(superior)}
                                                     alt={superior.name}
+                                                    className="object-cover w-full h-full"
                                                 />
                                                 <AvatarFallback className="text-xs">
                                                     {getInitials(superior.name)}
@@ -587,13 +621,14 @@ export default function StaffProfilePage() {
                                 </p>
                                 {subordinates.length > 0 ? (
                                     <div className="space-y-2">
-                                        {subordinates.map((subordinate: any) => (
-                                            <div key={subordinate.id} className="flex items-center justify-between rounded p-2 border">
+                                        {subordinates.map((subordinate: any, index: number) => (
+                                            <div key={`subordinate-${subordinate.id}-${index}`} className="flex items-center justify-between rounded p-2 border">
                                                 <div className="flex items-center gap-2">
-                                                    <Avatar className="size-9">
+                                                    <Avatar className="size-9 aspect-square">
                                                         <AvatarImage
                                                             src={getStaffAvatarImage(subordinate)}
                                                             alt={subordinate.name}
+                                                            className="object-cover w-full h-full"
                                                         />
                                                         <AvatarFallback className="text-xs">
                                                             {getInitials(subordinate.name)}

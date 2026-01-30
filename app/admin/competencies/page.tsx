@@ -34,7 +34,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover"
 import { Button } from "@/components/ui/button"
-import { IconSearch } from "@tabler/icons-react"
+import { IconSearch, IconFilter } from "@tabler/icons-react"
 import { toast } from "sonner"
 import { Competency, getColumns } from "./columns"
 import { DataTablePagination } from "@/components/data-table-pagination"
@@ -270,7 +270,7 @@ export default function CompetencyManagementPage() {
                       ? "Filter by Cluster"
                       : clusters.find((c) => c.id === selectedClusterId)?.name || "Filter by Cluster"
                     }
-                    <IconSearch className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                    <IconFilter className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-[180px] p-0">

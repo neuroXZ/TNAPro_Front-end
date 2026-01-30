@@ -770,6 +770,20 @@ export const idpAPI = {
   },
 };
 
+// CGA (Competency Gap Analysis) API
+export const cgaAPI = {
+  exportCsv: async (data: { staffId: string; assessmentId: string }) => {
+    const params = new URLSearchParams();
+    params.append('staffId', data.staffId);
+    params.append('assessmentId', data.assessmentId);
+    
+    const response = await api.get(`/cga/export?${params.toString()}`, {
+      responseType: 'blob'
+    });
+    return response;
+  },
+};
+
 // Recommended Training (RTN) API
 export const rtnAPI = {
   getReport: async (data: { staffId: string; assessmentId: string }) => {

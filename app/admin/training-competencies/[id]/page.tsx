@@ -13,9 +13,11 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { IconArrowLeft, IconPlus, IconTrash, IconEye } from "@tabler/icons-react"
+import { IconArrowLeft, IconPlus, IconTrash, IconEye, IconTrashX, IconSearch } from "@tabler/icons-react"
 import { toast } from "sonner"
 import { Skeleton } from "@/components/ui/skeleton"
+import { Checkbox } from "@/components/ui/checkbox"
+import { Input } from "@/components/ui/input"
 import { CompetencyViewDialog } from "./competency-view-dialog"
 import { CompetencyDeleteDialog } from "./competency-delete-dialog"
 
@@ -73,10 +75,24 @@ export default function TrainingCompetencyDetailPage() {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
   const [selectedCompetency, setSelectedCompetency] = useState<Competency | null>(null)
   const [selectedTrainingCompetency, setSelectedTrainingCompetency] = useState<TrainingCompetency | null>(null)
+  const [selectedIds, setSelectedIds] = useState<string[]>([])
+  const [selectedCompetencyIds, setSelectedCompetencyIds] = useState<string[]>([])
+  const [isBulkDeleting, setIsBulkDeleting] = useState(false)
+  const [isBulkAdding, setIsBulkAdding] = useState(false)
+  const [activeTab, setActiveTab] = useState<string>("")
+  const [searchQuery, setSearchQuery] = useState("")
 
   useEffect(() => {
     fetchData()
   }, [trainingId])
+
+  // Set initial active tab after data loads
+  useEffect(() => {
+    const groupedKeys = Object.keys(groupCompetenciesByCluster())
+    if (!activeTab && groupedKeys.length > 0) {
+      setActiveTab(groupedKeys[0])
+    }
+  }, [trainingCompetencies, allCompetencies])
 
   const fetchData = async () => {
     try {
@@ -114,10 +130,23 @@ export default function TrainingCompetencyDetailPage() {
         (tc) => tc.competencyId === competency.id
       )
 
-      grouped[clusterId].competencies.push({
-        competency,
-        trainingCompetency: trainingComp,
-      })
+      // Filter by search query
+      const matchesSearch = !searchQuery || 
+        competency.name.toLowerCase().includes(searchQuery.toLowerCase())
+
+      if (matchesSearch) {
+        grouped[clusterId].competencies.push({
+          competency,
+          trainingCompetency: trainingComp,
+        })
+      }
+    })
+
+    // Remove empty clusters
+    Object.keys(grouped).forEach((clusterId) => {
+      if (grouped[clusterId].competencies.length === 0) {
+        delete grouped[clusterId]
+      }
     })
 
     return grouped
@@ -160,6 +189,95 @@ export default function TrainingCompetencyDetailPage() {
     }
   }
 
+  const toggleSelection = (id: string) => {
+    setSelectedIds(prev =>
+      prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]
+    )
+  }
+
+  const toggleCompetencySelection = (id: string) => {
+    setSelectedCompetencyIds(prev =>
+      prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]
+    )
+  }
+
+  const toggleSelectAll = (competencies: Array<{ trainingCompetency?: TrainingCompetency }>) => {
+    const assignedIds = competencies
+      .filter(c => c.trainingCompetency)
+      .map(c => c.trainingCompetency!.id)
+    
+    if (selectedIds.length === assignedIds.length) {
+      setSelectedIds([])
+    } else {
+      setSelectedIds(assignedIds)
+    }
+  }
+
+  const toggleSelectAllNotAdded = (competencies: Array<{ competency: Competency; trainingCompetency?: TrainingCompetency }>) => {
+    const notAddedIds = competencies
+      .filter(c => !c.trainingCompetency)
+      .map(c => c.competency.id)
+    
+    if (selectedCompetencyIds.length === notAddedIds.length) {
+      setSelectedCompetencyIds([])
+    } else {
+      setSelectedCompetencyIds(notAddedIds)
+    }
+  }
+
+  const handleBulkDelete = async () => {
+    if (selectedIds.length === 0) {
+      toast.error("No competencies selected")
+      return
+    }
+
+    if (!confirm(`Are you sure you want to remove ${selectedIds.length} competenc${selectedIds.length === 1 ? 'y' : 'ies'}?`)) {
+      return
+    }
+
+    try {
+      setIsBulkDeleting(true)
+      await Promise.all(
+        selectedIds.map(id => trainingCompetencyAPI.delete(id))
+      )
+      toast.success(`${selectedIds.length} competenc${selectedIds.length === 1 ? 'y' : 'ies'} removed successfully`)
+      setSelectedIds([])
+      await fetchData()
+    } catch (error) {
+      toast.error("Failed to remove competencies")
+      console.error(error)
+    } finally {
+      setIsBulkDeleting(false)
+    }
+  }
+
+  const handleBulkAdd = async () => {
+    if (selectedCompetencyIds.length === 0) {
+      toast.error("No competencies selected")
+      return
+    }
+
+    try {
+      setIsBulkAdding(true)
+      await Promise.all(
+        selectedCompetencyIds.map(competencyId => 
+          trainingCompetencyAPI.create({
+            trainingId,
+            competencyId,
+          })
+        )
+      )
+      toast.success(`${selectedCompetencyIds.length} competenc${selectedCompetencyIds.length === 1 ? 'y' : 'ies'} added successfully`)
+      setSelectedCompetencyIds([])
+      await fetchData()
+    } catch (error) {
+      toast.error("Failed to add competencies")
+      console.error(error)
+    } finally {
+      setIsBulkAdding(false)
+    }
+  }
+
   const groupedCompetencies = groupCompetenciesByCluster()
 
   if (isLoading) {
@@ -196,103 +314,187 @@ export default function TrainingCompetencyDetailPage() {
         </div>
       </div>
 
-      <Tabs defaultValue={Object.keys(groupedCompetencies)[0]} className="w-full">
-        <TabsList className="grid w-full" style={{ gridTemplateColumns: `repeat(${Object.keys(groupedCompetencies).length}, minmax(0, 1fr))` }}>
-          {Object.entries(groupedCompetencies).map(([clusterId, { cluster, competencies }]) => (
-            <TabsTrigger key={clusterId} value={clusterId} className="gap-2">
-              {cluster?.color && (
-                <div
-                  className="size-3 rounded"
-                  style={{ backgroundColor: cluster.color }}
-                />
-              )}
-              {cluster?.name || "Uncategorized"}
-              <Badge className="ml-1">
-                {competencies.filter((c) => c.trainingCompetency).length}/{competencies.length}
-              </Badge>
-            </TabsTrigger>
-          ))}
-        </TabsList>
-
-        {Object.entries(groupedCompetencies).map(([clusterId, { cluster, competencies }]) => (
-          <TabsContent key={clusterId} value={clusterId} className="mt-4">
-            <Card>
-              <CardHeader>
-                <div className="flex items-center gap-2">
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+        <div className="flex gap-4">
+          <div className="w-64 space-y-4">
+            <div className="relative">
+              <IconSearch className="absolute left-2.5 top-2.5 size-4 text-muted-foreground" />
+              <Input
+                placeholder="Search competencies..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-8"
+              />
+            </div>
+            <TabsList className="flex flex-col h-fit w-full">
+              {Object.entries(groupedCompetencies).map(([clusterId, { cluster, competencies }]) => (
+                <TabsTrigger key={clusterId} value={clusterId} className="justify-start gap-3 w-full">
                   {cluster?.color && (
                     <div
-                      className="size-4 rounded"
+                      className="size-4 rounded shrink-0"
                       style={{ backgroundColor: cluster.color }}
                     />
                   )}
-                  <CardTitle>{cluster?.name || "Uncategorized"}</CardTitle>
-                  <Badge>
-                    {competencies.filter((c) => c.trainingCompetency).length} / {competencies.length}
+                  <span className="flex-1 text-left truncate">{cluster?.name || "Uncategorized"}</span>
+                  <Badge className="ml-auto">
+                    {competencies.filter((c) => c.trainingCompetency).length}/{competencies.length}
                   </Badge>
-                </div>
-                <CardDescription>
-                  {competencies.filter((c) => c.trainingCompetency).length} competencies taught in this training
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-2">
-                  {competencies.map(({ competency, trainingCompetency }) => (
-                    <div
-                      key={competency.id}
-                      className="flex items-center justify-between rounded-lg border p-3 hover:bg-muted/50"
-                    >
-                      <div className="flex items-center gap-3">
-                        {trainingCompetency ? (
-                          <Badge variant="default">✓ Added</Badge>
-                        ) : (
-                          <Badge variant="outline">Not Added</Badge>
+                </TabsTrigger>
+              ))}
+            </TabsList>
+          </div>
+
+          <div className="flex-1">
+            {Object.entries(groupedCompetencies).map(([clusterId, { cluster, competencies }]) => (
+              <TabsContent key={clusterId} value={clusterId} className="mt-0">
+                <Card>
+                  <CardHeader>
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        {cluster?.color && (
+                          <div
+                            className="size-4 rounded"
+                            style={{ backgroundColor: cluster.color }}
+                          />
                         )}
-                        <div>
-                          <p className="font-medium">{competency.name}</p>
-                          {competency.description && (
-                            <p className="text-sm text-muted-foreground">
-                              {competency.description.split(" ").slice(0, 5).join(" ")}
-                              {competency.description.split(" ").length > 5 && "..."}
-                            </p>
-                          )}
-                        </div>
+                        <CardTitle>{cluster?.name || "Uncategorized"}</CardTitle>
+                        <Badge>
+                          {competencies.filter((c) => c.trainingCompetency).length} / {competencies.length}
+                        </Badge>
                       </div>
                       <div className="flex items-center gap-2">
-                        {trainingCompetency ? (
-                          <>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => handleView(competency, trainingCompetency)}
-                            >
-                              <IconEye className="size-4" />
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => handleDelete(trainingCompetency)}
-                            >
-                              <IconTrash className="size-4" />
-                            </Button>
-                          </>
-                        ) : (
+                        {selectedCompetencyIds.length > 0 && (
                           <Button
-                            variant="outline"
+                            variant="default"
                             size="sm"
-                            onClick={() => handleAdd(competency)}
+                            onClick={handleBulkAdd}
+                            disabled={isBulkAdding}
                           >
                             <IconPlus className="mr-2 size-4" />
-                            Add
+                            Add Selected ({selectedCompetencyIds.length})
+                          </Button>
+                        )}
+                        {selectedIds.length > 0 && (
+                          <Button
+                            variant="destructive"
+                            size="sm"
+                            onClick={handleBulkDelete}
+                            disabled={isBulkDeleting}
+                          >
+                            <IconTrashX className="mr-2 size-4" />
+                            Delete Selected ({selectedIds.length})
                           </Button>
                         )}
                       </div>
                     </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-        ))}
+                    <CardDescription>
+                      {competencies.filter((c) => c.trainingCompetency).length} competencies taught in this training
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    {(competencies.filter(c => !c.trainingCompetency).length > 0 || competencies.filter(c => c.trainingCompetency).length > 0) && (
+                      <div className="mb-3 flex items-center gap-6 border-b pb-2">
+                        {competencies.filter(c => !c.trainingCompetency).length > 0 && (
+                          <div className="flex items-center gap-2">
+                            <Checkbox
+                              checked={
+                                competencies.filter(c => !c.trainingCompetency).length > 0 &&
+                                selectedCompetencyIds.length === competencies.filter(c => !c.trainingCompetency).length
+                              }
+                              onCheckedChange={() => toggleSelectAllNotAdded(competencies)}
+                            />
+                            <span className="text-sm text-muted-foreground">
+                              Select all not added competencies
+                            </span>
+                          </div>
+                        )}
+                        {competencies.filter(c => c.trainingCompetency).length > 0 && (
+                          <div className="flex items-center gap-2">
+                            <Checkbox
+                              checked={
+                                competencies.filter(c => c.trainingCompetency).length > 0 &&
+                                selectedIds.length === competencies.filter(c => c.trainingCompetency).length
+                              }
+                              onCheckedChange={() => toggleSelectAll(competencies)}
+                            />
+                            <span className="text-sm text-muted-foreground">
+                              Select all assigned competencies
+                            </span>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                    <div className="space-y-2">
+                      {competencies.map(({ competency, trainingCompetency }) => (
+                        <div
+                          key={competency.id}
+                          className="flex items-center justify-between rounded-lg border p-3 hover:bg-muted/50"
+                        >
+                          <div className="flex items-center gap-3">
+                            {trainingCompetency ? (
+                              <Checkbox
+                                checked={selectedIds.includes(trainingCompetency.id)}
+                                onCheckedChange={() => toggleSelection(trainingCompetency.id)}
+                              />
+                            ) : (
+                              <Checkbox
+                                checked={selectedCompetencyIds.includes(competency.id)}
+                                onCheckedChange={() => toggleCompetencySelection(competency.id)}
+                              />
+                            )}
+                            {trainingCompetency ? (
+                              <Badge variant="default">✓ Added</Badge>
+                            ) : (
+                              <Badge variant="outline">Not Added</Badge>
+                            )}
+                            <div>
+                              <p className="font-medium">{competency.name}</p>
+                              {competency.description && (
+                                <p className="text-sm text-muted-foreground">
+                                  {competency.description.split(" ").slice(0, 5).join(" ")}
+                                  {competency.description.split(" ").length > 5 && "..."}
+                                </p>
+                              )}
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            {trainingCompetency ? (
+                              <>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => handleView(competency, trainingCompetency)}
+                                >
+                                  <IconEye className="size-4" />
+                                </Button>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => handleDelete(trainingCompetency)}
+                                >
+                                  <IconTrash className="size-4" />
+                                </Button>
+                              </>
+                            ) : (
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => handleAdd(competency)}
+                              >
+                                <IconPlus className="mr-2 size-4" />
+                                Add
+                              </Button>
+                            )}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+              </TabsContent>
+            ))}
+          </div>
+        </div>
       </Tabs>
 
       <CompetencyViewDialog

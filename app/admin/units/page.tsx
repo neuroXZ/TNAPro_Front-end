@@ -34,7 +34,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover"
-import { IconSearch } from "@tabler/icons-react"
+import { IconSearch, IconFilter } from "@tabler/icons-react"
 import { toast } from "sonner"
 import { Unit, getColumns } from "./columns"
 import { DataTablePagination } from "@/components/data-table-pagination"
@@ -255,7 +255,7 @@ export default function UnitManagementPage() {
                       ? "Filter by unit type"
                       : unitTypes.find((ut) => ut.id === selectedUnitType)?.name || "Filter by unit type"
                     }
-                    <IconSearch className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                    <IconFilter className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-[180px] p-0">

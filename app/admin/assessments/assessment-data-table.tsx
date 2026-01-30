@@ -43,11 +43,20 @@ export function AssessmentDataTable({ table, columnsLength }: AssessmentDataTabl
               <TableRow
                 key={row.id}
                 data-state={row.getIsSelected() && "selected"}
-                onClick={() => router.push(`/admin/assessments/${row.original.id}`)}
                 className="cursor-pointer"
               >
                 {row.getVisibleCells().map((cell) => (
-                  <TableCell key={cell.id}>
+                  <TableCell 
+                    key={cell.id}
+                    onClick={(e) => {
+                      // Don't navigate if clicking on action buttons or checkbox
+                      if (cell.column.id === 'actions' || cell.column.id === 'select') {
+                        e.stopPropagation()
+                        return
+                      }
+                      router.push(`/admin/assessments/${row.original.id}`)
+                    }}
+                  >
                     {flexRender(
                       cell.column.columnDef.cell,
                       cell.getContext()

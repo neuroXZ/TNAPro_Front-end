@@ -261,6 +261,64 @@ export default function AdminIdpPage() {
     return "text-green-600"
   }
 
+  const handleExportCSV = async () => {
+    if (!idpResult) return
+
+    try {
+      toast.info("Generating CSV export...")
+      
+      const response = await idpAPI.exportCsv({
+        staffId: selectedStaff,
+        assessmentId: selectedAssessment || undefined
+      })
+
+      // Create blob and download
+      const blob = new Blob([response.data], { type: 'text/csv' })
+      const url = window.URL.createObjectURL(blob)
+      const link = document.createElement('a')
+      link.href = url
+      link.setAttribute('download', `IDP_${idpResult.staffName.replace(/\s+/g, '_')}_${format(new Date(), 'yyyyMMdd')}.csv`)
+      document.body.appendChild(link)
+      link.click()
+      link.remove()
+      window.URL.revokeObjectURL(url)
+
+      toast.success("IDP exported to CSV successfully")
+    } catch (error) {
+      console.error("CSV Export Error:", error)
+      toast.error("Failed to export IDP to CSV")
+    }
+  }
+
+  const handleExportPDF = async () => {
+    if (!idpResult) return
+
+    try {
+      toast.info("Generating PDF export...")
+      
+      const response = await idpAPI.exportPdf({
+        staffId: selectedStaff,
+        assessmentId: selectedAssessment || undefined
+      })
+
+      // Create blob and download
+      const blob = new Blob([response.data], { type: 'application/pdf' })
+      const url = window.URL.createObjectURL(blob)
+      const link = document.createElement('a')
+      link.href = url
+      link.setAttribute('download', `IDP_${idpResult.staffName.replace(/\s+/g, '_')}_${format(new Date(), 'yyyyMMdd')}.pdf`)
+      document.body.appendChild(link)
+      link.click()
+      link.remove()
+      window.URL.revokeObjectURL(url)
+
+      toast.success("IDP exported to PDF successfully")
+    } catch (error) {
+      console.error("PDF Export Error:", error)
+      toast.error("Failed to export IDP to PDF")
+    }
+  }
+
   const getFilteredCompetencies = () => {
     if (!idpResult) return []
     
@@ -331,14 +389,14 @@ export default function AdminIdpPage() {
             <div className="space-y-2">
               <Label htmlFor="unit">Filter by Unit (Optional)</Label>
               <Select value={selectedUnit} onValueChange={setSelectedUnit}>
-                <SelectTrigger id="unit">
-                  <SelectValue placeholder="All Units" />
+                <SelectTrigger id="unit" className="w-full">
+                  <SelectValue placeholder="All Units" className="truncate" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="max-w-[300px]">
                   <SelectItem value="all">All Units</SelectItem>
                   {unitList.map((unit) => (
-                    <SelectItem key={unit.id} value={unit.id}>
-                      {unit.name}
+                    <SelectItem key={unit.id} value={unit.id} className="max-w-[280px]">
+                      <span className="truncate block">{unit.name}</span>
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -348,13 +406,15 @@ export default function AdminIdpPage() {
             <div className="space-y-2">
               <Label htmlFor="staff">Staff Member *</Label>
               <Select value={selectedStaff} onValueChange={setSelectedStaff}>
-                <SelectTrigger id="staff">
-                  <SelectValue placeholder="Select staff member" />
+                <SelectTrigger id="staff" className="w-full">
+                  <SelectValue placeholder="Select staff member" className="truncate" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="max-w-[450px]">
                   {filteredStaffList.map((staff) => (
-                    <SelectItem key={staff.id} value={staff.id}>
-                      {staff.name} ({staff.staffOrgId}) - {staff.position?.name || 'No Position'}
+                    <SelectItem key={staff.id} value={staff.id} className="max-w-[430px]">
+                      <span className="truncate block">
+                        {staff.name} ({staff.staffOrgId}) - {staff.position?.name || 'No Position'}
+                      </span>
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -364,14 +424,16 @@ export default function AdminIdpPage() {
             <div className="space-y-2">
               <Label htmlFor="assessment">Assessment (Optional)</Label>
               <Select value={selectedAssessment || "latest"} onValueChange={(v) => setSelectedAssessment(v === "latest" ? "" : v)}>
-                <SelectTrigger id="assessment">
-                  <SelectValue placeholder="Use latest assessment" />
+                <SelectTrigger id="assessment" className="w-full">
+                  <SelectValue placeholder="Use latest assessment" className="truncate" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="max-w-[400px]">
                   <SelectItem value="latest">Use Latest</SelectItem>
                   {assessments.map((assessment) => (
-                    <SelectItem key={assessment.id} value={assessment.id}>
-                      {assessment.name} ({format(new Date(assessment.startDate), "dd MMM yyyy")})
+                    <SelectItem key={assessment.id} value={assessment.id} className="max-w-[380px]">
+                      <span className="truncate block">
+                        {assessment.name} ({format(new Date(assessment.startDate), "dd MMM yyyy")})
+                      </span>
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -533,7 +595,11 @@ export default function AdminIdpPage() {
                       </div>
                     </DialogContent>
                   </Dialog>
-                  <Button variant="outline" size="sm">
+                  <Button variant="outline" size="sm" onClick={handleExportCSV}>
+                    <IconDownload className="size-4 mr-2" />
+                    Export CSV
+                  </Button>
+                  <Button variant="outline" size="sm" onClick={handleExportPDF}>
                     <IconDownload className="size-4 mr-2" />
                     Export PDF
                   </Button>

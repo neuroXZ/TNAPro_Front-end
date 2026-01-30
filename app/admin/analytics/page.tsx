@@ -206,71 +206,6 @@ export default function AdminAnalytics() {
 
       {dashboardData && (
         <>
-          {/* Summary Cards */}
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Total Staff</CardTitle>
-                <IconUsers className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{dashboardData.summary.totalStaff}</div>
-                <p className="text-xs text-muted-foreground">
-                  Registered employees
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Total Units</CardTitle>
-                <IconBuilding className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{dashboardData.summary.totalUnits}</div>
-                <p className="text-xs text-muted-foreground">
-                  Organizational units
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">License Usage</CardTitle>
-                <IconLicense className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className={`text-2xl font-bold ${getLicenseStatusColor(dashboardData.summary.licenseUsage.percentage)}`}>
-                  {dashboardData.summary.licenseUsage.used}/{dashboardData.summary.licenseUsage.max}
-                </div>
-                <div className="mt-2">
-                  <Progress 
-                    value={dashboardData.summary.licenseUsage.percentage} 
-                    className="h-2"
-                  />
-                  <p className="text-xs text-muted-foreground mt-1">
-                    {Math.round(dashboardData.summary.licenseUsage.percentage)}% used • {getLicenseStatusText(dashboardData.summary.licenseUsage.percentage)}
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">License Expiry</CardTitle>
-                <IconCalendar className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">
-                  {formatDate(dashboardData.summary.licenseUsage.expiryDate)}
-                </div>
-                <p className="text-xs text-muted-foreground">
-                  System license validity
-                </p>
-              </CardContent>
-            </Card>
-          </div>
-
           {/* Charts Section */}
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
             {/* Unit Distribution Chart */}
@@ -445,7 +380,7 @@ export default function AdminAnalytics() {
           </div>
 
           {/* Quick Insights */}
-          <Card>
+          {/* <Card>
             <CardHeader>
               <CardTitle>Quick Insights</CardTitle>
               <CardDescription>Key organizational metrics and observations</CardDescription>
@@ -487,7 +422,7 @@ export default function AdminAnalytics() {
                 </div>
               </div>
             </CardContent>
-          </Card>
+          </Card> */}
         </>
       )}
     </div>
