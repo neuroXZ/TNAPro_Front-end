@@ -259,6 +259,7 @@ export default function AssessmentDetailPage() {
           assessorId: selfAssessorId,
           score: scoreData.score,
           remark: scoreData.remark || '',
+          status: 'DRAFT',
         }
 
         if (scoreData.resultId) {
@@ -293,11 +294,48 @@ export default function AssessmentDetailPage() {
       return
     }
 
-    await handleSaveAll()
-    toast.success("Assessment submitted successfully!")
-    setTimeout(() => {
-      router.push("/staff/assessments")
-    }, 1500)
+    if (!selfAssessorId || !positionId) {
+      toast.error("Missing required data")
+      return
+    }
+
+    try {
+      setIsSaving(true)
+
+      const promises = Object.values(scores).map(async (scoreData) => {
+        if (scoreData.score === null) return // Skip if not rated
+
+        const payload = {
+          assessmentId,
+          positionId,
+          competencyId: scoreData.competencyId,
+          assessorId: selfAssessorId,
+          score: scoreData.score,
+          remark: scoreData.remark || '',
+          status: 'SUBMITTED',
+        }
+
+        if (scoreData.resultId) {
+          // Update existing
+          return assessmentResultAPI.update(scoreData.resultId, payload)
+        } else {
+          // Create new
+          return assessmentResultAPI.create(payload)
+        }
+      })
+
+      await Promise.all(promises)
+      toast.success("Assessment submitted successfully!")
+      
+      setTimeout(() => {
+        router.push("/staff/assessments")
+      }, 1500)
+    } catch (error) {
+      console.error("Failed to submit assessment:", error)
+      toast.error("Failed to submit assessment")
+    } finally {
+      setIsSaving(false)
+    }
   }
 
   const calculateProgress = () => {
