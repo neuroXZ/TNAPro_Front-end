@@ -45,6 +45,7 @@ export interface AssessmentResult {
   competencyId: string
   assessorId: string
   score: number
+  status: string
   position?: Position
   competency?: Competency
   assessor?: Assessor

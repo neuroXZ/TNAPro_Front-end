@@ -11,6 +11,7 @@ export interface AssessmentResult {
   competencyId: string
   assessorId: string
   score: number
+  status: string
   createdAt: string
   updatedAt: string
   assessment?: {
