@@ -23,6 +23,7 @@ interface ResultViewDialogProps {
       type: string
     }
     score: number
+    status: string
     createdAt: string
     updatedAt: string
   } | null
@@ -70,7 +71,9 @@ export function ResultViewDialog({
           </div>
           <div className="grid gap-2">
             <div className="text-sm font-medium text-muted-foreground">Score</div>
-            <div className="text-2xl font-bold">{result.score?.toFixed(2) || "0.00"} / 5.00</div>
+            <div className="text-2xl font-bold">
+              {result.status === 'SUBMITTED' ? (result.score?.toFixed(2) || "0.00") : "N/A"} / 5.00
+            </div>
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div className="grid gap-2">

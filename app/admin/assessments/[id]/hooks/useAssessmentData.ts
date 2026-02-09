@@ -111,12 +111,12 @@ export function useAssessmentData(assessmentId: string) {
         }
       }
 
-      // Assign score and result ID based on assessor type
+      // Assign score and result ID based on assessor type - only if status is SUBMITTED
       if (assessorType === "self") {
-        matrix[staffId].competencies[competencyId].scores.self = result.score
+        matrix[staffId].competencies[competencyId].scores.self = result.status === 'SUBMITTED' ? result.score : null
         matrix[staffId].competencies[competencyId].resultIds.self = result.id
       } else if (assessorType === "superior") {
-        matrix[staffId].competencies[competencyId].scores.superior = result.score
+        matrix[staffId].competencies[competencyId].scores.superior = result.status === 'SUBMITTED' ? result.score : null
         matrix[staffId].competencies[competencyId].resultIds.superior = result.id
       }
     })

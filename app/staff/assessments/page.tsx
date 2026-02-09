@@ -7,7 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Button } from "@/components/ui/button"
 import { assessmentAPI, assessmentResultAPI, assessorAPI, positionCompetencyAPI } from "@/lib/api"
 import { toast } from "sonner"
-import { IconCalendar, IconClipboardCheck, IconFileText, IconCheck } from "@tabler/icons-react"
+import { IconCalendar, IconClipboardCheck, IconFileText, IconCheck, IconPencil } from "@tabler/icons-react"
 import { format } from "date-fns"
 
 interface Assessment {
@@ -30,6 +30,8 @@ interface AssessmentWithStatus extends Assessment {
   averageScore: number
   selfScore: number
   superiorScore: number
+  hasDraftResults: boolean
+  hasSubmittedResults: boolean
 }
 
 export default function MyAssessments() {
@@ -100,12 +102,18 @@ export default function MyAssessments() {
           r.assessmentId === assessment.id && userAssessorIds.includes(r.assessorId)
         )
 
-        // Group results by competency
+        // Group results by competency and track status
         const competencyScores: Record<string, {
           self?: number
           superior?: number
           peer?: number
         }> = {}
+        
+        // Track draft and submitted status separately
+        let hasDraftResults = false
+        let hasSubmittedResults = false
+        let submittedSelfCount = 0
+        let draftSelfCount = 0
 
         assessmentResults.forEach((result: any) => {
           const competencyId = result.competencyId
@@ -116,7 +124,19 @@ export default function MyAssessments() {
             competencyScores[competencyId] = {}
           }
 
-          if (type && result.score !== null && result.score !== undefined) {
+          // Check for draft or submitted status
+          if (type === 'self' && result.score !== null && result.score !== undefined) {
+            if (result.status === 'DRAFT') {
+              hasDraftResults = true
+              draftSelfCount++
+            } else if (result.status === 'SUBMITTED') {
+              hasSubmittedResults = true
+              submittedSelfCount++
+            }
+          }
+
+          // Only use scores if status is SUBMITTED
+          if (type && result.score !== null && result.score !== undefined && result.status === 'SUBMITTED') {
             competencyScores[competencyId][type as 'self' | 'superior' | 'peer'] = result.score
           }
         })
@@ -165,6 +185,8 @@ export default function MyAssessments() {
           averageScore: weightedAverage,
           selfScore: avgSelf,
           superiorScore: avgSuperior,
+          hasDraftResults,
+          hasSubmittedResults,
         }
       })
 
@@ -474,12 +496,59 @@ function AssessmentCard({ assessment }: { assessment: AssessmentWithStatus }) {
   }
 
   const getSelfAssessmentStatus = () => {
-    // Check if self assessment is completed (has selfScore)
-    return assessment.selfScore > 0
+    // Return object with different status types
+    return {
+      hasDraft: assessment.hasDraftResults,
+      hasSubmitted: assessment.hasSubmittedResults,
+      hasAnyResults: assessment.hasDraftResults || assessment.hasSubmittedResults
+    }
   }
 
   const dateStatus = getDateBasedStatus()
-  const hasSelfAssessment = getSelfAssessmentStatus()
+  const selfAssessmentStatus = getSelfAssessmentStatus()
+
+  // Determine button text and styling
+  const getButtonConfig = () => {
+    if (dateStatus.status !== "Open") {
+      return {
+        text: "Close",
+        variant: "outline" as const,
+        className: "",
+        icon: <IconFileText className="size-4 mr-1" />,
+        disabled: true
+      }
+    }
+
+    if (selfAssessmentStatus.hasSubmitted) {
+      return {
+        text: "Submitted",
+        variant: "outline" as const,
+        className: "bg-green-50 border-green-500 text-green-700 hover:bg-green-100",
+        icon: <IconCheck className="size-4 mr-1" />,
+        disabled: false
+      }
+    }
+
+    if (selfAssessmentStatus.hasDraft) {
+      return {
+        text: "Save Draft",
+        variant: "outline" as const,
+        className: "bg-yellow-50 border-yellow-500 text-yellow-700 hover:bg-yellow-100",
+        icon: <IconPencil className="size-4 mr-1" />,
+        disabled: false
+      }
+    }
+
+    return {
+      text: "Start",
+      variant: "default" as const,
+      className: "",
+      icon: <IconFileText className="size-4 mr-1" />,
+      disabled: false
+    }
+  }
+
+  const buttonConfig = getButtonConfig()
 
   return (
     
@@ -539,35 +608,16 @@ function AssessmentCard({ assessment }: { assessment: AssessmentWithStatus }) {
           <Button 
             size="sm" 
             onClick={() => {
-              if (dateStatus.status === "Open" && !hasSelfAssessment) {
+              if (dateStatus.status === "Open") {
                 handleStartAssessment(assessment.id)
-              } else if (dateStatus.status === "Open" && hasSelfAssessment) {
-                handleStartAssessment(assessment.id) // Allow re-access to view/edit
               }
             }}
-            variant={
-              hasSelfAssessment && dateStatus.status === "Open" 
-                ? "outline" 
-                : dateStatus.status === "Open" 
-                  ? "default" 
-                  : "outline"
-            }
-            className={`w-full sm:w-auto ${
-              hasSelfAssessment && dateStatus.status === "Open" 
-                ? "bg-green-50 border-green-500 text-green-700 hover:bg-green-100" 
-                : ""
-            }`}
-            disabled={dateStatus.status !== "Open"}
+            variant={buttonConfig.variant}
+            className={`w-full sm:w-auto ${buttonConfig.className}`}
+            disabled={buttonConfig.disabled}
           >
-            {hasSelfAssessment && dateStatus.status === "Open" ? (
-              <IconCheck className="size-4 mr-1" />
-            ) : (
-              <IconFileText className="size-4 mr-1" />
-            )}
-            {dateStatus.status === "Open" 
-              ? (hasSelfAssessment ? "Submitted" : "Start")
-              : "Close"
-            }
+            {buttonConfig.icon}
+            {buttonConfig.text}
           </Button>
         </div>
       </div>

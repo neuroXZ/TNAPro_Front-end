@@ -97,9 +97,9 @@ export default function AdminDashboard() {
       const totalAssessors = assessorsData.length
       const pendingEvaluations = Math.max(0, totalAssessors - staffWithResults.size)
 
-      // Calculate average score
+      // Calculate average score - only from submitted assessments
       const validScores = assessmentResults.filter((result: any) => 
-        result.score !== null && result.score !== undefined && result.score > 0
+        result.score !== null && result.score !== undefined && result.score > 0 && result.status === 'SUBMITTED'
       )
       const averageScore = validScores.length > 0
         ? validScores.reduce((sum: number, result: any) => sum + result.score, 0) / validScores.length
@@ -502,11 +502,11 @@ function DataTablesPreview() {
 
       setUpcomingDeadlines(upcoming)
 
-      // Low Performing Areas (competencies with average score < 3)
+      // Low Performing Areas (competencies with average score < 3) - only from submitted assessments
       const competencyScores: Record<string, number[]> = {}
       
       assessmentResults.forEach((result: any) => {
-        if (result.score && result.score > 0) {
+        if (result.score && result.score > 0 && result.status === 'SUBMITTED') {
           if (!competencyScores[result.competencyId]) {
             competencyScores[result.competencyId] = []
           }

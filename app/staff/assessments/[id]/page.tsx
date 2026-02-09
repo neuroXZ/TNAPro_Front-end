@@ -77,6 +77,14 @@ interface CompetencyScore {
   resultId?: string
 }
 
+interface CompetencyScore {
+  competencyId: string
+  score: number | null
+  remark?: string
+  resultId?: string
+  status?: string
+}
+
 export default function AssessmentDetailPage() {
   const params = useParams()
   const router = useRouter()
@@ -208,6 +216,7 @@ export default function AssessmentDetailPage() {
           score: existingResult ? existingResult.score : null,
           remark: existingResult?.remark || '',
           resultId: existingResult?.id,
+          status: existingResult?.status || 'DRAFT',
         }
       })
 
@@ -325,6 +334,21 @@ export default function AssessmentDetailPage() {
       })
 
       await Promise.all(promises)
+      
+      // Update local state to reflect submitted status
+      setScores(prevScores => {
+        const updatedScores = { ...prevScores }
+        Object.keys(updatedScores).forEach(competencyId => {
+          if (updatedScores[competencyId].score !== null) {
+            updatedScores[competencyId] = {
+              ...updatedScores[competencyId],
+              status: 'SUBMITTED'
+            }
+          }
+        })
+        return updatedScores
+      })
+      
       toast.success("Assessment submitted successfully!")
       
       setTimeout(() => {
@@ -357,10 +381,12 @@ export default function AssessmentDetailPage() {
   }
 
   const isAssessmentSubmitted = () => {
-    // Check if all competencies have been rated AND have existing resultId (indicating saved to database)
+    // Check if all competencies have been rated AND submitted (status is SUBMITTED)
     const totalCompetencies = competencies.length
-    const completedWithResults = Object.values(scores).filter(s => s.score !== null && s.resultId).length
-    return totalCompetencies > 0 && completedWithResults === totalCompetencies
+    const submittedCompetencies = Object.values(scores).filter(s => 
+      s.score !== null && s.resultId && s.status === 'SUBMITTED'
+    ).length
+    return totalCompetencies > 0 && submittedCompetencies === totalCompetencies
   }
 
   if (isLoading) {
@@ -519,7 +545,7 @@ export default function AssessmentDetailPage() {
             onClick={handleSaveAll}
             disabled={isSaving || !withinPeriod}
           >
-            Save Progress
+            Save Draff
           </Button>
           <Button 
             onClick={handleSubmit}

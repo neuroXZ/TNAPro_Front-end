@@ -549,11 +549,11 @@ export default function MyIdpPage() {
                         </div>
                         <div className="text-center">
                           <div className="text-muted-foreground">Self</div>
-                          <div className="font-medium">{comp.selfScore || 'N/A'}</div>
+                          <div className="font-medium">{comp.selfScore !== undefined ? comp.selfScore : 'N/A'}</div>
                         </div>
                         <div className="text-center">
                           <div className="text-muted-foreground">Superior</div>
-                          <div className="font-medium">{comp.superiorScore || 'N/A'}</div>
+                          <div className="font-medium">{comp.superiorScore !== undefined ? comp.superiorScore : 'N/A'}</div>
                         </div>
                       </div>
 
@@ -704,8 +704,8 @@ export default function MyIdpPage() {
                           <tr key={comp.competencyId} className="border-t hover:bg-muted/50">
                             <td className="px-4 py-3 text-sm font-medium border-r">{comp.competencyName}</td>
                             <td className="px-3 py-3 text-sm text-center border-r">{comp.requiredLevel}</td>
-                            <td className="px-3 py-3 text-sm text-center">{comp.selfScore || 'N/A'}</td>
-                            <td className="px-3 py-3 text-sm text-center">{comp.superiorScore || 'N/A'}</td>
+                            <td className="px-3 py-3 text-sm text-center">{comp.selfScore !== undefined ? comp.selfScore : 'N/A'}</td>
+                            <td className="px-3 py-3 text-sm text-center">{comp.superiorScore !== undefined ? comp.superiorScore : 'N/A'}</td>
                             <td className={`px-3 py-3 text-sm text-center border-r font-medium ${getGapColor(comp.gap)}`}>
                               {comp.gap.toFixed(1)}
                             </td>
