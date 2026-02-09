@@ -543,9 +543,9 @@ export default function AssessmentDetailPage() {
           <Button 
             variant="outline" 
             onClick={handleSaveAll}
-            disabled={isSaving || !withinPeriod}
+            disabled={isSaving || !withinPeriod || isSubmitted}
           >
-            Save Draff
+            Save Draft
           </Button>
           <Button 
             onClick={handleSubmit}

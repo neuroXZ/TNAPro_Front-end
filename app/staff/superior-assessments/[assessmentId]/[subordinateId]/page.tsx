@@ -564,9 +564,9 @@ export default function SuperiorAssessmentDetailPage() {
           <Button 
             variant="outline" 
             onClick={handleSaveAll}
-            disabled={isSaving || !withinPeriod}
+            disabled={isSaving || !withinPeriod || isSubmitted}
           >
-            Save Draff
+            Save Draft
           </Button>
           <Button 
             onClick={handleSubmit}
