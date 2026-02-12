@@ -8,6 +8,8 @@ import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/ui/progress"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Alert, AlertDescription } from "@/components/ui/alert"
+import { Button } from "@/components/ui/button"
+import Link from "next/link"
 import {
   ChartContainer,
   ChartTooltip,
@@ -152,7 +154,6 @@ export default function AdminAnalytics() {
         <div className="flex items-center justify-between">
           <h2 className="text-3xl font-bold tracking-tight">Reports & Analytics</h2>
         </div>
-        
         {/* Loading Skeleton */}
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
           {Array.from({ length: 4 }).map((_, i) => (
@@ -265,25 +266,31 @@ export default function AdminAnalytics() {
                   {dashboardData.unitDistribution.length > 8 ? `Showing top 8 of ${dashboardData.unitDistribution.length} units` : `Total ${dashboardData.unitDistribution.length} units`}
                   <TrendingUp className="h-4 w-4" />
                 </div>
-                <div className="text-muted-foreground leading-none">
+                <div className="text-muted-foreground leading-none mb-3">
                   Staff distribution across organizational units
                 </div>
+                <Link href="/admin/analytics/staff-per-unit">
+                  <Button variant="outline" size="sm" className="w-full">
+                    <IconChartBar className="h-4 w-4 mr-2" />
+                    View Detailed Staff List
+                  </Button>
+                </Link>
               </CardFooter>
             </Card>
 
             {/* Gender Distribution Chart */}
             <Card className="flex flex-col">
-              <CardHeader className="items-center pb-0">
+              <CardHeader className="items-center">
                 <CardTitle className="flex items-center gap-2">
                   <IconChartPie className="h-5 w-5 text-green-600" />
                   Gender Distribution
                 </CardTitle>
                 <CardDescription>Staff distribution by gender</CardDescription>
               </CardHeader>
-              <CardContent className="flex-1 pb-0">
+              <CardContent className="flex-1">
                 <ChartContainer
                   config={createGenderChartConfig(dashboardData.genderDistribution)}
-                  className="[&_.recharts-text]:fill-background mx-auto aspect-square max-h-[250px]"
+                  className="[&_.recharts-text]:fill-background mx-auto aspect-square max-h-[230px]"
                 >
                   <PieChart>
                     <ChartTooltip
@@ -372,9 +379,15 @@ export default function AdminAnalytics() {
                   Total {dashboardData.gradeDistribution.length} grades
                   <TrendingUp className="h-4 w-4" />
                 </div>
-                <div className="text-muted-foreground leading-none">
+                <div className="text-muted-foreground leading-none mb-3">
                   Staff distribution across grade levels
                 </div>
+                <Link href="/admin/analytics/grade-distribution">
+                  <Button variant="outline" size="sm" className="w-full">
+                    <IconChartBar className="h-4 w-4 mr-2" />
+                    View Detailed Grade Distribution
+                  </Button>
+                </Link>
               </CardFooter>
             </Card>
           </div>

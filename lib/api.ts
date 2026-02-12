@@ -566,28 +566,28 @@ export const positionCompetencyAPI = {
     const response = await api.get('/positioncompetency');
     return response.data;
   },
-  
+
   getById: async (id: string) => {
     const response = await api.get(`/positioncompetency/${id}`);
     return response.data;
   },
-  
+
   getByPosition: async (positionId: string) => {
     const response = await api.get('/positioncompetency');
     const data = response.data;
     return data.filter((pc: any) => pc.positionId === positionId);
   },
-  
+
   create: async (data: any) => {
     const response = await api.post('/positioncompetency', data);
     return response.data;
   },
-  
+
   update: async (id: string, data: any) => {
     const response = await api.put(`/positioncompetency/${id}`, data);
     return response.data;
   },
-  
+
   delete: async (id: string) => {
     const response = await api.delete(`/positioncompetency/${id}`);
     return response.data;
@@ -600,28 +600,28 @@ export const trainingCompetencyAPI = {
     const response = await api.get('/trainingcompetency');
     return response.data;
   },
-  
+
   getById: async (id: string) => {
     const response = await api.get(`/trainingcompetency/${id}`);
     return response.data;
   },
-  
+
   getByTraining: async (trainingId: string) => {
     const response = await api.get('/trainingcompetency');
     const data = response.data;
     return data.filter((tc: any) => tc.trainingId === trainingId);
   },
-  
+
   create: async (data: any) => {
     const response = await api.post('/trainingcompetency', data);
     return response.data;
   },
-  
+
   update: async (id: string, data: any) => {
     const response = await api.put(`/trainingcompetency/${id}`, data);
     return response.data;
   },
-  
+
   delete: async (id: string) => {
     const response = await api.delete(`/trainingcompetency/${id}`);
     return response.data;
@@ -634,22 +634,22 @@ export const settingAPI = {
     const response = await api.get('/setting');
     return response.data;
   },
-  
+
   getById: async (id: string) => {
     const response = await api.get(`/setting/${id}`);
     return response.data;
   },
-  
+
   create: async (data: any) => {
     const response = await api.post('/setting', data);
     return response.data;
   },
-  
+
   update: async (id: string, data: any) => {
     const response = await api.put(`/setting/${id}`, data);
     return response.data;
   },
-  
+
   delete: async (id: string) => {
     const response = await api.delete(`/setting/${id}`);
     return response.data;
@@ -658,7 +658,7 @@ export const settingAPI = {
   uploadLogo: async (file: File) => {
     const formData = new FormData();
     formData.append('logo', file);
-    
+
     const response = await api.post('/setting/upload-logo', formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
@@ -680,22 +680,22 @@ export const assessmentAPI = {
     const response = await api.get('/assessment');
     return response.data;
   },
-  
+
   getById: async (id: string) => {
     const response = await api.get(`/assessment/${id}`);
     return response.data;
   },
-  
+
   create: async (data: any) => {
     const response = await api.post('/assessment', data);
     return response.data;
   },
-  
+
   update: async (id: string, data: any) => {
     const response = await api.put(`/assessment/${id}`, data);
     return response.data;
   },
-  
+
   delete: async (id: string) => {
     const response = await api.delete(`/assessment/${id}`);
     return response.data;
@@ -708,28 +708,28 @@ export const assessmentResultAPI = {
     const response = await api.get('/assessmentresult');
     return response.data;
   },
-  
+
   getById: async (id: string) => {
     const response = await api.get(`/assessmentresult/${id}`);
     return response.data;
   },
-  
+
   getByAssessment: async (assessmentId: string) => {
     const response = await api.get('/assessmentresult');
     const data = response.data;
     return data.filter((result: any) => result.assessmentId === assessmentId);
   },
-  
+
   create: async (data: any) => {
     const response = await api.post('/assessmentresult', data);
     return response.data;
   },
-  
+
   update: async (id: string, data: any) => {
     const response = await api.put(`/assessmentresult/${id}`, data);
     return response.data;
   },
-  
+
   delete: async (id: string) => {
     const response = await api.delete(`/assessmentresult/${id}`);
     return response.data;
@@ -742,27 +742,27 @@ export const idpAPI = {
     const response = await api.post('/idp/generate', data);
     return response.data;
   },
-  
+
   exportCsv: async (data: { staffId: string; assessmentId?: string }) => {
     const params = new URLSearchParams();
     params.append('staffId', data.staffId);
     if (data.assessmentId) {
       params.append('assessmentId', data.assessmentId);
     }
-    
+
     const response = await api.get(`/idp/export-csv?${params.toString()}`, {
       responseType: 'blob'
     });
     return response;
   },
-  
+
   exportPdf: async (data: { staffId: string; assessmentId?: string }) => {
     const params = new URLSearchParams();
     params.append('staffId', data.staffId);
     if (data.assessmentId) {
       params.append('assessmentId', data.assessmentId);
     }
-    
+
     const response = await api.get(`/idp/export-pdf/?${params.toString()}`, {
       responseType: 'blob'
     });
@@ -776,11 +776,23 @@ export const cgaAPI = {
     const params = new URLSearchParams();
     params.append('staffId', data.staffId);
     params.append('assessmentId', data.assessmentId);
-    
+
     const response = await api.get(`/cga/export?${params.toString()}`, {
       responseType: 'blob'
     });
     return response;
+  },
+};
+
+// Competency Gap by Grade (Competency VS Grade) API
+export const cggAPI = {
+  generate: async (data: { assessmentId?: string }) => {
+    const response = await api({
+      method: 'get',
+      url: '/competencyreport/competency-gap-by-grade',
+      data: data
+    });
+    return response.data;
   },
 };
 
@@ -823,11 +835,11 @@ export const importAPI = {
     });
     return response.data;
   },
-  
+
   import: async (modelType: 'staff' | 'position' | 'grade' | 'competency' | 'training', file: File) => {
     const formData = new FormData();
     formData.append('file', file);
-    
+
     const response = await api.post(`/import/${modelType}`, formData, {
       headers: {
         'Content-Type': 'multipart/form-data',

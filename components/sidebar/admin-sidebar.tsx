@@ -147,6 +147,10 @@ const navMainItems = [
         title: "Report & Analytics",
         url: "/admin/analytics",
       },
+      {
+        title: "Competency Gap by Grade",
+        url: "/admin/analytics/competency-gap-by-grade",
+      },
     ],
   },
 ]

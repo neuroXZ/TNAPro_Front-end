@@ -6,6 +6,7 @@ import {
   IconUserCircle,
   IconSettings,
   IconMail,
+  IconDownload,
 } from "@tabler/icons-react"
 
 import { useAuth } from "@/lib/auth-context"
@@ -108,6 +109,12 @@ export function NavUser({
                 <a href="/admin/settings" className="flex items-center gap-2 cursor-pointer" onClick={handleLinkClick}>
                   <IconSettings />
                   Setting
+                </a>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <a href="/admin/download" className="flex items-center gap-2 cursor-pointer" onClick={handleLinkClick}>
+                  <IconDownload />
+                  Download
                 </a>
               </DropdownMenuItem>
             </DropdownMenuGroup>
