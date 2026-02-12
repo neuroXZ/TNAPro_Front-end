@@ -236,17 +236,21 @@ export default function CompetencyGapByGradePage() {
                         <TableCell className="font-medium">{competency.Competency}</TableCell>
                         {grades.map((grade) => {
                           const gapValue = getGradeValue(competency, grade)
-                          const color = gapValue !== null ? getGapColor(gapValue) : null
                           
                           return (
                             <TableCell key={grade} className="text-center">
                               {gapValue !== null ? (
-                                <Badge 
-                                  variant="outline"
-                                  className={`${color.badge} ${color.text} border-0`}
-                                >
-                                  {gapValue.toFixed(2)}
-                                </Badge>
+                                (() => {
+                                  const color = getGapColor(gapValue)
+                                  return (
+                                    <Badge 
+                                      variant="outline"
+                                      className={`${color.badge} ${color.text} border-0`}
+                                    >
+                                      {gapValue.toFixed(2)}
+                                    </Badge>
+                                  )
+                                })()
                               ) : (
                                 <span className="text-muted-foreground">-</span>
                               )}
