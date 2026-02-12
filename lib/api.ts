@@ -784,15 +784,7 @@ export const cgaAPI = {
   },
 };
 
-// Competency Gap by Grade (Competency VS Grade) API
-export const cggAPI = {
-  generate: async (data: { assessmentId?: string }) => {
-    const response = await api.get('/competencyreport/competency-gap-by-grade', {
-      data: data
-    });
-    return response.data;
-  },
-};
+
 
 // Recommended Training (RTN) API
 export const rtnAPI = {
@@ -864,6 +856,16 @@ export const emailAPI = {
     message: string;
   }) => {
     const response = await api.post('/email/contact', data);
+    return response.data;
+  },
+};
+
+// Competency Report API
+export const competencyReportAPI = {
+  getGapByGrade: async (assessmentId: string) => {
+    const response = await api.get('/competencyreport/competency-gap-by-grade', {
+      params: { assessmentId }
+    });
     return response.data;
   },
 };
