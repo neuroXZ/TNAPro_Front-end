@@ -787,9 +787,7 @@ export const cgaAPI = {
 // Competency Gap by Grade (Competency VS Grade) API
 export const cggAPI = {
   generate: async (data: { assessmentId?: string }) => {
-    const response = await api({
-      method: 'get',
-      url: '/competencyreport/competency-gap-by-grade',
+    const response = await api.get('/competencyreport/competency-gap-by-grade', {
       data: data
     });
     return response.data;
