@@ -200,9 +200,8 @@ export default function MyIdpPage() {
         assessmentId: selectedAssessmentId
       })
 
-      // Create blob and open in new tab
-      const blob = new Blob([response.data], { type: 'application/pdf' })
-      const url = window.URL.createObjectURL(blob)
+      // response.data is already a Blob when using responseType: 'blob'
+      const url = window.URL.createObjectURL(response.data)
 
       // Open PDF in new tab
       window.open(url, '_blank')
@@ -260,9 +259,8 @@ export default function MyIdpPage() {
         assessmentId: selectedAssessmentId
       })
 
-      // Create blob and download
-      const blob = new Blob([response.data], { type: 'text/csv' })
-      const url = window.URL.createObjectURL(blob)
+      // response.data is already a Blob when using responseType: 'blob'
+      const url = window.URL.createObjectURL(response.data)
       const link = document.createElement('a')
       link.href = url
 

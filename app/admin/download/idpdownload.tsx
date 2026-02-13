@@ -267,9 +267,8 @@ export default function AdminIdpDownloadPage() {
         assessmentId: selectedAssessment || undefined
       })
 
-      // Create blob and download
-      const blob = new Blob([response.data], { type: 'text/csv' })
-      const url = window.URL.createObjectURL(blob)
+      // response.data is already a Blob when using responseType: 'blob'
+      const url = window.URL.createObjectURL(response.data)
       const link = document.createElement('a')
       link.href = url
       link.setAttribute('download', `IDP_${idpResult.staffName.replace(/\s+/g, '_')}_${format(new Date(), 'yyyyMMdd')}.csv`)
@@ -297,9 +296,8 @@ export default function AdminIdpDownloadPage() {
         assessmentId: selectedAssessment || undefined
       })
 
-      // Create blob and download
-      const blob = new Blob([response.data], { type: 'application/pdf' })
-      const url = window.URL.createObjectURL(blob)
+      // response.data is already a Blob when using responseType: 'blob'
+      const url = window.URL.createObjectURL(response.data)
       const link = document.createElement('a')
       link.href = url
       link.setAttribute('download', `IDP_${idpResult.staffName.replace(/\s+/g, '_')}_${format(new Date(), 'yyyyMMdd')}.pdf`)

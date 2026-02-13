@@ -51,7 +51,8 @@ export function LoginForm({
         if (data && data.logoPath) {
           setLogoPath(data.logoPath);
         }
-      } catch (error) {
+      }
+       catch (error) {
         console.warn('Failed to fetch logo, using default TNA logo');
         // Keep logoPath as null to show default TNA logo
         setLogoPath(null);
@@ -68,9 +69,11 @@ export function LoginForm({
     try {
       await login(username, password, userType);
       toast.success("Login successful!");
-    } catch (error: any) {
-      toast.error(error.message || "Login failed. Please check your credentials.");
-    } finally {
+    } 
+    // catch (error: any) {
+    //   toast.error(error.message || "Login failed. Please check your credentials.");
+    // } 
+    finally {
       setIsLoading(false);
     }
   };
@@ -81,11 +84,12 @@ export function LoginForm({
 
     try {
       const appBaseUrl = window.location.origin;
-      console.log('🚀 Starting forgot password with:', {
-        identifier: forgotPasswordEmail,
-        userType,
-        appBaseUrl
-      });
+      // console.log('🚀 Starting forgot password with:', 
+      //   {
+      //   identifier: forgotPasswordEmail,
+      //   userType,
+      //   appBaseUrl
+      // });
       
       await authAPI.forgotPassword({
         identifier: forgotPasswordEmail,
@@ -96,12 +100,12 @@ export function LoginForm({
       toast.success("Password reset link has been sent to your email!");
       setShowForgotPassword(false);
       setForgotPasswordEmail("");
-    } catch (error: any) {
-      console.error('🔥 Forgot password error in component:', error);
-      const errorMessage = error.message?.includes('Cannot connect') 
-        ? "Cannot connect to server. Please check your network connection."
-        : error.response?.data?.error || error.message || "Failed to send password reset email.";
-      toast.error(errorMessage);
+    // } catch (error: any) {
+    //   console.error('🔥 Forgot password error in component:', error);
+    //   const errorMessage = error.message?.includes('Cannot connect') 
+    //     ? "Cannot connect to server. Please check your network connection."
+    //     : error.response?.data?.error || error.message || "Failed to send password reset email.";
+    //   toast.error(errorMessage);
     } finally {
       setIsForgotPasswordLoading(false);
     }
@@ -182,7 +186,7 @@ export function LoginForm({
                   <FieldLabel htmlFor="password">Password</FieldLabel>
                   <Dialog open={showForgotPassword} onOpenChange={setShowForgotPassword}>
                     <DialogTrigger asChild>
-                      <button 
+                      <button
                         type="button"
                         className="text-sm text-primary hover:underline"
                         disabled={isLoading}

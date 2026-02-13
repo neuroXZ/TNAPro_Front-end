@@ -868,6 +868,26 @@ export const competencyReportAPI = {
     });
     return response.data;
   },
+
+  exportCsv: async (data: { assessmentId: string }) => {
+    const params = new URLSearchParams();
+    params.append('assessmentId', data.assessmentId);
+
+    const response = await api.get(`/competencyreport/export-csv?${params.toString()}`, {
+      responseType: 'blob'
+    });
+    return response;
+  },
+
+  exportPdf: async (data: { assessmentId: string }) => {
+    const params = new URLSearchParams();
+    params.append('assessmentId', data.assessmentId);
+
+    const response = await api.get(`/competencyreport/export-pdf/?${params.toString()}`, {
+      responseType: 'blob'
+    });
+    return response;
+  },
 };
 
 export default api;

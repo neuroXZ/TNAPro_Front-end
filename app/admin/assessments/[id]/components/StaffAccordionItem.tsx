@@ -37,8 +37,8 @@ export function StaffAccordionItem({ staffMember, staffData, assessmentId, onDat
         assessmentId: assessmentId
       });
       
-      // Create download link
-      const url = window.URL.createObjectURL(new Blob([response.data]));
+      // response.data is already a Blob when using responseType: 'blob'
+      const url = window.URL.createObjectURL(response.data);
       const link = document.createElement('a');
       link.href = url;
       link.setAttribute('download', `CGA_Report_${staffMember.name.replace(/\s/g, '_')}_${new Date().toISOString().slice(0, 10)}.csv`);
