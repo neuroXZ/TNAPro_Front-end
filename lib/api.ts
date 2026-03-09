@@ -890,4 +890,24 @@ export const competencyReportAPI = {
   },
 };
 
+// Training Demand API
+export const trainingDemandAPI = {
+  generateReport: async (assessmentId: string) => {
+    const response = await api.get('/trainingdemand/demand', {
+      params: { assessmentId }
+    });
+    return response.data;
+  },
+
+  exportCsv: async (assessmentId: string) => {
+    const params = new URLSearchParams();
+    params.append('assessmentId', assessmentId);
+
+    const response = await api.get(`/trainingdemand/demand/export-csv?${params.toString()}`, {
+      responseType: 'blob'
+    });
+    return response;
+  },
+};
+
 export default api;

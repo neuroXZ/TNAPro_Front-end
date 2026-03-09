@@ -93,7 +93,7 @@ export function UnitFormDialog({
         name: "",
         description: "",
         unitTypeId: "",
-        parentId: "none",
+        parentId: "",
       })
     }
   }, [editingUnit, open])
@@ -163,13 +163,13 @@ export function UnitFormDialog({
             <div className="grid gap-2">
               <Label htmlFor="parentId">Parent Unit</Label>
               <Select
-                value={formData.parentId || "none"}
+                value={formData.parentId ? formData.parentId : "none"}
                 onValueChange={(value) =>
                   setFormData({ ...formData, parentId: value === "none" ? "" : value })
                 }
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="Select parent unit (optional)" />
+                  <SelectValue placeholder="No Parent Unit" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="none">No Parent Unit</SelectItem>

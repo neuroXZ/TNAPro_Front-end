@@ -151,6 +151,10 @@ const navMainItems = [
         title: "Competency Gap by Grade",
         url: "/admin/analytics/competency-gap-by-grade",
       },
+      {
+        title: "Training Demand",
+        url: "/admin/training-demand",
+      },
     ],
   },
 ]

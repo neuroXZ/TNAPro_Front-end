@@ -159,48 +159,56 @@ export default function CompetencyGapByGradePage() {
   };
 
   const handleExportCSV = async () => {
-    if (!selectedAssessmentId) return
+    if (!selectedAssessmentId) return;
 
     try {
       const response = await competencyReportAPI.exportCsv({
-        assessmentId: selectedAssessmentId
-      })
+        assessmentId: selectedAssessmentId,
+      });
 
       // response.data is already a Blob when using responseType: 'blob'
-      const url = window.URL.createObjectURL(response.data)
-      const link = document.createElement('a')
-      link.href = url
-      link.setAttribute('download', `CompetencyGap_${selectedAssessmentId}_${new Date().toISOString().slice(0, 10)}.csv`)
-      document.body.appendChild(link)
-      link.click()
-      link.remove()
-      window.URL.revokeObjectURL(url)
+      const url = window.URL.createObjectURL(response.data);
+      const link = document.createElement("a");
+      link.href = url;
+      link.setAttribute(
+        "download",
+        `CompetencyGap_${selectedAssessmentId}_${new Date().toISOString().slice(0, 10)}.csv`,
+      );
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
     } catch (error) {
-      console.error("CSV Export Error:", error)
+      console.error("CSV Export Error:", error);
     }
-  }
+  };
+
+  // =============================================================================
 
   const handleExportPDF = async () => {
-    if (!selectedAssessmentId) return
+    if (!selectedAssessmentId) return;
 
     try {
       const response = await competencyReportAPI.exportPdf({
-        assessmentId: selectedAssessmentId
-      })
+        assessmentId: selectedAssessmentId,
+      });
 
       // response.data is already a Blob when using responseType: 'blob'
-      const url = window.URL.createObjectURL(response.data)
-      const link = document.createElement('a')
-      link.href = url
-      link.setAttribute('download', `CompetencyGap_${selectedAssessmentId}_${new Date().toISOString().slice(0, 10)}.pdf`)
-      document.body.appendChild(link)
-      link.click()
-      link.remove()
-      window.URL.revokeObjectURL(url)
+      const url = window.URL.createObjectURL(response.data);
+      const link = document.createElement("a");
+      link.href = url;
+      link.setAttribute(
+        "download",
+        `CompetencyGap_${selectedAssessmentId}_${new Date().toISOString().slice(0, 10)}.pdf`,
+      );
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
     } catch (error) {
-      console.error("PDF Export Error:", error)
+      console.error("PDF Export Error:", error);
     }
-  }
+  };
 
   return (
     <div className="flex flex-col gap-6">
@@ -222,15 +230,6 @@ export default function CompetencyGapByGradePage() {
             </p>
           </div>
         </div>
-        <Button
-          onClick={fetchGapData}
-          variant="outline"
-          disabled={loading || !selectedAssessmentId}
-          className="gap-2"
-        >
-          <IconRefresh className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} />
-          Refresh
-        </Button>
       </div>
 
       {/* Assessment Selector */}
@@ -241,7 +240,7 @@ export default function CompetencyGapByGradePage() {
             Choose an assessment to view competency gaps
           </CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className="flex items-center justify-between">
           <Select
             value={selectedAssessmentId}
             onValueChange={setSelectedAssessmentId}
@@ -257,6 +256,17 @@ export default function CompetencyGapByGradePage() {
               ))}
             </SelectContent>
           </Select>
+          <Button
+            onClick={fetchGapData}
+            variant="outline"
+            disabled={loading || !selectedAssessmentId}
+            className="gap-2"
+          >
+            <IconRefresh
+              className={`h-4 w-4 ${loading ? "animate-spin" : ""}`}
+            />
+            Refresh
+          </Button>
         </CardContent>
       </Card>
 
@@ -272,17 +282,23 @@ export default function CompetencyGapByGradePage() {
       <Card>
         <CardHeader>
           <CardTitle className="text-lg">Gap Analysis by Grade</CardTitle>
-          <CardDescription>
-            Lower gap values indicate better alignment with required competency
-            levels
-            <Button variant="outline" size="sm" onClick={handleExportCSV}>
-                    <IconDownload className="size-4 mr-2" />
-                    Export CSV
-                  </Button>
-                  <Button variant="outline" size="sm" onClick={handleExportPDF}>
-                    <IconDownload className="size-4 mr-2" />
-                    Export PDF
-                  </Button>
+          <CardDescription className="flex items-center justify-between">
+            <span>
+              Lower gap values indicate better alignment with required
+              competency levels
+            </span>
+
+            <div className="flex gap-2">
+              <Button variant="default" size="sm" onClick={handleExportCSV}>
+                <IconDownload className="size-4 mr-2" />
+                Export CSV
+              </Button>
+
+              <Button variant="default" size="sm" onClick={handleExportPDF}>
+                <IconDownload className="size-4 mr-2" />
+                Export PDF
+              </Button>
+            </div>
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -303,7 +319,7 @@ export default function CompetencyGapByGradePage() {
             <Card className="max-h-[500px] overflow-scroll">
               <CardContent>
                 {/* < className="max-h-[500px] overflow-y-auto overflow-x-auto  "> */}
-                <Table >
+                <Table>
                   <TableHeader>
                     <TableRow className="bg-muted/50">
                       <TableHead className="font-semibold">
@@ -322,7 +338,7 @@ export default function CompetencyGapByGradePage() {
                       </TableHead>
                     </TableRow>
                   </TableHeader>
-                  <TableBody >
+                  <TableBody>
                     {data.map((competency, idx) => {
                       const avgGap = calculateAverageGap(competency);
                       const gapColor = getGapColor(avgGap);

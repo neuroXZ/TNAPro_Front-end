@@ -122,8 +122,8 @@ export default function UnitManagementPage() {
     // Clean up the form data to handle empty strings properly
     const cleanFormData = {
       ...formData,
-      unitTypeId: formData.unitTypeId === "" ? null : formData.unitTypeId,
-      parentId: formData.parentId === "" ? null : formData.parentId,
+      unitTypeId: formData.unitTypeId === "" || formData.unitTypeId === "none" ? null : formData.unitTypeId,
+      parentId: formData.parentId === "" || formData.parentId === "none" ? null : formData.parentId,
       description: formData.description === "" ? null : formData.description,
     }
     

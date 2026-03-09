@@ -198,7 +198,7 @@ export function LoginForm({
                       <DialogHeader>
                         <DialogTitle>Reset Password</DialogTitle>
                         <DialogDescription>
-                          Enter your {userType === 'staff' ? 'email address' : 'username'} and we'll send you a link to reset your password.
+                          Enter your {userType === 'staff' ? 'email address' : 'username'} and we`&lsquo;`ll send you a link to reset your password.
                         </DialogDescription>
                       </DialogHeader>
                       <form onSubmit={handleForgotPassword} className="space-y-4">
