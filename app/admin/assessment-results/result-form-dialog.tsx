@@ -27,6 +27,8 @@ interface AssessmentResult {
   competencyId: string
   assessorId: string
   score: number
+  status: string
+  remark?: string
 }
 
 interface Assessment {
@@ -78,6 +80,8 @@ export function ResultFormDialog({
     competencyId: "",
     assessorId: "",
     score: "",
+    status: "DRAFT",
+    remark: "",
   })
   const [isSaving, setIsSaving] = useState(false)
 
@@ -89,6 +93,8 @@ export function ResultFormDialog({
         competencyId: result.competencyId || "",
         assessorId: result.assessorId || "",
         score: result.score?.toString() || "",
+        status: result.status || "DRAFT",
+        remark: result.remark || "",
       })
     } else if (open) {
       setFormData({
@@ -97,6 +103,8 @@ export function ResultFormDialog({
         competencyId: "",
         assessorId: "",
         score: "",
+        status: "DRAFT",
+        remark: "",
       })
     }
   }, [open, result])
@@ -111,6 +119,8 @@ export function ResultFormDialog({
         competencyId: formData.competencyId || null,
         assessorId: formData.assessorId || null,
         score: formData.score ? parseFloat(formData.score) : null,
+        status: formData.status || "DRAFT",
+        remark: formData.remark || null,
       })
       onOpenChange(false)
     } catch (error) {
@@ -122,7 +132,7 @@ export function ResultFormDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[500px]">
+      <DialogContent className="max-w-[95vw] sm:max-w-[500px] md:max-w-[600px] lg:max-w-[700px]">
         <form onSubmit={handleSubmit}>
           <DialogHeader>
             <DialogTitle>
@@ -221,6 +231,32 @@ export function ResultFormDialog({
                 onChange={(e) => setFormData({ ...formData, score: e.target.value })}
                 placeholder="e.g., 4.5"
                 required
+              />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="status">Status *</Label>
+              <Select
+                value={formData.status}
+                onValueChange={(value) => setFormData({ ...formData, status: value })}
+                required
+              >
+                <SelectTrigger id="status">
+                  <SelectValue placeholder="Select status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="DRAFT">Draft</SelectItem>
+                  <SelectItem value="SUBMITTED">Submitted</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="remark">Remark</Label>
+              <textarea
+                id="remark"
+                value={formData.remark}
+                onChange={(e) => setFormData({ ...formData, remark: e.target.value })}
+                placeholder="Enter remark (optional)"
+                className="flex min-h-20 w-full rounded-md border border-input bg-background px-3 py-2 text-base ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
               />
             </div>
           </div>

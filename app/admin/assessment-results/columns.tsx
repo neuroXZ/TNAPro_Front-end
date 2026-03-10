@@ -12,6 +12,7 @@ export interface AssessmentResult {
   assessorId: string
   score: number
   status: string
+  remark?: string
   createdAt: string
   updatedAt: string
   assessment?: {
@@ -42,6 +43,7 @@ interface ColumnsContext {
   onEdit: (result: AssessmentResult) => void
   onView: (result: AssessmentResult) => void
   onDelete: (result: AssessmentResult) => void
+  assessors: any[]
 }
 
 export const getColumns = (context: ColumnsContext): ColumnDef<AssessmentResult>[] => [
@@ -148,6 +150,20 @@ export const getColumns = (context: ColumnsContext): ColumnDef<AssessmentResult>
     },
   },
   {
+    id: "assessorName",
+    header: "Assessor Name",
+    cell: ({ row }) => {
+      const assessorId = row.original.assessorId
+      const assessor = context.assessors.find((a: any) => a.id === assessorId)
+      const assessorName = assessor?.assessor?.name || assessor?.staff?.name
+      return (
+        <span>
+          {assessorName || "-"}
+        </span>
+      )
+    },
+  },
+  {
     accessorKey: "score",
     header: ({ column }) => {
       const isSorted = column.getIsSorted()
@@ -170,9 +186,44 @@ export const getColumns = (context: ColumnsContext): ColumnDef<AssessmentResult>
     },
     cell: ({ row }) => {
       const score = row.original.score
+      const status = row.original.status
       return (
         <span className="font-medium">
-          {score?.toFixed(2) || "0.00"}
+          {status === 'SUBMITTED' ? (score?.toFixed(2) || "0.00") : "N/A"}
+        </span>
+      )
+    },
+  },
+  {
+    accessorKey: "status",
+    header: ({ column }) => {
+      const isSorted = column.getIsSorted()
+      return (
+        <Button
+          variant="ghost"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          className="-ml-4 h-8"
+        >
+          Status
+          {isSorted === "asc" ? (
+            <IconArrowUp className="ml-2 size-4" />
+          ) : isSorted === "desc" ? (
+            <IconArrowDown className="ml-2 size-4" />
+          ) : (
+            <IconArrowsSort className="ml-2 size-4" />
+          )}
+        </Button>
+      )
+    },
+    cell: ({ row }) => {
+      const status = row.original.status
+      return (
+        <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
+          status === 'SUBMITTED' 
+            ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300'
+            : 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300'
+        }`}>
+          {status || 'DRAFT'}
         </span>
       )
     },

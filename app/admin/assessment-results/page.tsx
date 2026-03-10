@@ -20,7 +20,15 @@ import {
   CardTitle,
 } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
-import { IconSearch } from "@tabler/icons-react"
+import { Button } from "@/components/ui/button"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
+import { IconSearch, IconFilterOff } from "@tabler/icons-react"
 import { toast } from "sonner"
 import { AssessmentResult, getColumns } from "./columns"
 import { DataTablePagination } from "@/components/data-table-pagination"
@@ -51,6 +59,9 @@ export default function AssessmentResultsPage() {
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({})
   const [rowSelection, setRowSelection] = useState({})
   const [globalFilter, setGlobalFilter] = useState("")
+  const [assessorTypeFilter, setAssessorTypeFilter] = useState("all")
+  const [assessorNameFilter, setAssessorNameFilter] = useState("all")
+  const [statusFilter, setStatusFilter] = useState("all")
 
   useEffect(() => {
     fetchData()
@@ -118,15 +129,39 @@ export default function AssessmentResultsPage() {
         onEdit: handleOpenDialog,
         onView: handleRowClick,
         onDelete: handleOpenDeleteDialog,
+        assessors: assessors,
       }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    []
+    [assessors]
   )
 
   // ==================== TABLE INITIALIZATION ====================
+  // Filter results based on selected filters
+  const filteredResults = useMemo(() => {
+    return results.filter((result) => {
+      // Assessor Type filter
+      if (assessorTypeFilter !== "all") {
+        const assessor = assessors.find((a: any) => a.id === result.assessorId)
+        if (assessor?.type !== assessorTypeFilter) return false
+      }
+
+      // Assessor Name filter
+      if (assessorNameFilter !== "all") {
+        if (result.assessorId !== assessorNameFilter) return false
+      }
+
+      // Status filter
+      if (statusFilter !== "all") {
+        if (result.status !== statusFilter) return false
+      }
+
+      return true
+    })
+  }, [results, assessorTypeFilter, assessorNameFilter, statusFilter, assessors])
+
   // Initialize table after columns are defined
   const table = useReactTable({
-    data: results,
+    data: filteredResults,
     columns,
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
@@ -182,6 +217,19 @@ export default function AssessmentResultsPage() {
     }
   }
 
+  const handleClearFilters = () => {
+    setAssessorTypeFilter("all")
+    setAssessorNameFilter("all")
+    setStatusFilter("all")
+    setGlobalFilter("")
+  }
+
+  const hasActiveFilters = 
+    assessorTypeFilter !== "all" || 
+    assessorNameFilter !== "all" || 
+    statusFilter !== "all" || 
+    globalFilter !== ""
+
   // ==================== RENDER ====================
   return (
     <div className="space-y-4">
@@ -205,10 +253,46 @@ export default function AssessmentResultsPage() {
             <div>
               <CardTitle>All Assessment Results</CardTitle>
               <CardDescription>
-                A list of all assessment results in the system
+                {filteredResults.length === results.length
+                  ? `A list of all assessment results in the system (${results.length} total)`
+                  : `Showing ${filteredResults.length} of ${results.length} results`}
               </CardDescription>
             </div>
             <div className="flex items-center gap-2">
+              <Select value={assessorTypeFilter} onValueChange={setAssessorTypeFilter}>
+                <SelectTrigger className="w-[180px]">
+                  <SelectValue placeholder="Assessor Type" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Types</SelectItem>
+                  <SelectItem value="SELF">Self</SelectItem>
+                  <SelectItem value="SUPERIOR">Superior</SelectItem>
+                  <SelectItem value="PEER">Peer</SelectItem>
+                </SelectContent>
+              </Select>
+              <Select value={assessorNameFilter} onValueChange={setAssessorNameFilter}>
+                <SelectTrigger className="w-[200px]">
+                  <SelectValue placeholder="Assessor Name" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Assessors</SelectItem>
+                  {assessors.map((assessor: any) => (
+                    <SelectItem key={assessor.id} value={assessor.id}>
+                      {assessor.assessor?.name || assessor.staff?.name || "Unknown"}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <Select value={statusFilter} onValueChange={setStatusFilter}>
+                <SelectTrigger className="w-[150px]">
+                  <SelectValue placeholder="Status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Status</SelectItem>
+                  <SelectItem value="DRAFT">Draft</SelectItem>
+                  <SelectItem value="SUBMITTED">Submitted</SelectItem>
+                </SelectContent>
+              </Select>
               <div className="relative">
                 <IconSearch className="absolute left-2 top-2.5 size-4 text-muted-foreground" />
                 <Input
@@ -218,6 +302,17 @@ export default function AssessmentResultsPage() {
                   className="pl-8 w-[250px]"
                 />
               </div>
+              {hasActiveFilters && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleClearFilters}
+                  className="h-10"
+                >
+                  <IconFilterOff className="mr-2 size-4" />
+                  Clear
+                </Button>
+              )}
             </div>
           </div>
         </CardHeader>

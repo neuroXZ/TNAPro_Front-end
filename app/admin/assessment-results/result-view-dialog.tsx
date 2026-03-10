@@ -24,6 +24,7 @@ interface ResultViewDialogProps {
     }
     score: number
     status: string
+    remark?: string
     createdAt: string
     updatedAt: string
   } | null
@@ -38,7 +39,7 @@ export function ResultViewDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[500px]">
+      <DialogContent className="max-w-[95vw] sm:max-w-[500px] md:max-w-[600px] lg:max-w-[700px]">
         <DialogHeader>
           <DialogTitle>Assessment Result Details</DialogTitle>
           <DialogDescription>
@@ -75,6 +76,26 @@ export function ResultViewDialog({
               {result.status === 'SUBMITTED' ? (result.score?.toFixed(2) || "0.00") : "N/A"} / 5.00
             </div>
           </div>
+          <div className="grid gap-2">
+            <div className="text-sm font-medium text-muted-foreground">Status</div>
+            <div>
+              <span className={`inline-flex items-center rounded-full px-3 py-1 text-sm font-medium ${
+                result.status === 'SUBMITTED' 
+                  ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300'
+                  : 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300'
+              }`}>
+                {result.status || 'DRAFT'}
+              </span>
+            </div>
+          </div>
+          {result.remark && (
+            <div className="grid gap-2">
+              <div className="text-sm font-medium text-muted-foreground">Remark</div>
+              <div className="text-sm whitespace-pre-wrap rounded-md border bg-muted/50 p-3">
+                {result.remark}
+              </div>
+            </div>
+          )}
           <div className="grid grid-cols-2 gap-4">
             <div className="grid gap-2">
               <div className="text-sm font-medium text-muted-foreground">Created At</div>
