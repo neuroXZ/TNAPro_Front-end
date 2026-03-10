@@ -224,6 +224,28 @@ export default function AssessmentResultsPage() {
     setGlobalFilter("")
   }
 
+  const handleBulkStatusChange = async (newStatus: string) => {
+    try {
+      const selectedRows = table.getFilteredSelectedRowModel().rows
+      if (selectedRows.length === 0) {
+        toast.error("Please select results to update")
+        return
+      }
+
+      const updatePromises = selectedRows.map((row) =>
+        assessmentResultAPI.update(row.original.id, { status: newStatus })
+      )
+      await Promise.all(updatePromises)
+      
+      toast.success(`${selectedRows.length} result(s) status updated to ${newStatus}`)
+      setRowSelection({})
+      fetchData()
+    } catch (error: any) {
+      toast.error("Failed to update status")
+      console.error(error)
+    }
+  }
+
   const hasActiveFilters = 
     assessorTypeFilter !== "all" || 
     assessorNameFilter !== "all" || 
@@ -244,6 +266,7 @@ export default function AssessmentResultsPage() {
           selectedCount={table.getFilteredSelectedRowModel().rows.length}
           onAdd={() => handleOpenDialog()}
           onBulkDelete={handleBulkDelete}
+          onBulkStatusChange={handleBulkStatusChange}
         />
       </div>
 
