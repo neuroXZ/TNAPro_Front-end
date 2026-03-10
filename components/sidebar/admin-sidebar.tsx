@@ -153,7 +153,7 @@ const navMainItems = [
       },
       {
         title: "Training Demand",
-        url: "/admin/training-demand",
+        url: "/admin/analytics/training-demand",
       },
     ],
   },

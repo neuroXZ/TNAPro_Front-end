@@ -606,7 +606,7 @@ export default function AdminAnalytics() {
                 <div className="text-muted-foreground leading-none mb-3">
                   Based on assessment: {assessments.find(a => a.id === selectedAssessmentId)?.name || "Select an assessment"}
                 </div>
-                <Link href="/admin/training-demand">
+                <Link href="/admin/analytics/training-demand">
                   <Button variant="outline" size="sm" className="w-full">
                     <IconBook className="h-4 w-4 mr-2" />
                     View Full Training Demand Report

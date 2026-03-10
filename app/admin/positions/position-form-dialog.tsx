@@ -18,7 +18,7 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { Position } from "./columns"
-import { gradeAPI } from "@/lib/api"
+import { gradeAPI, positionCategoryAPI } from "@/lib/api"
 
 interface PositionFormData {
   name: string
@@ -67,20 +67,10 @@ export function PositionFormDialog({
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        const response = await fetch("/api/positioncategory")
-        
-        // Check if response is OK before parsing as JSON
-        if (!response.ok) {
-          console.warn(`Position categories endpoint not available (${response.status}). Using empty categories.`)
-          setCategories([])
-          return
-        }
-        
-        const data = await response.json()
+        const data = await positionCategoryAPI.getAll()
         setCategories(data)
       } catch (error) {
-        console.warn("Position categories endpoint not available. Using empty categories.")
-        // Set empty array if fetch fails - this is expected until backend is deployed
+        console.error("Failed to fetch categories:", error)
         setCategories([])
       }
     }
@@ -167,28 +157,26 @@ export function PositionFormDialog({
                 </SelectContent>
               </Select>
             </div>
-            {categories.length > 0 && (
-              <div className="grid gap-2">
-                <Label htmlFor="categoryId">Category</Label>
-                <Select
-                  value={formData.categoryId || undefined}
-                  onValueChange={(value) =>
-                    setFormData({ ...formData, categoryId: value })
-                  }
-                >
-                  <SelectTrigger id="categoryId">
-                    <SelectValue placeholder="Select category (optional)" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {categories.map((category) => (
-                      <SelectItem key={category.id} value={category.id}>
-                        {category.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            )}
+            <div className="grid gap-2">
+              <Label htmlFor="categoryId">Position Category</Label>
+              <Select
+                value={formData.categoryId || undefined}
+                onValueChange={(value) =>
+                  setFormData({ ...formData, categoryId: value })
+                }
+              >
+                <SelectTrigger id="categoryId">
+                  <SelectValue placeholder="Select category (optional)" />
+                </SelectTrigger>
+                <SelectContent>
+                  {categories.map((category) => (
+                    <SelectItem key={category.id} value={category.id}>
+                      {category.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
             <div className="grid gap-2">
               <Label htmlFor="description">Description</Label>
               <textarea
