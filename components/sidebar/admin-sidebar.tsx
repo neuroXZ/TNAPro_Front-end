@@ -16,6 +16,7 @@ import { NavMain } from "@/components/nav/nav-main"
 import { NavUser } from "@/components/nav/nav-admin"
 import { useAuth } from "@/lib/auth-context"
 import { settingAPI } from "@/lib/api"
+import { useTranslations } from "next-intl"
 import {
   Sidebar,
   SidebarContent,
@@ -26,144 +27,78 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar"
 
-const navMainItems = [
-  {
-    title: "Dashboard",
-    url: "/admin/dashboard",
-    icon: IconDashboard,
-  },
-  {
-    title: "Organization",
-    url: "#",
-    icon: IconBuilding,
-    items: [
-      {
-        title: "Unit Types",
-        url: "/admin/unittype",
-      },
-      {
-        title: "Units",
-        url: "/admin/units",
-      },
-      
-      {
-        title: "Grades",
-        url: "/admin/grades",
-      },
-      {
-        title: "Position Categories",
-        url: "/admin/position-category",
-      },
-      {
-        title: "Positions",
-        url: "/admin/positions",
-      },
-
-
-
-    ],
-  },
-  {
-    title: "Staff Development",
-    url: "#",
-    icon: IconUsers,
-    items: [
-      {
-        title: "Staff Management",
-        url: "/admin/staff",
-      },
-      {
-        title: "Assessors",
-        url: "/admin/assessors",
-      },
-    ],
-  },
-  {
-    title: "Competency",
-    url: "#",
-    icon: IconTarget,
-    items: [
-      {
-        title: "Levels",
-        url: "/admin/levels",
-      },
-      {
-        title: "Clusters",
-        url: "/admin/clusters",
-      },
-      {
-        title: "Competencies",
-        url: "/admin/competencies",
-      },
-      {
-        title: "Competency Mapping",
-        url: "/admin/position-competencies",
-      },
-
-    ],
-  },
-  {
-    title: "Training",
-    url: "#",
-    icon: IconSchool,
-    items: [
-      {
-        title: "Training Programs",
-        url: "/admin/trainings",
-      },
-      {
-        title: "Training Mapping",
-        url: "/admin/training-competencies",
-      },
-
-    ],
-  },
-  {
-    title: "Assessment",
-    url: "#",
-    icon: IconClipboardList,
-    items: [
-      {
-        title: "Assessments",
-        url: "/admin/assessments",
-      },
-      // {
-      //   title: "Assessment Results",
-      //   url: "/admin/assessment-results",
-      // },
-
-    ],
-  },
-  {
-    title: "Reports & Analytics",
-    url: "#",
-    icon: IconChartBar,
-    items: [
-      {
-        title: "IDP",
-        url: "/admin/idp",
-      },
-      {
-        title: "Report & Analytics",
-        url: "/admin/analytics",
-      },
-      {
-        title: "Competency Gap by Grade",
-        url: "/admin/analytics/competency-gap-by-grade",
-      },
-      {
-        title: "Training Demand",
-        url: "/admin/analytics/training-demand",
-      },
-    ],
-  },
-]
-
-
-
 export function AdminSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const { user } = useAuth()
+  const t = useTranslations('AdminSidebar')
   const [logoPath, setLogoPath] = React.useState<string | null>(null)
+
+  const navMainItems = [
+    {
+      title: t('dashboard'),
+      url: "/admin/dashboard",
+      icon: IconDashboard,
+    },
+    {
+      title: t('organization'),
+      url: "#",
+      icon: IconBuilding,
+      items: [
+        { title: t('unitTypes'), url: "/admin/unittype" },
+        { title: t('units'), url: "/admin/units" },
+        { title: t('grades'), url: "/admin/grades" },
+        { title: t('positionCategories'), url: "/admin/position-category" },
+        { title: t('positions'), url: "/admin/positions" },
+      ],
+    },
+    {
+      title: t('staffDevelopment'),
+      url: "#",
+      icon: IconUsers,
+      items: [
+        { title: t('staffManagement'), url: "/admin/staff" },
+        { title: t('assessors'), url: "/admin/assessors" },
+      ],
+    },
+    {
+      title: t('competency'),
+      url: "#",
+      icon: IconTarget,
+      items: [
+        { title: t('levels'), url: "/admin/levels" },
+        { title: t('clusters'), url: "/admin/clusters" },
+        { title: t('competencies'), url: "/admin/competencies" },
+        { title: t('competencyMapping'), url: "/admin/position-competencies" },
+      ],
+    },
+    {
+      title: t('training'),
+      url: "#",
+      icon: IconSchool,
+      items: [
+        { title: t('trainingPrograms'), url: "/admin/trainings" },
+        { title: t('trainingMapping'), url: "/admin/training-competencies" },
+      ],
+    },
+    {
+      title: t('assessment'),
+      url: "#",
+      icon: IconClipboardList,
+      items: [
+        { title: t('assessments'), url: "/admin/assessments" },
+      ],
+    },
+    {
+      title: t('reportsAnalytics'),
+      url: "#",
+      icon: IconChartBar,
+      items: [
+        { title: t('idp'), url: "/admin/idp" },
+        { title: t('reportAnalytics'), url: "/admin/analytics" },
+        { title: t('competencyGapByGrade'), url: "/admin/analytics/competency-gap-by-grade" },
+        { title: t('trainingDemand'), url: "/admin/analytics/training-demand" },
+      ],
+    },
+  ]
 
   // Fetch logo from settings on component mount
   React.useEffect(() => {

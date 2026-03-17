@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from "react"
+import { useTranslations } from "next-intl"
 import { useAuth } from "@/lib/auth-context"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
@@ -32,6 +33,7 @@ export function LoginForm({
   className,
   ...props
 }: React.ComponentProps<"div">) {
+  const t = useTranslations('LoginForm')
   const { login } = useAuth();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
@@ -68,7 +70,7 @@ export function LoginForm({
 
     try {
       await login(username, password, userType);
-      toast.success("Login successful!");
+      toast.success(t('loginSuccess'));
     } 
     // catch (error: any) {
     //   toast.error(error.message || "Login failed. Please check your credentials.");
@@ -97,7 +99,7 @@ export function LoginForm({
         appBaseUrl
       });
       
-      toast.success("Password reset link has been sent to your email!");
+      toast.success(t('resetLinkSent'));
       setShowForgotPassword(false);
       setForgotPasswordEmail("");
     // } catch (error: any) {
@@ -133,13 +135,13 @@ export function LoginForm({
                     TNA
                   </div>
                 )}
-                <h1 className="text-2xl font-bold">Welcome</h1>
+                <h1 className="text-2xl font-bold">{t('welcome')}</h1>
                 <p className="text-muted-foreground text-balance">
-                  Login to your TNAPro account
+                  {t('subtitle')}
                 </p>
               </div>
               <Field>
-                <FieldLabel>Login as</FieldLabel>
+                <FieldLabel>{t('loginAs')}</FieldLabel>
                 <div className="flex gap-2 p-1 bg-muted rounded-lg">
                   <button
                     type="button"
@@ -152,7 +154,7 @@ export function LoginForm({
                         : "text-muted-foreground hover:text-foreground"
                     )}
                   >
-                    Staff
+                    {t('staff')}
                   </button>
                   <button
                     type="button"
@@ -165,16 +167,16 @@ export function LoginForm({
                         : "text-muted-foreground hover:text-foreground"
                     )}
                   >
-                    Admin
+                    {t('admin')}
                   </button>
                 </div>
               </Field>
               <Field>
-                <FieldLabel htmlFor="username">{userType === 'staff' ? 'Staff ID' : 'Username'}</FieldLabel>
+                <FieldLabel htmlFor="username">{userType === 'staff' ? t('staffId') : t('username')}</FieldLabel>
                 <Input
                   id="username"
                   type="text"
-                  placeholder={userType === 'staff' ? 'Enter your staff ID' : 'Enter your username'}
+                  placeholder={userType === 'staff' ? t('enterStaffId') : t('enterUsername')}
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
                   required
@@ -183,7 +185,7 @@ export function LoginForm({
               </Field>
               <Field>
                 <div className="flex items-center justify-between">
-                  <FieldLabel htmlFor="password">Password</FieldLabel>
+                  <FieldLabel htmlFor="password">{t('password')}</FieldLabel>
                   <Dialog open={showForgotPassword} onOpenChange={setShowForgotPassword}>
                     <DialogTrigger asChild>
                       <button
@@ -191,25 +193,25 @@ export function LoginForm({
                         className="text-sm text-primary hover:underline"
                         disabled={isLoading}
                       >
-                        Forgot Password?
+                        {t('forgotPassword')}
                       </button>
                     </DialogTrigger>
                     <DialogContent>
                       <DialogHeader>
-                        <DialogTitle>Reset Password</DialogTitle>
+                        <DialogTitle>{t('resetPassword')}</DialogTitle>
                         <DialogDescription>
-                          Enter your {userType === 'staff' ? 'email address' : 'username'} and we`&lsquo;`ll send you a link to reset your password.
+                          {userType === 'staff' ? t('resetDescriptionStaff') : t('resetDescriptionAdmin')}
                         </DialogDescription>
                       </DialogHeader>
                       <form onSubmit={handleForgotPassword} className="space-y-4">
                         <Field>
                           <FieldLabel htmlFor="forgot-email">
-                            {userType === 'staff' ? 'Email Address' : 'Username'}
+                            {userType === 'staff' ? t('emailAddress') : t('username')}
                           </FieldLabel>
                           <Input
                             id="forgot-email"
                             type={userType === 'staff' ? 'email' : 'text'}
-                            placeholder={userType === 'staff' ? 'Enter your email address' : 'Enter your username'}
+                            placeholder={userType === 'staff' ? t('enterEmail') : t('enterUsername')}
                             value={forgotPasswordEmail}
                             onChange={(e) => setForgotPasswordEmail(e.target.value)}
                             required
@@ -223,10 +225,10 @@ export function LoginForm({
                             onClick={() => setShowForgotPassword(false)}
                             disabled={isForgotPasswordLoading}
                           >
-                            Cancel
+                            {t('cancel')}
                           </Button>
                           <Button disabled={isForgotPasswordLoading}>
-                            {isForgotPasswordLoading ? "Sending..." : "Send Reset Link"}
+                            {isForgotPasswordLoading ? t('sending') : t('sendResetLink')}
                           </Button>
                         </div>
                       </form>
@@ -260,7 +262,7 @@ export function LoginForm({
               </Field>
               <Field>
                 <Button type="submit" disabled={isLoading}>
-                  {isLoading ? "Logging in..." : "Login"}
+                  {isLoading ? t('loggingIn') : t('login')}
                 </Button>
               </Field>
 
@@ -292,7 +294,7 @@ export function LoginForm({
         </CardContent>
       </Card>
       <FieldDescription className="px-6 text-center">
-        Copyright © {new Date().getFullYear()} TNAPro. All rights reserved. | <a href="/customer-service/contact-us" className="text-primary hover:underline">Customer Service </a>| <a href="/customer-service/terms-conditions" className="text-primary hover:underline">Terms and Conditions T&C</a>
+        {t('copyright', { year: new Date().getFullYear() })} | <a href="/customer-service/contact-us" className="text-primary hover:underline">{t('customerService')} </a>| <a href="/customer-service/terms-conditions" className="text-primary hover:underline">{t('termsAndConditions')}</a>
       </FieldDescription>
     </div>
   )

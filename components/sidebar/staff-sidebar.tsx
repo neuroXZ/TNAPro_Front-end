@@ -17,6 +17,7 @@ import { NavUser } from "@/components/nav/nav-staff"
 import { useAuth } from "@/lib/auth-context"
 import { settingAPI } from "@/lib/api"
 import { useIsMobile } from "@/hooks/use-mobile"
+import { useTranslations } from "next-intl"
 import {
   Sidebar,
   SidebarContent,
@@ -28,45 +29,20 @@ import {
 } from "@/components/ui/sidebar"
 
 
-const navMainItems = [
-  {
-    title: "Dashboard",
-    url: "/staff/dashboard",
-    icon: IconDashboard,
-  },
-  {
-    title: "Self Assessment",
-    url: "/staff/assessments",
-    icon: IconClipboardCheck,
-  },
-  {
-    title: "Superior Assessment",
-    url: "/staff/superior-assessments",
-    icon: IconUserCheck,
-  },
-  {
-    title: "My Competencies",
-    url: "/staff/competencies",
-    icon: IconCertificate,
-  },
-  {
-    title: "My IDP",
-    url: "/staff/idp",
-    icon: IconFileText,
-  },
-  {
-    title: "My Training",
-    url: "/staff/training",
-    icon: IconSchool,
-  },
-]
-
-
-
 export function StaffSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const { user } = useAuth()
+  const t = useTranslations('StaffSidebar')
   const [logoPath, setLogoPath] = React.useState<string | null>(null)
   const isMobile = useIsMobile()
+
+  const navMainItems = [
+    { title: t('dashboard'), url: "/staff/dashboard", icon: IconDashboard },
+    { title: t('selfAssessment'), url: "/staff/assessments", icon: IconClipboardCheck },
+    { title: t('superiorAssessment'), url: "/staff/superior-assessments", icon: IconUserCheck },
+    { title: t('myCompetencies'), url: "/staff/competencies", icon: IconCertificate },
+    { title: t('myIdp'), url: "/staff/idp", icon: IconFileText },
+    { title: t('myTraining'), url: "/staff/training", icon: IconSchool },
+  ]
 
   // Fetch logo from settings on component mount
   React.useEffect(() => {
@@ -135,34 +111,34 @@ export function StaffSidebar({ ...props }: React.ComponentProps<typeof Sidebar>)
           <div className="flex flex-col gap-4 p-4">
             <div className="space-y-3">
               <div className="border-l-4 border-primary pl-3">
-                <h3 className="font-semibold text-sm text-foreground">TNAPro System</h3>
+                <h3 className="font-semibold text-sm text-foreground">{t('systemTitle')}</h3>
                 <p className="text-xs text-muted-foreground mt-1">
-                  Training Needs Analysis Professional
+                  {t('systemSubtitle')}
                 </p>
               </div>
               
               <div className="space-y-2 text-xs text-muted-foreground leading-relaxed">
                 <p>
-                  A comprehensive system for employee training needs analysis that helps organizations identify skill gaps and plan effective training programs.
+                  {t('systemDesc')}
                 </p>
                 
                 <div className="bg-muted/50 rounded-lg p-3 mt-3">
                   <div className="flex items-center gap-2 mb-2">
                     <div className="size-2 bg-primary rounded-full"></div>
-                    <span className="font-medium text-xs">Version 2.0</span>
+                    <span className="font-medium text-xs">{t('version')}</span>
                   </div>
                   <p className="text-[11px]">
-                    Equipped with a mobile interface optimized for ease of use.
+                    {t('versionDesc')}
                   </p>
                 </div>
 
                 <div className="space-y-1 mt-3">
-                  <p className="font-medium text-xs text-foreground">Key features:</p>
+                  <p className="font-medium text-xs text-foreground">{t('keyFeatures')}</p>
                   <ul className="text-[11px] space-y-0.5 ml-2">
-                    <li>• Self & superior assessments</li>
-                    <li>• Individual development plan (IDP)</li>
-                    <li>• Training management</li>
-                    <li>• Competency gap analysis</li>
+                    <li>• {t('feature1')}</li>
+                    <li>• {t('feature2')}</li>
+                    <li>• {t('feature3')}</li>
+                    <li>• {t('feature4')}</li>
                   </ul>
                 </div>
               </div>

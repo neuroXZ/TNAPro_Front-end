@@ -6,7 +6,9 @@ import { useTheme } from "next-themes"
 import { Button } from "@/components/ui/button"
 import { Separator } from "@/components/ui/separator"
 import { SidebarTrigger } from "@/components/ui/sidebar"
-import { IconUser, IconChevronDown, IconMoon, IconSun } from "@tabler/icons-react"
+import { IconUser, IconChevronDown, IconMoon, IconSun, IconLanguage } from "@tabler/icons-react"
+import { useRouter as useIntlRouter, usePathname as useIntlPathname } from '@/navigation'
+import { useLocale } from 'next-intl'
 import { useIsMobile } from "@/hooks/use-mobile"
 import {
   Breadcrumb,
@@ -28,6 +30,13 @@ export function SiteHeader() {
   const [user, setUser] = useState<{ name: string; userType: string } | null>(null)
   const isMobile = useIsMobile()
   const { theme, setTheme } = useTheme()
+  const locale = useLocale()
+  const intlRouter = useIntlRouter()
+  const intlPathname = useIntlPathname()
+
+  const switchLocale = (newLocale: string) => {
+    intlRouter.replace(intlPathname, { locale: newLocale })
+  }
   
   useEffect(() => {
     // Get user data from localStorage
@@ -108,6 +117,31 @@ export function SiteHeader() {
         
         {/* User menu */}
         <div className="ml-auto flex items-center gap-2">
+          {/* Language switcher */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="sm" className="gap-1.5 px-2">
+                <IconLanguage className="size-4" />
+                <span className="hidden sm:inline-block text-xs font-medium uppercase">{locale}</span>
+                <IconChevronDown className="size-3" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem
+                onClick={() => switchLocale('en')}
+                className={locale === 'en' ? 'font-semibold text-primary' : ''}
+              >
+                🇬🇧 English
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={() => switchLocale('ms')}
+                className={locale === 'ms' ? 'font-semibold text-primary' : ''}
+              >
+                🇲🇾 Bahasa Melayu
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+
           {/* Dark mode toggle */}
           <Button
             variant="ghost"

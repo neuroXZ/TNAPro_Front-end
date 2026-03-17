@@ -9,6 +9,7 @@ import {
   IconDownload,
 } from "@tabler/icons-react"
 
+import { useTranslations } from "next-intl"
 import { useAuth } from "@/lib/auth-context"
 import {
   Avatar,
@@ -42,6 +43,7 @@ export function NavUser({
 }) {
   const { isMobile, setOpenMobile } = useSidebar()
   const { logout } = useAuth()
+  const t = useTranslations('NavAdmin')
 
   const handleLogout = () => {
     logout()
@@ -102,26 +104,26 @@ export function NavUser({
               <DropdownMenuItem asChild>
                 <a href="/admin/mails" className="flex items-center gap-2 cursor-pointer" onClick={handleLinkClick}>
                   <IconMail />
-                  Mail Template
+                  {t('mailTemplate')}
                 </a>
               </DropdownMenuItem>
               <DropdownMenuItem asChild>
                 <a href="/admin/settings" className="flex items-center gap-2 cursor-pointer" onClick={handleLinkClick}>
                   <IconSettings />
-                  Setting
+                  {t('settings')}
                 </a>
               </DropdownMenuItem>
               <DropdownMenuItem asChild>
                 <a href="/admin/download" className="flex items-center gap-2 cursor-pointer" onClick={handleLinkClick}>
                   <IconDownload />
-                  Download
+                  {t('download')}
                 </a>
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={handleLogout}>
               <IconLogout />
-              Log out
+              {t('logout')}
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

@@ -8,6 +8,7 @@ import {
   IconMail,
 } from "@tabler/icons-react"
 
+import { useTranslations } from "next-intl"
 import { useAuth } from "@/lib/auth-context"
 import {
   Avatar,
@@ -41,6 +42,7 @@ export function NavUser({
 }) {
   const { isMobile, setOpenMobile } = useSidebar()
   const { logout } = useAuth()
+  const t = useTranslations('NavStaff')
 
   const handleLogout = () => {
     logout()
@@ -100,7 +102,7 @@ export function NavUser({
               <DropdownMenuItem asChild>
                 <a href="/staff/profile" className="flex items-center gap-2 cursor-pointer" onClick={handleLinkClick}>
                   <IconUserCircle />
-                  Profile Settings
+                  {t('profileSettings')}
                 </a>
               </DropdownMenuItem>
               
@@ -108,7 +110,7 @@ export function NavUser({
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={handleLogout}>
               <IconLogout />
-              Log out
+              {t('logout')}
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
