@@ -292,7 +292,7 @@ export function LoginForm({
         </CardContent>
       </Card>
       <FieldDescription className="px-6 text-center">
-        Copyright © {new Date().getFullYear()} TNAPro. All rights reserved. | <a href="/customer-service/contact-us" className="text-primary hover:underline">Customer Service</a>
+        Copyright © {new Date().getFullYear()} TNAPro. All rights reserved. | <a href="/customer-service/contact-us" className="text-primary hover:underline">Customer Service </a>| <a href="/customer-service/terms-conditions" className="text-primary hover:underline">Terms and Conditions T&C</a>
       </FieldDescription>
     </div>
   )

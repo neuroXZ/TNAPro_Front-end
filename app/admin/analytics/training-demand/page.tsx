@@ -19,24 +19,20 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+import { Progress } from "@/components/ui/progress";
+import { Separator } from "@/components/ui/separator";
 import { assessmentAPI, trainingDemandAPI } from "@/lib/api";
 import {
-  IconRefresh,
   IconAlertTriangle,
-  IconChevronLeft,
   IconDownload,
   IconBook,
+  IconTrendingUp,
+  IconUsers,
+  IconChartBar,
 } from "@tabler/icons-react";
 import Link from "next/link";
 import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 
 interface TrainingDemandItem {
   trainingName: string;
@@ -56,6 +52,8 @@ interface TrainingDemandReport {
 interface Assessment {
   id: string;
   name: string;
+  createdAt?: string;
+  endDate?: string;
 }
 
 const getGapColor = (
@@ -78,6 +76,7 @@ const getGapLabel = (gap: number): string => {
 };
 
 export default function TrainingDemandPage() {
+  const router = useRouter();
   const [assessments, setAssessments] = useState<Assessment[]>([]);
   const [selectedAssessmentId, setSelectedAssessmentId] = useState<string>("");
   const [demandData, setDemandData] = useState<TrainingDemandReport[]>([]);
@@ -85,6 +84,7 @@ export default function TrainingDemandPage() {
   const [isLoadingAssessments, setIsLoadingAssessments] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isExporting, setIsExporting] = useState(false);
+  const [showFullReport, setShowFullReport] = useState(false);
 
   // Fetch assessments on mount
   useEffect(() => {
@@ -92,9 +92,18 @@ export default function TrainingDemandPage() {
       try {
         setIsLoadingAssessments(true);
         const data = await assessmentAPI.getAll();
-        setAssessments(data);
-        if (data.length > 0) {
-          setSelectedAssessmentId(data[0].id);
+        
+        // Sort assessments by createdAt descending (latest first)
+        const sortedData = [...data].sort((a, b) => {
+          const dateA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+          const dateB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+          return dateB - dateA;
+        });
+        
+        setAssessments(sortedData);
+        // Auto-select the latest assessment (first in the sorted list)
+        if (sortedData.length > 0) {
+          setSelectedAssessmentId(sortedData[0].id);
         }
       } catch (err) {
         toast.error("Failed to load assessments");
@@ -162,99 +171,59 @@ export default function TrainingDemandPage() {
   );
   const totalTrainingsRecommended = demandData.length;
 
+  // Get top 5 trainings for preview
+  const topTrainings = demandData.slice(0, 5);
+  const maxStaffCount = Math.max(...demandData.map(t => t.totalStaffCount), 1);
+
+  const selectedAssessment = assessments.find(a => a.id === selectedAssessmentId);
+
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 p-6">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <Link href="/admin/training-demand" className="flex items-center gap-2">
-            <IconBook className="w-6 h-6" />
-            <h1 className="text-3xl font-bold">Training Demand</h1>
-          </Link>
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">Training Demand Analysis</h1>
+          <p className="text-muted-foreground mt-1">
+            Identify training needs based on competency gaps
+          </p>
         </div>
       </div>
 
-      {/* Assessment Selection */}
+      {/* Assessment Selection Card */}
       <Card>
-        <CardHeader>
-          <CardTitle>Select Assessment</CardTitle>
-          <CardDescription>Choose an assessment to view training demand report</CardDescription>
+        <CardHeader className="pb-3">
+          <CardTitle className="text-base">Assessment Period</CardTitle>
         </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent>
           {isLoadingAssessments ? (
             <Skeleton className="h-10 w-full" />
           ) : (
-            <div className="flex gap-4 items-end">
-              <div className="flex-1">
-                <label className="text-sm font-medium mb-2 block">Assessment</label>
-                <Select value={selectedAssessmentId} onValueChange={setSelectedAssessmentId}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select an assessment" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {assessments.map((assessment) => (
-                      <SelectItem key={assessment.id} value={assessment.id}>
-                        {assessment.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
+            <div className="flex gap-3">
+              <Select value={selectedAssessmentId} onValueChange={setSelectedAssessmentId}>
+                <SelectTrigger className="flex-1">
+                  <SelectValue placeholder="Select an assessment" />
+                </SelectTrigger>
+                <SelectContent>
+                  {assessments.map((assessment) => (
+                    <SelectItem key={assessment.id} value={assessment.id}>
+                      {assessment.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
               <Button
                 onClick={handleExport}
                 disabled={isExporting || !selectedAssessmentId || demandData.length === 0}
                 variant="outline"
-                size="sm"
+                size="default"
               >
                 <IconDownload className="w-4 h-4 mr-2" />
-                {isExporting ? "Exporting..." : "Export CSV"}
+                Export
               </Button>
             </div>
           )}
         </CardContent>
       </Card>
-
-      {/* Summary Cards */}
-      {!isLoading && demandData.length > 0 && (
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium">Total Trainings Recommended</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold">{totalTrainingsRecommended}</div>
-              <p className="text-xs text-gray-500 mt-1">Based on competency gaps</p>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium">Staff Requiring Training</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold">{totalStaffWithGap}</div>
-              <p className="text-xs text-gray-500 mt-1">Across all trainings</p>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium">Average Gap Score</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold">
-                {(
-                  demandData.reduce((sum, training) => {
-                    const trainingGapSum = training.staffList.reduce((s, staff) => s + staff.gap, 0);
-                    return sum + trainingGapSum;
-                  }, 0) / Math.max(totalStaffWithGap, 1)
-                ).toFixed(2)}
-              </div>
-              <p className="text-xs text-gray-500 mt-1">Weighted average</p>
-            </CardContent>
-          </Card>
-        </div>
-      )}
 
       {/* Error State */}
       {error && (
@@ -266,92 +235,242 @@ export default function TrainingDemandPage() {
 
       {/* Loading State */}
       {isLoading && (
-        <Card>
-          <CardContent className="pt-6">
-            <div className="space-y-4">
-              <Skeleton className="h-12 w-full" />
-              <Skeleton className="h-64 w-full" />
-            </div>
-          </CardContent>
-        </Card>
+        <div className="space-y-4">
+          <Skeleton className="h-32 w-full" />
+          <Skeleton className="h-64 w-full" />
+        </div>
       )}
 
-      {/* Empty State */}
-      {!isLoading && demandData.length === 0 && !error && (
-        <Card>
-          <CardContent className="pt-6">
-            <div className="text-center py-12">
-              <IconAlertTriangle className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-              <p className="text-gray-600">
-                {selectedAssessmentId
-                  ? "No training demands identified for this assessment."
-                  : "Please select an assessment to view training demands."}
-              </p>
-            </div>
-          </CardContent>
-        </Card>
-      )}
-
-      {/* Trainings List */}
-      {!isLoading &&
-        demandData.map((training) => (
-          <Card key={training.trainingId}>
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <div>
-                  <CardTitle className="text-lg">{training.trainingName}</CardTitle>
-                  <CardDescription>
-                    {training.totalStaffCount} staff require this training
-                  </CardDescription>
+      {/* Main Content */}
+      {!isLoading && !error && (
+        <>
+          {demandData.length === 0 ? (
+            <Card>
+              <CardContent className="pt-6">
+                <div className="text-center py-12">
+                  <IconAlertTriangle className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+                  <h3 className="font-semibold text-lg mb-2">No Training Demands</h3>
+                  <p className="text-muted-foreground">
+                    {selectedAssessmentId
+                      ? "No training demands identified for this assessment."
+                      : "Please select an assessment to view training demands."}
+                  </p>
                 </div>
-                <Badge variant="secondary">{training.totalStaffCount} Staff</Badge>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className="overflow-x-auto">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Staff Name</TableHead>
-                      <TableHead>Department</TableHead>
-                      <TableHead>Deficient Competency</TableHead>
-                      <TableHead className="text-right">Gap Score</TableHead>
-                      <TableHead className="text-right">Severity</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {training.staffList.map((staff, idx) => {
-                      const gapColor = getGapColor(staff.gap);
-                      return (
-                        <TableRow key={`${training.trainingId}-${idx}`}>
-                          <TableCell className="font-medium">{staff.staffName}</TableCell>
-                          <TableCell>{staff.unitName}</TableCell>
-                          <TableCell>{staff.triggerCompetency}</TableCell>
-                          <TableCell className="text-right">
-                            <Badge variant="outline">{staff.gap.toFixed(2)}</Badge>
-                          </TableCell>
-                          <TableCell className="text-right">
-                            <Badge
-                              variant={
-                                staff.gap >= 2
-                                  ? "destructive"
-                                  : staff.gap >= 1.5
-                                  ? "secondary"
-                                  : "outline"
-                              }
+              </CardContent>
+            </Card>
+          ) : (
+            <>
+              {/* Training Demand Overview Card */}
+              <Card>
+                <CardHeader>
+                  <div className="flex items-start justify-between">
+                    <div>
+                      <CardTitle className="flex items-center gap-2">
+                        <IconBook className="w-5 h-5" />
+                        Training Demand
+                      </CardTitle>
+                      <CardDescription className="mt-1">
+                        Staff requiring training by program
+                      </CardDescription>
+                    </div>
+                  </div>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  {/* Bar Chart Visualization */}
+                  {topTrainings.length > 0 ? (
+                    <div className="space-y-3">
+                      {topTrainings.map((training, index) => (
+                        <div key={training.trainingId} className="space-y-2">
+                          <div className="flex items-center justify-between text-sm">
+                            <span className="font-medium truncate pr-4">
+                              {training.trainingName}
+                            </span>
+                            <div className="flex items-center gap-2">
+                              <span className="text-muted-foreground text-xs">
+                                {training.totalStaffCount} staff
+                              </span>
+                              <Badge variant="secondary" className="text-xs">
+                                {((training.totalStaffCount / maxStaffCount) * 100).toFixed(0)}%
+                              </Badge>
+                            </div>
+                          </div>
+                          <div className="relative h-8 bg-muted rounded-md overflow-hidden">
+                            <div
+                              className="absolute h-full bg-primary transition-all duration-500 flex items-center justify-end pr-3"
+                              style={{
+                                width: `${(training.totalStaffCount / maxStaffCount) * 100}%`,
+                              }}
                             >
-                              {getGapLabel(staff.gap)}
-                            </Badge>
-                          </TableCell>
-                        </TableRow>
-                      );
-                    })}
-                  </TableBody>
-                </Table>
+                              {training.totalStaffCount > 0 && (
+                                <span className="text-xs font-medium text-primary-foreground">
+                                  {training.totalStaffCount}
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="text-center py-8 text-muted-foreground">
+                      No training demands identified
+                    </div>
+                  )}
+
+                  <Separator />
+
+                  {/* Summary Footer */}
+                  <div className="flex items-center justify-between pt-2">
+                    <div className="flex items-center gap-2 text-sm">
+                      <IconTrendingUp className="w-4 h-4 text-muted-foreground" />
+                      <span className="font-semibold">Total {totalTrainingsRecommended} trainings required</span>
+                    </div>
+                    <div className="text-xs text-muted-foreground">
+                      Based on assessment: {selectedAssessment?.name}
+                    </div>
+                  </div>
+
+                  {/* View Full Report Button */}
+                  {demandData.length > 0 && (
+                    <Button
+                      variant="outline"
+                      className="w-full"
+                      onClick={() => setShowFullReport(!showFullReport)}
+                    >
+                      <IconBook className="w-4 h-4 mr-2" />
+                      {showFullReport ? "Hide Full Report" : "View Full Training Demand Report"}
+                    </Button>
+                  )}
+                </CardContent>
+              </Card>
+
+              {/* Summary Stats Cards */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <Card>
+                  <CardHeader className="pb-3">
+                    <div className="flex items-center justify-between">
+                      <CardTitle className="text-sm font-medium text-muted-foreground">
+                        Trainings Required
+                      </CardTitle>
+                      <IconChartBar className="w-4 h-4 text-muted-foreground" />
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-3xl font-bold">{totalTrainingsRecommended}</div>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Based on competency gaps
+                    </p>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader className="pb-3">
+                    <div className="flex items-center justify-between">
+                      <CardTitle className="text-sm font-medium text-muted-foreground">
+                        Staff Requiring Training
+                      </CardTitle>
+                      <IconUsers className="w-4 h-4 text-muted-foreground" />
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-3xl font-bold">{totalStaffWithGap}</div>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Across all programs
+                    </p>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader className="pb-3">
+                    <div className="flex items-center justify-between">
+                      <CardTitle className="text-sm font-medium text-muted-foreground">
+                        Average Gap Score
+                      </CardTitle>
+                      <IconTrendingUp className="w-4 h-4 text-muted-foreground" />
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-3xl font-bold">
+                      {(
+                        demandData.reduce((sum, training) => {
+                          const trainingGapSum = training.staffList.reduce(
+                            (s, staff) => s + staff.gap,
+                            0
+                          );
+                          return sum + trainingGapSum;
+                        }, 0) / Math.max(totalStaffWithGap, 1)
+                      ).toFixed(2)}
+                    </div>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Weighted average
+                    </p>
+                  </CardContent>
+                </Card>
               </div>
-            </CardContent>
-          </Card>
-        ))}
+
+              {/* Full Report Details */}
+              {showFullReport && (
+                <div className="space-y-4">
+                  <div>
+                    <h2 className="text-xl font-semibold mb-4">Detailed Training Requirements</h2>
+                  </div>
+                  {demandData.map((training) => (
+                    <Card key={training.trainingId}>
+                      <CardHeader>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <CardTitle className="text-lg">{training.trainingName}</CardTitle>
+                            <CardDescription className="mt-1">
+                              {training.totalStaffCount} staff member{training.totalStaffCount !== 1 ? 's' : ''} require this training
+                            </CardDescription>
+                          </div>
+                          <Badge variant="secondary" className="text-base px-3 py-1">
+                            {training.totalStaffCount}
+                          </Badge>
+                        </div>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="space-y-3">
+                          {training.staffList.map((staff, idx) => (
+                            <div
+                              key={`${training.trainingId}-${idx}`}
+                              className="flex items-center justify-between p-3 rounded-lg border bg-card hover:bg-accent/50 transition-colors"
+                            >
+                              <div className="flex-1 min-w-0">
+                                <div className="font-medium">{staff.staffName}</div>
+                                <div className="text-sm text-muted-foreground mt-1">
+                                  {staff.unitName} • {staff.triggerCompetency}
+                                </div>
+                              </div>
+                              <div className="flex items-center gap-3 ml-4">
+                                <Badge variant="outline" className="font-mono">
+                                  {staff.gap.toFixed(2)}
+                                </Badge>
+                                <Badge
+                                  variant={
+                                    staff.gap >= 2
+                                      ? "destructive"
+                                      : staff.gap >= 1.5
+                                      ? "secondary"
+                                      : "outline"
+                                  }
+                                  className="min-w-[100px] justify-center"
+                                >
+                                  {getGapLabel(staff.gap)}
+                                </Badge>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              )}
+            </>
+          )}
+        </>
+      )}
     </div>
   );
 }

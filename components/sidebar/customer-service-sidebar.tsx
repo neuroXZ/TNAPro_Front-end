@@ -51,6 +51,11 @@ const navMainItems = [
     url: "/customer-service/contact-us",
     icon: IconMessagePlus,
   },
+  {
+    title: "Terms & Conditions",
+    url: "/customer-service/terms-conditions",
+    icon: IconFileText,
+  },
   
 ]
 

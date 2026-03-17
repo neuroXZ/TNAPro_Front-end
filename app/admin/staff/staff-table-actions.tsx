@@ -4,6 +4,7 @@ import {
   IconDownload,
   IconUpload,
   IconTrash,
+  IconMail,
 } from "@tabler/icons-react"
 
 interface StaffTableActionsProps {
@@ -43,6 +44,12 @@ export function StaffTableActions({
         <Button variant="destructive" size="sm" onClick={onBulkDelete}>
           <IconTrash className="mr-2 size-4" />
           Delete Selected ({selectedCount})
+        </Button>
+      )}
+      {selectedCount > 0 && (
+        <Button variant="default" size="sm" onClick={onBulkDelete}>
+          <IconMail className="mr-2 size-4" />
+          Send Email Notification ({selectedCount})
         </Button>
       )}
     </div>
