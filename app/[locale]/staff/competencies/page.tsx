@@ -1,6 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
+import { useTranslations } from "next-intl"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/ui/progress"
@@ -33,6 +34,7 @@ interface PositionCompetency {
 }
 
 export default function MyCompetencies() {
+  const t = useTranslations('StaffCompetenciesPage')
   const [competencies, setCompetencies] = useState<PositionCompetency[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [userPositionId, setUserPositionId] = useState<string | null>(null)
@@ -138,15 +140,15 @@ export default function MyCompetencies() {
     return (
       <div className="space-y-4">
         <div>
-          <h1 className="text-3xl font-bold text-primary">My Competencies</h1>
+          <h1 className="text-3xl font-bold text-primary">{t('title')}</h1>
           <p className="text-muted-foreground">
-            View your assigned competencies and proficiency levels
+            {t('description')}
           </p>
         </div>
         <div className="grid gap-4">
           <Card>
             <CardContent className="py-8">
-              <div className="text-center text-muted-foreground">Loading...</div>
+              <div className="text-center text-muted-foreground">{t('loading')}</div>
             </CardContent>
           </Card>
         </div>
@@ -157,9 +159,9 @@ export default function MyCompetencies() {
   return (
     <div className="space-y-4">
       <div>
-        <h1 className="text-3xl font-bold text-primary">My Competencies</h1>
+        <h1 className="text-3xl font-bold text-primary">{t('title')}</h1>
         <p className="text-muted-foreground">
-          View your assigned competencies and proficiency levels
+          {t('description')}
         </p>
       </div>
       <div className="space-y-4">
@@ -188,7 +190,7 @@ export default function MyCompetencies() {
                     />
                     <CardTitle className="text-base sm:text-lg">{cluster.name}</CardTitle>
                   </div>
-                  <Badge variant="outline">{clusterCounts[cluster.name] || 0} Competencies</Badge>
+                  <Badge variant="outline">{t('competenciesBadge', { count: clusterCounts[cluster.name] || 0 })}</Badge>
                 </div>
               </CardHeader>
               <CardContent>
@@ -209,7 +211,7 @@ export default function MyCompetencies() {
                       </div>
                       <div className="flex items-center gap-2">
                         <div className="text-right mr-2">
-                          <p className="text-xs text-muted-foreground">RCL</p>
+                          <p className="text-xs text-muted-foreground">{t('rclLabel')}</p>
                           <p className="text-sm font-semibold">
                             {pc.level !== undefined && pc.level !== null ? pc.level : "N/A"}
                           </p>

@@ -38,6 +38,7 @@ import { Badge } from "@/components/ui/badge"
 import { IconSearch, IconCalendar, IconUser, IconTarget, IconChevronRight, IconChevronDown } from "@tabler/icons-react"
 import { toast } from "sonner"
 import { format } from "date-fns"
+import { useTranslations } from "next-intl"
 
 
 
@@ -68,6 +69,7 @@ interface RecommendedTrainingRecord {
 export default function StaffTrainingTestingPage() {
   const { user } = useAuth()
   const isMobile = useIsMobile()
+  const t = useTranslations('StaffTrainingPage')
   const [recommendedTrainings, setRecommendedTrainings] = useState<RecommendedTrainingRecord[]>([])
   const [isLoadingRecommended, setIsLoadingRecommended] = useState(false)
   const [searchQuery, setSearchQuery] = useState("")
@@ -247,10 +249,10 @@ export default function StaffTrainingTestingPage() {
                             variant={getStatusVariant(status)}
                             className={`text-[10px] h-5 ${getStatusColor(status)}`}
                           >
-                            {status}
+                            {status === "Upcoming" ? t('statusUpcoming') : status === "Ongoing" ? t('statusOngoing') : status === "Closed" ? t('statusClosed') : t('statusNoDates')}
                           </Badge>
                           <span className="text-xs text-muted-foreground">
-                            {competencies.length} competenc{competencies.length === 1 ? 'y' : 'ies'}
+                            {competencies.length === 1 ? t('competencyCount', { count: competencies.length }) : t('competenciesCount', { count: competencies.length })}
                           </span>
                         </div>
                       </div>
@@ -279,7 +281,7 @@ export default function StaffTrainingTestingPage() {
                 {isExpanded && (
                   <div className="border-t bg-muted/20 p-3">
                     <h4 className="text-xs font-medium text-foreground mb-2">
-                      Related Competencies & Gap Analysis:
+                      {t('relatedCompetencies')}
                     </h4>
                     <div className="space-y-2">
                       {competencies.map((record) => (
@@ -299,7 +301,7 @@ export default function StaffTrainingTestingPage() {
                               )}
                             </div>
                             <Badge variant="destructive" className="text-[10px] h-5 ml-2">
-                              Required: {record.relatedCompetency.requiredLevel}
+                              {t('requiredBadge', { level: record.relatedCompetency.requiredLevel })}
                             </Badge>
                           </div>
                         </div>
@@ -323,11 +325,11 @@ export default function StaffTrainingTestingPage() {
         <TableHeader>
           <TableRow>
             <TableHead className="w-[50px]"></TableHead>
-            <TableHead className="w-[300px]">Training Name</TableHead>
-            <TableHead className="w-[120px]">Start Date</TableHead>
-            <TableHead className="w-[120px]">End Date</TableHead>
-            <TableHead className="w-[100px]">Status</TableHead>
-            <TableHead className="w-[100px]">Competencies</TableHead>
+            <TableHead className="w-[300px]">{t('colTrainingName')}</TableHead>
+            <TableHead className="w-[120px]">{t('colStartDate')}</TableHead>
+            <TableHead className="w-[120px]">{t('colEndDate')}</TableHead>
+            <TableHead className="w-[100px]">{t('colStatus')}</TableHead>
+            <TableHead className="w-[100px]">{t('colCompetencies')}</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -373,12 +375,12 @@ export default function StaffTrainingTestingPage() {
                       variant={getStatusVariant(status)}
                       className={getStatusColor(status)}
                     >
-                      {status}
+                      {status === "Upcoming" ? t('statusUpcoming') : status === "Ongoing" ? t('statusOngoing') : status === "Closed" ? t('statusClosed') : t('statusNoDates')}
                     </Badge>
                   </TableCell>
                   <TableCell>
                     <Badge className="text-xs">
-                      {competencies.length} competenc{competencies.length === 1 ? 'y' : 'ies'}
+                      {competencies.length === 1 ? t('competencyCount', { count: competencies.length }) : t('competenciesCount', { count: competencies.length })}
                     </Badge>
                   </TableCell>
                 </TableRow>
@@ -390,7 +392,7 @@ export default function StaffTrainingTestingPage() {
                       <div className="bg-muted/30 px-6 py-4">
                         <div className="space-y-3">
                           <h4 className="text-sm font-medium text-muted-foreground mb-3">
-                            Related Competencies & Gap Analysis:
+                            {t('relatedCompetencies')}
                           </h4>
                           <div className="grid gap-3">
                             {competencies.map((record, index) => (
@@ -416,7 +418,7 @@ export default function StaffTrainingTestingPage() {
                                 <div className="text-right">
                                   <Badge variant="destructive" className="text-xs">
                                     {/* Gap: {record.relatedCompetency.weightedGap.toFixed(1)} */}
-                                    Required Level: {record.relatedCompetency.requiredLevel}
+                                  {t('requiredBadge', { level: record.relatedCompetency.requiredLevel })}
                                   </Badge>
                                 </div>
                               </div>
@@ -439,10 +441,10 @@ export default function StaffTrainingTestingPage() {
     <div className={`container mx-auto ${isMobile ? 'p-3' : 'p-6'}`}>
       <div className={`mb-4 ${isMobile ? 'mb-3' : 'mb-6'}`}>
         <h1 className={`font-bold ${isMobile ? 'text-lg' : 'text-2xl'}`}>
-          {isMobile ? 'Programs' : 'Recommended Training Programs'}
+          {isMobile ? t('titleMobile') : t('titleDesktop')}
         </h1>
         <p className={`text-muted-foreground ${isMobile ? 'text-xs mt-1' : 'text-sm'}`}>
-          Personalized training recommendations based on your competency assessment
+          {t('description')}
         </p>
       </div>
 
@@ -451,7 +453,7 @@ export default function StaffTrainingTestingPage() {
         <div className="relative">
           <IconSearch className={`absolute left-3 top-1/2 text-muted-foreground -translate-y-1/2 ${isMobile ? 'h-3 w-3' : 'h-4 w-4'}`} />
           <Input
-            placeholder="Search trainings..."
+            placeholder={t('searchPlaceholder')}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className={`pl-9 ${isMobile ? 'h-9 text-sm' : ''}`}
@@ -465,18 +467,18 @@ export default function StaffTrainingTestingPage() {
           <MobileCardHeader>
             <MobileCardTitle className="flex items-center gap-2">
               <IconTarget className="h-4 w-4 text-blue-500" />
-              Recommended Training Programs
+              {t('mobileCardTitle')}
             </MobileCardTitle>
             <p className="text-xs text-muted-foreground mt-1">
-              Personalized training recommendations based on competency assessment
+              {t('mobileCardDesc')}
             </p>
             
             {/* Mobile Assessment Selector */}
             <div className="space-y-2 mt-3">
-              <label className="text-xs font-medium">Select Assessment:</label>
+              <label className="text-xs font-medium">{t('selectAssessmentLabel')}</label>
               <Select value={selectedAssessmentId} onValueChange={setSelectedAssessmentId}>
                 <SelectTrigger className="w-full h-9">
-                  <SelectValue placeholder="Choose an assessment..." />
+                  <SelectValue placeholder={t('assessmentPlaceholder')} />
                 </SelectTrigger>
                 <SelectContent>
                   {assessments.map((assessment) => (
@@ -504,8 +506,8 @@ export default function StaffTrainingTestingPage() {
                 <IconTarget className="h-8 w-8 text-muted-foreground mb-3" />
                 <p className="text-xs text-muted-foreground text-center">
                   {searchQuery 
-                    ? "No recommended trainings found matching your search." 
-                    : "No personalized recommendations available. Complete your assessment to get training recommendations."}
+                    ? t('noTrainingsSearch')
+                    : t('noTrainingsEmpty')}
                 </p>
               </div>
             ) : (
@@ -515,7 +517,7 @@ export default function StaffTrainingTestingPage() {
             {/* Mobile Summary */}
             {!isLoadingRecommended && filteredRecommendedTrainings.length > 0 && (
               <div className="mt-3 text-center text-xs text-muted-foreground">
-                Showing {filteredRecommendedTrainings.length} of {recommendedTrainings.length} recommended trainings
+                {t('showingCount', { count: filteredRecommendedTrainings.length, total: recommendedTrainings.length })}
                 {searchQuery && ` for "${searchQuery}"`}
               </div>
             )}
@@ -526,18 +528,18 @@ export default function StaffTrainingTestingPage() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <IconTarget className="h-5 w-5 text-blue-500" />
-              Recommended Training Programs
+              {t('titleDesktop')}
             </CardTitle>
             <CardDescription>
-              Personalized training recommendations based on your IDP and competency assessment
+              {t('description')}
             </CardDescription>
             
             {/* Desktop Assessment Selector */}
             <div className="flex items-center gap-4 mt-4">
-              <label className="text-sm font-medium">Select Assessment:</label>
+              <label className="text-sm font-medium">{t('selectAssessmentLabel')}</label>
               <Select value={selectedAssessmentId} onValueChange={setSelectedAssessmentId}>
                 <SelectTrigger className="w-[300px]">
-                  <SelectValue placeholder="Choose an assessment..." />
+                  <SelectValue placeholder={t('assessmentPlaceholder')} />
                 </SelectTrigger>
                 <SelectContent>
                   {assessments.map((assessment) => (
@@ -569,8 +571,8 @@ export default function StaffTrainingTestingPage() {
                 <IconTarget className="h-12 w-12 text-muted-foreground mb-4" />
                 <p className="text-muted-foreground text-center">
                   {searchQuery 
-                    ? "No recommended trainings found matching your search." 
-                    : "No personalized recommendations available. Complete your assessment to get training recommendations."}
+                    ? t('noTrainingsSearch')
+                    : t('noTrainingsEmpty')}
                 </p>
               </div>
             ) : (
@@ -580,7 +582,7 @@ export default function StaffTrainingTestingPage() {
             {/* Desktop Summary */}
             {!isLoadingRecommended && (
               <div className="mt-4 text-center text-sm text-muted-foreground">
-                Showing {filteredRecommendedTrainings.length} of {recommendedTrainings.length} recommended trainings
+                {t('showingCount', { count: filteredRecommendedTrainings.length, total: recommendedTrainings.length })}
                 {searchQuery && ` for "${searchQuery}"`}
               </div>
             )}

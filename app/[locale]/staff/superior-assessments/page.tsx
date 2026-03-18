@@ -10,6 +10,7 @@ import { assessmentAPI, assessorAPI, staffAPI, assessmentResultAPI, positionComp
 import { toast } from "sonner"
 import { IconUsers, IconClipboardCheck, IconAlertCircle, IconCheck } from "@tabler/icons-react"
 import { format } from "date-fns"
+import { useTranslations } from "next-intl"
 
 interface Assessment {
   id: string
@@ -34,6 +35,7 @@ interface Subordinate {
 
 export default function SuperiorAssessmentsPage() {
   const router = useRouter()
+  const t = useTranslations('StaffSuperiorAssessmentsPage')
   const [assessments, setAssessments] = useState<Assessment[]>([])
   const [subordinates, setSubordinates] = useState<Subordinate[]>([])
   const [selectedAssessmentId, setSelectedAssessmentId] = useState<string>("")
@@ -176,14 +178,14 @@ export default function SuperiorAssessmentsPage() {
     return (
       <div className="space-y-4">
         <div>
-          <h1 className="text-3xl font-bold text-primary">Superior Assessments</h1>
+          <h1 className="text-3xl font-bold text-primary">{t('title')}</h1>
           <p className="text-muted-foreground mt-1">
-            Assess your subordinates' competencies
+            {t('description')}
           </p>
         </div>
         <Card>
           <CardContent className="py-8">
-            <div className="text-center text-muted-foreground">Loading...</div>
+            <div className="text-center text-muted-foreground">{t('loading')}</div>
           </CardContent>
         </Card>
       </div>
@@ -194,9 +196,9 @@ export default function SuperiorAssessmentsPage() {
     return (
       <div className="space-y-4">
         <div>
-          <h1 className="text-3xl font-bold text-primary">Superior Assessments</h1>
+          <h1 className="text-3xl font-bold text-primary">{t('title')}</h1>
           <p className="text-muted-foreground mt-1">
-            Assess your subordinates' competencies
+            {t('description')}
           </p>
         </div>
         <Card className="border-yellow-500 bg-yellow-50 dark:bg-yellow-950">
@@ -204,12 +206,12 @@ export default function SuperiorAssessmentsPage() {
             <div className="flex flex-col items-center gap-4 text-yellow-800 dark:text-yellow-200">
               <IconAlertCircle className="size-12" />
               <div className="text-center">
-                <p className="font-semibold text-lg">No Subordinates Found</p>
+                <p className="font-semibold text-lg">{t('noSubordinatesTitle')}</p>
                 <p className="text-sm mt-1">
-                  You have not been assigned as a superior assessor for any staff members.
+                  {t('noSubordinatesMsg')}
                 </p>
                 <p className="text-sm">
-                  Please contact the admin to set up assessor relationships.
+                  {t('noSubordinatesContact')}
                 </p>
               </div>
             </div>
@@ -222,9 +224,9 @@ export default function SuperiorAssessmentsPage() {
   return (
     <div className="space-y-4">
       <div>
-        <h1 className="text-3xl font-bold text-primary">Superior Assessments</h1>
+        <h1 className="text-3xl font-bold text-primary">{t('title')}</h1>
         <p className="text-muted-foreground mt-1">
-          Assess your subordinates' competencies
+          {t('description')}
         </p>
       </div>
 
@@ -233,13 +235,13 @@ export default function SuperiorAssessmentsPage() {
           <CardHeader className="pb-3">
             <CardTitle className="text-sm font-medium flex items-center gap-2">
               <IconUsers className="size-4" />
-              Your Subordinates
+              {t('yourSubordinates')}
             </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{subordinates.length}</div>
             <p className="text-xs text-muted-foreground mt-1">
-              Staff members to assess
+              {t('staffToAssess')}
             </p>
           </CardContent>
         </Card>
@@ -248,7 +250,7 @@ export default function SuperiorAssessmentsPage() {
           <CardHeader className="pb-3">
             <CardTitle className="text-sm font-medium flex items-center gap-2">
               <IconClipboardCheck className="size-4" />
-              Active Assessments
+              {t('activeAssessments')}
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -256,7 +258,7 @@ export default function SuperiorAssessmentsPage() {
               {assessments.filter(isWithinPeriod).length}
             </div>
             <p className="text-xs text-muted-foreground mt-1">
-              Currently available
+              {t('currentlyAvailable')}
             </p>
           </CardContent>
         </Card>
@@ -266,7 +268,7 @@ export default function SuperiorAssessmentsPage() {
         <Card>
           <CardContent className="py-8">
             <div className="text-center text-muted-foreground">
-              No assessments available
+              {t('noAssessments')}
             </div>
           </CardContent>
         </Card>
@@ -275,13 +277,13 @@ export default function SuperiorAssessmentsPage() {
           {/* Assessment Selection Dropdown */}
           <Card className="bg-primary text-primary-foreground border-primary hover:bg-primary/90">
             <CardHeader>
-              <CardTitle className="text-lg">Select Assessment</CardTitle>
-              <CardDescription className="text-white">Choose an assessment to evaluate your subordinates</CardDescription>
+              <CardTitle className="text-lg">{t('selectAssessmentTitle')}</CardTitle>
+              <CardDescription className="text-white">{t('selectAssessmentDesc')}</CardDescription>
             </CardHeader>
             <CardContent>
               <Select value={selectedAssessmentId} onValueChange={setSelectedAssessmentId} >
                 <SelectTrigger className="w-full bg-white text-black dark:bg-gray-800 dark:text-white">
-                  <SelectValue placeholder="Select an assessment" />
+                  <SelectValue placeholder={t('selectPlaceholder')} />
                 </SelectTrigger>
                 <SelectContent>
                   {assessments.map((assessment) => {
@@ -300,7 +302,7 @@ export default function SuperiorAssessmentsPage() {
                             variant={withinPeriod ? "default" : "secondary"}
                             className={`shrink-0 h-5 text-xs ml-2 ${withinPeriod ? 'bg-green-600 hover:bg-green-700' : 'bg-red-600 hover:bg-red-700 text-white'}`}
                           >
-                            {withinPeriod ? "Active" : "Closed"}
+                            {withinPeriod ? t('badgeActive') : t('badgeClosed')}
                           </Badge>
                         </div>
                         
@@ -337,7 +339,7 @@ export default function SuperiorAssessmentsPage() {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-2">
-                    <p className="text-sm font-medium">Select a subordinate to assess:</p>
+                    <p className="text-sm font-medium">{t('selectSubordinate')}</p>
                     <div className="grid gap-2">
                       {subordinates.map((subordinate) => {
                         // Check if assessment is completed for this subordinate
@@ -367,12 +369,12 @@ export default function SuperiorAssessmentsPage() {
                                 </div>
                               </div>
                               {withinPeriod && !isCompleted && (
-                                <Badge className="bg-yellow-500 hover:bg-yellow-600 text-white">Pending</Badge>
+                                <Badge className="bg-yellow-500 hover:bg-yellow-600 text-white">{t('badgePending')}</Badge>
                               )}
                               {isCompleted && (
                                 <Badge variant="default" className="bg-green-600 hover:bg-green-700 gap-1">
                                   <IconCheck className="size-3" />
-                                  Completed
+                                {t('badgeCompleted')}
                                 </Badge>
                               )}
                             </div>

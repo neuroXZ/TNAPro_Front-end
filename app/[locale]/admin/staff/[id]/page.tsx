@@ -512,7 +512,7 @@ export default function StaffProfilePage() {
                                     {t('positionCompetencies')}
                                 </CardTitle>
                                 <CardDescription>
-                                    {t('requiredCompetenciesFor', { position: staff.position?.name })}
+                                    {t('requiredCompetenciesFor', { position: staff.position?.name ?? '' })}
                                 </CardDescription>
                             </CardHeader>
                             <CardContent>

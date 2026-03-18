@@ -30,6 +30,7 @@ import {
   IconInfoCircle
 } from "@tabler/icons-react"
 import { format } from "date-fns"
+import { useTranslations } from "next-intl"
 import { Textarea } from "@/components/ui/textarea"
 import {
   Dialog,
@@ -114,6 +115,7 @@ export default function SuperiorAssessmentDetailPage() {
   const [isLoading, setIsLoading] = useState(true)
   const [isSaving, setIsSaving] = useState(false)
   const [userId, setUserId] = useState<string | null>(null)
+  const t = useTranslations('StaffAssessmentFormPage')
 
   useEffect(() => {
     const storedUser = localStorage.getItem('user')
@@ -408,11 +410,11 @@ export default function SuperiorAssessmentDetailPage() {
       <div className="space-y-4">
         <Button variant="ghost" onClick={() => router.back()}>
           <IconArrowLeft className="size-4 mr-2" />
-          Back
+          {t('back')}
         </Button>
         <Card>
           <CardContent className="py-8">
-            <div className="text-center text-muted-foreground">Loading...</div>
+            <div className="text-center text-muted-foreground">{t('loading')}</div>
           </CardContent>
         </Card>
       </div>
@@ -424,12 +426,12 @@ export default function SuperiorAssessmentDetailPage() {
       <div className="space-y-4">
         <Button variant="ghost" onClick={() => router.back()}>
           <IconArrowLeft className="size-4 mr-2" />
-          Back
+          {t('back')}
         </Button>
         <Card>
           <CardContent className="py-8">
             <div className="text-center text-muted-foreground">
-              Assessment not found
+              {t('notFound')}
             </div>
           </CardContent>
         </Card>
@@ -447,7 +449,7 @@ export default function SuperiorAssessmentDetailPage() {
     <div className="space-y-4">
       <Button variant="ghost" onClick={() => router.back()}>
         <IconArrowLeft className="size-4 mr-2" />
-        Back to Superior Assessments
+        {t('backToSuperiorAssessments')}
       </Button>
 
       <div className="flex items-start justify-between">
@@ -458,7 +460,7 @@ export default function SuperiorAssessmentDetailPage() {
           )}
         </div>
         <Badge variant={withinPeriod ? "default" : "secondary"}>
-          {withinPeriod ? "Active" : "Closed"}
+          {withinPeriod ? t('badgeActive') : t('badgeClosed')}
         </Badge>
       </div>
 
@@ -466,7 +468,7 @@ export default function SuperiorAssessmentDetailPage() {
         <CardHeader className="pb-3">
           <CardTitle className="text-sm font-medium flex items-center gap-2">
             <IconUser className="size-4" />
-            Assessing Subordinate
+            {t('assessingSubordinate')}
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -476,7 +478,7 @@ export default function SuperiorAssessmentDetailPage() {
               {subordinate.staffOrgId} • {subordinate.email}
             </div>
             <div className="text-sm">
-              <Badge variant="outline">{subordinate.position?.name || 'No Position'}</Badge>
+              <Badge variant="outline">{subordinate.position?.name || t('noPosition')}</Badge>
             </div>
           </div>
         </CardContent>
@@ -487,13 +489,13 @@ export default function SuperiorAssessmentDetailPage() {
           <CardHeader className="pb-3">
             <CardTitle className="text-sm font-medium flex items-center gap-2">
               <IconCalendar className="size-4" />
-              Assessment Period
+              {t('assessmentPeriod')}
             </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-sm">
               <div>{format(new Date(assessment.startDate), "dd MMM yyyy")}</div>
-              <div className="text-muted-foreground">to</div>
+              <div className="text-muted-foreground">{t('dateTo')}</div>
               <div>{format(new Date(assessment.endDate), "dd MMM yyyy")}</div>
             </div>
           </CardContent>
@@ -503,7 +505,7 @@ export default function SuperiorAssessmentDetailPage() {
           <CardHeader className="pb-3">
             <CardTitle className="text-sm font-medium flex items-center gap-2">
               <IconTrophy className="size-4" />
-              Progress
+              {t('progress')}
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -513,7 +515,7 @@ export default function SuperiorAssessmentDetailPage() {
               </div>
               <Progress value={progress} className="h-2" />
               <p className="text-xs text-muted-foreground">
-                {progress.toFixed(0)}% completed
+                {t('progressCompleted', { percent: progress.toFixed(0) })}
               </p>
             </div>
           </CardContent>
@@ -521,14 +523,14 @@ export default function SuperiorAssessmentDetailPage() {
 
         <Card>
           <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium">Superior Weightage</CardTitle>
+            <CardTitle className="text-sm font-medium">{t('superiorWeightage')}</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
               {(assessment.weightageSuperior * 100).toFixed(0)}%
             </div>
             <p className="text-xs text-muted-foreground mt-1">
-              of total assessment
+              {t('ofTotalAssessment')}
             </p>
           </CardContent>
         </Card>
@@ -536,15 +538,15 @@ export default function SuperiorAssessmentDetailPage() {
 
       <Card>
         <CardHeader>
-          <CardTitle>Rate Subordinate's Competencies</CardTitle>
+          <CardTitle>{t('rateSubordinateCompetencies')}</CardTitle>
           <CardDescription>
-            Rate based on the required competency level for their position
+            {t('rateSubordinateCompetenciesDesc')}
           </CardDescription>
         </CardHeader>
         <CardContent>
           {competencies.length === 0 ? (
             <div className="text-center py-8 text-muted-foreground">
-              No competencies assigned to this position
+              {t('noCompetenciesThisPosition')}
             </div>
           ) : (
             <CompetencyAssessmentTable
@@ -566,7 +568,7 @@ export default function SuperiorAssessmentDetailPage() {
             onClick={handleSaveAll}
             disabled={isSaving || !withinPeriod || isSubmitted}
           >
-            Save Draft
+            {t('saveDraft')}
           </Button>
           <Button 
             onClick={handleSubmit}
@@ -576,10 +578,10 @@ export default function SuperiorAssessmentDetailPage() {
           >
             {isSubmitted && <IconCheck className="size-4 mr-1" />}
             {isSubmitted 
-              ? "Assessment Submitted" 
+              ? t('assessmentSubmitted') 
               : isSaving 
-                ? "Submitting..." 
-                : "Submit Assessment"
+                ? t('submitting') 
+                : t('submitAssessment')
             }
           </Button>
         </div>
@@ -605,12 +607,13 @@ function CompetencyAssessmentTable({
   onRemarkChange,
   disabled
 }: CompetencyAssessmentTableProps) {
+  const t = useTranslations('StaffAssessmentFormPage')
   const [currentTabIndex, setCurrentTabIndex] = useState(0)
 
   // Group competencies by cluster with cluster info
   const groupedByCluster = competencies.reduce((acc, pc) => {
     const cluster = pc.competency?.cluster
-    const clusterName = cluster?.name || 'Uncategorized'
+    const clusterName = cluster?.name || t('uncategorized')
     if (!acc[clusterName]) {
       acc[clusterName] = {
         competencies: [],
@@ -673,9 +676,9 @@ function CompetencyAssessmentTable({
           <Card>
             <CardHeader>
               <div className="flex items-center justify-between">
-                <CardTitle className="text-lg">{clusterName} Competencies</CardTitle>
+                <CardTitle className="text-lg">{t('clusterCompetencies', { cluster: clusterName })}</CardTitle>
                 <Badge variant="outline">
-                  {clusterCompetencies.filter(pc => scores[pc.competency.id]?.score !== null).length} / {clusterCompetencies.length} Completed
+                  {t('clusterCompleted', { completed: clusterCompetencies.filter(pc => scores[pc.competency.id]?.score !== null).length, total: clusterCompetencies.length })}
                 </Badge>
               </div>
             </CardHeader>
@@ -686,8 +689,8 @@ function CompetencyAssessmentTable({
                   <table className="w-full">
                     <thead className="bg-primary text-primary-foreground">
                       <tr>
-                        <th className="px-3 py-2 text-left text-sm font-medium w-12">No</th>
-                        <th className="px-3 py-2 text-left text-sm font-medium min-w-[200px]">Competency</th>
+                        <th className="px-3 py-2 text-left text-sm font-medium w-12">{t('colNo')}</th>
+                        <th className="px-3 py-2 text-left text-sm font-medium min-w-[200px]">{t('colCompetency')}</th>
                         {/* <th className="px-3 py-2 text-center text-sm font-medium w-16">RCL</th> */}
                         <th className="px-3 py-2 text-center text-sm font-medium w-16">
                           <div className="flex items-center justify-center gap-1">
@@ -700,9 +703,9 @@ function CompetencyAssessmentTable({
                               </DialogTrigger>
                               <DialogContent className="max-w-lg">
                                 <DialogHeader>
-                                  <DialogTitle>Required Competency Level (RCL)</DialogTitle>
+                                  <DialogTitle>{t('rclDialogTitle')}</DialogTitle>
                                   <DialogDescription className="text-sm mb-4">
-                                    RCL indicates the minimum competency level required for your position in this specific competency.
+                                    {t('rclDialogDesc')}
                                   </DialogDescription>
                                 </DialogHeader>
                                 <div className="space-y-3">
@@ -735,7 +738,7 @@ function CompetencyAssessmentTable({
                             {level.value}
                           </th>
                         ))}
-                        <th className="px-3 py-2 text-left text-sm font-medium min-w-[150px]">Remarks</th>
+                        <th className="px-3 py-2 text-left text-sm font-medium min-w-[150px]">{t('colRemarks')}</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -779,7 +782,7 @@ function CompetencyAssessmentTable({
                                   value={competencyScore?.remark || ''}
                                   onChange={(e) => onRemarkChange(pc.competency.id, e.target.value)}
                                   disabled={disabled}
-                                  placeholder="Add remark..."
+                                  placeholder={t('addRemark')}
                                   className="min-h-[60px] text-sm resize-none"
                                 />
                                 <IconPencil className="size-4 text-muted-foreground shrink-0" />
@@ -820,14 +823,14 @@ function CompetencyAssessmentTable({
                               <div className="space-y-4">
                                 {pc.competency?.description && (
                                   <div>
-                                    <h4 className="font-medium text-sm mb-2">Description:</h4>
+                                      <h4 className="font-medium text-sm mb-2">{t('descriptionLabel')}</h4>
                                     <p className="text-sm text-muted-foreground">
                                       {pc.competency.description}
                                     </p>
                                   </div>
                                 )}
                                 <div>
-                                  <h4 className="font-medium text-sm mb-2">Required Competency Level (RCL): {rcl}</h4>
+                                  <h4 className="font-medium text-sm mb-2">{t('rclMobileHeader', { rcl })}</h4>
                                   <div className="space-y-2">
                                     {sortedLevels.map((level) => (
                                       <div 
@@ -863,9 +866,9 @@ function CompetencyAssessmentTable({
                         {/* Rating Circles with RCL */}
                         <div className="space-y-3">
                           <div className="flex items-center justify-between">
-                            <Label className="text-sm font-medium">Select Level:</Label>
+                            <Label className="text-sm font-medium">{t('selectLevel')}</Label>
                             <div className="flex items-center gap-2">
-                              <span className="text-xs text-muted-foreground">RCL:</span>
+                              <span className="text-xs text-muted-foreground">{t('rclLabel')}</span>
                               <div className="flex items-center justify-center w-6 h-6 rounded-full bg-muted border text-xs font-semibold">
                                 {rcl}
                               </div>
@@ -901,12 +904,12 @@ function CompetencyAssessmentTable({
 
                         {/* Remarks */}
                         <div className="space-y-2">
-                          <Label className="text-sm font-medium">Remarks:</Label>
+                          <Label className="text-sm font-medium">{t('remarksLabel')}</Label>
                           <Textarea
                             value={competencyScore?.remark || ''}
                             onChange={(e) => onRemarkChange(pc.competency.id, e.target.value)}
                             disabled={disabled}
-                            placeholder="Add your remarks here..."
+                            placeholder={t('addRemarksHere')}
                             className="min-h-[80px] text-sm resize-none"
                           />
                         </div>
@@ -930,11 +933,11 @@ function CompetencyAssessmentTable({
           className="flex items-center gap-2"
         >
           <IconArrowLeft className="size-4" />
-          Previous
+          {t('previous')}
         </Button>
 
         <div className="text-sm text-muted-foreground">
-          Tab {currentTabIndex + 1} of {clusterEntries.length}
+          {t('tabCounter', { current: currentTabIndex + 1, total: clusterEntries.length })}
         </div>
 
         <Button
@@ -943,7 +946,7 @@ function CompetencyAssessmentTable({
           disabled={disabled || currentTabIndex === clusterEntries.length - 1}
           className="flex items-center gap-2"
         >
-          Next
+          {t('next')}
           <IconArrowLeft className="size-4 rotate-180" />
         </Button>
       </div>

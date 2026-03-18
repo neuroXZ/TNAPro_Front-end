@@ -16,6 +16,7 @@ import { IconUser, IconMail, IconBriefcase, IconBuilding, IconEdit, IconUsers } 
 import { authAPI, staffAPI, assessorAPI } from "@/lib/api"
 import { toast } from "sonner"
 import { Skeleton } from "@/components/ui/skeleton"
+import { useTranslations } from "next-intl"
 
 interface ProfileData {
   id: string
@@ -46,6 +47,7 @@ interface ProfileData {
 }
 
 export default function MyProfile() {
+  const t = useTranslations('StaffProfilePage')
   const [profile, setProfile] = useState<ProfileData | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [isEditing, setIsEditing] = useState(false)
@@ -287,23 +289,23 @@ export default function MyProfile() {
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-primary">My Profile</h1>
+          <h1 className="text-3xl font-bold text-primary">{t('title')}</h1>
           <p className="text-muted-foreground">
-            View and manage your profile information
+            {t('description')}
           </p>
         </div>
         <Button variant="outline" onClick={() => setIsEditing(!isEditing)}>
           <IconEdit className="mr-2 size-4" />
-          {isEditing ? "Cancel" : "Edit Profile"}
+          {isEditing ? t('cancelBtn') : t('editBtn')}
         </Button>
       </div>
 
       <div className="grid gap-4 md:grid-cols-3">
         <Card className="md:col-span-1">
           <CardHeader>
-            <CardTitle>Profile Picture</CardTitle>
+            <CardTitle>{t('profilePictureTitle')}</CardTitle>
             <CardDescription>
-              Your profile photo
+              {t('profilePictureDesc')}
             </CardDescription>
           </CardHeader>
           <CardContent className="flex flex-col items-center">
@@ -331,7 +333,7 @@ export default function MyProfile() {
             />
             {imageLoadError && profile?.image && (
               <p className="text-xs text-red-500 mt-1">
-                Failed to load profile image
+                {t('imageError')}
               </p>
             )}
 
@@ -349,13 +351,13 @@ export default function MyProfile() {
                 disabled={!isEditing || isUploadingPhoto}
                 onClick={() => document.getElementById('photo-upload')?.click()}
               >
-                {isUploadingPhoto ? 'Uploading...' : 'Change Photo'}
+                {isUploadingPhoto ? t('uploading') : t('changePhoto')}
               </Button>
             </div>
             <Card className="mt-6 w-full p-2 gap-2">
               <div className="grid gap-2">
                 <div className="flex items-center gap-2">
-                  <Label htmlFor="position">Position</Label>
+                  <Label htmlFor="position">{t('labelPosition')}</Label>
                   <IconBriefcase className="size-4 text-muted-foreground" />
                   <Input
                     id="position"
@@ -368,7 +370,7 @@ export default function MyProfile() {
 
               <div className="grid gap-2">
                 <div className="flex items-center gap-2">
-                  <Label htmlFor="unit">Unit</Label>
+                  <Label htmlFor="unit">{t('labelUnit')}</Label>
                   <IconBuilding className="size-4 text-muted-foreground" />
                   <Input
                     id="unit"
@@ -384,14 +386,14 @@ export default function MyProfile() {
 
         <Card className="md:col-span-2">
           <CardHeader>
-            <CardTitle>Personal Information</CardTitle>
+            <CardTitle>{t('personalInfoTitle')}</CardTitle>
             <CardDescription>
-              Your basic information
+              {t('personalInfoDesc')}
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid gap-2">
-              <Label htmlFor="name">Full Name</Label>
+              <Label htmlFor="name">{t('labelFullName')}</Label>
               <div className="flex items-center gap-2">
                 <IconUser className="size-4 text-muted-foreground" />
                 <Input
@@ -404,7 +406,7 @@ export default function MyProfile() {
               </div>
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="email">Email</Label>
+              <Label htmlFor="email">{t('labelEmail')}</Label>
               <div className="flex items-center gap-2">
                 <IconMail className="size-4 text-muted-foreground" />
                 <Input
@@ -418,7 +420,7 @@ export default function MyProfile() {
               </div>
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="staffId">Staff ID</Label>
+              <Label htmlFor="staffId">{t('labelStaffId')}</Label>
               <Input
                 id="staffId"
                 value={profile?.staffOrgId || "-"}
@@ -427,18 +429,18 @@ export default function MyProfile() {
               />
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="gender">Gender</Label>
+              <Label htmlFor="gender">{t('labelGender')}</Label>
               {isEditing ? (
                 <Select
                   value={formData.gender}
                   onValueChange={(value) => setFormData({ ...formData, gender: value })}
                 >
                   <SelectTrigger id="gender">
-                    <SelectValue placeholder="Select gender" />
+                    <SelectValue placeholder={t('genderPlaceholder')} />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="Male">Male</SelectItem>
-                    <SelectItem value="Female">Female</SelectItem>
+                    <SelectItem value="Male">{t('genderMale')}</SelectItem>
+                    <SelectItem value="Female">{t('genderFemale')}</SelectItem>
                   </SelectContent>
                 </Select>
               ) : (
@@ -455,9 +457,9 @@ export default function MyProfile() {
       </div>
       <Card>
         <CardHeader>
-          <CardTitle>Supervisor</CardTitle>
+          <CardTitle>{t('supervisorTitle')}</CardTitle>
           <CardDescription>
-            Your reporting manager
+            {t('supervisorDesc')}
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -478,16 +480,16 @@ export default function MyProfile() {
               </span>
             </div>
           ) : (
-            <p className="text-muted-foreground">No supervisor assigned.</p>
+            <p className="text-muted-foreground">{t('noSupervisor')}</p>
           )}
         </CardContent>
       </Card>
 
       <Card>
         <CardHeader>
-          <CardTitle>Subordinates</CardTitle>
+          <CardTitle>{t('subordinatesTitle')}</CardTitle>
           <CardDescription>
-            Staff members you supervise
+            {t('subordinatesDesc')}
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -506,7 +508,7 @@ export default function MyProfile() {
               ))}
             </div>
           ) : (
-            <p className="text-muted-foreground">You have no subordinates assigned.</p>
+            <p className="text-muted-foreground">{t('noSubordinates')}</p>
           )}
         </CardContent>
       </Card>
@@ -518,10 +520,10 @@ export default function MyProfile() {
             // Reset form data to original profile data
             if (profile) updateFormData(profile)
           }}>
-            Cancel
+            {t('cancelBtn')}
           </Button>
           <Button onClick={handleSaveChanges}>
-            Save Changes
+            {t('saveBtn')}
           </Button>
         </div>
       )}

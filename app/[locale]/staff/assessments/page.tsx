@@ -1,6 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
+import { useTranslations } from "next-intl"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
@@ -35,6 +36,7 @@ interface AssessmentWithStatus extends Assessment {
 }
 
 export default function MyAssessments() {
+  const t = useTranslations('StaffAssessmentsPage')
   const [assessments, setAssessments] = useState<AssessmentWithStatus[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [userId, setUserId] = useState<string | null>(null)
@@ -250,14 +252,14 @@ export default function MyAssessments() {
     return (
       <div className="space-y-4">
         <div>
-          <h1 className="text-3xl font-bold text-primary">My Assessments</h1>
+          <h1 className="text-3xl font-bold text-primary">{t('title')}</h1>
           <p className="text-muted-foreground">
-            View your assessment results and performance
+            {t('description')}
           </p>
         </div>
         <Card>
           <CardContent className="py-8">
-            <div className="text-center text-muted-foreground">Loading...</div>
+            <div className="text-center text-muted-foreground">{t('loading')}</div>
           </CardContent>
         </Card>
       </div>
@@ -268,15 +270,15 @@ export default function MyAssessments() {
     return (
       <div className="space-y-4">
         <div>
-          <h1 className="text-3xl font-bold text-primary">My Assessments</h1>
+          <h1 className="text-3xl font-bold text-primary">{t('title')}</h1>
           <p className="text-muted-foreground">
-            View your assessment results and performance
+            {t('description')}
           </p>
         </div>
         <Card>
           <CardContent className="py-8">
             <div className="text-center text-muted-foreground">
-              Please login to view your assessments
+              {t('notLoggedIn')}
             </div>
           </CardContent>
         </Card>
@@ -287,9 +289,9 @@ export default function MyAssessments() {
   return (
     <div className="space-y-4">
       <div>
-        <h1 className="text-3xl font-bold text-primary">My Assessments</h1>
+        <h1 className="text-3xl font-bold text-primary">{t('title')}</h1>
         <p className="text-muted-foreground">
-          View your assessment results and performance
+          {t('description')}
         </p>
       </div>
 
@@ -339,10 +341,10 @@ export default function MyAssessments() {
 
       <Tabs defaultValue="all" className="space-y-4">
         <TabsList>
-          <TabsTrigger value="all">All Assessments</TabsTrigger>
-          <TabsTrigger value="completed">Completed</TabsTrigger>
-          <TabsTrigger value="pending">Pending</TabsTrigger>
-          <TabsTrigger value="expired">Expired</TabsTrigger>
+          <TabsTrigger value="all">{t('tabAll')}</TabsTrigger>
+          <TabsTrigger value="completed">{t('tabCompleted')}</TabsTrigger>
+          <TabsTrigger value="pending">{t('tabPending')}</TabsTrigger>
+          <TabsTrigger value="expired">{t('tabExpired')}</TabsTrigger>
         </TabsList>
 
         <TabsContent value="all" className="space-y-4">
@@ -350,18 +352,18 @@ export default function MyAssessments() {
             <CardHeader>
               <div className="flex items-center justify-between">
                 <div>
-                  <CardTitle>Assessment History</CardTitle>
+                  <CardTitle>{t('cardAllTitle')}</CardTitle>
                   <CardDescription>
-                    All your assessment records
+                    {t('cardAllDesc')}
                   </CardDescription>
                 </div>
-                <Badge variant="outline">{assessments.length} Total</Badge>
+                <Badge variant="outline">{t('totalBadge', { count: assessments.length })}</Badge>
               </div>
             </CardHeader>
             <CardContent>
               {assessments.length === 0 ? (
                 <div className="text-center py-8 text-muted-foreground">
-                  No assessment records found
+                  {t('emptyAll')}
                 </div>
               ) : (
                 <div className="space-y-3">
@@ -379,18 +381,18 @@ export default function MyAssessments() {
             <CardHeader>
               <div className="flex items-center justify-between">
                 <div>
-                  <CardTitle>Completed Assessments</CardTitle>
+                  <CardTitle>{t('cardCompletedTitle')}</CardTitle>
                   <CardDescription>
-                    Assessments you have completed
+                    {t('cardCompletedDesc')}
                   </CardDescription>
                 </div>
-                <Badge variant="outline">{completedAssessments.length} Total</Badge>
+                <Badge variant="outline">{t('totalBadge', { count: completedAssessments.length })}</Badge>
               </div>
             </CardHeader>
             <CardContent>
               {completedAssessments.length === 0 ? (
                 <div className="text-center py-8 text-muted-foreground">
-                  No completed assessments
+                  {t('emptyCompleted')}
                 </div>
               ) : (
                 <div className="space-y-3">
@@ -408,18 +410,18 @@ export default function MyAssessments() {
             <CardHeader>
               <div className="flex items-center justify-between">
                 <div>
-                  <CardTitle>Pending Assessments</CardTitle>
+                  <CardTitle>{t('cardPendingTitle')}</CardTitle>
                   <CardDescription>
-                    Assessments awaiting your response
+                    {t('cardPendingDesc')}
                   </CardDescription>
                 </div>
-                <Badge variant="outline">{pendingAssessments.length} Total</Badge>
+                <Badge variant="outline">{t('totalBadge', { count: pendingAssessments.length })}</Badge>
               </div>
             </CardHeader>
             <CardContent>
               {pendingAssessments.length === 0 ? (
                 <div className="text-center py-8 text-muted-foreground">
-                  No pending assessments
+                  {t('emptyPending')}
                 </div>
               ) : (
                 <div className="space-y-3">
@@ -437,18 +439,18 @@ export default function MyAssessments() {
             <CardHeader>
               <div className="flex items-center justify-between">
                 <div>
-                  <CardTitle>Expired Assessments</CardTitle>
+                  <CardTitle>{t('cardExpiredTitle')}</CardTitle>
                   <CardDescription>
-                    Assessments that have passed their due date
+                    {t('cardExpiredDesc')}
                   </CardDescription>
                 </div>
-                <Badge variant="destructive" className="text-white">{expiredAssessments.length} Total</Badge>
+                <Badge variant="destructive" className="text-white">{t('totalBadge', { count: expiredAssessments.length })}</Badge>
               </div>
             </CardHeader>
             <CardContent>
               {expiredAssessments.length === 0 ? (
                 <div className="text-center py-8 text-muted-foreground">
-                  No expired assessments
+                  {t('emptyExpired')}
                 </div>
               ) : (
                 <div className="space-y-3">
@@ -466,6 +468,7 @@ export default function MyAssessments() {
 }
 
 function AssessmentCard({ assessment }: { assessment: AssessmentWithStatus }) {
+  const t = useTranslations('StaffAssessmentsPage')
   const handleStartAssessment = (assessmentId: string) => {
     // Navigate to assessment detail/form page
     window.location.href = `/staff/assessments/${assessmentId}`
@@ -482,15 +485,15 @@ function AssessmentCard({ assessment }: { assessment: AssessmentWithStatus }) {
     endDate.setHours(0, 0, 0, 0)
     
     if (currentDate < startDate) {
-      return { status: "Coming Soon", variant: "secondary" as const, className: "bg-yellow-500 text-white hover:bg-yellow-900" }
+      return { status: t('statusComingSoon'), variant: "secondary" as const, className: "bg-yellow-500 text-white hover:bg-yellow-900" }
     } else if (currentDate >= startDate && currentDate <= endDate) {
-      return { status: "Open", variant: "default" as const, className: "bg-green-500 text-white hover:bg-green-600" }
+      return { status: t('statusOpen'), variant: "default" as const, className: "bg-green-500 text-white hover:bg-green-600" }
     } else {
       // Check if completed or expired
       if (assessment.status === "completed") {
-        return { status: "Completed", variant: "outline" as const, className: "bg-blue-500 text-white hover:bg-blue-600" }
+        return { status: t('statusCompleted'), variant: "outline" as const, className: "bg-blue-500 text-white hover:bg-blue-600" }
       } else {
-        return { status: "Expired", variant: "destructive" as const, className: "bg-red-500 text-white hover:bg-red-600" }
+        return { status: t('statusExpired'), variant: "destructive" as const, className: "bg-red-500 text-white hover:bg-red-600" }
       }
     }
   }
@@ -509,9 +512,9 @@ function AssessmentCard({ assessment }: { assessment: AssessmentWithStatus }) {
 
   // Determine button text and styling
   const getButtonConfig = () => {
-    if (dateStatus.status !== "Open") {
+    if (dateStatus.status !== t('statusOpen')) {
       return {
-        text: "Close",
+        text: t('btnClose'),
         variant: "outline" as const,
         className: "",
         icon: <IconFileText className="size-4 mr-1" />,
@@ -521,7 +524,7 @@ function AssessmentCard({ assessment }: { assessment: AssessmentWithStatus }) {
 
     if (selfAssessmentStatus.hasSubmitted) {
       return {
-        text: "Submitted",
+        text: t('btnSubmitted'),
         variant: "outline" as const,
         className: "bg-green-50 border-green-500 text-green-700 hover:bg-green-100",
         icon: <IconCheck className="size-4 mr-1" />,
@@ -531,7 +534,7 @@ function AssessmentCard({ assessment }: { assessment: AssessmentWithStatus }) {
 
     if (selfAssessmentStatus.hasDraft) {
       return {
-        text: "Save Draft",
+        text: t('btnSaveDraft'),
         variant: "outline" as const,
         className: "bg-yellow-50 border-yellow-500 text-yellow-700 hover:bg-yellow-100",
         icon: <IconPencil className="size-4 mr-1" />,
@@ -540,7 +543,7 @@ function AssessmentCard({ assessment }: { assessment: AssessmentWithStatus }) {
     }
 
     return {
-      text: "Start",
+      text: t('btnStart'),
       variant: "default" as const,
       className: "",
       icon: <IconFileText className="size-4 mr-1" />,
@@ -577,7 +580,7 @@ function AssessmentCard({ assessment }: { assessment: AssessmentWithStatus }) {
               <div className="flex items-center gap-1">
                 <IconClipboardCheck className="size-4" />
                 <span className="text-xs sm:text-sm">
-                  {assessment.completedCompetencies} / {assessment.totalCompetencies} competencies
+                  {t('competenciesLabel', { completed: assessment.completedCompetencies, total: assessment.totalCompetencies })}
                 </span>
               </div>
             </div>
@@ -587,19 +590,19 @@ function AssessmentCard({ assessment }: { assessment: AssessmentWithStatus }) {
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
           <div className="grid grid-cols-3 gap-4 flex-1">
             <div className="space-y-1">
-              <p className="text-xs text-muted-foreground">Average</p>
+              <p className="text-xs text-muted-foreground">{t('scoreAverage')}</p>
               <p className="text-lg font-semibold">
                 {assessment.averageScore > 0 ? assessment.averageScore.toFixed(2) : "-"}
               </p>
             </div>
             <div className="space-y-1">
-              <p className="text-xs text-muted-foreground">Self</p>
+              <p className="text-xs text-muted-foreground">{t('scoreSelf')}</p>
               <p className="text-lg font-semibold">
                 {assessment.selfScore > 0 ? assessment.selfScore.toFixed(2) : "-"}
               </p>
             </div>
             <div className="space-y-1">
-              <p className="text-xs text-muted-foreground">Superior</p>
+              <p className="text-xs text-muted-foreground">{t('scoreSuperior')}</p>
               <p className="text-lg font-semibold">
                 {assessment.superiorScore > 0 ? assessment.superiorScore.toFixed(2) : "-"}
               </p>
@@ -608,7 +611,7 @@ function AssessmentCard({ assessment }: { assessment: AssessmentWithStatus }) {
           <Button 
             size="sm" 
             onClick={() => {
-              if (dateStatus.status === "Open") {
+              if (dateStatus.status === t('statusOpen')) {
                 handleStartAssessment(assessment.id)
               }
             }}

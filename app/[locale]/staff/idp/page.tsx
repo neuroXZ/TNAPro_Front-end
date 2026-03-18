@@ -37,6 +37,7 @@ import {
   IconInfoCircle
 } from "@tabler/icons-react"
 import { format } from "date-fns"
+import { useTranslations } from "next-intl"
 
 interface CompetencyAnalysis {
   competencyId: string
@@ -78,6 +79,7 @@ interface Cluster {
 export default function MyIdpPage() {
   const { user } = useAuth()
   const isMobile = useIsMobile()
+  const t = useTranslations('StaffIdpPage')
   const [assessments, setAssessments] = useState<Assessment[]>([])
   const [selectedAssessmentId, setSelectedAssessmentId] = useState<string>("")
   const [idpResult, setIdpResult] = useState<IdpResult | null>(null)
@@ -303,10 +305,10 @@ export default function MyIdpPage() {
     <div className={`space-y-4 ${isMobile ? 'space-y-3' : 'space-y-4'}`}>
       <div className={isMobile ? 'px-1' : ''}>
         <h1 className={`font-bold text-primary ${isMobile ? 'text-lg' : 'text-3xl'}`}>
-          {isMobile ? 'My Individual Development Plan (IDP)' : 'My Individual Development Plan (IDP)'}
+          {t('title')}
         </h1>
         <p className={`text-muted-foreground mt-1 ${isMobile ? 'text-xs' : 'text-sm'}`}>
-          View your personalized development plan based on competency assessment results
+          {t('description')}
         </p>
       </div>
 
@@ -314,22 +316,22 @@ export default function MyIdpPage() {
       {isMobile ? (
         <MobileCard>
           <MobileCardHeader>
-            <MobileCardTitle>Generate IDP</MobileCardTitle>
+            <MobileCardTitle>{t('generateCardTitle')}</MobileCardTitle>
             <p className="text-xs text-muted-foreground mt-1">
-              Select an assessment to generate your development plan
+              {t('generateCardDesc')}
             </p>
           </MobileCardHeader>
           <MobileCardContent>
             <div className="space-y-3">
               <div className="space-y-2">
-                <Label htmlFor="assessment" className="text-xs">Assessment</Label>
+                <Label htmlFor="assessment" className="text-xs">{t('assessmentLabel')}</Label>
                 <Select
                   value={selectedAssessmentId}
                   onValueChange={setSelectedAssessmentId}
                   disabled={isLoadingAssessments}
                 >
                   <SelectTrigger id="assessment" className="h-9">
-                    <SelectValue placeholder="Select an assessment" />
+                    <SelectValue placeholder={t('assessmentPlaceholder')} />
                   </SelectTrigger>
                   <SelectContent>
                     {assessments.map((assessment) => (
@@ -352,11 +354,11 @@ export default function MyIdpPage() {
                 size="sm"
               >
                 {isLoading ? (
-                  <>Generating...</>
+                  <>{t('generating')}</>
                 ) : (
                   <>
                     <IconFileText className="size-3 mr-2" />
-                    Generate IDP
+                    {t('generateBtn')}
                   </>
                 )}
               </Button>
@@ -366,23 +368,23 @@ export default function MyIdpPage() {
       ) : (
         <Card>
           <CardHeader>
-            <CardTitle>Generate IDP</CardTitle>
+            <CardTitle>{t('generateCardTitle')}</CardTitle>
             <CardDescription>
-              Select an assessment to generate your development plan
+              {t('generateCardDesc')}
             </CardDescription>
 
           </CardHeader>
           <CardContent>
             <div className="flex items-center gap-4">
               <div className="flex-1 space-y-2">
-                <Label htmlFor="assessment">Assessment</Label>
+                <Label htmlFor="assessment">{t('assessmentLabel')}</Label>
                 <Select
                   value={selectedAssessmentId}
                   onValueChange={setSelectedAssessmentId}
                   disabled={isLoadingAssessments}
                 >
                   <SelectTrigger id="assessment">
-                    <SelectValue placeholder="Select an assessment" />
+                    <SelectValue placeholder={t('assessmentPlaceholder')} />
                   </SelectTrigger>
                   <SelectContent>
                     {assessments.map((assessment) => (
@@ -400,11 +402,11 @@ export default function MyIdpPage() {
                   disabled={!selectedAssessmentId || isLoading}
                 >
                   {isLoading ? (
-                    <>Generating...</>
+                    <>{t('generating')}</>
                   ) : (
                     <>
                       <IconFileText className="size-4 mr-2" />
-                      Generate IDP
+                      {t('generateBtn')}
                     </>
                   )}
                 </Button>
@@ -429,21 +431,21 @@ export default function MyIdpPage() {
                     {idpResult.positionName}
                   </p>
                   <Badge variant="outline" className="text-xs w-fit">
-                    Generated: {format(new Date(idpResult.generatedAt), "dd MMM yyyy")}
+                    {t('generated', { date: format(new Date(idpResult.generatedAt), "dd MMM yyyy") })}
                   </Badge>
                 </div>
               </MobileCardHeader>
               <MobileCardContent>
                 <div className="grid grid-cols-2 gap-3">
                   <div className="bg-muted/50 rounded-lg p-3">
-                    <div className="text-xs text-muted-foreground">Total Competencies</div>
+                    <div className="text-xs text-muted-foreground">{t('totalCompetencies')}</div>
                     <div className="text-lg font-bold">{filteredCompetencies.length}</div>
                     {selectedResultCluster !== "all" && (
                       <div className="text-[10px] text-muted-foreground">of {idpResult.competencyAnalysis.length} total</div>
                     )}
                   </div>
                   <div className="bg-muted/50 rounded-lg p-3">
-                    <div className="text-xs text-muted-foreground">Need Training</div>
+                    <div className="text-xs text-muted-foreground">{t('needsTraining')}</div>
                     <div className="text-lg font-bold text-red-600">
                       {filteredCompetencies.filter(c => c.developmentStrategies?.training === true).length}
                     </div>
@@ -465,7 +467,7 @@ export default function MyIdpPage() {
                     </CardDescription>
                   </div>
                   <Badge variant="outline">
-                    Generated: {format(new Date(idpResult.generatedAt), "dd MMM yyyy HH:mm")}
+                    {t('generated', { date: format(new Date(idpResult.generatedAt), "dd MMM yyyy HH:mm") })}
                   </Badge>
                 </div>
               </CardHeader>
@@ -473,7 +475,7 @@ export default function MyIdpPage() {
                 <div className="grid gap-4 md:grid-cols-3">
                   <Card>
                     <CardHeader className="pb-3">
-                      <CardTitle className="text-sm font-medium">Total Competencies</CardTitle>
+                      <CardTitle className="text-sm font-medium">{t('totalCompetencies')}</CardTitle>
                     </CardHeader>
                     <CardContent>
                       <div className="text-2xl font-bold">{filteredCompetencies.length}</div>
@@ -485,7 +487,7 @@ export default function MyIdpPage() {
 
                   <Card>
                     <CardHeader className="pb-3">
-                      <CardTitle className="text-sm font-medium">Needs Training</CardTitle>
+                      <CardTitle className="text-sm font-medium">{t('needsTraining')}</CardTitle>
                     </CardHeader>
                     <CardContent>
                       <div className="text-2xl font-bold text-red-600">
@@ -496,7 +498,7 @@ export default function MyIdpPage() {
 
                   <Card>
                     <CardHeader className="pb-3">
-                      <CardTitle className="text-sm font-medium">Average Gap</CardTitle>
+                      <CardTitle className="text-sm font-medium">{t('averageGap')}</CardTitle>
                     </CardHeader>
                     <CardContent>
                       <div className="text-2xl font-bold text-orange-600">
@@ -518,10 +520,10 @@ export default function MyIdpPage() {
               <MobileCardHeader>
                 <MobileCardTitle className="flex items-center gap-2">
                   <IconTrendingUp className="size-4" />
-                  Competency Analysis
+                  {t('analysisTitle')}
                 </MobileCardTitle>
                 <p className="text-xs text-muted-foreground mt-1">
-                  Individual development recommendations for each competency
+                  {t('analysisDesc')}
                 </p>
               </MobileCardHeader>
               <MobileCardContent>
@@ -557,19 +559,19 @@ export default function MyIdpPage() {
 
                       {comp.gap > 0 && (
                         <div className="pt-2 border-t">
-                          <div className="text-xs font-medium text-foreground mb-1">Development Strategies:</div>
+                          <div className="text-xs font-medium text-foreground mb-1">{t('devStrategiesLabel')}</div>
                           <div className="flex flex-wrap gap-1">
                             {comp.developmentStrategies.training && (
-                              <Badge variant="outline" className="text-[10px] h-5">Training</Badge>
+                              <Badge variant="outline" className="text-[10px] h-5">{t('strategyTraining')}</Badge>
                             )}
                             {comp.developmentStrategies.coaching && (
-                              <Badge variant="outline" className="text-[10px] h-5">Coaching</Badge>
+                              <Badge variant="outline" className="text-[10px] h-5">{t('strategyCoaching')}</Badge>
                             )}
                             {comp.developmentStrategies.selfLearning && (
-                              <Badge variant="outline" className="text-[10px] h-5">Self Learning</Badge>
+                              <Badge variant="outline" className="text-[10px] h-5">{t('strategySelfLearning')}</Badge>
                             )}
                             {comp.developmentStrategies.workExperience && (
-                              <Badge variant="outline" className="text-[10px] h-5">Work Experience</Badge>
+                              <Badge variant="outline" className="text-[10px] h-5">{t('strategyWorkExp')}</Badge>
                             )}
                           </div>
                         </div>
@@ -579,10 +581,10 @@ export default function MyIdpPage() {
                 </div>
                 <Select value={selectedResultCluster} onValueChange={setSelectedResultCluster}>
                   <SelectTrigger className="w-[200px]">
-                    <SelectValue placeholder="Filter by Cluster" />
+                    <SelectValue placeholder={t('filterCluster')} />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="all">All Clusters</SelectItem>
+                    <SelectItem value="all">{t('allClusters')}</SelectItem>
                     {clusterList.map((cluster) => (
                       <SelectItem key={cluster.id} value={cluster.id}>
                         {cluster.name}
@@ -602,18 +604,18 @@ export default function MyIdpPage() {
                     className="w-full"
                   >
                     {isExporting ? (
-                      "Exporting..."
+                      t('exporting')
                     ) : (
                       <>
                         <IconDownload className="size-3 mr-2" />
-                        Export PDF
+                        {t('viewPdf')}
                       </>
                     )}
                   </Button>
                 </div>
                 {selectedResultCluster !== "all" && (
                   <div className="text-sm text-muted-foreground">
-                    Showing {filteredCompetencies.length} of {idpResult.competencyAnalysis.length} competencies
+                    {t('showingFilter', { count: filteredCompetencies.length, total: idpResult.competencyAnalysis.length })}
                   </div>
                 )}
               </MobileCardContent>
@@ -625,15 +627,15 @@ export default function MyIdpPage() {
             <Card>
               <CardHeader>
                 <div className="flex items-center justify-between">
-                  <CardTitle>Competency Gap Analysis</CardTitle>
+                  <CardTitle>{t('tableTitle')}</CardTitle>
                   <div className="flex gap-2">
                     <div>
                       <Select value={selectedResultCluster} onValueChange={setSelectedResultCluster}>
                         <SelectTrigger className="w-[200px]">
-                          <SelectValue placeholder="Filter by Cluster" />
+                          <SelectValue placeholder={t('filterCluster')} />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="all">All Clusters</SelectItem>
+                          <SelectItem value="all">{t('allClusters')}</SelectItem>
                           {clusterList.map((cluster) => (
                             <SelectItem key={cluster.id} value={cluster.id}>
                               {cluster.name}
@@ -648,7 +650,7 @@ export default function MyIdpPage() {
                       disabled={isExporting}
                     >
                       <IconDownload className="size-4 mr-2" />
-                      {isExporting ? "Exporting..." : "Export CSV"}
+                      {isExporting ? t('exporting') : t('exportCsv')}
                     </Button>
                     <Button
                       variant="outline"
@@ -657,7 +659,7 @@ export default function MyIdpPage() {
                       disabled={isExporting}
                     >
                       <IconDownload className="size-4 mr-2" />
-                      {isExporting ? "Opening..." : "View PDF"}
+                      {isExporting ? t('opening') : t('viewPdf')}
                     </Button>
                   </div>
                 </div>
@@ -668,28 +670,28 @@ export default function MyIdpPage() {
                     <table className="w-full">
                       <thead className="bg-muted">
                         <tr>
-                          <th rowSpan={2} className="px-4 py-3 text-left text-sm font-medium border-r align-middle">Competency</th>
-                          <th rowSpan={2} className="px-3 py-3 text-center text-sm font-medium border-r align-middle">RCL</th>
-                          <th colSpan={3} className="px-3 py-2 text-center text-sm font-medium border-r border-b">Assessment Result</th>
-                          <th colSpan={4} className="px-3 py-2 text-center text-sm font-medium">Development Strategy</th>
+                          <th rowSpan={2} className="px-4 py-3 text-left text-sm font-medium border-r align-middle">{t('colCompetency')}</th>
+                          <th rowSpan={2} className="px-3 py-3 text-center text-sm font-medium border-r align-middle">{t('colRcl')}</th>
+                          <th colSpan={3} className="px-3 py-2 text-center text-sm font-medium border-r border-b">{t('colAssessmentResult')}</th>
+                          <th colSpan={4} className="px-3 py-2 text-center text-sm font-medium">{t('colDevStrategy')}</th>
                         </tr>
                         <tr>
-                          <th className="px-3 py-2 text-center text-sm font-medium">Self</th>
-                          <th className="px-3 py-2 text-center text-sm font-medium">Superior</th>
-                          <th className="px-3 py-2 text-center text-sm font-medium border-r">Gap</th>
-                          <th className="px-3 py-2 text-center text-sm font-medium">Training</th>
-                          <th className="px-3 py-2 text-center text-sm font-medium">Coaching</th>
-                          <th className="px-3 py-2 text-center text-sm font-medium">Self Learning</th>
+                          <th className="px-3 py-2 text-center text-sm font-medium">{t('colSelf')}</th>
+                          <th className="px-3 py-2 text-center text-sm font-medium">{t('colSuperior')}</th>
+                          <th className="px-3 py-2 text-center text-sm font-medium border-r">{t('colGap')}</th>
+                          <th className="px-3 py-2 text-center text-sm font-medium">{t('colTraining')}</th>
+                          <th className="px-3 py-2 text-center text-sm font-medium">{t('colCoaching')}</th>
+                          <th className="px-3 py-2 text-center text-sm font-medium">{t('colSelfLearning')}</th>
                           <th className="px-3 py-2 text-center text-sm font-medium">
                             <div className="flex items-center justify-center gap-1">
-                              <span>Work Experience</span>
+                              <span>{t('colWorkExp')}</span>
                               <TooltipProvider>
                                 <Tooltip>
                                   <TooltipTrigger asChild>
                                     <IconInfoCircle className="size-3.5 cursor-help" />
                                   </TooltipTrigger>
                                   <TooltipContent>
-                                    <p>Enhance Competency Through Working Experience</p>
+                                    <p>{t('workExpTooltip')}</p>
                                   </TooltipContent>
                                 </Tooltip>
                               </TooltipProvider>
@@ -727,7 +729,7 @@ export default function MyIdpPage() {
                 </div>
                 {selectedResultCluster !== "all" && (
                   <div className="text-sm text-muted-foreground mt-2">
-                    Showing {filteredCompetencies.length} of {idpResult.competencyAnalysis.length} competencies
+                    {t('showingFilter', { count: filteredCompetencies.length, total: idpResult.competencyAnalysis.length })}
                   </div>
                 )}
               </CardContent>
@@ -739,26 +741,26 @@ export default function MyIdpPage() {
             <CardHeader>
               <CardTitle className="text-sm flex items-center gap-2">
                 <IconTrendingUp className="size-4" />
-                Development Strategy Legend
+                {t('legendTitle')}
               </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="grid gap-2 md:grid-cols-2">
                 <div className="flex items-center gap-2 text-sm">
-                  <Badge className="bg-red-600">Training</Badge>
-                  <span className="text-muted-foreground">Gap ≥ 1.5 - Formal training required</span>
+                  <Badge className="bg-red-600">{t('strategyTraining')}</Badge>
+                  <span className="text-muted-foreground">{t('legendTraining')}</span>
                 </div>
                 <div className="flex items-center gap-2 text-sm">
-                  <Badge className="bg-orange-600">Coaching</Badge>
-                  <span className="text-muted-foreground">Gap 1.0-1.5 - Coaching/mentoring needed</span>
+                  <Badge className="bg-orange-600">{t('strategyCoaching')}</Badge>
+                  <span className="text-muted-foreground">{t('legendCoaching')}</span>
                 </div>
                 <div className="flex items-center gap-2 text-sm">
-                  <Badge className="bg-blue-600">Self Learning</Badge>
-                  <span className="text-muted-foreground">Gap {'<'} 1.0 - Self-study materials</span>
+                  <Badge className="bg-blue-600">{t('strategySelfLearning')}</Badge>
+                  <span className="text-muted-foreground">{t('legendSelfLearning')}</span>
                 </div>
                 <div className="flex items-center gap-2 text-sm">
-                  <Badge className="bg-green-600">Work Experience</Badge>
-                  <span className="text-muted-foreground">No gap - Maintain through practice</span>
+                  <Badge className="bg-green-600">{t('strategyWorkExp')}</Badge>
+                  <span className="text-muted-foreground">{t('legendWorkExp')}</span>
                 </div>
               </div>
             </CardContent>
