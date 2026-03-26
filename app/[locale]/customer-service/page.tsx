@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Separator } from '@/components/ui/separator'
+import { useTranslations } from 'next-intl'
 import { 
   CheckCircle, 
   BarChart3, 
@@ -18,6 +19,7 @@ import {
 } from 'lucide-react'
 
 const CustomerServicePage = () => {
+  const t = useTranslations('CustomerServicePage')
   return (
     <div className="min-h-screen bg-background">
       {/* Hero Section */}
@@ -25,25 +27,23 @@ const CustomerServicePage = () => {
         <div className="mx-auto max-w-7xl pt-20 pb-16 sm:pt-24 sm:pb-20">
           <div className="text-center space-y-6">
             <Badge>
-              Training Needs Analysis System
+              {t('badge')}
             </Badge>
             <h1 className="text-4xl font-bold tracking-tight sm:text-6xl">
-              Welcome to{' '}
+              {t('heroTitle')}{' '}
               <span className="text-primary">TNAPro</span>
             </h1>
             <p className="text-lg text-muted-foreground max-w-3xl mx-auto leading-relaxed">
-              Leading competency assessment platform that helps organizations identify 
-              training needs and develop employee potential through comprehensive and 
-              accurate competency gap analysis.
+              {t('heroSubtitle')}
             </p>
             <div className="flex items-center justify-center gap-4 pt-6">
               <Button size="lg">
-                Start Assessment
+                {t('startAssessment')}
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
               <Link href="/customer-service/faq">
                 <Button variant="outline" size="lg">
-                  Learn More
+                  {t('learnMore')}
                 </Button>
               </Link>
             </div>
@@ -56,10 +56,10 @@ const CustomerServicePage = () => {
         <div className="mx-auto max-w-7xl px-6 lg:px-8">
           <div className="mx-auto max-w-2xl text-center space-y-4">
             <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
-              Why Choose TNAPro?
+              {t('whyChooseTitle')}
             </h2>
             <p className="text-lg text-muted-foreground">
-              Innovative solution to optimize human resource development in your organization
+              {t('whyChooseSubtitle')}
             </p>
           </div>
           
@@ -70,12 +70,11 @@ const CustomerServicePage = () => {
                   <div className="mx-auto w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center">
                     <BarChart3 className="h-6 w-6 text-primary" />
                   </div>
-                  <CardTitle>In-Depth Analysis</CardTitle>
+                  <CardTitle>{t('feature1Title')}</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <p className="text-muted-foreground text-center leading-relaxed">
-                    Get deep insights into employee competency gaps with 
-                    comprehensive and easy-to-understand analytical reports.
+                    {t('feature1Desc')}
                   </p>
                 </CardContent>
               </Card>
@@ -85,12 +84,11 @@ const CustomerServicePage = () => {
                   <div className="mx-auto w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center">
                     <Users className="h-6 w-6 text-primary" />
                   </div>
-                  <CardTitle>Multi-Level Assessment</CardTitle>
+                  <CardTitle>{t('feature2Title')}</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <p className="text-muted-foreground text-center leading-relaxed">
-                    Support assessment for various job levels from staff to 
-                    management with customized competency frameworks.
+                    {t('feature2Desc')}
                   </p>
                 </CardContent>
               </Card>
@@ -100,12 +98,11 @@ const CustomerServicePage = () => {
                   <div className="mx-auto w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center">
                     <GraduationCap className="h-6 w-6 text-primary" />
                   </div>
-                  <CardTitle>Training Recommendations</CardTitle>
+                  <CardTitle>{t('feature3Title')}</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <p className="text-muted-foreground text-center leading-relaxed">
-                    Receive targeted training program recommendations based on 
-                    assessment results to enhance employee competencies.
+                    {t('feature3Desc')}
                   </p>
                 </CardContent>
               </Card>
@@ -121,10 +118,10 @@ const CustomerServicePage = () => {
             <div className="space-y-8">
               <div className="space-y-4">
                 <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
-                  Benefits You Get
+                  {t('benefitsTitle')}
                 </h2>
                 <p className="text-lg text-muted-foreground">
-                  TNAPro is designed to provide maximum value for your organization's human resource development.
+                  {t('benefitsSubtitle')}
                 </p>
               </div>
               
@@ -134,9 +131,9 @@ const CustomerServicePage = () => {
                     <CheckCircle className="h-5 w-5 text-green-600" />
                   </div>
                   <div className="space-y-1">
-                    <h3 className="font-semibold">Time & Cost Efficiency</h3>
+                    <h3 className="font-semibold">{t('benefit1Title')}</h3>
                     <p className="text-muted-foreground">
-                      Accurately identify training needs in a cost-effective manner
+                      {t('benefit1Desc')}
                     </p>
                   </div>
                 </div>
@@ -146,9 +143,9 @@ const CustomerServicePage = () => {
                     <Clock className="h-5 w-5 text-blue-600" />
                   </div>
                   <div className="space-y-1">
-                    <h3 className="font-semibold">Fast & Easy Process</h3>
+                    <h3 className="font-semibold">{t('benefit2Title')}</h3>
                     <p className="text-muted-foreground">
-                      Assessment can be completed in 30-60 minutes with a user-friendly interface
+                      {t('benefit2Desc')}
                     </p>
                   </div>
                 </div>
@@ -158,9 +155,9 @@ const CustomerServicePage = () => {
                     <Shield className="h-5 w-5 text-purple-600" />
                   </div>
                   <div className="space-y-1">
-                    <h3 className="font-semibold">Secure & Reliable Data</h3>
+                    <h3 className="font-semibold">{t('benefit3Title')}</h3>
                     <p className="text-muted-foreground">
-                      Data security guaranteed with encryption system and automatic backup
+                      {t('benefit3Desc')}
                     </p>
                   </div>
                 </div>
@@ -169,23 +166,23 @@ const CustomerServicePage = () => {
             
             <Card>
               <CardHeader>
-                <CardTitle>Usage Statistics</CardTitle>
-                <CardDescription>TNAPro system performance data</CardDescription>
+                <CardTitle>{t('statsTitle')}</CardTitle>
+                <CardDescription>{t('statsDesc')}</CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
                 <div className="space-y-4">
                   <div className="flex justify-between items-center">
-                    <span className="text-muted-foreground">Assessment Completed</span>
+                    <span className="text-muted-foreground">{t('statsAssessments')}</span>
                     <span className="font-bold text-2xl text-primary">15,000+</span>
                   </div>
                   <Separator />
                   <div className="flex justify-between items-center">
-                    <span className="text-muted-foreground">Organizations Served</span>
+                    <span className="text-muted-foreground">{t('statsOrganizations')}</span>
                     <span className="font-bold text-2xl text-green-600">500+</span>
                   </div>
                   <Separator />
                   <div className="flex justify-between items-center">
-                    <span className="text-muted-foreground">Success Rate</span>
+                    <span className="text-muted-foreground">{t('statsSuccessRate')}</span>
                     <span className="font-bold text-2xl text-purple-600">98%</span>
                   </div>
                 </div>
@@ -200,10 +197,10 @@ const CustomerServicePage = () => {
         <div className="mx-auto max-w-7xl px-6 lg:px-8">
           <div className="mx-auto max-w-2xl text-center space-y-4">
             <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
-              Need Help?
+              {t('needHelpTitle')}
             </h2>
             <p className="text-lg text-muted-foreground">
-              Our customer service team is ready to help you 24/7
+              {t('needHelpSubtitle')}
             </p>
           </div>
           
@@ -214,16 +211,16 @@ const CustomerServicePage = () => {
                   <HelpCircle className="h-8 w-8 text-blue-600" />
                 </div>
                 <div className="space-y-2">
-                  <CardTitle>FAQ</CardTitle>
+                  <CardTitle>{t('faqTitle')}</CardTitle>
                   <CardDescription>
-                    Find answers to frequently asked questions
+                    {t('faqDesc')}
                   </CardDescription>
                 </div>
               </CardHeader>
               <CardContent>
                 <Link href="/customer-service/faq">
                   <Button variant="outline" className="w-full">
-                    View FAQ
+                    {t('faqButton')}
                   </Button>
                 </Link>
               </CardContent>
@@ -235,16 +232,16 @@ const CustomerServicePage = () => {
                   <Mail className="h-8 w-8 text-green-600" />
                 </div>
                 <div className="space-y-2">
-                  <CardTitle>Contact Us</CardTitle>
+                  <CardTitle>{t('contactTitle')}</CardTitle>
                   <CardDescription>
-                    Send messages or questions directly to our team
+                    {t('contactDesc')}
                   </CardDescription>
                 </div>
               </CardHeader>
               <CardContent>
                 <Link href="/customer-service/contact-us">
                   <Button variant="outline" className="w-full">
-                    Contact Us
+                    {t('contactButton')}
                   </Button>
                 </Link>
               </CardContent>
@@ -256,15 +253,15 @@ const CustomerServicePage = () => {
                   <Phone className="h-8 w-8 text-purple-600" />
                 </div>
                 <div className="space-y-2">
-                  <CardTitle>Live Support</CardTitle>
+                  <CardTitle>{t('liveSupport')}</CardTitle>
                   <CardDescription>
-                    Get direct assistance via live chat or phone
+                    {t('liveSupportDesc')}
                   </CardDescription>
                 </div>
               </CardHeader>
               <CardContent>
                 <Button className="w-full">
-                  Chat Now
+                  {t('chatNow')}
                 </Button>
               </CardContent>
             </Card>

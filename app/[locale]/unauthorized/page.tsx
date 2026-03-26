@@ -3,9 +3,11 @@
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { IconLock, IconArrowLeft } from '@tabler/icons-react';
+import { useTranslations } from 'next-intl';
 
 export default function UnauthorizedPage() {
   const router = useRouter();
+  const t = useTranslations('UnauthorizedPage');
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-background">
@@ -17,9 +19,9 @@ export default function UnauthorizedPage() {
         </div>
         
         <div className="space-y-2">
-          <h1 className="text-4xl font-bold tracking-tight">403 - Unauthorized</h1>
+          <h1 className="text-4xl font-bold tracking-tight">{t('title')}</h1>
           <p className="text-muted-foreground text-lg">
-            You don't have permission to access this page.
+            {t('message')}
           </p>
         </div>
         
@@ -30,12 +32,12 @@ export default function UnauthorizedPage() {
             className="gap-2"
           >
             <IconArrowLeft className="size-4" />
-            Go Back
+            {t('goBack')}
           </Button>
           <Button
             onClick={() => router.push('/login')}
           >
-            Return to Login
+            {t('returnToLogin')}
           </Button>
         </div>
       </div>

@@ -1,4 +1,5 @@
 import React from 'react'
+import { useTranslations } from 'next-intl'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Separator } from '@/components/ui/separator'
@@ -25,68 +26,69 @@ import {
 } from 'lucide-react'
 
 const StaffDocumentationPage = () => {
+  const t = useTranslations('StaffDocumentationPage')
   const menuFeatures = [
     {
-      title: "Dashboard",
+      title: t('feature1Title'),
       icon: User,
       color: "blue",
-      description: "Overview of your performance, assessments, and progress tracking"
+      description: t('feature1Desc')
     },
     {
-      title: "Self Assessment",
+      title: t('feature2Title'),
       icon: ClipboardList,
       color: "green", 
-      description: "Complete competency assessments for your current role"
+      description: t('feature2Desc')
     },
     {
-      title: "Superior Assessment",
+      title: t('feature3Title'),
       icon: UserCheck,
       color: "purple",
-      description: "Participate in assessments conducted by your supervisor"
+      description: t('feature3Desc')
     },
     {
-      title: "My Competencies",
+      title: t('feature4Title'),
       icon: Award,
       color: "orange",
-      description: "View your competency levels and skill development"
+      description: t('feature4Desc')
     },
     {
-      title: "My IDP",
+      title: t('feature5Title'),
       icon: FileText,
       color: "red",
-      description: "Individual Development Plan - your personalized growth roadmap"
+      description: t('feature5Desc')
     },
     {
-      title: "My Training",
+      title: t('feature6Title'),
       icon: GraduationCap,
       color: "indigo",
-      description: "Access assigned training programs and track completion"
+      description: t('feature6Desc')
     }
   ]
 
   const assessmentSteps = [
     {
       step: 1,
-      title: "Access Assessment",
-      description: "Navigate to Self Assessment or Superior Assessment from the sidebar",
+      title: t('assessStep1Title'),
+      description: t('assessStep1Desc'),
       icon: PlayCircle
     },
     {
       step: 2,
-      title: "Read Instructions",
-      description: "Review assessment guidelines and competency descriptions carefully",
+      title: t('assessStep2Title'),
+      description: t('assessStep2Desc'),
       icon: BookOpen
     },
     {
       step: 3,
-      title: "Complete Questions",
-      description: "Answer all assessment questions honestly and thoroughly",
+      title: t('assessStep3Title'),
+      description: t('assessStep3Desc'),
       icon: CheckCircle
     },
     {
       step: 4,
-      title: "Submit Assessment",
-      description: "Review your answers and submit for evaluation",
+      title: t('assessStep4Title'),
+      description: t('assessStep4Desc'),
       icon: Target
     }
   ]
@@ -97,10 +99,10 @@ const StaffDocumentationPage = () => {
       <div className="space-y-4">
         <div className="flex items-center gap-3">
           <FileText className="h-8 w-8 text-primary" />
-          <h1 className="text-3xl font-bold">TNAPro Staff Guide</h1>
+          <h1 className="text-3xl font-bold">{t('title')}</h1>
         </div>
         <p className="text-lg text-muted-foreground">
-          Complete guide for staff members to effectively use the Training Needs Analysis system
+          {t('subtitle')}
         </p>
         <Separator />
       </div>
@@ -110,57 +112,57 @@ const StaffDocumentationPage = () => {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <PlayCircle className="h-5 w-5 text-green-600" />
-            Getting Started
+            {t('gettingStarted')}
           </CardTitle>
           <CardDescription>
-            Essential steps to begin using TNAPro as a staff member
+            {t('gettingStartedDesc')}
           </CardDescription>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-4">
-              <h3 className="font-semibold text-lg">First Time Login</h3>
+              <h3 className="font-semibold text-lg">{t('firstTimeLogin')}</h3>
               <ol className="space-y-2 text-sm">
                 <li className="flex items-start gap-2">
                   <span className="bg-primary text-primary-foreground rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold">1</span>
-                  <span>Log in with your provided credentials</span>
+                  <span>{t('loginStep1')}</span>
                 </li>
                 <li className="flex items-start gap-2">
                   <span className="bg-primary text-primary-foreground rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold">2</span>
-                  <span>Update your profile information</span>
+                  <span>{t('loginStep2')}</span>
                 </li>
                 <li className="flex items-start gap-2">
                   <span className="bg-primary text-primary-foreground rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold">3</span>
-                  <span>Explore the dashboard to familiarize yourself</span>
+                  <span>{t('loginStep3')}</span>
                 </li>
                 <li className="flex items-start gap-2">
                   <span className="bg-primary text-primary-foreground rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold">4</span>
-                  <span>Check for any pending assessments</span>
+                  <span>{t('loginStep4')}</span>
                 </li>
               </ol>
             </div>
             <div className="space-y-4">
-              <h3 className="font-semibold text-lg">Regular Activities</h3>
+              <h3 className="font-semibold text-lg">{t('regularActivities')}</h3>
               <ul className="space-y-2 text-sm">
                 <li className="flex items-center gap-2">
                   <CheckCircle className="h-4 w-4 text-green-600" />
-                  <span>Complete assigned self-assessments</span>
+                  <span>{t('activity1')}</span>
                 </li>
                 <li className="flex items-center gap-2">
                   <CheckCircle className="h-4 w-4 text-green-600" />
-                  <span>Participate in superior assessments</span>
+                  <span>{t('activity2')}</span>
                 </li>
                 <li className="flex items-center gap-2">
                   <CheckCircle className="h-4 w-4 text-green-600" />
-                  <span>Review your competency progress</span>
+                  <span>{t('activity3')}</span>
                 </li>
                 <li className="flex items-center gap-2">
                   <CheckCircle className="h-4 w-4 text-green-600" />
-                  <span>Follow your Individual Development Plan</span>
+                  <span>{t('activity4')}</span>
                 </li>
                 <li className="flex items-center gap-2">
                   <CheckCircle className="h-4 w-4 text-green-600" />
-                  <span>Complete recommended training programs</span>
+                  <span>{t('activity5')}</span>
                 </li>
               </ul>
             </div>
@@ -171,9 +173,9 @@ const StaffDocumentationPage = () => {
       {/* Feature Overview */}
       <Card>
         <CardHeader>
-          <CardTitle>System Features Overview</CardTitle>
+          <CardTitle>{t('featureOverview')}</CardTitle>
           <CardDescription>
-            Understanding each section of your staff portal
+            {t('featureOverviewDesc')}
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -199,12 +201,12 @@ const StaffDocumentationPage = () => {
       {/* Main Tabs */}
       <Tabs defaultValue="assessment" className="space-y-6">
         <TabsList className="grid w-full grid-cols-6">
-          <TabsTrigger value="assessment">Assessment</TabsTrigger>
-          <TabsTrigger value="competencies">Competencies</TabsTrigger>
-          <TabsTrigger value="idp">IDP</TabsTrigger>
-          <TabsTrigger value="training">Training</TabsTrigger>
-          <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
-          <TabsTrigger value="tips">Tips</TabsTrigger>
+          <TabsTrigger value="assessment">{t('tabAssessment')}</TabsTrigger>
+          <TabsTrigger value="competencies">{t('tabCompetencies')}</TabsTrigger>
+          <TabsTrigger value="idp">{t('tabIdp')}</TabsTrigger>
+          <TabsTrigger value="training">{t('tabTraining')}</TabsTrigger>
+          <TabsTrigger value="dashboard">{t('tabDashboard')}</TabsTrigger>
+          <TabsTrigger value="tips">{t('tabTips')}</TabsTrigger>
         </TabsList>
 
         {/* Assessment Tab */}
@@ -213,16 +215,16 @@ const StaffDocumentationPage = () => {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <ClipboardList className="h-5 w-5 text-green-600" />
-                Taking Assessments
+                {t('assessmentTitle')}
               </CardTitle>
               <CardDescription>
-                How to complete self-assessments and participate in superior assessments
+                {t('assessmentDesc')}
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
               <div className="grid gap-6">
                 <div className="bg-green-50 p-4 rounded-lg border border-green-200">
-                  <h3 className="font-semibold text-green-900 mb-3">Assessment Process</h3>
+                  <h3 className="font-semibold text-green-900 mb-3">{t('assessmentProcess')}</h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                     {assessmentSteps.map((step) => (
                       <div key={step.step} className="text-center">
@@ -241,45 +243,45 @@ const StaffDocumentationPage = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <Card>
                     <CardHeader>
-                      <CardTitle className="text-lg">Self Assessment</CardTitle>
-                      <CardDescription>Evaluate your own competencies</CardDescription>
+                      <CardTitle className="text-lg">{t('selfAssessmentTitle')}</CardTitle>
+                      <CardDescription>{t('selfAssessmentDesc')}</CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-3 text-sm">
-                      <p><strong>Purpose:</strong> Rate your own skills and competencies honestly</p>
-                      <p><strong>Frequency:</strong> Typically conducted quarterly or bi-annually</p>
-                      <p><strong>Duration:</strong> 30-45 minutes per assessment</p>
-                      <p><strong>Scoring:</strong> Use the provided competency scale (1-5)</p>
-                      <p><strong>Tips:</strong> Be honest and provide evidence for your ratings</p>
+                      <p><strong>Purpose:</strong> {t('selfAssessmentPurpose')}</p>
+                      <p><strong>Frequency:</strong> {t('selfAssessmentFrequency')}</p>
+                      <p><strong>Duration:</strong> {t('selfAssessmentDuration')}</p>
+                      <p><strong>Scoring:</strong> {t('selfAssessmentScoring')}</p>
+                      <p><strong>Tips:</strong> {t('selfAssessmentTips')}</p>
                     </CardContent>
                   </Card>
 
                   <Card>
                     <CardHeader>
-                      <CardTitle className="text-lg">Superior Assessment</CardTitle>
-                      <CardDescription>Assessments conducted by your supervisor</CardDescription>
+                      <CardTitle className="text-lg">{t('superiorAssessmentTitle')}</CardTitle>
+                      <CardDescription>{t('superiorAssessmentDesc')}</CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-3 text-sm">
-                      <p><strong>Purpose:</strong> Receive evaluation from your direct supervisor</p>
-                      <p><strong>Process:</strong> Supervisor assesses your performance and competencies</p>
-                      <p><strong>Collaboration:</strong> May include discussion sessions</p>
-                      <p><strong>Outcome:</strong> Forms basis for development planning</p>
-                      <p><strong>Feedback:</strong> Receive constructive feedback for improvement</p>
+                      <p><strong>Purpose:</strong> {t('superiorAssessmentPurpose')}</p>
+                      <p><strong>Process:</strong> {t('superiorAssessmentProcess')}</p>
+                      <p><strong>Collaboration:</strong> {t('superiorAssessmentCollab')}</p>
+                      <p><strong>Outcome:</strong> {t('superiorAssessmentOutcome')}</p>
+                      <p><strong>Feedback:</strong> {t('superiorAssessmentFeedback')}</p>
                     </CardContent>
                   </Card>
                 </div>
 
                 <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
-                  <h3 className="font-semibold text-blue-900 mb-2">Assessment Best Practices</h3>
+                  <h3 className="font-semibold text-blue-900 mb-2">{t('assessBestPractices')}</h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-blue-800">
                     <div>
-                      <p><strong>• Preparation:</strong> Review job requirements and competency definitions</p>
-                      <p><strong>• Honesty:</strong> Provide accurate self-assessments</p>
-                      <p><strong>• Examples:</strong> Prepare specific examples to support your ratings</p>
+                      <p><strong>• {t('bestPractice1')}</strong></p>
+                      <p><strong>• {t('bestPractice2')}</strong></p>
+                      <p><strong>• {t('bestPractice3')}</strong></p>
                     </div>
                     <div>
-                      <p><strong>• Time Management:</strong> Allow sufficient time without rushing</p>
-                      <p><strong>• Documentation:</strong> Keep notes of your achievements</p>
-                      <p><strong>• Follow-up:</strong> Discuss results with your supervisor</p>
+                      <p><strong>• {t('bestPractice4')}</strong></p>
+                      <p><strong>• {t('bestPractice5')}</strong></p>
+                      <p><strong>• {t('bestPractice6')}</strong></p>
                     </div>
                   </div>
                 </div>
@@ -294,93 +296,93 @@ const StaffDocumentationPage = () => {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Award className="h-5 w-5 text-orange-600" />
-                Understanding Your Competencies
+                {t('competenciesTitle')}
               </CardTitle>
               <CardDescription>
-                How to view and interpret your competency levels and development areas
+                {t('competenciesDesc')}
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <Card>
                   <CardHeader>
-                    <CardTitle className="text-lg">Competency Levels</CardTitle>
+                    <CardTitle className="text-lg">{t('competencyLevelsTitle')}</CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-3">
                     <div className="flex items-center gap-3">
-                      <Badge variant="outline" className="bg-red-100 text-red-800">1 - Beginner</Badge>
-                      <span className="text-sm">Basic understanding, requires guidance</span>
+                      <Badge variant="outline" className="bg-red-100 text-red-800">{t('level1')}</Badge>
+                      <span className="text-sm">{t('level1Desc')}</span>
                     </div>
                     <div className="flex items-center gap-3">
-                      <Badge variant="outline" className="bg-orange-100 text-orange-800">2 - Developing</Badge>
-                      <span className="text-sm">Learning and improving, some support needed</span>
+                      <Badge variant="outline" className="bg-orange-100 text-orange-800">{t('level2')}</Badge>
+                      <span className="text-sm">{t('level2Desc')}</span>
                     </div>
                     <div className="flex items-center gap-3">
-                      <Badge variant="outline" className="bg-yellow-100 text-yellow-800">3 - Competent</Badge>
-                      <span className="text-sm">Meets job requirements effectively</span>
+                      <Badge variant="outline" className="bg-yellow-100 text-yellow-800">{t('level3')}</Badge>
+                      <span className="text-sm">{t('level3Desc')}</span>
                     </div>
                     <div className="flex items-center gap-3">
-                      <Badge variant="outline" className="bg-blue-100 text-blue-800">4 - Proficient</Badge>
-                      <span className="text-sm">Exceeds requirements, can mentor others</span>
+                      <Badge variant="outline" className="bg-blue-100 text-blue-800">{t('level4')}</Badge>
+                      <span className="text-sm">{t('level4Desc')}</span>
                     </div>
                     <div className="flex items-center gap-3">
-                      <Badge variant="outline" className="bg-green-100 text-green-800">5 - Expert</Badge>
-                      <span className="text-sm">Exceptional level, organizational reference</span>
+                      <Badge variant="outline" className="bg-green-100 text-green-800">{t('level5')}</Badge>
+                      <span className="text-sm">{t('level5Desc')}</span>
                     </div>
                   </CardContent>
                 </Card>
 
                 <Card>
                   <CardHeader>
-                    <CardTitle className="text-lg">Gap Analysis</CardTitle>
+                    <CardTitle className="text-lg">{t('gapAnalysisTitle')}</CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-3 text-sm">
-                    <p><strong>Current Level:</strong> Your current competency assessment score</p>
-                    <p><strong>Required Level:</strong> Minimum level needed for your position</p>
-                    <p><strong>Gap:</strong> Difference between current and required levels</p>
-                    <p><strong>Priority:</strong> Critical gaps are highlighted for immediate attention</p>
-                    <p><strong>Action:</strong> Recommended development activities to close gaps</p>
+                    <p>{t('gapCurrentLevel')}</p>
+                    <p>{t('gapRequiredLevel')}</p>
+                    <p>{t('gapGap')}</p>
+                    <p>{t('gapPriority')}</p>
+                    <p>{t('gapAction')}</p>
                   </CardContent>
                 </Card>
               </div>
 
               <div className="space-y-4">
-                <h3 className="text-lg font-semibold">How to Use Competency Information</h3>
+                <h3 className="text-lg font-semibold">{t('howToUseCompetencies')}</h3>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div className="bg-muted/30 p-4 rounded-lg">
                     <h4 className="font-medium mb-2 flex items-center gap-2">
                       <Eye className="h-4 w-4" />
-                      View Results
+                      {t('viewResults')}
                     </h4>
                     <ul className="text-sm text-muted-foreground space-y-1">
-                      <li>• Check your competency dashboard regularly</li>
-                      <li>• Review assessment feedback</li>
-                      <li>• Compare with job requirements</li>
-                      <li>• Track progress over time</li>
+                      <li>• {t('viewResultsList1')}</li>
+                      <li>• {t('viewResultsList2')}</li>
+                      <li>• {t('viewResultsList3')}</li>
+                      <li>• {t('viewResultsList4')}</li>
                     </ul>
                   </div>
                   <div className="bg-muted/30 p-4 rounded-lg">
                     <h4 className="font-medium mb-2 flex items-center gap-2">
                       <Target className="h-4 w-4" />
-                      Identify Gaps
+                      {t('identifyGaps')}
                     </h4>
                     <ul className="text-sm text-muted-foreground space-y-1">
-                      <li>• Focus on red/orange highlighted areas</li>
-                      <li>• Understand the impact of each gap</li>
-                      <li>• Prioritize critical competencies</li>
-                      <li>• Discuss with your supervisor</li>
+                      <li>• {t('identifyGapsList1')}</li>
+                      <li>• {t('identifyGapsList2')}</li>
+                      <li>• {t('identifyGapsList3')}</li>
+                      <li>• {t('identifyGapsList4')}</li>
                     </ul>
                   </div>
                   <div className="bg-muted/30 p-4 rounded-lg">
                     <h4 className="font-medium mb-2 flex items-center gap-2">
                       <TrendingUp className="h-4 w-4" />
-                      Plan Development
+                      {t('planDevelopment')}
                     </h4>
                     <ul className="text-sm text-muted-foreground space-y-1">
-                      <li>• Create development goals</li>
-                      <li>• Select appropriate training</li>
-                      <li>• Seek mentoring opportunities</li>
-                      <li>• Apply skills in real projects</li>
+                      <li>• {t('planDevelopmentList1')}</li>
+                      <li>• {t('planDevelopmentList2')}</li>
+                      <li>• {t('planDevelopmentList3')}</li>
+                      <li>• {t('planDevelopmentList4')}</li>
                     </ul>
                   </div>
                 </div>
@@ -395,27 +397,26 @@ const StaffDocumentationPage = () => {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <FileText className="h-5 w-5 text-red-600" />
-                Individual Development Plan (IDP)
+                {t('idpTitle')}
               </CardTitle>
               <CardDescription>
-                Your personalized roadmap for professional growth and skill development
+                {t('idpDesc')}
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
               <div className="bg-red-50 p-4 rounded-lg border border-red-200">
-                <h3 className="font-semibold text-red-900 mb-3">What is an IDP?</h3>
+                <h3 className="font-semibold text-red-900 mb-3">{t('whatIsIdp')}</h3>
                 <p className="text-sm text-red-800 mb-3">
-                  Your Individual Development Plan is a strategic document that outlines your career goals, 
-                  identifies skill gaps, and provides a structured approach to professional development.
+                  {t('idpExplanation')}
                 </p>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-red-800">
                   <div>
-                    <p><strong>Purpose:</strong> Guide your professional development journey</p>
-                    <p><strong>Timeline:</strong> Typically covers 6-12 months</p>
+                    <p>{t('idpPurpose')}</p>
+                    <p>{t('idpTimeline')}</p>
                   </div>
                   <div>
-                    <p><strong>Collaboration:</strong> Developed with your supervisor</p>
-                    <p><strong>Review:</strong> Regular progress reviews and updates</p>
+                    <p>{t('idpCollab')}</p>
+                    <p>{t('idpReview')}</p>
                   </div>
                 </div>
               </div>
@@ -423,91 +424,91 @@ const StaffDocumentationPage = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <Card>
                   <CardHeader>
-                    <CardTitle className="text-lg">IDP Components</CardTitle>
+                    <CardTitle className="text-lg">{t('idpComponentsTitle')}</CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-3 text-sm">
                     <div>
-                      <p><strong>Development Goals:</strong></p>
-                      <p className="text-muted-foreground">Specific objectives based on competency gaps</p>
+                      <p><strong>{t('idpGoals')}</strong></p>
+                      <p className="text-muted-foreground">{t('idpGoalsDesc')}</p>
                     </div>
                     <div>
-                      <p><strong>Learning Activities:</strong></p>
-                      <p className="text-muted-foreground">Training, courses, and development programs</p>
+                      <p><strong>{t('idpActivities')}</strong></p>
+                      <p className="text-muted-foreground">{t('idpActivitiesDesc')}</p>
                     </div>
                     <div>
-                      <p><strong>Timeline:</strong></p>
-                      <p className="text-muted-foreground">Deadlines and milestones for each goal</p>
+                      <p><strong>{t('idpTimelineLabel')}</strong></p>
+                      <p className="text-muted-foreground">{t('idpTimelineDesc')}</p>
                     </div>
                     <div>
-                      <p><strong>Resources:</strong></p>
-                      <p className="text-muted-foreground">Support and tools needed for development</p>
+                      <p><strong>{t('idpResources')}</strong></p>
+                      <p className="text-muted-foreground">{t('idpResourcesDesc')}</p>
                     </div>
                     <div>
-                      <p><strong>Success Metrics:</strong></p>
-                      <p className="text-muted-foreground">How progress will be measured</p>
+                      <p><strong>{t('idpMetrics')}</strong></p>
+                      <p className="text-muted-foreground">{t('idpMetricsDesc')}</p>
                     </div>
                   </CardContent>
                 </Card>
 
                 <Card>
                   <CardHeader>
-                    <CardTitle className="text-lg">How to Use Your IDP</CardTitle>
+                    <CardTitle className="text-lg">{t('howToUseIdp')}</CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-3 text-sm">
                     <div>
-                      <p><strong>Regular Review:</strong></p>
-                      <p className="text-muted-foreground">Check progress monthly or quarterly</p>
+                      <p><strong>{t('idpRegularReview')}</strong></p>
+                      <p className="text-muted-foreground">{t('idpRegularReviewDesc')}</p>
                     </div>
                     <div>
-                      <p><strong>Track Activities:</strong></p>
-                      <p className="text-muted-foreground">Log completed training and development</p>
+                      <p><strong>{t('idpTrackActivities')}</strong></p>
+                      <p className="text-muted-foreground">{t('idpTrackActivitiesDesc')}</p>
                     </div>
                     <div>
-                      <p><strong>Update Goals:</strong></p>
-                      <p className="text-muted-foreground">Modify objectives as you progress</p>
+                      <p><strong>{t('idpUpdateGoals')}</strong></p>
+                      <p className="text-muted-foreground">{t('idpUpdateGoalsDesc')}</p>
                     </div>
                     <div>
-                      <p><strong>Seek Support:</strong></p>
-                      <p className="text-muted-foreground">Discuss challenges with your supervisor</p>
+                      <p><strong>{t('idpSeekSupport')}</strong></p>
+                      <p className="text-muted-foreground">{t('idpSeekSupportDesc')}</p>
                     </div>
                     <div>
-                      <p><strong>Celebrate Success:</strong></p>
-                      <p className="text-muted-foreground">Acknowledge achievements and milestones</p>
+                      <p><strong>{t('idpCelebrate')}</strong></p>
+                      <p className="text-muted-foreground">{t('idpCelebrateDesc')}</p>
                     </div>
                   </CardContent>
                 </Card>
               </div>
 
               <div className="bg-purple-50 p-4 rounded-lg border border-purple-200">
-                <h3 className="font-semibold text-purple-900 mb-2">IDP Development Process</h3>
+                <h3 className="font-semibold text-purple-900 mb-2">{t('idpProcess')}</h3>
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                   <div className="text-center">
                     <div className="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-2">
                       <span className="text-purple-600 font-bold">1</span>
                     </div>
-                    <h4 className="font-medium text-purple-900">Assessment</h4>
-                    <p className="text-xs text-purple-700">Complete competency assessment</p>
+                    <h4 className="font-medium text-purple-900">{t('idpProcess1')}</h4>
+                    <p className="text-xs text-purple-700">{t('idpProcess1Desc')}</p>
                   </div>
                   <div className="text-center">
                     <div className="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-2">
                       <span className="text-purple-600 font-bold">2</span>
                     </div>
-                    <h4 className="font-medium text-purple-900">Gap Analysis</h4>
-                    <p className="text-xs text-purple-700">Identify development areas</p>
+                    <h4 className="font-medium text-purple-900">{t('idpProcess2')}</h4>
+                    <p className="text-xs text-purple-700">{t('idpProcess2Desc')}</p>
                   </div>
                   <div className="text-center">
                     <div className="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-2">
                       <span className="text-purple-600 font-bold">3</span>
                     </div>
-                    <h4 className="font-medium text-purple-900">Plan Creation</h4>
-                    <p className="text-xs text-purple-700">Develop with supervisor</p>
+                    <h4 className="font-medium text-purple-900">{t('idpProcess3')}</h4>
+                    <p className="text-xs text-purple-700">{t('idpProcess3Desc')}</p>
                   </div>
                   <div className="text-center">
                     <div className="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-2">
                       <span className="text-purple-600 font-bold">4</span>
                     </div>
-                    <h4 className="font-medium text-purple-900">Implementation</h4>
-                    <p className="text-xs text-purple-700">Execute and track progress</p>
+                    <h4 className="font-medium text-purple-900">{t('idpProcess4')}</h4>
+                    <p className="text-xs text-purple-700">{t('idpProcess4Desc')}</p>
                   </div>
                 </div>
               </div>
@@ -521,10 +522,10 @@ const StaffDocumentationPage = () => {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <GraduationCap className="h-5 w-5 text-indigo-600" />
-                My Training Programs
+                {t('trainingTitle')}
               </CardTitle>
               <CardDescription>
-                Access and manage your assigned training programs and development activities
+                {t('trainingDesc')}
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
@@ -533,15 +534,15 @@ const StaffDocumentationPage = () => {
                   <CardHeader>
                     <CardTitle className="text-lg flex items-center gap-2">
                       <Calendar className="h-4 w-4" />
-                      Scheduled Training
+                      {t('scheduledTraining')}
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-3 text-sm">
-                    <p><strong>Upcoming:</strong> View scheduled training sessions</p>
-                    <p><strong>Calendar:</strong> Check dates, times, and locations</p>
-                    <p><strong>Prerequisites:</strong> Review required preparations</p>
-                    <p><strong>Materials:</strong> Download training resources</p>
-                    <p><strong>Notifications:</strong> Receive reminders and updates</p>
+                    <p>{t('scheduledUpcoming')}</p>
+                    <p>{t('scheduledCalendar')}</p>
+                    <p>{t('scheduledPrerequisites')}</p>
+                    <p>{t('scheduledMaterials')}</p>
+                    <p>{t('scheduledNotifications')}</p>
                   </CardContent>
                 </Card>
 
@@ -549,15 +550,15 @@ const StaffDocumentationPage = () => {
                   <CardHeader>
                     <CardTitle className="text-lg flex items-center gap-2">
                       <PlayCircle className="h-4 w-4" />
-                      In Progress
+                      {t('inProgress')}
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-3 text-sm">
-                    <p><strong>Current:</strong> Training you're currently taking</p>
-                    <p><strong>Progress:</strong> Track completion percentage</p>
-                    <p><strong>Assignments:</strong> Complete required tasks</p>
-                    <p><strong>Assessments:</strong> Take quizzes and evaluations</p>
-                    <p><strong>Deadlines:</strong> Monitor completion dates</p>
+                    <p>{t('inProgressCurrent')}</p>
+                    <p>{t('inProgressProgress')}</p>
+                    <p>{t('inProgressAssignments')}</p>
+                    <p>{t('inProgressAssessments')}</p>
+                    <p>{t('inProgressDeadlines')}</p>
                   </CardContent>
                 </Card>
 
@@ -565,15 +566,15 @@ const StaffDocumentationPage = () => {
                   <CardHeader>
                     <CardTitle className="text-lg flex items-center gap-2">
                       <CheckCircle className="h-4 w-4" />
-                      Completed
+                      {t('completed')}
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-3 text-sm">
-                    <p><strong>History:</strong> View completed training programs</p>
-                    <p><strong>Certificates:</strong> Download completion certificates</p>
-                    <p><strong>Scores:</strong> Review assessment results</p>
-                    <p><strong>Feedback:</strong> Provide program evaluations</p>
-                    <p><strong>Credits:</strong> Track professional development hours</p>
+                    <p>{t('completedHistory')}</p>
+                    <p>{t('completedCertificates')}</p>
+                    <p>{t('completedScores')}</p>
+                    <p>{t('completedFeedback')}</p>
+                    <p>{t('completedCredits')}</p>
                   </CardContent>
                 </Card>
               </div>
@@ -581,46 +582,46 @@ const StaffDocumentationPage = () => {
               <Separator />
 
               <div className="space-y-4">
-                <h3 className="text-lg font-semibold">Training Management</h3>
+                <h3 className="text-lg font-semibold">{t('trainingManagement')}</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="space-y-4">
-                    <h4 className="font-medium">How to Access Training</h4>
+                    <h4 className="font-medium">{t('howToAccessTraining')}</h4>
                     <ol className="space-y-2 text-sm">
                       <li className="flex items-start gap-2">
                         <span className="bg-primary text-primary-foreground rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold">1</span>
-                        <span>Navigate to "My Training" from the sidebar</span>
+                        <span>{t('trainingStep1')}</span>
                       </li>
                       <li className="flex items-start gap-2">
                         <span className="bg-primary text-primary-foreground rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold">2</span>
-                        <span>Review your assigned training programs</span>
+                        <span>{t('trainingStep2')}</span>
                       </li>
                       <li className="flex items-start gap-2">
                         <span className="bg-primary text-primary-foreground rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold">3</span>
-                        <span>Click on a program to view details</span>
+                        <span>{t('trainingStep3')}</span>
                       </li>
                       <li className="flex items-start gap-2">
                         <span className="bg-primary text-primary-foreground rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold">4</span>
-                        <span>Follow the provided instructions to complete</span>
+                        <span>{t('trainingStep4')}</span>
                       </li>
                     </ol>
                   </div>
                   <div className="space-y-4">
-                    <h4 className="font-medium">Training Types</h4>
+                    <h4 className="font-medium">{t('trainingTypes')}</h4>
                     <div className="space-y-3 text-sm">
                       <div>
-                        <p><strong>Online Courses:</strong> Self-paced digital learning modules</p>
+                        <p>{t('trainingOnline')}</p>
                       </div>
                       <div>
-                        <p><strong>Classroom Training:</strong> Instructor-led sessions at specific locations</p>
+                        <p>{t('trainingClassroom')}</p>
                       </div>
                       <div>
-                        <p><strong>Virtual Sessions:</strong> Live online training via video conferencing</p>
+                        <p>{t('trainingVirtual')}</p>
                       </div>
                       <div>
-                        <p><strong>Workshops:</strong> Interactive hands-on learning experiences</p>
+                        <p>{t('trainingWorkshops')}</p>
                       </div>
                       <div>
-                        <p><strong>Mentoring:</strong> One-on-one guidance from experienced colleagues</p>
+                        <p>{t('trainingMentoring')}</p>
                       </div>
                     </div>
                   </div>
@@ -628,17 +629,17 @@ const StaffDocumentationPage = () => {
               </div>
 
               <div className="bg-indigo-50 p-4 rounded-lg border border-indigo-200">
-                <h3 className="font-semibold text-indigo-900 mb-2">Training Success Tips</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-indigo-800">
-                  <div>
-                    <p><strong>• Preparation:</strong> Review materials and prerequisites beforehand</p>
-                    <p><strong>• Engagement:</strong> Actively participate in all activities</p>
-                    <p><strong>• Application:</strong> Practice new skills in your daily work</p>
-                  </div>
-                  <div>
-                    <p><strong>• Documentation:</strong> Take notes and keep training materials</p>
-                    <p><strong>• Feedback:</strong> Provide honest evaluation to improve programs</p>
-                    <p><strong>• Follow-up:</strong> Continue learning beyond the formal program</p>
+                  <h3 className="font-semibold text-indigo-900 mb-2">{t('trainingSuccessTips')}</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-indigo-800">
+                    <div>
+                      <p><strong>• {t('trainingTip1')}</strong></p>
+                      <p><strong>• {t('trainingTip2')}</strong></p>
+                      <p><strong>• {t('trainingTip3')}</strong></p>
+                    </div>
+                    <div>
+                      <p><strong>• {t('trainingTip4')}</strong></p>
+                      <p><strong>• {t('trainingTip5')}</strong></p>
+                      <p><strong>• {t('trainingTip6')}</strong></p>
                   </div>
                 </div>
               </div>
@@ -652,76 +653,76 @@ const StaffDocumentationPage = () => {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <User className="h-5 w-5 text-blue-600" />
-                Understanding Your Dashboard
+                {t('dashboardTitle')}
               </CardTitle>
               <CardDescription>
-                Navigate and interpret the information on your staff dashboard
+                {t('dashboardDesc')}
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 <Card>
                   <CardHeader>
-                    <CardTitle className="text-lg">Performance Overview</CardTitle>
+                    <CardTitle className="text-lg">{t('performanceOverview')}</CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-2 text-sm">
-                    <p>• Current competency levels summary</p>
-                    <p>• Recent assessment scores</p>
-                    <p>• Progress tracking charts</p>
-                    <p>• Goal achievement status</p>
-                    <p>• Performance trends over time</p>
+                    <p>• {t('performanceList1')}</p>
+                    <p>• {t('performanceList2')}</p>
+                    <p>• {t('performanceList3')}</p>
+                    <p>• {t('performanceList4')}</p>
+                    <p>• {t('performanceList5')}</p>
                   </CardContent>
                 </Card>
 
                 <Card>
                   <CardHeader>
-                    <CardTitle className="text-lg">Pending Actions</CardTitle>
+                    <CardTitle className="text-lg">{t('pendingActions')}</CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-2 text-sm">
-                    <p>• Outstanding assessments to complete</p>
-                    <p>• Training programs to finish</p>
-                    <p>• IDP milestones due</p>
-                    <p>• Feedback requests</p>
-                    <p>• Document updates needed</p>
+                    <p>• {t('pendingList1')}</p>
+                    <p>• {t('pendingList2')}</p>
+                    <p>• {t('pendingList3')}</p>
+                    <p>• {t('pendingList4')}</p>
+                    <p>• {t('pendingList5')}</p>
                   </CardContent>
                 </Card>
 
                 <Card>
                   <CardHeader>
-                    <CardTitle className="text-lg">Quick Access</CardTitle>
+                    <CardTitle className="text-lg">{t('quickAccess')}</CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-2 text-sm">
-                    <p>• Start new self-assessment</p>
-                    <p>• View latest results</p>
-                    <p>• Access current training</p>
-                    <p>• Download certificates</p>
-                    <p>• Contact support</p>
+                    <p>• {t('quickList1')}</p>
+                    <p>• {t('quickList2')}</p>
+                    <p>• {t('quickList3')}</p>
+                    <p>• {t('quickList4')}</p>
+                    <p>• {t('quickList5')}</p>
                   </CardContent>
                 </Card>
               </div>
 
               <div className="space-y-4">
-                <h3 className="text-lg font-semibold">Dashboard Navigation</h3>
+                <h3 className="text-lg font-semibold">{t('dashboardNavigation')}</h3>
                 <div className="bg-muted/30 p-4 rounded-lg">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                     <div>
-                      <h4 className="font-medium mb-2">Key Metrics to Monitor</h4>
+                      <h4 className="font-medium mb-2">{t('keyMetrics')}</h4>
                       <ul className="space-y-1">
-                        <li>• Overall competency score</li>
-                        <li>• Number of gaps closed</li>
-                        <li>• Training completion rate</li>
-                        <li>• Assessment frequency</li>
-                        <li>• Goal achievement percentage</li>
+                        <li>• {t('metricList1')}</li>
+                        <li>• {t('metricList2')}</li>
+                        <li>• {t('metricList3')}</li>
+                        <li>• {t('metricList4')}</li>
+                        <li>• {t('metricList5')}</li>
                       </ul>
                     </div>
                     <div>
-                      <h4 className="font-medium mb-2">Action Items</h4>
+                      <h4 className="font-medium mb-2">{t('actionItems')}</h4>
                       <ul className="space-y-1">
-                        <li>• Complete overdue assessments</li>
-                        <li>• Review feedback from supervisors</li>
-                        <li>• Update personal development goals</li>
-                        <li>• Schedule required training</li>
-                        <li>• Check notification messages</li>
+                        <li>• {t('actionList1')}</li>
+                        <li>• {t('actionList2')}</li>
+                        <li>• {t('actionList3')}</li>
+                        <li>• {t('actionList4')}</li>
+                        <li>• {t('actionList5')}</li>
                       </ul>
                     </div>
                   </div>
@@ -737,74 +738,74 @@ const StaffDocumentationPage = () => {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <AlertCircle className="h-5 w-5 text-yellow-600" />
-                Success Tips & Best Practices
+                {t('tipsTitle')}
               </CardTitle>
               <CardDescription>
-                Maximize your experience with the TNAPro system
+                {t('tipsDesc')}
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <Card>
                   <CardHeader>
-                    <CardTitle className="text-lg text-green-700">Do's</CardTitle>
+                    <CardTitle className="text-lg text-green-700">{t('dos')}</CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-2 text-sm">
                     <div className="flex items-start gap-2">
                       <CheckCircle className="h-4 w-4 text-green-600 mt-0.5" />
-                      <span>Complete assessments honestly and thoughtfully</span>
+                    <span>{t('do1')}</span>
                     </div>
                     <div className="flex items-start gap-2">
                       <CheckCircle className="h-4 w-4 text-green-600 mt-0.5" />
-                      <span>Regularly check your dashboard for updates</span>
+                    <span>{t('do2')}</span>
                     </div>
                     <div className="flex items-start gap-2">
                       <CheckCircle className="h-4 w-4 text-green-600 mt-0.5" />
-                      <span>Engage actively with your IDP</span>
+                    <span>{t('do3')}</span>
                     </div>
                     <div className="flex items-start gap-2">
                       <CheckCircle className="h-4 w-4 text-green-600 mt-0.5" />
-                      <span>Complete training programs on time</span>
+                    <span>{t('do4')}</span>
                     </div>
                     <div className="flex items-start gap-2">
                       <CheckCircle className="h-4 w-4 text-green-600 mt-0.5" />
-                      <span>Seek feedback from supervisors</span>
+                    <span>{t('do5')}</span>
                     </div>
                     <div className="flex items-start gap-2">
                       <CheckCircle className="h-4 w-4 text-green-600 mt-0.5" />
-                      <span>Document your achievements and progress</span>
+                    <span>{t('do6')}</span>
                     </div>
                   </CardContent>
                 </Card>
 
                 <Card>
                   <CardHeader>
-                    <CardTitle className="text-lg text-red-700">Don'ts</CardTitle>
+                    <CardTitle className="text-lg text-red-700">{t('donts')}</CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-2 text-sm">
                     <div className="flex items-start gap-2">
                       <AlertCircle className="h-4 w-4 text-red-600 mt-0.5" />
-                      <span>Don't rush through assessments</span>
+                    <span>{t('dont1')}</span>
                     </div>
                     <div className="flex items-start gap-2">
                       <AlertCircle className="h-4 w-4 text-red-600 mt-0.5" />
-                      <span>Don't ignore pending notifications</span>
+                    <span>{t('dont2')}</span>
                     </div>
                     <div className="flex items-start gap-2">
                       <AlertCircle className="h-4 w-4 text-red-600 mt-0.5" />
-                      <span>Don't skip training prerequisites</span>
+                    <span>{t('dont3')}</span>
                     </div>
                     <div className="flex items-start gap-2">
                       <AlertCircle className="h-4 w-4 text-red-600 mt-0.5" />
-                      <span>Don't leave assessments incomplete</span>
+                    <span>{t('dont4')}</span>
                     </div>
                     <div className="flex items-start gap-2">
                       <AlertCircle className="h-4 w-4 text-red-600 mt-0.5" />
-                      <span>Don't hesitate to ask for help</span>
+                    <span>{t('dont5')}</span>
                     </div>
                     <div className="flex items-start gap-2">
                       <AlertCircle className="h-4 w-4 text-red-600 mt-0.5" />
-                      <span>Don't neglect regular progress reviews</span>
+                    <span>{t('dont6')}</span>
                     </div>
                   </CardContent>
                 </Card>
@@ -813,36 +814,32 @@ const StaffDocumentationPage = () => {
               <div className="grid gap-6">
                 <Card>
                   <CardHeader>
-                    <CardTitle className="text-lg">Troubleshooting Common Issues</CardTitle>
+                    <CardTitle className="text-lg">{t('troubleshootingTitle')}</CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-4">
                     <div className="grid gap-4">
                       <div className="border rounded-lg p-3">
-                        <h4 className="font-medium mb-2">Can't access an assessment</h4>
+                        <h4 className="font-medium mb-2">{t('trouble1Title')}</h4>
                         <p className="text-sm text-muted-foreground">
-                          Check if the assessment period is active, ensure you have the required permissions, 
-                          or contact your supervisor or IT support.
+                          {t('trouble1Desc')}
                         </p>
                       </div>
                       <div className="border rounded-lg p-3">
-                        <h4 className="font-medium mb-2">Training materials won't load</h4>
+                        <h4 className="font-medium mb-2">{t('trouble2Title')}</h4>
                         <p className="text-sm text-muted-foreground">
-                          Verify your internet connection, clear browser cache, try a different browser, 
-                          or check if system maintenance is in progress.
+                          {t('trouble2Desc')}
                         </p>
                       </div>
                       <div className="border rounded-lg p-3">
-                        <h4 className="font-medium mb-2">Results not showing up</h4>
+                        <h4 className="font-medium mb-2">{t('trouble3Title')}</h4>
                         <p className="text-sm text-muted-foreground">
-                          Assessment results may take time to process. If delayed beyond expected timeframe, 
-                          contact your supervisor or HR department.
+                          {t('trouble3Desc')}
                         </p>
                       </div>
                       <div className="border rounded-lg p-3">
-                        <h4 className="font-medium mb-2">Forgot login credentials</h4>
+                        <h4 className="font-medium mb-2">{t('trouble4Title')}</h4>
                         <p className="text-sm text-muted-foreground">
-                          Use the password reset function on the login page, or contact IT support 
-                          for assistance with account recovery.
+                          {t('trouble4Desc')}
                         </p>
                       </div>
                     </div>
@@ -850,12 +847,12 @@ const StaffDocumentationPage = () => {
                 </Card>
 
                 <div className="bg-yellow-50 p-4 rounded-lg border border-yellow-200">
-                  <h3 className="font-semibold text-yellow-900 mb-2">📞 Need Additional Help?</h3>
+                  <h3 className="font-semibold text-yellow-900 mb-2">{t('needHelp')}</h3>
                   <div className="text-sm text-yellow-800 space-y-2">
-                    <p><strong>Technical Support:</strong> Contact IT helpdesk for system-related issues</p>
-                    <p><strong>HR Department:</strong> Reach out for policy or process questions</p>
-                    <p><strong>Your Supervisor:</strong> Discuss assessment results and development planning</p>
-                    <p><strong>Training Coordinator:</strong> Get help with training program access</p>
+                    <p>{t('techSupport')}</p>
+                    <p>{t('hrDept')}</p>
+                    <p>{t('supervisor')}</p>
+                    <p>{t('trainingCoord')}</p>
                   </div>
                 </div>
               </div>

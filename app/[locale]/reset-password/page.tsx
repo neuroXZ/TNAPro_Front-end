@@ -10,10 +10,12 @@ import { authAPI } from "@/lib/api"
 import { toast } from "sonner"
 import { IconEye, IconEyeOff, IconArrowLeft } from "@tabler/icons-react"
 import Link from "next/link"
+import { useTranslations } from 'next-intl'
 
 function ResetPasswordForm() {
   const searchParams = useSearchParams()
   const router = useRouter()
+  const t = useTranslations('ResetPasswordPage')
   const [newPassword, setNewPassword] = useState("")
   const [confirmPassword, setConfirmPassword] = useState("")
   const [isLoading, setIsLoading] = useState(false)
@@ -105,7 +107,7 @@ function ResetPasswordForm() {
         <div className="w-full max-w-sm">
           <Card>
             <CardContent className="p-6 text-center">
-              <p className="text-muted-foreground">Loading...</p>
+              <p className="text-muted-foreground">{t('loading')}</p>
             </CardContent>
           </Card>
         </div>
@@ -121,20 +123,20 @@ function ResetPasswordForm() {
             <div className="h-16 w-16 rounded-full bg-primary flex items-center justify-center text-white font-bold text-2xl shadow-lg mx-auto mb-4">
               TNA
             </div>
-            <CardTitle className="text-2xl">Reset Password</CardTitle>
+            <CardTitle className="text-2xl">{t('title')}</CardTitle>
             <p className="text-muted-foreground text-sm">
-              Enter your new password for your {userType} account
+              {t('subtitle', { userType })}
             </p>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-4">
               <Field>
-                <FieldLabel htmlFor="newPassword">New Password</FieldLabel>
+                <FieldLabel htmlFor="newPassword">{t('newPassword')}</FieldLabel>
                 <div className="relative">
                   <Input
                     id="newPassword"
                     type={showPassword ? "text" : "password"}
-                    placeholder="Enter your new password"
+                    placeholder={t('newPasswordPlaceholder')}
                     value={newPassword}
                     onChange={(e) => setNewPassword(e.target.value)}
                     required
@@ -157,17 +159,17 @@ function ResetPasswordForm() {
                   </Button>
                 </div>
                 <div className="text-xs text-muted-foreground mt-1">
-                  Password must be at least 8 characters with uppercase, lowercase, and numbers
+                  {t('passwordHint')}
                 </div>
               </Field>
 
               <Field>
-                <FieldLabel htmlFor="confirmPassword">Confirm Password</FieldLabel>
+                <FieldLabel htmlFor="confirmPassword">{t('confirmPassword')}</FieldLabel>
                 <div className="relative">
                   <Input
                     id="confirmPassword"
                     type={showConfirmPassword ? "text" : "password"}
-                    placeholder="Confirm your new password"
+                    placeholder={t('confirmPasswordPlaceholder')}
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
                     required
@@ -192,7 +194,7 @@ function ResetPasswordForm() {
               </Field>
 
               <Button type="submit" className="w-full" disabled={isLoading}>
-                {isLoading ? "Resetting Password..." : "Reset Password"}
+                {isLoading ? t('resettingButton') : t('resetButton')}
               </Button>
 
               <div className="text-center">
@@ -201,7 +203,7 @@ function ResetPasswordForm() {
                   className="text-sm text-primary hover:underline inline-flex items-center gap-2"
                 >
                   <IconArrowLeft className="size-4" />
-                  Back to Login
+                  {t('backToLogin')}
                 </Link>
               </div>
             </form>
@@ -217,7 +219,7 @@ export default function ResetPasswordPage() {
     <Suspense fallback={
       <div className="bg-muted flex min-h-svh flex-col items-center justify-center p-6 md:p-10">
         <div className="w-full max-w-sm">
-          <div className="text-center text-muted-foreground">Loading...</div>
+          <div className="text-center text-muted-foreground">...</div>
         </div>
       </div>
     }>
