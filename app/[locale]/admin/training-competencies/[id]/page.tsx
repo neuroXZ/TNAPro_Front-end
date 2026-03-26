@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 
 import { useState, useEffect } from "react"
 import { useParams, useRouter } from "next/navigation"
@@ -18,8 +18,8 @@ import { toast } from "sonner"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Input } from "@/components/ui/input"
-import { CompetencyViewDialog } from "./competency-view-dialog"
-import { CompetencyDeleteDialog } from "./competency-delete-dialog"
+import { CompetencyViewDialog } from "@/features/admin/training-competencies/[id]/components/competency-view-dialog"
+import { CompetencyDeleteDialog } from "@/features/admin/training-competencies/[id]/components/competency-delete-dialog"
 import { useTranslations } from "next-intl"
 
 interface Training {
@@ -310,7 +310,7 @@ export default function TrainingCompetencyDetailPage() {
           <p className="text-muted-foreground">
             {training?.startDate && `${new Date(training.startDate).toLocaleDateString()} - `}
             {training?.endDate && new Date(training.endDate).toLocaleDateString()}
-            {training?.startDate && training?.endDate && " • "}
+            {training?.startDate && training?.endDate && " â€¢ "}
             {trainingCompetencies.length} {trainingCompetencies.length === 1 ? "competency" : "competencies"} assigned
           </p>
         </div>

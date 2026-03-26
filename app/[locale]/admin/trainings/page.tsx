@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 
 import { useState, useEffect, useMemo } from "react"
 import {
@@ -22,15 +22,15 @@ import {
 import { Input } from "@/components/ui/input"
 import { IconSearch } from "@tabler/icons-react"
 import { toast } from "sonner"
-import { Training, getColumns } from "./columns"
+import { Training, getColumns } from "@/features/admin/trainings/components/columns"
 import { DataTablePagination } from "@/components/data-table-pagination"
-import { TrainingFormDialog, type TrainingFormData } from "./training-form-dialog"
-import { TrainingDeleteDialog } from "./training-delete-dialog"
-import { TrainingTableSkeleton } from "./training-table-skeleton"
-import { TrainingDataTable } from "./training-data-table"
-import { TrainingTableActions } from "./training-table-actions"
-import { TrainingViewDialog } from "./training-view-dialog"
-import { TrainingImportDialog } from "./training-import-dialog"
+import { TrainingFormDialog, type TrainingFormData } from "@/features/admin/trainings/components/training-form-dialog"
+import { TrainingDeleteDialog } from "@/features/admin/trainings/components/training-delete-dialog"
+import { TrainingTableSkeleton } from "@/features/admin/trainings/components/training-table-skeleton"
+import { TrainingDataTable } from "@/features/admin/trainings/components/training-data-table"
+import { TrainingTableActions } from "@/features/admin/trainings/components/training-table-actions"
+import { TrainingViewDialog } from "@/features/admin/trainings/components/training-view-dialog"
+import { TrainingImportDialog } from "@/features/admin/trainings/components/training-import-dialog"
 import { useTranslations } from "next-intl"
 
 export default function TrainingManagementPage() {

@@ -1,8 +1,8 @@
-'use client';
+﻿'use client';
 
 import { useState, useEffect } from "react"
 import { useTranslations } from "next-intl"
-import { useAuth } from "@/lib/auth-context"
+import { useAuth } from "@/providers/auth-provider"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
@@ -86,7 +86,7 @@ export function LoginForm({
 
     try {
       const appBaseUrl = window.location.origin;
-      // console.log('🚀 Starting forgot password with:', 
+      // console.log('ðŸš€ Starting forgot password with:', 
       //   {
       //   identifier: forgotPasswordEmail,
       //   userType,
@@ -103,7 +103,7 @@ export function LoginForm({
       setShowForgotPassword(false);
       setForgotPasswordEmail("");
     // } catch (error: any) {
-    //   console.error('🔥 Forgot password error in component:', error);
+    //   console.error('ðŸ”¥ Forgot password error in component:', error);
     //   const errorMessage = error.message?.includes('Cannot connect') 
     //     ? "Cannot connect to server. Please check your network connection."
     //     : error.response?.data?.error || error.message || "Failed to send password reset email.";

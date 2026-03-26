@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 
 import { useEffect, useState } from "react"
 import { useTranslations } from "next-intl"
@@ -9,7 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { positionCompetencyAPI } from "@/lib/api"
 import { toast } from "sonner"
 import { IconTarget, IconTrophy, IconBook } from "@tabler/icons-react"
-import { CompetencyDetailDialog } from "./competency-detail-dialog"
+import { CompetencyDetailDialog } from "@/features/staff/competencies/components/competency-detail-dialog"
 
 interface PositionCompetency {
   id: string

@@ -2,7 +2,7 @@
 
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { authAPI } from './api';
+import { authAPI } from '@/lib/api';
 
 interface User {
   id: string;
@@ -57,7 +57,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       // If staff, fetch full data to get positionId and unitId
       if (userData.userType === 'staff' && userData.id) {
         try {
-          const { staffAPI } = await import('./api');
+          const { staffAPI } = await import('@/lib/api');
           const fullStaffData = await staffAPI.getById(userData.id);
           
           // Merge data - use full staff data which includes positionId, unitId, gender, image

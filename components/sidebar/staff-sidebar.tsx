@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 
 import * as React from "react"
 import {
@@ -14,7 +14,7 @@ import Image from "next/image"
 
 import { NavMain } from "@/components/nav/nav-main"
 import { NavUser } from "@/components/nav/nav-staff"
-import { useAuth } from "@/lib/auth-context"
+import { useAuth } from "@/providers/auth-provider"
 import { settingAPI } from "@/lib/api"
 import { useIsMobile } from "@/hooks/use-mobile"
 import { useTranslations } from "next-intl"
@@ -135,10 +135,10 @@ export function StaffSidebar({ ...props }: React.ComponentProps<typeof Sidebar>)
                 <div className="space-y-1 mt-3">
                   <p className="font-medium text-xs text-foreground">{t('keyFeatures')}</p>
                   <ul className="text-[11px] space-y-0.5 ml-2">
-                    <li>• {t('feature1')}</li>
-                    <li>• {t('feature2')}</li>
-                    <li>• {t('feature3')}</li>
-                    <li>• {t('feature4')}</li>
+                    <li>â€¢ {t('feature1')}</li>
+                    <li>â€¢ {t('feature2')}</li>
+                    <li>â€¢ {t('feature3')}</li>
+                    <li>â€¢ {t('feature4')}</li>
                   </ul>
                 </div>
               </div>

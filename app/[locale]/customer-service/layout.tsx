@@ -1,6 +1,6 @@
-// import { StaffSidebar } from "@/components/sidebar/staff-sidebar"
+﻿// import { StaffSidebar } from "@/components/sidebar/staff-sidebar"
 import { CustomerServiceSidebar } from "@/components/sidebar/customer-service-sidebar";
-import { SiteHeader } from "@/components/site-header"
+import { SiteHeader } from "@/components/layout/site-header"
 
 import {
   SidebarInset,

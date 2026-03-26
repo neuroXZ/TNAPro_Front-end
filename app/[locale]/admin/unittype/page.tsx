@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 
 import { useState, useEffect, useMemo } from "react"
 import {
@@ -22,14 +22,14 @@ import {
 import { Input } from "@/components/ui/input"
 import { IconSearch } from "@tabler/icons-react"
 import { toast } from "sonner"
-import { UnitType, getColumns } from "./columns"
+import { UnitType, getColumns } from "@/features/admin/unittype/components/columns"
 import { DataTablePagination } from "@/components/data-table-pagination"
-import { UnitTypeFormDialog, type UnitTypeFormData } from "./unittype-form-dialog"
-import { UnitTypeDeleteDialog } from "./unittype-delete-dialog"
-import { UnitTypeTableSkeleton } from "./unittype-table-skeleton"
-import { UnitTypeDataTable } from "./unittype-data-table"
-import { UnitTypeTableActions } from "./unittype-table-actions"
-import { UnitTypeViewDialog } from "./unittype-view-dialog"
+import { UnitTypeFormDialog, type UnitTypeFormData } from "@/features/admin/unittype/components/unittype-form-dialog"
+import { UnitTypeDeleteDialog } from "@/features/admin/unittype/components/unittype-delete-dialog"
+import { UnitTypeTableSkeleton } from "@/features/admin/unittype/components/unittype-table-skeleton"
+import { UnitTypeDataTable } from "@/features/admin/unittype/components/unittype-data-table"
+import { UnitTypeTableActions } from "@/features/admin/unittype/components/unittype-table-actions"
+import { UnitTypeViewDialog } from "@/features/admin/unittype/components/unittype-view-dialog"
 import { useTranslations } from "next-intl"
 
 export default function UnitTypeManagementPage() {

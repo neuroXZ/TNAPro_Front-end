@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 
 import { useState, useEffect, useMemo } from "react"
 import {
@@ -36,14 +36,14 @@ import {
 } from "@/components/ui/popover"
 import { IconSearch, IconFilter } from "@tabler/icons-react"
 import { toast } from "sonner"
-import { Unit, getColumns } from "./columns"
+import { Unit, getColumns } from "@/features/admin/units/components/columns"
 import { DataTablePagination } from "@/components/data-table-pagination"
-import { UnitFormDialog, type UnitFormData } from "./unit-form-dialog"
-import { UnitDeleteDialog } from "./unit-delete-dialog"
-import { UnitTableSkeleton } from "./unit-table-skeleton"
-import { UnitDataTable } from "./unit-data-table"
-import { UnitTableActions } from "./unit-table-actions"
-import { UnitViewDialog } from "./unit-view-dialog"
+import { UnitFormDialog, type UnitFormData } from "@/features/admin/units/components/unit-form-dialog"
+import { UnitDeleteDialog } from "@/features/admin/units/components/unit-delete-dialog"
+import { UnitTableSkeleton } from "@/features/admin/units/components/unit-table-skeleton"
+import { UnitDataTable } from "@/features/admin/units/components/unit-data-table"
+import { UnitTableActions } from "@/features/admin/units/components/unit-table-actions"
+import { UnitViewDialog } from "@/features/admin/units/components/unit-view-dialog"
 import { useTranslations } from "next-intl"
 
 interface UnitType {

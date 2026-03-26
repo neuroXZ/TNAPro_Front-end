@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 
 import * as React from "react"
 import {
@@ -14,7 +14,7 @@ import {
 import Image from "next/image"
 import { NavMain } from "@/components/nav/nav-main"
 import { NavUser } from "@/components/nav/nav-admin"
-import { useAuth } from "@/lib/auth-context"
+import { useAuth } from "@/providers/auth-provider"
 import { settingAPI } from "@/lib/api"
 import { useTranslations } from "next-intl"
 import {

@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 
 import { useEffect, useState } from "react"
 import { useTranslations } from "next-intl"
@@ -19,7 +19,7 @@ import {
   IconAlertCircle,
   IconChecks
 } from "@tabler/icons-react"
-import { useAuth } from "@/lib/auth-context"
+import { useAuth } from "@/providers/auth-provider"
 import { staffAPI, assessmentAPI, trainingAPI, idpAPI, rtnAPI } from "@/lib/api"
 import { useRouter } from "next/navigation"
 import { format } from "date-fns"

@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 
 import { useState, useEffect, useMemo } from "react"
 import {
@@ -36,15 +36,15 @@ import {
 import { Button } from "@/components/ui/button"
 import { IconSearch, IconFilter } from "@tabler/icons-react"
 import { toast } from "sonner"
-import { Competency, getColumns } from "./columns"
+import { Competency, getColumns } from "@/features/admin/competencies/components/columns"
 import { DataTablePagination } from "@/components/data-table-pagination"
-import { CompetencyFormDialog, type CompetencyFormData } from "./competency-form-dialog"
-import { CompetencyDeleteDialog } from "./competency-delete-dialog"
-import { CompetencyTableSkeleton } from "./competency-table-skeleton"
-import { CompetencyDataTable } from "./competency-data-table"
-import { CompetencyTableActions } from "./competency-table-actions"
-import { CompetencyViewDialog } from "./competency-view-dialog"
-import { CompetencyImportDialog } from "./competency-import-dialog"
+import { CompetencyFormDialog, type CompetencyFormData } from "@/features/admin/competencies/components/competency-form-dialog"
+import { CompetencyDeleteDialog } from "@/features/admin/competencies/components/competency-delete-dialog"
+import { CompetencyTableSkeleton } from "@/features/admin/competencies/components/competency-table-skeleton"
+import { CompetencyDataTable } from "@/features/admin/competencies/components/competency-data-table"
+import { CompetencyTableActions } from "@/features/admin/competencies/components/competency-table-actions"
+import { CompetencyViewDialog } from "@/features/admin/competencies/components/competency-view-dialog"
+import { CompetencyImportDialog } from "@/features/admin/competencies/components/competency-import-dialog"
 import { useTranslations } from "next-intl"
 
 export default function CompetencyManagementPage() {

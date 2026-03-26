@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 
 import { useState, useEffect, useMemo } from "react"
 import {
@@ -36,15 +36,15 @@ import {
 import { Button } from "@/components/ui/button"
 import { IconSearch, IconFilter } from "@tabler/icons-react"
 import { toast } from "sonner"
-import { Position, getColumns } from "./columns"
+import { Position, getColumns } from "@/features/admin/positions/components/columns"
 import { DataTablePagination } from "@/components/data-table-pagination"
-import { PositionFormDialog, type PositionFormData } from "./position-form-dialog"
-import { PositionDeleteDialog } from "./position-delete-dialog"
-import { PositionTableSkeleton } from "./position-table-skeleton"
-import { PositionDataTable } from "./position-data-table"
-import { PositionTableActions } from "./position-table-actions"
-import { PositionViewDialog } from "./position-view-dialog"
-import { PositionImportDialog } from "./position-import-dialog"
+import { PositionFormDialog, type PositionFormData } from "@/features/admin/positions/components/position-form-dialog"
+import { PositionDeleteDialog } from "@/features/admin/positions/components/position-delete-dialog"
+import { PositionTableSkeleton } from "@/features/admin/positions/components/position-table-skeleton"
+import { PositionDataTable } from "@/features/admin/positions/components/position-data-table"
+import { PositionTableActions } from "@/features/admin/positions/components/position-table-actions"
+import { PositionViewDialog } from "@/features/admin/positions/components/position-view-dialog"
+import { PositionImportDialog } from "@/features/admin/positions/components/position-import-dialog"
 import { useTranslations } from "next-intl"
 
 export default function PositionManagementPage() {

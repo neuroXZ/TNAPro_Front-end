@@ -9,12 +9,12 @@ import { Link } from '@tiptap/extension-link'
 import { Image } from '@tiptap/extension-image'
 import { useEffect, useState } from 'react'
 import { Button } from '@/components/ui/button'
-import { 
-  Bold, 
-  Italic, 
-  Underline, 
-  Strikethrough, 
-  List, 
+import {
+  Bold,
+  Italic,
+  Underline,
+  Strikethrough,
+  List,
   ListOrdered,
   AlignLeft,
   AlignCenter,
@@ -46,7 +46,7 @@ export function WysiwygEditor({
   const [showColorPicker, setShowColorPicker] = useState(false)
   const [showLinkDialog, setShowLinkDialog] = useState(false)
   const [linkUrl, setLinkUrl] = useState('')
-  
+
   const editor = useEditor({
     extensions: [
       StarterKit,
@@ -95,10 +95,10 @@ export function WysiwygEditor({
   // Link handlers
   const handleAddLink = () => {
     if (!editor) return
-    
+
     const selection = editor.state.selection
     const selectedText = editor.state.doc.textBetween(selection.from, selection.to)
-    
+
     if (selectedText) {
       setShowLinkDialog(true)
       setLinkUrl('')
@@ -109,7 +109,7 @@ export function WysiwygEditor({
 
   const handleSetLink = () => {
     if (!editor) return
-    
+
     if (linkUrl) {
       editor.chain().focus().setLink({ href: linkUrl }).run()
     }
@@ -164,9 +164,9 @@ export function WysiwygEditor({
         >
           <Heading3 className="h-4 w-4" />
         </Button>
-        
+
         <div className="w-px h-6 bg-border mx-1" />
-        
+
         <Button
           type="button"
           variant="ghost"
@@ -194,9 +194,9 @@ export function WysiwygEditor({
         >
           <Strikethrough className="h-4 w-4" />
         </Button>
-        
+
         <div className="w-px h-6 bg-border mx-1" />
-        
+
         <Button
           type="button"
           variant="ghost"
@@ -215,9 +215,9 @@ export function WysiwygEditor({
         >
           <ListOrdered className="h-4 w-4" />
         </Button>
-        
+
         <div className="w-px h-6 bg-border mx-1" />
-        
+
         <Button
           type="button"
           variant="ghost"
@@ -278,12 +278,12 @@ export function WysiwygEditor({
           >
             <Palette className="h-4 w-4" />
           </Button>
-          
+
           {showColorPicker && (
             <div className="w-[150px] absolute top-full left-0 mt-1 p-2 bg-popover border rounded-md shadow-md z-10">
               <div className="grid grid-cols-5 gap-1">
                 {colors.map((color) => (
-                  <button
+                  <Button
                     key={color}
                     type="button"
                     className="w-6 h-6 rounded-sm border border-gray-300 hover:scale-110 transition-transform"
@@ -312,10 +312,10 @@ export function WysiwygEditor({
             <Button type="button" size="sm" onClick={handleSetLink}>
               Add Link
             </Button>
-            <Button 
-              type="button" 
-              size="sm" 
-              variant="outline" 
+            <Button
+              type="button"
+              size="sm"
+              variant="outline"
               onClick={() => setShowLinkDialog(false)}
             >
               Cancel
@@ -326,8 +326,8 @@ export function WysiwygEditor({
 
       {/* Editor */}
       <div className="max-h-[200px] overflow-y-auto">
-        <EditorContent 
-          editor={editor} 
+        <EditorContent
+          editor={editor}
           className="prose-mail-body min-h-[150px] max-w-none"
         />
       </div>

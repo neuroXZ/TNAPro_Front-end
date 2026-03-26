@@ -16,6 +16,16 @@ interface ThemeSettings {
   infoColor?: string;
 }
 
+// Module-level cache — avoids re-fetching on every component mount
+let themeCache: ThemeSettings | null = null;
+let themeLoaded = false;
+
+/** Clear the module-level theme cache (call after saving new settings). */
+export function invalidateThemeCache(): void {
+  themeCache = null;
+  themeLoaded = false;
+}
+
 /**
  * Fetch theme settings from backend
  * Client-side only function
@@ -25,6 +35,9 @@ export async function fetchThemeSettings(): Promise<ThemeSettings | null> {
   if (typeof window === 'undefined') {
     return null;
   }
+
+  // Return cached result to avoid repeated network calls
+  if (themeLoaded) return themeCache;
 
   try {
     console.log('Fetching theme settings from:', `${API_BASE_URL}/setting`);
@@ -40,12 +53,13 @@ export async function fetchThemeSettings(): Promise<ThemeSettings | null> {
     }
     
     const response = await fetch(`${API_BASE_URL}/setting`, {
-      cache: 'no-store', // Always get fresh data
       headers,
     });
 
     if (!response.ok) {
       console.warn('Failed to fetch theme settings, status:', response.status);
+      themeLoaded = true;
+      themeCache = null;
       return null;
     }
 
@@ -54,7 +68,7 @@ export async function fetchThemeSettings(): Promise<ThemeSettings | null> {
     
     // Assuming first setting record contains theme colors
     if (settings && settings.length > 0) {
-      return {
+      themeCache = {
         primaryColor: settings[0].primaryColor,
         secondaryColor: settings[0].secondaryColor,
         successColor: settings[0].successColor,
@@ -63,10 +77,12 @@ export async function fetchThemeSettings(): Promise<ThemeSettings | null> {
         infoColor: settings[0].infoColor,
       };
     }
-
-    return null;
+    themeLoaded = true;
+    return themeCache;
   } catch (error) {
     console.error('Error fetching theme settings:', error);
+    themeLoaded = true;
+    themeCache = null;
     return null;
   }
 }

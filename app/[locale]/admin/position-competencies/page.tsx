@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 
 import { useState, useEffect, useMemo } from "react"
 import {
@@ -22,10 +22,10 @@ import {
 import { Input } from "@/components/ui/input"
 import { IconSearch } from "@tabler/icons-react"
 import { toast } from "sonner"
-import { Position, getColumns } from "./columns"
+import { Position, getColumns } from "@/features/admin/position-competencies/components/columns"
 import { DataTablePagination } from "@/components/data-table-pagination"
-import { PositionCompetencyTableSkeleton } from "./position-competency-table-skeleton"
-import { PositionCompetencyDataTable } from "./position-competency-data-table"
+import { PositionCompetencyTableSkeleton } from "@/features/admin/position-competencies/components/position-competency-table-skeleton"
+import { PositionCompetencyDataTable } from "@/features/admin/position-competencies/components/position-competency-data-table"
 import { useTranslations } from "next-intl"
 
 export default function PositionCompetencyManagementPage() {

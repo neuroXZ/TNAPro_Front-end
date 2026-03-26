@@ -1,7 +1,7 @@
-import { AdminRoute } from "@/components/route/admin-route"
+﻿import { AdminRoute } from "@/components/route/admin-route"
 import { AdminSidebar } from "@/components/sidebar/admin-sidebar"
-import { SiteHeader } from "@/components/site-header"
-import { ThemeProvider } from "@/components/theme-provider"
+import { SiteHeader } from "@/components/layout/site-header"
+import { ThemeProvider } from "@/providers/theme-provider"
 
 import {
   SidebarInset,

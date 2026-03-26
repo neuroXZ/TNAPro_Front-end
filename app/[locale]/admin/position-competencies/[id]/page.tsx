@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 
 import { useState, useEffect } from "react"
 import { useParams, useRouter } from "next/navigation"
@@ -18,10 +18,10 @@ import { toast } from "sonner"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Input } from "@/components/ui/input"
-import { CompetencyLevelDialog } from "./competency-level-dialog"
-import { CompetencyViewDialog } from "./competency-view-dialog"
-import { CompetencyDeleteDialog } from "./competency-delete-dialog"
-import { BulkLevelDialog } from "./bulk-level-dialog"
+import { CompetencyLevelDialog } from "@/features/admin/position-competencies/[id]/components/competency-level-dialog"
+import { CompetencyViewDialog } from "@/features/admin/position-competencies/[id]/components/competency-view-dialog"
+import { CompetencyDeleteDialog } from "@/features/admin/position-competencies/[id]/components/competency-delete-dialog"
+import { BulkLevelDialog } from "@/features/admin/position-competencies/[id]/components/bulk-level-dialog"
 import { useTranslations } from "next-intl"
 
 interface Position {
@@ -339,7 +339,7 @@ export default function PositionCompetencyDetailPage() {
         <div>
           <h1 className="text-3xl font-bold text-primary">{position?.name}</h1>
           <p className="text-muted-foreground ">
-            {position?.grade?.name && `Grade: ${position.grade.name} • `}
+            {position?.grade?.name && `Grade: ${position.grade.name} â€¢ `}
             {positionCompetencies.length} {positionCompetencies.length === 1 ? "competency" : "competencies"} assigned
           </p>
         </div>

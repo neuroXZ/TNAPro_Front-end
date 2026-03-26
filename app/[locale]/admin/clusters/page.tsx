@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 
 import { useState, useEffect, useMemo } from "react"
 import {
@@ -22,14 +22,14 @@ import {
 import { Input } from "@/components/ui/input"
 import { IconSearch } from "@tabler/icons-react"
 import { toast } from "sonner"
-import { Cluster, getColumns } from "./columns"
+import { Cluster, getColumns } from "@/features/admin/clusters/components/columns"
 import { DataTablePagination } from "@/components/data-table-pagination"
-import { ClusterFormDialog, type ClusterFormData } from "./cluster-form-dialog"
-import { ClusterDeleteDialog } from "./cluster-delete-dialog"
-import { ClusterTableSkeleton } from "./cluster-table-skeleton"
-import { ClusterDataTable } from "./cluster-data-table"
-import { ClusterTableActions } from "./cluster-table-actions"
-import { ClusterViewDialog } from "./cluster-view-dialog"
+import { ClusterFormDialog, type ClusterFormData } from "@/features/admin/clusters/components/cluster-form-dialog"
+import { ClusterDeleteDialog } from "@/features/admin/clusters/components/cluster-delete-dialog"
+import { ClusterTableSkeleton } from "@/features/admin/clusters/components/cluster-table-skeleton"
+import { ClusterDataTable } from "@/features/admin/clusters/components/cluster-data-table"
+import { ClusterTableActions } from "@/features/admin/clusters/components/cluster-table-actions"
+import { ClusterViewDialog } from "@/features/admin/clusters/components/cluster-view-dialog"
 import { useTranslations } from "next-intl"
 
 export default function ClusterManagementPage() {

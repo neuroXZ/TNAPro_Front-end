@@ -31,7 +31,7 @@ import {
     IconEdit
 } from "@tabler/icons-react"
 import { format } from "date-fns"
-import { StaffFormDialog, type StaffFormData } from "../staff-form-dialog"
+import { StaffFormDialog, type StaffFormData } from "@/features/admin/staff/components/staff-form-dialog"
 import { useTranslations } from "next-intl"
 
 interface Staff {

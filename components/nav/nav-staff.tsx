@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 
 import {
   IconDotsVertical,
@@ -9,7 +9,7 @@ import {
 } from "@tabler/icons-react"
 
 import { useTranslations } from "next-intl"
-import { useAuth } from "@/lib/auth-context"
+import { useAuth } from "@/providers/auth-provider"
 import {
   Avatar,
   AvatarFallback,

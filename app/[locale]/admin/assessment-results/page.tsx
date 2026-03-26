@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 
 import { useState, useEffect, useMemo } from "react"
 import {
@@ -30,14 +30,14 @@ import {
 } from "@/components/ui/select"
 import { IconSearch, IconFilterOff } from "@tabler/icons-react"
 import { toast } from "sonner"
-import { AssessmentResult, getColumns } from "./columns"
+import { AssessmentResult, getColumns } from "@/features/admin/assessment-results/components/columns"
 import { DataTablePagination } from "@/components/data-table-pagination"
-import { ResultFormDialog } from "./result-form-dialog"
-import { ResultDeleteDialog } from "./result-delete-dialog"
-import { ResultTableSkeleton } from "./result-table-skeleton"
-import { ResultDataTable } from "./result-data-table"
-import { ResultTableActions } from "./result-table-actions"
-import { ResultViewDialog } from "./result-view-dialog"
+import { ResultFormDialog } from "@/features/admin/assessment-results/components/result-form-dialog"
+import { ResultDeleteDialog } from "@/features/admin/assessment-results/components/result-delete-dialog"
+import { ResultTableSkeleton } from "@/features/admin/assessment-results/components/result-table-skeleton"
+import { ResultDataTable } from "@/features/admin/assessment-results/components/result-data-table"
+import { ResultTableActions } from "@/features/admin/assessment-results/components/result-table-actions"
+import { ResultViewDialog } from "@/features/admin/assessment-results/components/result-view-dialog"
 import { useTranslations } from "next-intl"
 
 export default function AssessmentResultsPage() {

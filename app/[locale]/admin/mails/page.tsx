@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 
 import { useState, useEffect, useMemo } from "react"
 import {
@@ -22,14 +22,14 @@ import {
 import { Input } from "@/components/ui/input"
 import { IconSearch } from "@tabler/icons-react"
 import { toast } from "sonner"
-import { Mail, getColumns } from "./columns"
+import { Mail, getColumns } from "@/features/admin/mails/components/columns"
 import { DataTablePagination } from "@/components/data-table-pagination"
-import { MailFormDialog, type MailFormData } from "./mail-form-dialog"
-import { MailDeleteDialog } from "./mail-delete-dialog"
-import { MailTableSkeleton } from "./mail-table-skeleton"
-import { MailDataTable } from "./mail-data-table"
-import { MailTableActions } from "./mail-table-actions"
-import { MailViewDialog } from "./mail-view-dialog"
+import { MailFormDialog, type MailFormData } from "@/features/admin/mails/components/mail-form-dialog"
+import { MailDeleteDialog } from "@/features/admin/mails/components/mail-delete-dialog"
+import { MailTableSkeleton } from "@/features/admin/mails/components/mail-table-skeleton"
+import { MailDataTable } from "@/features/admin/mails/components/mail-data-table"
+import { MailTableActions } from "@/features/admin/mails/components/mail-table-actions"
+import { MailViewDialog } from "@/features/admin/mails/components/mail-view-dialog"
 import { useTranslations } from "next-intl"
 
 export default function MailManagementPage() {

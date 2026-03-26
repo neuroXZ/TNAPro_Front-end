@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 
 import { useState, useEffect, useMemo } from "react"
 import {
@@ -22,14 +22,14 @@ import {
 import { Input } from "@/components/ui/input"
 import { IconSearch } from "@tabler/icons-react"
 import { toast } from "sonner"
-import { Level, getColumns } from "./columns"
+import { Level, getColumns } from "@/features/admin/levels/components/columns"
 import { DataTablePagination } from "@/components/data-table-pagination"
-import { LevelFormDialog, type LevelFormData } from "./level-form-dialog"
-import { LevelDeleteDialog } from "./level-delete-dialog"
-import { LevelTableSkeleton } from "./level-table-skeleton"
-import { LevelDataTable } from "./level-data-table"
-import { LevelTableActions } from "./level-table-actions"
-import { LevelViewDialog } from "./level-view-dialog"
+import { LevelFormDialog, type LevelFormData } from "@/features/admin/levels/components/level-form-dialog"
+import { LevelDeleteDialog } from "@/features/admin/levels/components/level-delete-dialog"
+import { LevelTableSkeleton } from "@/features/admin/levels/components/level-table-skeleton"
+import { LevelDataTable } from "@/features/admin/levels/components/level-data-table"
+import { LevelTableActions } from "@/features/admin/levels/components/level-table-actions"
+import { LevelViewDialog } from "@/features/admin/levels/components/level-view-dialog"
 import { useTranslations } from "next-intl"
 
 export default function LevelManagementPage() {

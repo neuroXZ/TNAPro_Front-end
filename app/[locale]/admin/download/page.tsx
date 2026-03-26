@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import React from 'react'
 import {
@@ -14,7 +14,7 @@ import {
   TabsList,
   TabsTrigger,
 } from "@/components/ui/tabs"
-import AdminIdpDownloadPage from './idpdownload'
+import AdminIdpDownloadPage from "@/features/admin/download/components/idpdownload"
 import { useTranslations } from "next-intl"
 
 

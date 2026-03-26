@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 
 import { useState, useEffect, useMemo } from "react"
 import {
@@ -45,14 +45,14 @@ import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { IconSearch, IconFilter } from "@tabler/icons-react"
 import { toast } from "sonner"
-import { Assessor, getColumns } from "./columns"
+import { Assessor, getColumns } from "@/features/admin/assessors/components/columns"
 import { DataTablePagination } from "@/components/data-table-pagination"
-import { AssessorFormDialog, type AssessorFormData } from "./assessor-form-dialog"
-import { AssessorDeleteDialog } from "./assessor-delete-dialog"
-import { AssessorTableSkeleton } from "./assessor-table-skeleton"
-import { AssessorDataTable } from "./assessor-data-table"
-import { AssessorTableActions } from "./assessor-table-actions"
-import { AssessorViewDialog } from "./assessor-view-dialog"
+import { AssessorFormDialog, type AssessorFormData } from "@/features/admin/assessors/components/assessor-form-dialog"
+import { AssessorDeleteDialog } from "@/features/admin/assessors/components/assessor-delete-dialog"
+import { AssessorTableSkeleton } from "@/features/admin/assessors/components/assessor-table-skeleton"
+import { AssessorDataTable } from "@/features/admin/assessors/components/assessor-data-table"
+import { AssessorTableActions } from "@/features/admin/assessors/components/assessor-table-actions"
+import { AssessorViewDialog } from "@/features/admin/assessors/components/assessor-view-dialog"
 import { useTranslations } from "next-intl"
 
 export default function AssessorManagementPage() {

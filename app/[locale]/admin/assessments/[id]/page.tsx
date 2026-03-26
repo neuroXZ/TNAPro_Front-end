@@ -1,13 +1,13 @@
-"use client"
+﻿"use client"
 
 import { useParams, useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { IconArrowLeft } from "@tabler/icons-react"
 import { Skeleton } from "@/components/ui/skeleton"
-import { useAssessmentData } from "./hooks/useAssessmentData"
-import { WeightageCard } from "./components/WeightageCard"
-import { StaffList } from "./components/StaffList"
+import { useAssessmentData } from "@/features/admin/assessments/[id]/hooks/useAssessmentData"
+import { WeightageCard } from "@/features/admin/assessments/[id]/components/WeightageCard"
+import { StaffList } from "@/features/admin/assessments/[id]/components/StaffList"
 import { useTranslations } from "next-intl"
 
 export default function AssessmentDetailPage() {
@@ -58,7 +58,7 @@ export default function AssessmentDetailPage() {
             {assessment?.startDate &&
               `${new Date(assessment.startDate).toLocaleDateString()} - `}
             {assessment?.endDate && new Date(assessment.endDate).toLocaleDateString()}
-            {assessment?.startDate && assessment?.endDate && " • "}
+            {assessment?.startDate && assessment?.endDate && " â€¢ "}
             {results.length === 1 ? t('resultsRecordedSingle', { count: results.length }) : t('resultsRecordedMultiple', { count: results.length })}
           </p>
         </div>

@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 
 import * as React from "react"
 import { usePathname, useRouter } from "next/navigation"
@@ -15,7 +15,7 @@ import {
 } from "@tabler/icons-react"
 import { cn } from "@/lib/utils"
 import { useIsMobile } from "@/hooks/use-mobile"
-import { useAuth } from "@/lib/auth-context"
+import { useAuth } from "@/providers/auth-provider"
 import {
   DropdownMenu,
   DropdownMenuContent,

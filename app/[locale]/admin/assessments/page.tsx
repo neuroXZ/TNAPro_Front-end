@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 
 import { useState, useEffect, useMemo } from "react"
 import {
@@ -22,13 +22,13 @@ import {
 import { Input } from "@/components/ui/input"
 import { IconSearch } from "@tabler/icons-react"
 import { toast } from "sonner"
-import { Assessment, getColumns } from "./columns"
+import { Assessment, getColumns } from "@/features/admin/assessments/components/columns"
 import { DataTablePagination } from "@/components/data-table-pagination"
-import { AssessmentTableSkeleton } from "./assessment-table-skeleton"
-import { AssessmentDataTable } from "./assessment-data-table"
-import { AssessmentTableActions } from "./assessment-table-actions"
-import { AssessmentFormDialog } from "./assessment-form-dialog"
-import { AssessmentDeleteDialog } from "./assessment-delete-dialog"
+import { AssessmentTableSkeleton } from "@/features/admin/assessments/components/assessment-table-skeleton"
+import { AssessmentDataTable } from "@/features/admin/assessments/components/assessment-data-table"
+import { AssessmentTableActions } from "@/features/admin/assessments/components/assessment-table-actions"
+import { AssessmentFormDialog } from "@/features/admin/assessments/components/assessment-form-dialog"
+import { AssessmentDeleteDialog } from "@/features/admin/assessments/components/assessment-delete-dialog"
 import { useTranslations } from "next-intl"
 
 export default function AssessmentsPage() {

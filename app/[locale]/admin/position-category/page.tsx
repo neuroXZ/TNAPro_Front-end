@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 
 import { useState, useEffect, useMemo } from "react"
 import {
@@ -22,14 +22,14 @@ import {
 import { Input } from "@/components/ui/input"
 import { IconSearch } from "@tabler/icons-react"
 import { toast } from "sonner"
-import { PositionCategory, getColumns } from "./columns"
+import { PositionCategory, getColumns } from "@/features/admin/position-category/components/columns"
 import { DataTablePagination } from "@/components/data-table-pagination"
-import { PositionCategoryFormDialog, type PositionCategoryFormData } from "./unittype-form-dialog"
-import { PositionCategoryDeleteDialog } from "./unittype-delete-dialog"
-import { PositionCategoryTableSkeleton } from "./unittype-table-skeleton"
-import { PositionCategoryDataTable } from "./unittype-data-table"
-import { PositionCategoryTableActions } from "./unittype-table-actions"
-import { PositionCategoryViewDialog } from "./unittype-view-dialog"
+import { PositionCategoryFormDialog, type PositionCategoryFormData } from "@/features/admin/position-category/components/unittype-form-dialog"
+import { PositionCategoryDeleteDialog } from "@/features/admin/position-category/components/unittype-delete-dialog"
+import { PositionCategoryTableSkeleton } from "@/features/admin/position-category/components/unittype-table-skeleton"
+import { PositionCategoryDataTable } from "@/features/admin/position-category/components/unittype-data-table"
+import { PositionCategoryTableActions } from "@/features/admin/position-category/components/unittype-table-actions"
+import { PositionCategoryViewDialog } from "@/features/admin/position-category/components/unittype-view-dialog"
 import { useTranslations } from "next-intl"
 
 export default function PositionCategoryManagementPage() {

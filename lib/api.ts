@@ -67,6 +67,50 @@ api.interceptors.response.use(
   }
 );
 
+// ─────────────────────────────────────────────────────────────────────────────
+// In-memory GET cache — deduplicates simultaneous requests and caches responses
+// for CACHE_TTL_MS ms to prevent redundant API calls across components.
+// ─────────────────────────────────────────────────────────────────────────────
+const CACHE_TTL_MS = 30_000; // 30 seconds
+
+interface CacheEntry { data: unknown; expiresAt: number }
+const requestCache = new Map<string, CacheEntry>();
+const inFlightRequests = new Map<string, Promise<unknown>>();
+
+function buildCacheKey(url: string, params?: unknown): string {
+  return params ? `${url}::${JSON.stringify(params)}` : url;
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+async function cachedGet<T = any>(url: string, params?: unknown, ttl = CACHE_TTL_MS): Promise<T> {
+  const key = buildCacheKey(url, params);
+  const cached = requestCache.get(key);
+  if (cached && Date.now() < cached.expiresAt) return cached.data as T;
+  const inflight = inFlightRequests.get(key);
+  if (inflight) return inflight as Promise<T>;
+  const promise = api
+    .get<T>(url, params ? { params } : undefined)
+    .then(res => {
+      requestCache.set(key, { data: res.data, expiresAt: Date.now() + ttl });
+      inFlightRequests.delete(key);
+      return res.data;
+    })
+    .catch(err => { inFlightRequests.delete(key); throw err; });
+  inFlightRequests.set(key, promise);
+  return promise;
+}
+
+/**
+ * Invalidate cached GET responses whose key starts with `pathPrefix`.
+ * Call after create / update / delete mutations. Omit to clear entire cache.
+ */
+export function invalidateApiCache(pathPrefix?: string): void {
+  if (!pathPrefix) { requestCache.clear(); return; }
+  for (const key of requestCache.keys()) {
+    if (key.startsWith(pathPrefix)) requestCache.delete(key);
+  }
+}
+
 // Auth API
 export const authAPI = {
   login: async (credentials: { username: string; password: string; userType: 'staff' | 'admin' }) => {
@@ -168,27 +212,28 @@ export const authAPI = {
 // Admin API
 export const adminAPI = {
   getAll: async () => {
-    const response = await api.get('/admin');
-    return response.data;
+    return cachedGet('/admin');
   },
   
   getById: async (id: string) => {
-    const response = await api.get(`/admin/${id}`);
-    return response.data;
+    return cachedGet(`/admin/${id}`);
   },
   
   create: async (data: any) => {
     const response = await api.post('/admin', data);
+    invalidateApiCache('/admin');
     return response.data;
   },
   
   update: async (id: string, data: any) => {
     const response = await api.put(`/admin/${id}`, data);
+    invalidateApiCache('/admin');
     return response.data;
   },
   
   delete: async (id: string) => {
     const response = await api.delete(`/admin/${id}`);
+    invalidateApiCache('/admin');
     return response.data;
   },
 };
@@ -196,27 +241,28 @@ export const adminAPI = {
 // Staff API
 export const staffAPI = {
   getAll: async () => {
-    const response = await api.get('/staff');
-    return response.data;
+    return cachedGet('/staff');
   },
   
   getById: async (id: string) => {
-    const response = await api.get(`/staff/${id}`);
-    return response.data;
+    return cachedGet(`/staff/${id}`);
   },
   
   create: async (data: any) => {
     const response = await api.post('/staff', data);
+    invalidateApiCache('/staff');
     return response.data;
   },
   
   update: async (id: string, data: any) => {
     const response = await api.put(`/staff/${id}`, data);
+    invalidateApiCache('/staff');
     return response.data;
   },
   
   delete: async (id: string) => {
     const response = await api.delete(`/staff/${id}`);
+    invalidateApiCache('/staff');
     return response.data;
   },
   
@@ -229,6 +275,7 @@ export const staffAPI = {
         'Content-Type': 'multipart/form-data',
       },
     });
+    invalidateApiCache('/staff');
     return response.data;
   },
   
@@ -248,6 +295,7 @@ export const staffAPI = {
         'Content-Type': 'multipart/form-data',
       },
     });
+    invalidateApiCache('/staff');
     return response.data;
   },
 };
@@ -255,27 +303,28 @@ export const staffAPI = {
 // Position API
 export const positionAPI = {
   getAll: async () => {
-    const response = await api.get('/position');
-    return response.data;
+    return cachedGet('/position');
   },
   
   getById: async (id: string) => {
-    const response = await api.get(`/position/${id}`);
-    return response.data;
+    return cachedGet(`/position/${id}`);
   },
   
   create: async (data: any) => {
     const response = await api.post('/position', data);
+    invalidateApiCache('/position');
     return response.data;
   },
   
   update: async (id: string, data: any) => {
     const response = await api.put(`/position/${id}`, data);
+    invalidateApiCache('/position');
     return response.data;
   },
   
   delete: async (id: string) => {
     const response = await api.delete(`/position/${id}`);
+    invalidateApiCache('/position');
     return response.data;
   },
 };
@@ -283,27 +332,28 @@ export const positionAPI = {
 // Unit API
 export const unitAPI = {
   getAll: async () => {
-    const response = await api.get('/unit');
-    return response.data;
+    return cachedGet('/unit');
   },
   
   getById: async (id: string) => {
-    const response = await api.get(`/unit/${id}`);
-    return response.data;
+    return cachedGet(`/unit/${id}`);
   },
   
   create: async (data: any) => {
     const response = await api.post('/unit', data);
+    invalidateApiCache('/unit');
     return response.data;
   },
   
   update: async (id: string, data: any) => {
     const response = await api.put(`/unit/${id}`, data);
+    invalidateApiCache('/unit');
     return response.data;
   },
   
   delete: async (id: string) => {
     const response = await api.delete(`/unit/${id}`);
+    invalidateApiCache('/unit');
     return response.data;
   },
 };
@@ -311,27 +361,28 @@ export const unitAPI = {
 // UnitType API
 export const unitTypeAPI = {
   getAll: async () => {
-    const response = await api.get('/unittype');
-    return response.data;
+    return cachedGet('/unittype');
   },
   
   getById: async (id: string) => {
-    const response = await api.get(`/unittype/${id}`);
-    return response.data;
+    return cachedGet(`/unittype/${id}`);
   },
   
   create: async (data: any) => {
     const response = await api.post('/unittype', data);
+    invalidateApiCache('/unittype');
     return response.data;
   },
   
   update: async (id: string, data: any) => {
     const response = await api.put(`/unittype/${id}`, data);
+    invalidateApiCache('/unittype');
     return response.data;
   },
   
   delete: async (id: string) => {
     const response = await api.delete(`/unittype/${id}`);
+    invalidateApiCache('/unittype');
     return response.data;
   },
 };
@@ -339,27 +390,28 @@ export const unitTypeAPI = {
 // PositionCategory API
 export const positionCategoryAPI = {
   getAll: async () => {
-    const response = await api.get('/positioncategory');
-    return response.data;
+    return cachedGet('/positioncategory');
   },
   
   getById: async (id: string) => {
-    const response = await api.get(`/positioncategory/${id}`);
-    return response.data;
+    return cachedGet(`/positioncategory/${id}`);
   },
   
   create: async (data: any) => {
     const response = await api.post('/positioncategory', data);
+    invalidateApiCache('/positioncategory');
     return response.data;
   },
   
   update: async (id: string, data: any) => {
     const response = await api.put(`/positioncategory/${id}`, data);
+    invalidateApiCache('/positioncategory');
     return response.data;
   },
   
   delete: async (id: string) => {
     const response = await api.delete(`/positioncategory/${id}`);
+    invalidateApiCache('/positioncategory');
     return response.data;
   },
 };
@@ -367,27 +419,28 @@ export const positionCategoryAPI = {
 // Grade API
 export const gradeAPI = {
   getAll: async () => {
-    const response = await api.get('/grade');
-    return response.data;
+    return cachedGet('/grade');
   },
   
   getById: async (id: string) => {
-    const response = await api.get(`/grade/${id}`);
-    return response.data;
+    return cachedGet(`/grade/${id}`);
   },
   
   create: async (data: any) => {
     const response = await api.post('/grade', data);
+    invalidateApiCache('/grade');
     return response.data;
   },
   
   update: async (id: string, data: any) => {
     const response = await api.put(`/grade/${id}`, data);
+    invalidateApiCache('/grade');
     return response.data;
   },
   
   delete: async (id: string) => {
     const response = await api.delete(`/grade/${id}`);
+    invalidateApiCache('/grade');
     return response.data;
   },
 };
@@ -395,27 +448,28 @@ export const gradeAPI = {
 // Level API
 export const levelAPI = {
   getAll: async () => {
-    const response = await api.get('/level');
-    return response.data;
+    return cachedGet('/level');
   },
   
   getById: async (id: string) => {
-    const response = await api.get(`/level/${id}`);
-    return response.data;
+    return cachedGet(`/level/${id}`);
   },
   
   create: async (data: any) => {
     const response = await api.post('/level', data);
+    invalidateApiCache('/level');
     return response.data;
   },
   
   update: async (id: string, data: any) => {
     const response = await api.put(`/level/${id}`, data);
+    invalidateApiCache('/level');
     return response.data;
   },
   
   delete: async (id: string) => {
     const response = await api.delete(`/level/${id}`);
+    invalidateApiCache('/level');
     return response.data;
   },
 };
@@ -423,27 +477,28 @@ export const levelAPI = {
 // Assessor API
 export const assessorAPI = {
   getAll: async () => {
-    const response = await api.get('/assessor');
-    return response.data;
+    return cachedGet('/assessor');
   },
   
   getById: async (id: string) => {
-    const response = await api.get(`/assessor/${id}`);
-    return response.data;
+    return cachedGet(`/assessor/${id}`);
   },
   
   create: async (data: any) => {
     const response = await api.post('/assessor', data);
+    invalidateApiCache('/assessor');
     return response.data;
   },
   
   update: async (id: string, data: any) => {
     const response = await api.put(`/assessor/${id}`, data);
+    invalidateApiCache('/assessor');
     return response.data;
   },
   
   delete: async (id: string) => {
     const response = await api.delete(`/assessor/${id}`);
+    invalidateApiCache('/assessor');
     return response.data;
   },
 };
@@ -451,27 +506,28 @@ export const assessorAPI = {
 // Cluster API
 export const clusterAPI = {
   getAll: async () => {
-    const response = await api.get('/cluster');
-    return response.data;
+    return cachedGet('/cluster');
   },
   
   getById: async (id: string) => {
-    const response = await api.get(`/cluster/${id}`);
-    return response.data;
+    return cachedGet(`/cluster/${id}`);
   },
   
   create: async (data: any) => {
     const response = await api.post('/cluster', data);
+    invalidateApiCache('/cluster');
     return response.data;
   },
   
   update: async (id: string, data: any) => {
     const response = await api.put(`/cluster/${id}`, data);
+    invalidateApiCache('/cluster');
     return response.data;
   },
   
   delete: async (id: string) => {
     const response = await api.delete(`/cluster/${id}`);
+    invalidateApiCache('/cluster');
     return response.data;
   },
 };
@@ -479,27 +535,28 @@ export const clusterAPI = {
 // Training API
 export const trainingAPI = {
   getAll: async () => {
-    const response = await api.get('/training');
-    return response.data;
+    return cachedGet('/training');
   },
   
   getById: async (id: string) => {
-    const response = await api.get(`/training/${id}`);
-    return response.data;
+    return cachedGet(`/training/${id}`);
   },
   
   create: async (data: any) => {
     const response = await api.post('/training', data);
+    invalidateApiCache('/training');
     return response.data;
   },
   
   update: async (id: string, data: any) => {
     const response = await api.put(`/training/${id}`, data);
+    invalidateApiCache('/training');
     return response.data;
   },
   
   delete: async (id: string) => {
     const response = await api.delete(`/training/${id}`);
+    invalidateApiCache('/training');
     return response.data;
   },
 };
@@ -507,27 +564,28 @@ export const trainingAPI = {
 // Competency API
 export const competencyAPI = {
   getAll: async () => {
-    const response = await api.get('/competency');
-    return response.data;
+    return cachedGet('/competency');
   },
   
   getById: async (id: string) => {
-    const response = await api.get(`/competency/${id}`);
-    return response.data;
+    return cachedGet(`/competency/${id}`);
   },
   
   create: async (data: any) => {
     const response = await api.post('/competency', data);
+    invalidateApiCache('/competency');
     return response.data;
   },
   
   update: async (id: string, data: any) => {
     const response = await api.put(`/competency/${id}`, data);
+    invalidateApiCache('/competency');
     return response.data;
   },
   
   delete: async (id: string) => {
     const response = await api.delete(`/competency/${id}`);
+    invalidateApiCache('/competency');
     return response.data;
   },
 };
@@ -535,27 +593,28 @@ export const competencyAPI = {
 // Mail API
 export const mailAPI = {
   getAll: async () => {
-    const response = await api.get('/mail');
-    return response.data;
+    return cachedGet('/mail');
   },
   
   getById: async (id: string) => {
-    const response = await api.get(`/mail/${id}`);
-    return response.data;
+    return cachedGet(`/mail/${id}`);
   },
   
   create: async (data: any) => {
     const response = await api.post('/mail', data);
+    invalidateApiCache('/mail');
     return response.data;
   },
   
   update: async (id: string, data: any) => {
     const response = await api.put(`/mail/${id}`, data);
+    invalidateApiCache('/mail');
     return response.data;
   },
   
   delete: async (id: string) => {
     const response = await api.delete(`/mail/${id}`);
+    invalidateApiCache('/mail');
     return response.data;
   },
 };
@@ -563,33 +622,33 @@ export const mailAPI = {
 // Position Competency API
 export const positionCompetencyAPI = {
   getAll: async () => {
-    const response = await api.get('/positioncompetency');
-    return response.data;
+    return cachedGet('/positioncompetency');
   },
 
   getById: async (id: string) => {
-    const response = await api.get(`/positioncompetency/${id}`);
-    return response.data;
+    return cachedGet(`/positioncompetency/${id}`);
   },
 
   getByPosition: async (positionId: string) => {
-    const response = await api.get('/positioncompetency');
-    const data = response.data;
+    const data = await cachedGet<any[]>('/positioncompetency');
     return data.filter((pc: any) => pc.positionId === positionId);
   },
 
   create: async (data: any) => {
     const response = await api.post('/positioncompetency', data);
+    invalidateApiCache('/positioncompetency');
     return response.data;
   },
 
   update: async (id: string, data: any) => {
     const response = await api.put(`/positioncompetency/${id}`, data);
+    invalidateApiCache('/positioncompetency');
     return response.data;
   },
 
   delete: async (id: string) => {
     const response = await api.delete(`/positioncompetency/${id}`);
+    invalidateApiCache('/positioncompetency');
     return response.data;
   },
 };
@@ -597,33 +656,33 @@ export const positionCompetencyAPI = {
 // Training Competency API
 export const trainingCompetencyAPI = {
   getAll: async () => {
-    const response = await api.get('/trainingcompetency');
-    return response.data;
+    return cachedGet('/trainingcompetency');
   },
 
   getById: async (id: string) => {
-    const response = await api.get(`/trainingcompetency/${id}`);
-    return response.data;
+    return cachedGet(`/trainingcompetency/${id}`);
   },
 
   getByTraining: async (trainingId: string) => {
-    const response = await api.get('/trainingcompetency');
-    const data = response.data;
+    const data = await cachedGet<any[]>('/trainingcompetency');
     return data.filter((tc: any) => tc.trainingId === trainingId);
   },
 
   create: async (data: any) => {
     const response = await api.post('/trainingcompetency', data);
+    invalidateApiCache('/trainingcompetency');
     return response.data;
   },
 
   update: async (id: string, data: any) => {
     const response = await api.put(`/trainingcompetency/${id}`, data);
+    invalidateApiCache('/trainingcompetency');
     return response.data;
   },
 
   delete: async (id: string) => {
     const response = await api.delete(`/trainingcompetency/${id}`);
+    invalidateApiCache('/trainingcompetency');
     return response.data;
   },
 };
@@ -631,27 +690,28 @@ export const trainingCompetencyAPI = {
 // Setting API
 export const settingAPI = {
   getAll: async () => {
-    const response = await api.get('/setting');
-    return response.data;
+    return cachedGet('/setting');
   },
 
   getById: async (id: string) => {
-    const response = await api.get(`/setting/${id}`);
-    return response.data;
+    return cachedGet(`/setting/${id}`);
   },
 
   create: async (data: any) => {
     const response = await api.post('/setting', data);
+    invalidateApiCache('/setting');
     return response.data;
   },
 
   update: async (id: string, data: any) => {
     const response = await api.put(`/setting/${id}`, data);
+    invalidateApiCache('/setting');
     return response.data;
   },
 
   delete: async (id: string) => {
     const response = await api.delete(`/setting/${id}`);
+    invalidateApiCache('/setting');
     return response.data;
   },
 
@@ -664,40 +724,41 @@ export const settingAPI = {
         'Content-Type': 'multipart/form-data',
       },
     });
+    invalidateApiCache('/setting');
     return response.data;
   },
 
   // Public API - no auth required
   getPublicLogo: async () => {
-    const response = await api.get('/public/setting/logo');
-    return response.data;
+    return cachedGet('/public/setting/logo');
   },
 };
 
 // Assessment API
 export const assessmentAPI = {
   getAll: async () => {
-    const response = await api.get('/assessment');
-    return response.data;
+    return cachedGet('/assessment');
   },
 
   getById: async (id: string) => {
-    const response = await api.get(`/assessment/${id}`);
-    return response.data;
+    return cachedGet(`/assessment/${id}`);
   },
 
   create: async (data: any) => {
     const response = await api.post('/assessment', data);
+    invalidateApiCache('/assessment');
     return response.data;
   },
 
   update: async (id: string, data: any) => {
     const response = await api.put(`/assessment/${id}`, data);
+    invalidateApiCache('/assessment');
     return response.data;
   },
 
   delete: async (id: string) => {
     const response = await api.delete(`/assessment/${id}`);
+    invalidateApiCache('/assessment');
     return response.data;
   },
 };
@@ -705,33 +766,33 @@ export const assessmentAPI = {
 // Assessment Result API
 export const assessmentResultAPI = {
   getAll: async () => {
-    const response = await api.get('/assessmentresult');
-    return response.data;
+    return cachedGet('/assessmentresult');
   },
 
   getById: async (id: string) => {
-    const response = await api.get(`/assessmentresult/${id}`);
-    return response.data;
+    return cachedGet(`/assessmentresult/${id}`);
   },
 
   getByAssessment: async (assessmentId: string) => {
-    const response = await api.get('/assessmentresult');
-    const data = response.data;
+    const data = await cachedGet<any[]>('/assessmentresult');
     return data.filter((result: any) => result.assessmentId === assessmentId);
   },
 
   create: async (data: any) => {
     const response = await api.post('/assessmentresult', data);
+    invalidateApiCache('/assessmentresult');
     return response.data;
   },
 
   update: async (id: string, data: any) => {
     const response = await api.put(`/assessmentresult/${id}`, data);
+    invalidateApiCache('/assessmentresult');
     return response.data;
   },
 
   delete: async (id: string) => {
     const response = await api.delete(`/assessmentresult/${id}`);
+    invalidateApiCache('/assessmentresult');
     return response.data;
   },
 };
@@ -835,6 +896,7 @@ export const importAPI = {
         'Content-Type': 'multipart/form-data',
       },
     });
+    invalidateApiCache();
     return response.data;
   },
 };
@@ -842,8 +904,7 @@ export const importAPI = {
 // Dashboard API
 export const dashboardAPI = {
   getOverview: async () => {
-    const response = await api.get('/dashboard/overview');
-    return response.data;
+    return cachedGet('/dashboard/overview');
   },
 };
 
@@ -863,10 +924,7 @@ export const emailAPI = {
 // Competency Report API
 export const competencyReportAPI = {
   getGapByGrade: async (assessmentId: string) => {
-    const response = await api.get('/competencyreport/competency-gap-by-grade', {
-      params: { assessmentId }
-    });
-    return response.data;
+    return cachedGet('/competencyreport/competency-gap-by-grade', { assessmentId });
   },
 
   exportCsv: async (data: { assessmentId: string }) => {
@@ -893,10 +951,7 @@ export const competencyReportAPI = {
 // Training Demand API
 export const trainingDemandAPI = {
   generateReport: async (assessmentId: string) => {
-    const response = await api.get('/trainingdemand/demand', {
-      params: { assessmentId }
-    });
-    return response.data;
+    return cachedGet('/trainingdemand/demand', { assessmentId });
   },
 
   exportCsv: async (assessmentId: string) => {

@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 
 import { useState, useEffect, useMemo } from "react"
 import {
@@ -22,10 +22,10 @@ import {
 import { Input } from "@/components/ui/input"
 import { IconSearch } from "@tabler/icons-react"
 import { toast } from "sonner"
-import { Training, getColumns } from "./columns"
+import { Training, getColumns } from "@/features/admin/training-competencies/components/columns"
 import { DataTablePagination } from "@/components/data-table-pagination"
-import { TrainingCompetencyTableSkeleton } from "./training-competency-table-skeleton"
-import { TrainingCompetencyDataTable } from "./training-competency-data-table"
+import { TrainingCompetencyTableSkeleton } from "@/features/admin/training-competencies/components/training-competency-table-skeleton"
+import { TrainingCompetencyDataTable } from "@/features/admin/training-competencies/components/training-competency-data-table"
 import { useTranslations } from "next-intl"
 
 export default function TrainingCompetencyManagementPage() {

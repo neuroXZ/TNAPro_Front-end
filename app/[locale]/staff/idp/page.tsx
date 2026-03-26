@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 
 import { useEffect, useState } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -26,7 +26,7 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { idpAPI, assessmentAPI, clusterAPI, competencyAPI } from "@/lib/api"
-import { useAuth } from "@/lib/auth-context"
+import { useAuth } from "@/providers/auth-provider"
 import { toast } from "sonner"
 import {
   IconTarget,
@@ -710,16 +710,16 @@ export default function MyIdpPage() {
                               {comp.gap.toFixed(1)}
                             </td>
                             <td className="px-3 py-3 text-center">
-                              {comp.developmentStrategies.training && <span className="text-green-600 text-lg">✓</span>}
+                              {comp.developmentStrategies.training && <span className="text-green-600 text-lg">âœ“</span>}
                             </td>
                             <td className="px-3 py-3 text-center">
-                              {comp.developmentStrategies.coaching && <span className="text-green-600 text-lg">✓</span>}
+                              {comp.developmentStrategies.coaching && <span className="text-green-600 text-lg">âœ“</span>}
                             </td>
                             <td className="px-3 py-3 text-center">
-                              {comp.developmentStrategies.selfLearning && <span className="text-green-600 text-lg">✓</span>}
+                              {comp.developmentStrategies.selfLearning && <span className="text-green-600 text-lg">âœ“</span>}
                             </td>
                             <td className="px-3 py-3 text-center">
-                              {comp.developmentStrategies.workExperience && <span className="text-green-600 text-lg">✓</span>}
+                              {comp.developmentStrategies.workExperience && <span className="text-green-600 text-lg">âœ“</span>}
                             </td>
                           </tr>
                         ))}

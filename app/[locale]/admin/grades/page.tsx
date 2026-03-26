@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 
 import { useState, useEffect, useMemo } from "react"
 import {
@@ -22,15 +22,15 @@ import {
 import { Input } from "@/components/ui/input"
 import { IconSearch } from "@tabler/icons-react"
 import { toast } from "sonner"
-import { Grade, getColumns } from "./columns"
+import { Grade, getColumns } from "@/features/admin/grades/components/columns"
 import { DataTablePagination } from "@/components/data-table-pagination"
-import { GradeFormDialog, type GradeFormData } from "./grade-form-dialog"
-import { GradeDeleteDialog } from "./grade-delete-dialog"
-import { GradeTableSkeleton } from "./grade-table-skeleton"
-import { GradeDataTable } from "./grade-data-table"
-import { GradeTableActions } from "./grade-table-actions"
-import { GradeViewDialog } from "./grade-view-dialog"
-import { GradeImportDialog } from "./grade-import-dialog"
+import { GradeFormDialog, type GradeFormData } from "@/features/admin/grades/components/grade-form-dialog"
+import { GradeDeleteDialog } from "@/features/admin/grades/components/grade-delete-dialog"
+import { GradeTableSkeleton } from "@/features/admin/grades/components/grade-table-skeleton"
+import { GradeDataTable } from "@/features/admin/grades/components/grade-data-table"
+import { GradeTableActions } from "@/features/admin/grades/components/grade-table-actions"
+import { GradeViewDialog } from "@/features/admin/grades/components/grade-view-dialog"
+import { GradeImportDialog } from "@/features/admin/grades/components/grade-import-dialog"
 import { useTranslations } from "next-intl"
 
 export default function GradeManagementPage() {

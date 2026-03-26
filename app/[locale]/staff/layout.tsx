@@ -1,6 +1,6 @@
-import { StaffRoute } from "@/components/route/staff-route"
+﻿import { StaffRoute } from "@/components/route/staff-route"
 import { StaffSidebar } from "@/components/sidebar/staff-sidebar"
-import { SiteHeader } from "@/components/site-header"
+import { SiteHeader } from "@/components/layout/site-header"
 import { MobileBottomNav } from "@/components/nav/mobile-bottom-nav"
 
 import {

@@ -1,8 +1,8 @@
-"use client"
+﻿"use client"
 
 import React, { useState, useEffect } from "react"
 import { rtnAPI, assessmentAPI } from "@/lib/api"
-import { useAuth } from "@/lib/auth-context"
+import { useAuth } from "@/providers/auth-provider"
 import { useIsMobile } from "@/hooks/use-mobile"
 import {
   Card,
