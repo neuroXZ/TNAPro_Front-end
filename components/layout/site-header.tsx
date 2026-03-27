@@ -131,13 +131,13 @@ export function SiteHeader() {
                 onClick={() => switchLocale('en')}
                 className={locale === 'en' ? 'font-semibold text-primary' : ''}
               >
-                🇬🇧 English
+                EN-English
               </DropdownMenuItem>
               <DropdownMenuItem
                 onClick={() => switchLocale('ms')}
                 className={locale === 'ms' ? 'font-semibold text-primary' : ''}
               >
-                🇲🇾 Bahasa Melayu
+                MY-Bahasa Melayu
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>

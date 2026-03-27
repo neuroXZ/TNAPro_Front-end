@@ -710,16 +710,16 @@ export default function MyIdpPage() {
                               {comp.gap.toFixed(1)}
                             </td>
                             <td className="px-3 py-3 text-center">
-                              {comp.developmentStrategies.training && <span className="text-green-600 text-lg">âœ“</span>}
+                              {comp.developmentStrategies.training && <span className="text-green-600 text-lg">✓</span>}
                             </td>
                             <td className="px-3 py-3 text-center">
-                              {comp.developmentStrategies.coaching && <span className="text-green-600 text-lg">âœ“</span>}
+                              {comp.developmentStrategies.coaching && <span className="text-green-600 text-lg">✓</span>}
                             </td>
                             <td className="px-3 py-3 text-center">
-                              {comp.developmentStrategies.selfLearning && <span className="text-green-600 text-lg">âœ“</span>}
+                              {comp.developmentStrategies.selfLearning && <span className="text-green-600 text-lg">✓</span>}
                             </td>
                             <td className="px-3 py-3 text-center">
-                              {comp.developmentStrategies.workExperience && <span className="text-green-600 text-lg">âœ“</span>}
+                              {comp.developmentStrategies.workExperience && <span className="text-green-600 text-lg">✓</span>}
                             </td>
                           </tr>
                         ))}
