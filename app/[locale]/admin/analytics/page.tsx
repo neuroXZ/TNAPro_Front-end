@@ -455,13 +455,13 @@ export default function AdminAnalytics() {
 
         <div className="grid gap-6 xl:grid-cols-[1.35fr_0.95fr]">
           <Card className="rounded-3xl border-white/60 shadow-sm">
-              <CardHeader>
+            <CardHeader>
               <Skeleton className="mb-2 h-6 w-48" />
               <Skeleton className="h-4 w-64" />
-              </CardHeader>
-              <CardContent>
+            </CardHeader>
+            <CardContent>
               <Skeleton className="h-72 w-full" />
-              </CardContent>
+            </CardContent>
           </Card>
 
           <div className="grid gap-6">
@@ -502,31 +502,31 @@ export default function AdminAnalytics() {
             </div>
 
             <div className="w-full max-w-xl rounded-3xl border border-sky-100 bg-white/85 p-3 shadow-sm backdrop-blur lg:mt-3">
-                <div className="mb-2 flex items-center gap-2 text-sm font-medium text-slate-700">
-                  <IconCalendar className="h-4 w-4 text-sky-600" />
-                  {t('assessmentSelectionTitle')}
-                </div>
-                <Select
-                  value={selectedAssessmentId}
-                  onValueChange={setSelectedAssessmentId}
-                  disabled={reportLoading || assessments.length === 0}
-                >
-                  <SelectTrigger className="h-11 rounded-2xl border-sky-100 bg-white text-left">
-                    <SelectValue placeholder={t('selectAssessmentPlaceholder')} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {assessments.map((assessment) => (
-                      <SelectItem key={assessment.id} value={assessment.id}>
-                        {assessment.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <p className="mt-2 text-xs text-slate-500">
-                  {selectedAssessmentName
-                    ? `${t('latestAssessment')}: ${selectedAssessmentName}`
-                    : t('assessmentSelectionDesc')}
-                </p>
+              <div className="mb-2 flex items-center gap-2 text-sm font-medium text-slate-700">
+                <IconCalendar className="h-4 w-4 text-sky-600" />
+                {t('assessmentSelectionTitle')}
+              </div>
+              <Select
+                value={selectedAssessmentId}
+                onValueChange={setSelectedAssessmentId}
+                disabled={reportLoading || assessments.length === 0}
+              >
+                <SelectTrigger className="h-11 rounded-2xl border-sky-100 bg-white text-left">
+                  <SelectValue placeholder={t('selectAssessmentPlaceholder')} />
+                </SelectTrigger>
+                <SelectContent>
+                  {assessments.map((assessment) => (
+                    <SelectItem key={assessment.id} value={assessment.id}>
+                      {assessment.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <p className="mt-2 text-xs text-slate-500">
+                {selectedAssessmentName
+                  ? `${t('latestAssessment')}: ${selectedAssessmentName}`
+                  : t('assessmentSelectionDesc')}
+              </p>
             </div>
           </div>
         </div>
@@ -586,7 +586,7 @@ export default function AdminAnalytics() {
                 <div className="rounded-2xl border bg-slate-50/70 p-3 text-sm text-muted-foreground">
                   {t('genderDistFooter')}
                 </div>
-            
+
               </CardContent>
             </Card>
 
@@ -635,135 +635,57 @@ export default function AdminAnalytics() {
 
           <div className="grid gap-6 xl:grid-cols-[1.25fr_0.95fr]">
             <div className="grid gap-6">
-            {/* Unit Distribution Chart */}
-            <Card className="rounded-3xl border-white/60 bg-white/90 shadow-sm backdrop-blur">
-              <CardHeader className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-                <div>
-                  <div className="mb-3 inline-flex rounded-2xl bg-sky-100 p-2 text-sky-700">
-                    <IconChartBar className="h-5 w-5" />
-                  </div>
-                  <CardTitle className="flex items-center gap-2 text-xl text-slate-900">
-                    {t('staffPerUnitTitle')}
-                  </CardTitle>
-                  <CardDescription className="mt-2 max-w-xl text-sm leading-6">
-                    {t('staffPerUnitDesc')}
-                  </CardDescription>
-                </div>
-                <div className="flex flex-wrap items-center gap-2 self-start">
-                  <Badge variant="secondary" className="rounded-full px-3 py-1 text-slate-700">
-                    {t('totalUnits', { count: dashboardData.unitDistribution.length })}
-                  </Badge>
-                  <Link href="/admin/analytics/staff-per-unit">
-                    <Button variant="outline" size="sm" className="rounded-full px-5">
-                      <IconChartBar className="mr-2 h-4 w-4" />
-                      {t('viewDetail')}
-                    </Button>
-                  </Link>
-                </div>
-              </CardHeader>
-              <CardContent className="max-h-[460px] overflow-y-auto pr-2">
-                <div className="space-y-4">
-                  {dashboardData.unitDistribution.map((item) => {
-                    const highestUnitValue = dashboardData.unitDistribution[0]?.value || 1;
-                    const barWidth = Math.max(
-                      (item.value / highestUnitValue) * 100,
-                      item.value > 0 ? 10 : 0,
-                    );
 
-                    return (
-                      <div key={item.label} className="space-y-2">
-                        <div className="flex items-center justify-between gap-3">
-                          <p
-                            className="text-sm font-medium text-slate-700"
-                            title={item.label}
-                          >
-                            {item.label}
-                          </p>
-                          <Badge variant="secondary" className="rounded-full px-2.5 py-0.5">
-                            {item.value}
-                          </Badge>
-                        </div>
-                        <div className="h-3 overflow-hidden rounded-full bg-slate-100">
-                          <div
-                            className="h-full rounded-full bg-linear-to-r from-sky-300 via-blue-500 to-blue-700 transition-all"
-                            style={{ width: `${barWidth}%` }}
-                          />
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              </CardContent>
-              <CardFooter className="flex-col items-start gap-3 text-sm">
-                <div className="flex items-center gap-2 leading-none font-medium text-slate-800">
-                  <TrendingUp className="h-4 w-4 text-sky-600" />
-                  {topUnit ? `${t('topUnit')}: ${topUnit.label}` : t('staffDistributionDesc')}
-                </div>
-                <div className="text-muted-foreground leading-none">
-                  {t('staffDistributionDesc')}
-                </div>
-              </CardFooter>
-            </Card>
 
-            {/* Training Demand Chart */}
-            <Card className="rounded-3xl border-white/60 bg-white/90 shadow-sm backdrop-blur">
-              <CardHeader className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-                <div>
-                  <div className="mb-3 inline-flex rounded-2xl bg-orange-100 p-2 text-orange-700">
-                    <IconBook className="h-5 w-5" />
+              {/* Grade Distribution Chart */}
+              <Card className="rounded-3xl border-white/60 bg-white/90 shadow-sm backdrop-blur">
+                <CardHeader className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+                  <div>
+                    <div className="mb-3 inline-flex rounded-2xl bg-violet-100 p-2 text-violet-700">
+                      <IconTrendingUp className="h-5 w-5" />
+                    </div>
+                    <CardTitle className="flex items-center gap-2 text-xl text-slate-900">
+                      {t('gradeDistTitle')}
+                    </CardTitle>
+                    <CardDescription className="mt-2 max-w-xl text-sm leading-6">
+                      {t('gradeDistDesc')}
+                    </CardDescription>
                   </div>
-                  <CardTitle className="flex items-center gap-2 text-xl text-slate-900">
-                  {t('trainingDemandTitle')}
-                </CardTitle>
-                <CardDescription className="mt-2 max-w-xl text-sm leading-6">
-                  {t('trainingDemandDesc')}
-                </CardDescription>
-                </div>
-                <div className="flex items-center gap-2">
-                  
-                  <Badge variant="secondary" className="rounded-full px-3 py-1 text-slate-700">
-                    {totalTrainingDemandCount > 8
-                      ? t('showingTopTrainings', { count: totalTrainingDemandCount })
-                      : t('totalTrainingsRequired', { count: totalTrainingDemandCount })}
+                  <div className="flex flex-wrap items-center gap-2 self-start">
+                    <Badge variant="secondary" className="rounded-full px-3 py-1 text-slate-700">
+                    {t('totalGrades', { count: dashboardData.gradeDistribution.length })}
                   </Badge>
-                  <Link href="/admin/analytics/training-demand">
-                    <Button variant="outline" size="sm" className="rounded-full px-5">
-                      <IconBook className="mr-2 h-4 w-4" />
-                      {t('viewDetail')}
-                    </Button>
-                  </Link>
-                  
-                  {/* <Button variant="outline" size="icon" className="rounded-full" onClick={fetchDashboardData}>
-                    <IconRefresh className="h-4 w-4" />
-                  </Button> */}
-                </div>
-              </CardHeader>
-              <CardContent>
-                {trainingDemandLoading ? (
-                  <Skeleton className="h-58 w-full" />
-                ) : trainingDemandData.length > 0 ? (
+                    <Link href="/admin/analytics/grade-distribution">
+                      <Button variant="outline" size="sm" className="rounded-full px-5">
+                        <IconChartBar className="mr-2 h-4 w-4" />
+                        {t('viewDetail')}
+                      </Button>
+                    </Link>
+                  </div>
+                </CardHeader>
+                <CardContent className="max-h-[360px] overflow-y-auto pr-2">
                   <div className="space-y-4">
-                    {trainingDemandData.map((item) => {
-                      const highestTrainingValue =
-                        trainingDemandData[0]?.totalStaffCount || 1;
+                    {dashboardData.gradeDistribution.map((item) => {
+                      const highestGradeValue =
+                        dashboardData.gradeDistribution[0]?.value || 1;
                       const barWidth = Math.max(
-                        (item.totalStaffCount / highestTrainingValue) * 100,
-                        item.totalStaffCount > 0 ? 10 : 0,
+                        (item.value / highestGradeValue) * 100,
+                        item.value > 0 ? 10 : 0,
                       );
 
                       return (
-                        <div key={item.trainingId} className="space-y-2">
+                        <div key={item.label} className="space-y-2">
                           <div className="flex items-center justify-between gap-3">
                             <p className="text-sm font-medium text-slate-700">
-                              {item.trainingName}
+                              {item.label}
                             </p>
                             <Badge variant="secondary" className="rounded-full px-2.5 py-0.5">
-                              {item.totalStaffCount}
+                              {item.value}
                             </Badge>
                           </div>
                           <div className="h-3 overflow-hidden rounded-full bg-slate-100">
                             <div
-                              className="h-full rounded-full bg-linear-to-r from-orange-300 via-amber-500 to-orange-600 transition-all"
+                              className="h-full rounded-full bg-linear-to-r from-violet-300 via-indigo-500 to-blue-700 transition-all"
                               style={{ width: `${barWidth}%` }}
                             />
                           </div>
@@ -771,163 +693,239 @@ export default function AdminAnalytics() {
                       );
                     })}
                   </div>
-                ) : (
-                  <div className="flex h-58 items-center justify-center rounded-2xl border border-dashed text-muted-foreground">
-                    {t('noTrainingDemands')}
+                </CardContent>
+                <CardFooter className="flex-col items-start gap-3 text-sm">
+                  <div className="flex items-center gap-2 leading-none font-medium text-slate-800">
+                    <TrendingUp className="h-4 w-4 text-violet-600" />
+                    {topGrade ? `${t('topGrade')}: ${topGrade.label}` : t('gradeDistDesc')}
                   </div>
-                )}
-              </CardContent>
-              <CardFooter className="flex-col items-start gap-3 text-sm">
-                <div className="flex items-center gap-2 leading-none font-medium text-slate-800">
-                  <TrendingUp className="h-4 w-4 text-orange-600" />
-                  {selectedAssessmentName
-                    ? t('basedOnAssessment', { name: selectedAssessmentName })
-                    : t('selectAssessmentPlaceholder')}
-                </div>
-                <div className="text-muted-foreground leading-none">
-                  {t('trainingProgramsDesc')}
-                </div>
-              </CardFooter>
-            </Card>
+                  <div className="text-muted-foreground leading-none">
+                    {t('gradeDistDesc')}
+                  </div>
+                </CardFooter>
+              </Card>
+
+
             </div>
-
             <div className="grid gap-6">
-            {/* Gender Distribution Chart */}
-            <Card className="flex flex-col rounded-3xl border-white/60 bg-white/90 shadow-sm backdrop-blur">
-              <CardHeader className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-                <div>
-                  <div className="mb-3 inline-flex rounded-2xl bg-emerald-100 p-2 text-emerald-700">
-                    <IconChartPie className="h-5 w-5" />
-                  </div>
-                  <CardTitle className="flex items-center gap-2 text-xl text-slate-900">
-                    {t('genderDistTitle')}
-                  </CardTitle>
-                  <CardDescription className="mt-2 text-sm leading-6">{t('genderDistDesc')}</CardDescription>
-                </div>
-                <div className="flex flex-wrap items-center gap-2 self-start">
-                  <Link href="/admin/analytics/gender-distribution">
-                    <Button variant="outline" size="sm" className="rounded-full px-5">
-                      <IconChartPie className="mr-2 h-4 w-4" />
-                      {t('viewDetail')}
-                    </Button>
-                  </Link>
-                </div>
-              </CardHeader>
-              <CardContent className="flex-1">
-                <ChartContainer
-                  config={createGenderChartConfig(genderDistributionData)}
-                  className="[&_.recharts-text]:fill-background mx-auto aspect-square max-h-[230px]"
-                >
-                  <PieChart>
-                    <ChartTooltip
-                      content={
-                        <ChartTooltipContent nameKey="value" hideLabel />
-                      }
-                    />
-                    <Pie
-                      data={genderDistributionData.map((item) => ({
-                        category: item.label.toLowerCase(),
-                        label: item.label,
-                        value: item.value,
-                        fill: `var(--color-${item.label.toLowerCase()})`,
-                      }))}
-                      dataKey="value"
-                    >
-                      <LabelList
-                        dataKey="category"
-                        className="fill-background"
-                        stroke="none"
-                        fontSize={12}
-                        formatter={(value: string) => {
-                          const config = createGenderChartConfig(genderDistributionData);
-                          return (
-                            config[value as keyof typeof config]?.label || value
-                          );
-                        }}
-                      />
-                    </Pie>
-                  </PieChart>
-                </ChartContainer>
-                <div className="mt-4 grid gap-2 sm:grid-cols-3">
-                  {genderDistributionData.map((item, index) => (
-                    <div
-                      key={item.label}
-                      className="flex items-center justify-between rounded-2xl border bg-slate-50/70 px-3 py-2"
-                    >
-                      <div className="flex items-center gap-2 text-sm font-medium text-slate-700">
-                        <span
-                          className="h-2.5 w-2.5 rounded-full"
-                          style={{ backgroundColor: `var(--chart-${(index % 3) + 1})` }}
-                        />
-                        {item.label}
-                      </div>
-                      <Badge variant="secondary" className="rounded-full px-2.5 py-0.5">
-                        {item.value}
-                      </Badge>
+              {/* Gender Distribution Chart */}
+              <Card className="flex flex-col rounded-3xl border-white/60 bg-white/90 shadow-sm backdrop-blur">
+                <CardHeader className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+                  <div>
+                    <div className="mb-3 inline-flex rounded-2xl bg-emerald-100 p-2 text-emerald-700">
+                      <IconChartPie className="h-5 w-5" />
                     </div>
-                  ))}
-                </div>
-              </CardContent>
-              <CardFooter className="flex-col items-start gap-3 text-sm">
-                <div className="flex items-center gap-2 leading-none font-medium text-slate-800">
-                  <TrendingUp className="h-4 w-4 text-emerald-600" />
-                  {t('totalStaff', { count: totalGenderCount })}
-                </div>
-                <div className="text-muted-foreground leading-none">
-                  {t('genderDistFooter')}
-                </div>
-              </CardFooter>
-            </Card>
-
-            {/* Grade Distribution Chart */}
-            <Card className="rounded-3xl border-white/60 bg-white/90 shadow-sm backdrop-blur">
-              <CardHeader className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-                <div>
-                  <div className="mb-3 inline-flex rounded-2xl bg-violet-100 p-2 text-violet-700">
-                    <IconTrendingUp className="h-5 w-5" />
+                    <CardTitle className="flex items-center gap-2 text-xl text-slate-900">
+                      {t('genderDistTitle')}
+                    </CardTitle>
+                    <CardDescription className="mt-2 text-sm leading-6">{t('genderDistDesc')}</CardDescription>
                   </div>
-                  <CardTitle className="flex items-center gap-2 text-xl text-slate-900">
-                  {t('gradeDistTitle')}
+                  <div className="flex flex-wrap items-center gap-2 self-start">
+                    <Link href="/admin/analytics/gender-distribution">
+                      <Button variant="outline" size="sm" className="rounded-full px-5">
+                        <IconChartPie className="mr-2 h-4 w-4" />
+                        {t('viewDetail')}
+                      </Button>
+                    </Link>
+                  </div>
+                </CardHeader>
+                <CardContent className="flex-1">
+                  <ChartContainer
+                    config={createGenderChartConfig(genderDistributionData)}
+                    className="[&_.recharts-text]:fill-background mx-auto aspect-square max-h-[230px]"
+                  >
+                    <PieChart>
+                      <ChartTooltip
+                        content={
+                          <ChartTooltipContent nameKey="value" hideLabel />
+                        }
+                      />
+                      <Pie
+                        data={genderDistributionData.map((item) => ({
+                          category: item.label.toLowerCase(),
+                          label: item.label,
+                          value: item.value,
+                          fill: `var(--color-${item.label.toLowerCase()})`,
+                        }))}
+                        dataKey="value"
+                      >
+                        <LabelList
+                          dataKey="category"
+                          className="fill-background"
+                          stroke="none"
+                          fontSize={12}
+                          formatter={(value: string) => {
+                            const config = createGenderChartConfig(genderDistributionData);
+                            return (
+                              config[value as keyof typeof config]?.label || value
+                            );
+                          }}
+                        />
+                      </Pie>
+                    </PieChart>
+                  </ChartContainer>
+                  <div className="mt-4 grid gap-2 sm:grid-cols-3">
+                    {genderDistributionData.map((item, index) => (
+                      <div
+                        key={item.label}
+                        className="flex items-center justify-between rounded-2xl border bg-slate-50/70 px-3 py-2"
+                      >
+                        <div className="flex items-center gap-2 text-sm font-medium text-slate-700">
+                          <span
+                            className="h-2.5 w-2.5 rounded-full"
+                            style={{ backgroundColor: `var(--chart-${(index % 3) + 1})` }}
+                          />
+                          {item.label}
+                        </div>
+                        <Badge variant="secondary" className="rounded-full px-2.5 py-0.5">
+                          {item.value}
+                        </Badge>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+                <CardFooter className="flex-col items-start gap-3 text-sm">
+                  <div className="flex items-center gap-2 leading-none font-medium text-slate-800">
+                    <TrendingUp className="h-4 w-4 text-emerald-600" />
+                    {t('totalStaff', { count: totalGenderCount })}
+                  </div>
+                  <div className="text-muted-foreground leading-none">
+                    {t('genderDistFooter')}
+                  </div>
+                </CardFooter>
+              </Card>
+            </div>
+          </div>
+          {/* Unit Distribution Chart */}
+          <Card className="rounded-3xl border-white/60 bg-white/90 shadow-sm backdrop-blur">
+            <CardHeader className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+              <div>
+                <div className="mb-3 inline-flex rounded-2xl bg-sky-100 p-2 text-sky-700">
+                  <IconChartBar className="h-5 w-5" />
+                </div>
+                <CardTitle className="flex items-center gap-2 text-xl text-slate-900">
+                  {t('staffPerUnitTitle')}
                 </CardTitle>
                 <CardDescription className="mt-2 max-w-xl text-sm leading-6">
-                  {t('gradeDistDesc')}
+                  {t('staffPerUnitDesc')}
                 </CardDescription>
+              </div>
+              <div className="flex flex-wrap items-center gap-2 self-start">
+                <Badge variant="secondary" className="rounded-full px-3 py-1 text-slate-700">
+                  {t('totalUnits', { count: dashboardData.unitDistribution.length })}
+                </Badge>
+                <Link href="/admin/analytics/staff-per-unit">
+                  <Button variant="outline" size="sm" className="rounded-full px-5">
+                    <IconChartBar className="mr-2 h-4 w-4" />
+                    {t('viewDetail')}
+                  </Button>
+                </Link>
+              </div>
+            </CardHeader>
+            <CardContent className="max-h-[460px] overflow-y-auto pr-2">
+              <div className="space-y-4">
+                {dashboardData.unitDistribution.map((item) => {
+                  const highestUnitValue = dashboardData.unitDistribution[0]?.value || 1;
+                  const barWidth = Math.max(
+                    (item.value / highestUnitValue) * 100,
+                    item.value > 0 ? 10 : 0,
+                  );
+
+                  return (
+                    <div key={item.label} className="space-y-2">
+                      <div className="flex items-center justify-between gap-3">
+                        <p
+                          className="text-sm font-medium text-slate-700"
+                          title={item.label}
+                        >
+                          {item.label}
+                        </p>
+                        <Badge variant="secondary" className="rounded-full px-2.5 py-0.5">
+                          {item.value}
+                        </Badge>
+                      </div>
+                      <div className="h-3 overflow-hidden rounded-full bg-slate-100">
+                        <div
+                          className="h-full rounded-full bg-linear-to-r from-sky-300 via-blue-500 to-blue-700 transition-all"
+                          style={{ width: `${barWidth}%` }}
+                        />
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </CardContent>
+            <CardFooter className="flex-col items-start gap-3 text-sm">
+              <div className="flex items-center gap-2 leading-none font-medium text-slate-800">
+                <TrendingUp className="h-4 w-4 text-sky-600" />
+                {topUnit ? `${t('topUnit')}: ${topUnit.label}` : t('staffDistributionDesc')}
+              </div>
+              <div className="text-muted-foreground leading-none">
+                {t('staffDistributionDesc')}
+              </div>
+            </CardFooter>
+          </Card>
+
+
+          {/* Training Demand Chart */}
+          <Card className="rounded-3xl border-white/60 bg-white/90 shadow-sm backdrop-blur">
+            <CardHeader className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+              <div>
+                <div className="mb-3 inline-flex rounded-2xl bg-orange-100 p-2 text-orange-700">
+                  <IconBook className="h-5 w-5" />
                 </div>
-                <div className="flex flex-wrap items-center gap-2 self-start">
-                  {/* <Badge variant="secondary" className="rounded-full px-3 py-1 text-slate-700">
-                    {t('totalGrades', { count: dashboardData.gradeDistribution.length })}
-                  </Badge> */}
-                  <Link href="/admin/analytics/grade-distribution">
-                    <Button variant="outline" size="sm" className="rounded-full px-5">
-                      <IconChartBar className="mr-2 h-4 w-4" />
-                      {t('viewDetail')}
-                    </Button>
-                  </Link>
-                </div>
-              </CardHeader>
-              <CardContent className="max-h-[460px] overflow-y-auto pr-2">
+                <CardTitle className="flex items-center gap-2 text-xl text-slate-900">
+                  {t('trainingDemandTitle')}
+                </CardTitle>
+                <CardDescription className="mt-2 max-w-xl text-sm leading-6">
+                  {t('trainingDemandDesc')}
+                </CardDescription>
+              </div>
+              <div className="flex items-center gap-2">
+
+                <Badge variant="secondary" className="rounded-full px-3 py-1 text-slate-700">
+                  {totalTrainingDemandCount > 8
+                    ? t('showingTopTrainings', { count: totalTrainingDemandCount })
+                    : t('totalTrainingsRequired', { count: totalTrainingDemandCount })}
+                </Badge>
+                <Link href="/admin/analytics/training-demand">
+                  <Button variant="outline" size="sm" className="rounded-full px-5">
+                    <IconBook className="mr-2 h-4 w-4" />
+                    {t('viewDetail')}
+                  </Button>
+                </Link>
+
+                {/* <Button variant="outline" size="icon" className="rounded-full" onClick={fetchDashboardData}>
+                      <IconRefresh className="h-4 w-4" />
+                    </Button> */}
+              </div>
+            </CardHeader>
+            <CardContent>
+              {trainingDemandLoading ? (
+                <Skeleton className="h-58 w-full" />
+              ) : trainingDemandData.length > 0 ? (
                 <div className="space-y-4">
-                  {dashboardData.gradeDistribution.map((item) => {
-                    const highestGradeValue =
-                      dashboardData.gradeDistribution[0]?.value || 1;
+                  {trainingDemandData.map((item) => {
+                    const highestTrainingValue =
+                      trainingDemandData[0]?.totalStaffCount || 1;
                     const barWidth = Math.max(
-                      (item.value / highestGradeValue) * 100,
-                      item.value > 0 ? 10 : 0,
+                      (item.totalStaffCount / highestTrainingValue) * 100,
+                      item.totalStaffCount > 0 ? 10 : 0,
                     );
 
                     return (
-                      <div key={item.label} className="space-y-2">
+                      <div key={item.trainingId} className="space-y-2">
                         <div className="flex items-center justify-between gap-3">
                           <p className="text-sm font-medium text-slate-700">
-                            {item.label}
+                            {item.trainingName}
                           </p>
                           <Badge variant="secondary" className="rounded-full px-2.5 py-0.5">
-                            {item.value}
+                            {item.totalStaffCount}
                           </Badge>
                         </div>
                         <div className="h-3 overflow-hidden rounded-full bg-slate-100">
                           <div
-                            className="h-full rounded-full bg-linear-to-r from-violet-300 via-indigo-500 to-blue-700 transition-all"
+                            className="h-full rounded-full bg-linear-to-r from-orange-300 via-amber-500 to-orange-600 transition-all"
                             style={{ width: `${barWidth}%` }}
                           />
                         </div>
@@ -935,19 +933,26 @@ export default function AdminAnalytics() {
                     );
                   })}
                 </div>
-              </CardContent>
-              <CardFooter className="flex-col items-start gap-3 text-sm">
-                <div className="flex items-center gap-2 leading-none font-medium text-slate-800">
-                  <TrendingUp className="h-4 w-4 text-violet-600" />
-                  {topGrade ? `${t('topGrade')}: ${topGrade.label}` : t('gradeDistDesc')}
+              ) : (
+                <div className="flex h-58 items-center justify-center rounded-2xl border border-dashed text-muted-foreground">
+                  {t('noTrainingDemands')}
                 </div>
-                <div className="text-muted-foreground leading-none">
-                  {t('gradeDistDesc')}
-                </div>
-              </CardFooter>
-            </Card>
-            </div>
-          </div>
+              )}
+            </CardContent>
+            <CardFooter className="flex-col items-start gap-3 text-sm">
+              <div className="flex items-center gap-2 leading-none font-medium text-slate-800">
+                <TrendingUp className="h-4 w-4 text-orange-600" />
+                {selectedAssessmentName
+                  ? t('basedOnAssessment', { name: selectedAssessmentName })
+                  : t('selectAssessmentPlaceholder')}
+              </div>
+              <div className="text-muted-foreground leading-none">
+                {t('trainingProgramsDesc')}
+              </div>
+            </CardFooter>
+          </Card>
+
+
         </>
       )}
     </div>
