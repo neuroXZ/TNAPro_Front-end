@@ -56,6 +56,11 @@ const navMainItems = [
     url: "/customer-service/terms-conditions",
     icon: IconFileText,
   },
+  {
+    title: "Development",
+    url: "/customer-service/development",
+    icon: IconDashboard,
+  },
   
 ]
 

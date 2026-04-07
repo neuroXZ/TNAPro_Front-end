@@ -5,10 +5,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge'
 import { Separator } from '@/components/ui/separator'
 import { useTranslations } from 'next-intl'
-import { 
-  CheckCircle, 
-  BarChart3, 
-  Users, 
+import {
+  CheckCircle,
+  BarChart3,
+  Users,
   GraduationCap,
   Clock,
   Shield,
