@@ -419,7 +419,7 @@ export default function AdminAnalytics() {
   if (loading) {
     return (
       <div className="flex-1 space-y-6 p-4 pt-6">
-        <div className="overflow-hidden rounded-3xl border bg-linear-to-br from-sky-50 via-white to-cyan-50 p-6 shadow-sm">
+        <div className="overflow-hidden rounded-3xl border border-sky-100/80 bg-sky-50 p-6 shadow-sm">
           <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
             <div className="space-y-3">
               <Skeleton className="h-6 w-36 rounded-full" />
@@ -483,8 +483,8 @@ export default function AdminAnalytics() {
   }
 
   return (
-    <div className="flex-1 space-y-6 bg-[radial-gradient(circle_at_top,rgba(14,165,233,0.08),transparent_38%),radial-gradient(circle_at_bottom_right,rgba(34,197,94,0.08),transparent_28%)] p-4 pt-6">
-      <section className="overflow-hidden rounded-3xl border border-sky-100/80 bg-linear-to-br from-sky-50 via-white to-cyan-50 shadow-sm">
+    <div className="flex-1 space-y-6 ">
+      <section className="overflow-hidden rounded-3xl border border-sky-100/80 bg-sky-50 shadow-sm">
         <div className="p-6 lg:p-8">
           <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
             <div className="max-w-2xl space-y-4">
@@ -685,7 +685,7 @@ export default function AdminAnalytics() {
                           </div>
                           <div className="h-3 overflow-hidden rounded-full bg-slate-100">
                             <div
-                              className="h-full rounded-full bg-linear-to-r from-violet-300 via-indigo-500 to-blue-700 transition-all"
+                              className="h-full rounded-full bg-indigo-600 transition-all"
                               style={{ width: `${barWidth}%` }}
                             />
                           </div>
@@ -846,7 +846,7 @@ export default function AdminAnalytics() {
                       </div>
                       <div className="h-3 overflow-hidden rounded-full bg-slate-100">
                         <div
-                          className="h-full rounded-full bg-linear-to-r from-sky-300 via-blue-500 to-blue-700 transition-all"
+                          className="h-full rounded-full bg-blue-600 transition-all"
                           style={{ width: `${barWidth}%` }}
                         />
                       </div>
@@ -925,7 +925,7 @@ export default function AdminAnalytics() {
                         </div>
                         <div className="h-3 overflow-hidden rounded-full bg-slate-100">
                           <div
-                            className="h-full rounded-full bg-linear-to-r from-orange-300 via-amber-500 to-orange-600 transition-all"
+                            className="h-full rounded-full bg-orange-500 transition-all"
                             style={{ width: `${barWidth}%` }}
                           />
                         </div>
