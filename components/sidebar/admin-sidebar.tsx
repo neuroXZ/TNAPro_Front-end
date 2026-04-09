@@ -96,6 +96,7 @@ export function AdminSidebar({ ...props }: React.ComponentProps<typeof Sidebar>)
         { title: t('reportAnalytics'), url: "/admin/analytics" },
         { title: t('competencyGapByGrade'), url: "/admin/analytics/competency-gap-by-grade" },
         { title: t('trainingDemand'), url: "/admin/analytics/training-demand" },
+        { title: t('comparisons'), url: "/admin/analytics/comparisons" },
       ],
     },
   ]

@@ -282,7 +282,30 @@ const buildAssessmentDashboardData = (
   };
 };
 
-const getErrorMessage = (error: unknown, fallbackMessage: string) => {
+const TECHNICAL_ERROR_PATTERNS = [
+  /invalid\s+`prisma\./i,
+  /can'?t\s+reach\s+database\s+server/i,
+  /database\s+server/i,
+  /econnrefused/i,
+  /connect\s+etimedout/i,
+  /connect\s+ehostunreach/i,
+  /\bP\d{4}\b/i,
+];
+
+const sanitizeApiErrorMessage = (message?: string): string | null => {
+  if (!message) return null;
+
+  const normalizedMessage = message.trim();
+  if (!normalizedMessage) return null;
+
+  const isTechnicalError = TECHNICAL_ERROR_PATTERNS.some((pattern) =>
+    pattern.test(normalizedMessage),
+  );
+
+  return isTechnicalError ? null : normalizedMessage;
+};
+
+const getErrorMessage = (error: unknown, fallbackMessage: string): string | null => {
   if (
     typeof error === "object" &&
     error !== null &&
@@ -290,7 +313,12 @@ const getErrorMessage = (error: unknown, fallbackMessage: string) => {
     typeof (error as { response?: unknown }).response === "object" &&
     (error as { response?: { data?: { error?: string } } }).response?.data?.error
   ) {
-    return (error as { response?: { data?: { error?: string } } }).response?.data?.error || fallbackMessage;
+    const responseMessage = (error as { response?: { data?: { error?: string } } }).response?.data?.error;
+    return sanitizeApiErrorMessage(responseMessage) || null;
+  }
+
+  if (error instanceof Error) {
+    return sanitizeApiErrorMessage(error.message) || null;
   }
 
   return fallbackMessage;
@@ -379,6 +407,8 @@ export default function AdminAnalytics() {
       }
     } catch (err: unknown) {
       console.error("Failed to fetch dashboard data:", err);
+      setDashboardData(createEmptyDashboardData());
+      setTrainingDemandData([]);
       setError(getErrorMessage(err, "Failed to load dashboard data"));
     } finally {
       setLoading(false);

@@ -948,6 +948,21 @@ export const competencyReportAPI = {
   },
 };
 
+// Comparison API
+export const comparisonAPI = {
+  compareByStaff: async (params: { staffId: string; assessmentId1: string; assessmentId2: string }) => {
+    return cachedGet('/comparison/staff', params, 0); // no cache — on-demand
+  },
+
+  compareByUnit: async (params: { unitId: string; assessmentId1: string; assessmentId2: string }) => {
+    return cachedGet('/comparison/unit', params, 0);
+  },
+
+  compareByOrganisation: async (params: { assessmentId1: string; assessmentId2: string }) => {
+    return cachedGet('/comparison/organisation', params, 0);
+  },
+};
+
 // Training Demand API
 export const trainingDemandAPI = {
   generateReport: async (assessmentId: string) => {
