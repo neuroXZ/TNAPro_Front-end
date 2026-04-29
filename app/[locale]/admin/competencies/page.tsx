@@ -87,7 +87,7 @@ export default function CompetencyManagementPage() {
       const data = await competencyAPI.getAll()
       setCompetencies(data)
       setRowSelection({})
-    } catch (error: any) {
+    } catch (error: unknown) {
       toast.error(t('fetchError'))
       console.error(error)
     } finally {
@@ -99,7 +99,7 @@ export default function CompetencyManagementPage() {
     try {
       const data = await clusterAPI.getAll()
       setClusters(data)
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Failed to fetch clusters:", error)
     }
   }
@@ -198,7 +198,7 @@ export default function CompetencyManagementPage() {
       setIsDeleteDialogOpen(false)
       setDeletingCompetency(null)
       fetchCompetencies()
-    } catch (error: any) {
+    } catch (error: unknown) {
       toast.error(t('deleteError'))
       console.error(error)
     }

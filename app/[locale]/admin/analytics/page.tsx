@@ -362,7 +362,7 @@ export default function AdminAnalytics() {
         ),
       );
       setTrainingDemandData(trainingDemandReport);
-    } catch (err: unknown) {
+    } catch (err: any) {
       console.error("Failed to fetch assessment analytics:", err);
       setDashboardData(createEmptyDashboardData());
       setTrainingDemandData([]);
@@ -405,7 +405,7 @@ export default function AdminAnalytics() {
           assessorsData,
         );
       }
-    } catch (err: unknown) {
+    } catch (err: any) {
       console.error("Failed to fetch dashboard data:", err);
       setDashboardData(createEmptyDashboardData());
       setTrainingDemandData([]);

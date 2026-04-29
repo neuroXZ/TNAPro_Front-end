@@ -67,7 +67,7 @@ export default function TrainingCompetencyManagementPage() {
       setTrainings(trainingsWithCount)
       setTrainingCompetencies(trainingCompetenciesData)
       setRowSelection({})
-    } catch (error: any) {
+    } catch (error: unknown) {
       toast.error(t('fetchError'))
       console.error(error)
     } finally {

@@ -118,7 +118,7 @@ export default function StaffManagementPage() {
       const data = await staffAPI.getAll()
       setStaff(data)
       setRowSelection({})
-    } catch (error: any) {
+    } catch (error: unknown) {
       toast.error(t('fetchError'))
       console.error(error)
     } finally {
@@ -130,7 +130,7 @@ export default function StaffManagementPage() {
     try {
       const data = await positionAPI.getAll()
       setPositions(data)
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Failed to fetch positions:", error)
     }
   }
@@ -139,7 +139,7 @@ export default function StaffManagementPage() {
     try {
       const data = await unitAPI.getAll()
       setUnits(data)
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Failed to fetch units:", error)
     }
   }
@@ -184,7 +184,7 @@ export default function StaffManagementPage() {
       setEditingStaff(null)
       setIsDialogOpen(false)
       fetchStaff()
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Staff form submission error:', error)
       
       // Handle subscription limit error specifically
@@ -275,7 +275,7 @@ export default function StaffManagementPage() {
       setIsDeleteDialogOpen(false)
       setDeletingStaff(null)
       fetchStaff()
-    } catch (error: any) {
+    } catch (error: unknown) {
       toast.error(t('deleteError'))
       console.error(error)
     }

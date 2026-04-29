@@ -263,7 +263,11 @@
     "deleteSelectError": "Sila pilih jenis unit untuk dipadam",
     "deleteSuccess": "Jenis unit berjaya dipadam",
     "deletedMultiple": "{count} jenis unit berjaya dipadam",
-    "deleteError": "Gagal memadam jenis unit"
+    "deleteError": "Gagal memadam jenis unit",
+    "infoTitle": "Maklumat Jenis Unit",
+    "infoDescription": "Ketahui lebih lanjut tentang jenis unit",
+    "infoSubtitle1": "Apa itu Jenis Unit?",
+    "infoContent1": "Jenis unit ialah kategori yang digunakan untuk mengklasifikasikan unit organisasi. Setiap unit dalam organisasi anda mesti diberikan jenis unit untuk menentukan peranannya dalam struktur organisasi."
   },
   "AdminUnitsPage": {
     "title": "Pengurusan Unit",

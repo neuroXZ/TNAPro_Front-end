@@ -82,7 +82,7 @@ function ResetPasswordForm() {
         router.push("/login")
       }, 2000)
       
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Reset password error:', error)
       
       if (error.response?.status === 400) {

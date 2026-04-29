@@ -117,7 +117,7 @@ export default function AssessorManagementPage() {
       const data = await assessorAPI.getAll()
       setAssessors(data)
       setRowSelection({})
-    } catch (error: any) {
+    } catch (error: unknown) {
       toast.error(t('fetchError'))
       console.error(error)
     } finally {
@@ -219,7 +219,7 @@ export default function AssessorManagementPage() {
       setIsDeleteDialogOpen(false)
       setDeletingAssessor(null)
       fetchAssessors()
-    } catch (error: any) {
+    } catch (error: unknown) {
       toast.error(t('deleteError'))
       console.error(error)
     }

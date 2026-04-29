@@ -298,7 +298,7 @@ export default function StaffProfilePage() {
             setIsEditDialogOpen(false)
             // Refresh data
             fetchStaffData()
-        } catch (error: any) {
+        } catch (error: unknown) {
             console.error("Failed to update staff:", error)
             
             // Handle subscription limit error specifically

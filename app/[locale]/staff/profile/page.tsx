@@ -173,7 +173,7 @@ export default function MyProfile() {
         toast.warning("Profile loaded from local storage. Some data may be outdated.")
         return
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Unexpected error in fetchProfile:", error)
       toast.error("Failed to load profile data")
 
@@ -265,7 +265,7 @@ export default function MyProfile() {
       }
 
       toast.success('Photo uploaded and saved successfully!')
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Photo upload error:', error)
       if (error.response?.status === 400) {
         toast.error('Invalid image file or file too large (max 5MB)')

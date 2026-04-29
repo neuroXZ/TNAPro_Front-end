@@ -61,7 +61,7 @@ export default function LevelManagementPage() {
       const data = await levelAPI.getAll()
       setLevels(data)
       setRowSelection({})
-    } catch (error: any) {
+    } catch (error: unknown) {
       toast.error(t('fetchError'))
       console.error(error)
     } finally {
@@ -163,7 +163,7 @@ export default function LevelManagementPage() {
       setIsDeleteDialogOpen(false)
       setDeletingLevel(null)
       fetchLevels()
-    } catch (error: any) {
+    } catch (error: unknown) {
       toast.error(t('deleteError'))
       console.error(error)
     }

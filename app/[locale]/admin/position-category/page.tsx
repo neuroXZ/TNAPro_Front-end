@@ -61,7 +61,7 @@ export default function PositionCategoryManagementPage() {
       const data = await positionCategoryAPI.getAll()
       setPositionCategorys(data)
       setRowSelection({})
-    } catch (error: any) {
+    } catch (error: unknown) {
       toast.error(t('fetchError'))
       console.error(error)
     } finally {
@@ -163,7 +163,7 @@ export default function PositionCategoryManagementPage() {
       setIsDeleteDialogOpen(false)
       setDeletingPositionCategory(null)
       fetchPositionCategorys()
-    } catch (error: any) {
+    } catch (error: unknown) {
       toast.error(t('deleteError'))
       console.error(error)
     }

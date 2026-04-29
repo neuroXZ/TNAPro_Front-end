@@ -102,7 +102,7 @@ export default function AssessmentsPage() {
       setStaff(staffData)
       setAssessors(assessorsData)
       setRowSelection({})
-    } catch (error: any) {
+    } catch (error: unknown) {
       toast.error(t('fetchError'))
       console.error(error)
     } finally {

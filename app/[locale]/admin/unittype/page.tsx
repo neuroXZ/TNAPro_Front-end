@@ -20,7 +20,8 @@ import {
   CardTitle,
 } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
-import { IconSearch } from "@tabler/icons-react"
+import Link from "next/link"
+import { IconSearch, IconBook } from "@tabler/icons-react"
 import { toast } from "sonner"
 import { UnitType, getColumns } from "@/features/admin/unittype/components/columns"
 import { DataTablePagination } from "@/components/data-table-pagination"
@@ -61,7 +62,7 @@ export default function UnitTypeManagementPage() {
       const data = await unitTypeAPI.getAll()
       setUnitTypes(data)
       setRowSelection({})
-    } catch (error: any) {
+    } catch (error: unknown) {
       toast.error(t('fetchError'))
       console.error(error)
     } finally {
@@ -163,7 +164,7 @@ export default function UnitTypeManagementPage() {
       setIsDeleteDialogOpen(false)
       setDeletingUnitType(null)
       fetchUnitTypes()
-    } catch (error: any) {
+    } catch (error: unknown) {
       toast.error(t('deleteError'))
       console.error(error)
     }
@@ -205,6 +206,13 @@ export default function UnitTypeManagementPage() {
                   className="pl-8 w-[250px]"
                 />
               </div>
+              <Link
+                href="/admin/unittype/documentation"
+                className="cursor-pointer hover:text-foreground transition-colors"
+                title="Documentation"
+              >
+                <IconBook className="size-5 text-muted-foreground" />
+              </Link>
             </div>
           </div>
         </CardHeader>
@@ -244,6 +252,8 @@ export default function UnitTypeManagementPage() {
         onOpenChange={setIsViewDialogOpen}
         unitType={viewingUnitType}
       />
+
+      
     </div>
   )
 }

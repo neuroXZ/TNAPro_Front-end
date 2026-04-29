@@ -61,7 +61,7 @@ export default function ClusterManagementPage() {
       const data = await clusterAPI.getAll()
       setClusters(data)
       setRowSelection({})
-    } catch (error: any) {
+    } catch (error: unknown) {
       toast.error(t('fetchError'))
       console.error(error)
     } finally {
@@ -163,7 +163,7 @@ export default function ClusterManagementPage() {
       setIsDeleteDialogOpen(false)
       setDeletingCluster(null)
       fetchClusters()
-    } catch (error: any) {
+    } catch (error: unknown) {
       toast.error(t('deleteError'))
       console.error(error)
     }

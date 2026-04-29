@@ -68,7 +68,7 @@ export function SignupForm({
       setTimeout(() => {
         router.push('/login');
       }, 2000);
-    } catch (error: any) {
+    } catch (error: unknown) {
       if (error.response?.status === 409 || error.response?.data?.message?.includes('unique')) {
         toast.error("Username already exists. Please choose another one.");
       } else {

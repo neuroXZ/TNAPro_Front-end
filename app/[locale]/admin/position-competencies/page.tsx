@@ -67,7 +67,7 @@ export default function PositionCompetencyManagementPage() {
       setPositions(positionsWithCount)
       setPositionCompetencies(positionCompetenciesData)
       setRowSelection({})
-    } catch (error: any) {
+    } catch (error: unknown) {
       toast.error(t('fetchError'))
       console.error(error)
     } finally {

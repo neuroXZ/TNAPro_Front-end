@@ -99,7 +99,7 @@ export default function StaffTrainingTestingPage() {
       if (data.length > 0) {
         setSelectedAssessmentId(data[0].id)
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Failed to fetch assessments:", error)
     }
   }
@@ -130,7 +130,7 @@ export default function StaffTrainingTestingPage() {
       // Backend already returns the complete recommended training records
       setRecommendedTrainings(rtnReport.results || [])
       
-    } catch (error: any) {
+    } catch (error: unknown) {
       if (error.response?.status === 404) {
         toast.info("No training recommendations found. Complete your assessment to get personalized recommendations.")
         setRecommendedTrainings([])

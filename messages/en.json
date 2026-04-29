@@ -263,7 +263,11 @@
     "deleteSelectError": "Please select unit types to delete",
     "deleteSuccess": "Unit type deleted successfully",
     "deletedMultiple": "{count} unit types deleted successfully",
-    "deleteError": "Failed to delete unit type"
+    "deleteError": "Failed to delete unit type",
+    "infoTitle": "Unit Type Information",
+    "infoDescription": "Learn more about unit types",
+    "infoSubtitle1": "What is a Unit Type?",
+    "infoContent1": "Unit types are categories used to classify organizational units. Each unit in your organization must be assigned a unit type to define its role and purpose within the structure."
   },
   "AdminUnitsPage": {
     "title": "Unit Management",

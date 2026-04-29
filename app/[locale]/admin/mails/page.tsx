@@ -61,7 +61,7 @@ export default function MailManagementPage() {
       const data = await mailAPI.getAll()
       setMails(data)
       setRowSelection({})
-    } catch (error: any) {
+    } catch (error: unknown) {
       toast.error(t('fetchError'))
       console.error(error)
     } finally {
@@ -163,7 +163,7 @@ export default function MailManagementPage() {
       setIsDeleteDialogOpen(false)
       setDeletingMail(null)
       fetchMails()
-    } catch (error: any) {
+    } catch (error: unknown) {
       toast.error(t('deleteError'))
       console.error(error)
     }

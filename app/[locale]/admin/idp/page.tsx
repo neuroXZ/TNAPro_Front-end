@@ -249,7 +249,7 @@ export default function AdminIdpPage() {
         setIdpResult(result);
         toast.success(t('generateSuccess'));
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Failed to generate IDP - Full error:", error);
       console.error("Error response:", error.response);
 

@@ -101,7 +101,7 @@ export default function PositionManagementPage() {
       const data = await positionAPI.getAll()
       setPositions(data)
       setRowSelection({})
-    } catch (error: any) {
+    } catch (error: unknown) {
       toast.error(t('fetchError'))
       console.error(error)
     } finally {
@@ -113,7 +113,7 @@ export default function PositionManagementPage() {
     try {
       const data = await gradeAPI.getAll()
       setGrades(data)
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Failed to fetch grades:", error)
     }
   }
@@ -121,7 +121,7 @@ export default function PositionManagementPage() {
     try {
       const data = await positionCategoryAPI.getAll()
       setCategories(data)
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Failed to fetch categories:", error)
     }
   }
@@ -249,7 +249,7 @@ export default function PositionManagementPage() {
       setIsDeleteDialogOpen(false)
       setDeletingPosition(null)
       fetchPositions()
-    } catch (error: any) {
+    } catch (error: unknown) {
       toast.error(t('deleteError'))
       console.error(error)
     }

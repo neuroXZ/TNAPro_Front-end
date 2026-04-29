@@ -194,7 +194,7 @@ export default function AdminIdpDownloadPage() {
       }))
       
       toast.success(`IDP generated successfully for ${idpData.staffName}!`)
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Failed to generate IDP - Full error:", error)
       console.error("Error response:", error.response)
       

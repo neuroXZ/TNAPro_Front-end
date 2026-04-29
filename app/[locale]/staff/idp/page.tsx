@@ -214,7 +214,7 @@ export default function MyIdpPage() {
       }, 1000)
 
       toast.success("IDP opened in new tab!")
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Export failed:", error)
       toast.error(error.response?.data?.error || "Failed to export IDP")
     } finally {
@@ -277,7 +277,7 @@ export default function MyIdpPage() {
       window.URL.revokeObjectURL(url)
 
       toast.success("IDP exported successfully!")
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Export failed:", error)
       toast.error(error.response?.data?.error || "Failed to export IDP")
     } finally {

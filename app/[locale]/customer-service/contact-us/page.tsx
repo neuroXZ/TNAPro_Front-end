@@ -87,7 +87,7 @@ This message was sent from the TNAPro Customer Service contact form.`
         throw new Error('Failed to send email')
       }
       
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error sending email:', error)
       
       // Fallback to mailto if EmailJS fails

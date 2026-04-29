@@ -63,7 +63,7 @@ export default function GradeManagementPage() {
       const data = await gradeAPI.getAll()
       setGrades(data)
       setRowSelection({})
-    } catch (error: any) {
+    } catch (error: unknown) {
       toast.error(t('fetchError'))
       console.error(error)
     } finally {
@@ -165,7 +165,7 @@ export default function GradeManagementPage() {
       setIsDeleteDialogOpen(false)
       setDeletingGrade(null)
       fetchGrades()
-    } catch (error: any) {
+    } catch (error: unknown) {
       toast.error(t('deleteError'))
       console.error(error)
     }

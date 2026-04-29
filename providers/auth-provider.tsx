@@ -92,7 +92,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       } else {
         router.push('/staff/dashboard');
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Login error:', error);
       throw new Error(error.response?.data?.error || error.response?.data?.message || 'Login failed');
     }

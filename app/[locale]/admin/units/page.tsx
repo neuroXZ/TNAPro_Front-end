@@ -84,7 +84,7 @@ export default function UnitManagementPage() {
       const data = await unitAPI.getAll()
       setUnits(data)
       setRowSelection({})
-    } catch (error: any) {
+    } catch (error: unknown) {
       toast.error(t('fetchError'))
       console.error(error)
     } finally {
@@ -96,7 +96,7 @@ export default function UnitManagementPage() {
     try {
       const data = await unitTypeAPI.getAll()
       setUnitTypes(data)
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Failed to fetch unit types:", error)
     }
   }
@@ -211,7 +211,7 @@ export default function UnitManagementPage() {
       setIsDeleteDialogOpen(false)
       setDeletingUnit(null)
       fetchUnits()
-    } catch (error: any) {
+    } catch (error: unknown) {
       toast.error(t('deleteError'))
       console.error(error)
     }

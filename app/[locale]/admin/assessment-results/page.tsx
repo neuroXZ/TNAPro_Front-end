@@ -86,7 +86,7 @@ export default function AssessmentResultsPage() {
       setCompetencies(competenciesData)
       setAssessors(assessorsData)
       setRowSelection({})
-    } catch (error: any) {
+    } catch (error: unknown) {
       toast.error(t('fetchError'))
       console.error(error)
     } finally {
@@ -213,7 +213,7 @@ export default function AssessmentResultsPage() {
       setIsDeleteDialogOpen(false)
       setDeletingResult(null)
       fetchData()
-    } catch (error: any) {
+    } catch (error: unknown) {
       toast.error(t('deleteError'))
       console.error(error)
     }
@@ -242,7 +242,7 @@ export default function AssessmentResultsPage() {
       toast.success(t('statusUpdated', { count: selectedRows.length, status: newStatus }))
       setRowSelection({})
       fetchData()
-    } catch (error: any) {
+    } catch (error: unknown) {
       toast.error(t('updateStatusError'))
       console.error(error)
     }

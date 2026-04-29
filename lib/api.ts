@@ -143,7 +143,7 @@ export const authAPI = {
         
         console.log('✅ SUCCESS! Response:', response);
         return response;
-      } catch (error: any) {
+      } catch (error: unknown) {
         lastError = error;
         console.log(`❌ ATTEMPT ${attempt} FAILED!`);
         console.log('❌ Error type:', error.name);
@@ -190,7 +190,7 @@ export const authAPI = {
       });
       console.log('✅ RESET PASSWORD SUCCESS!', response.data);
       return response.data;
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.log('❌ RESET PASSWORD FAILED!');
       console.log('❌ Error:', error.response?.data || error.message);
       
@@ -853,7 +853,7 @@ export const rtnAPI = {
     try {
       const response = await api.post('/recommendedtraining/report', data);
       return response.data;
-    } catch (error: any) {
+    } catch (error: unknown) {
       // If 404, endpoint not available in deployment
       if (error.response?.status === 404) {
         console.warn("RTN endpoint not available, returning mock data");

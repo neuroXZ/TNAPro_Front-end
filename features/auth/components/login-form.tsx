@@ -72,7 +72,7 @@ export function LoginForm({
       await login(username, password, userType);
       toast.success(t('loginSuccess'));
     } 
-    // catch (error: any) {
+    // catch (error: unknown) {
     //   toast.error(error.message || "Login failed. Please check your credentials.");
     // } 
     finally {
@@ -102,7 +102,7 @@ export function LoginForm({
       toast.success(t('resetLinkSent'));
       setShowForgotPassword(false);
       setForgotPasswordEmail("");
-    // } catch (error: any) {
+    // } catch (error: unknown) {
     //   console.error('ðŸ”¥ Forgot password error in component:', error);
     //   const errorMessage = error.message?.includes('Cannot connect') 
     //     ? "Cannot connect to server. Please check your network connection."
