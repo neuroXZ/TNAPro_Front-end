@@ -22,18 +22,17 @@ import {
   SidebarMenuSubItem,
 } from "@/components/ui/sidebar"
 
+type NavItem = {
+  title: string
+  url: string
+  icon?: Icon
+  items?: NavItem[]
+}
+
 export function NavMain({
   items,
 }: {
-  items: {
-    title: string
-    url: string
-    icon?: Icon
-    items?: {
-      title: string
-      url: string
-    }[]
-  }[]
+  items: NavItem[]
 }) {
   const pathname = usePathname()
   const router = useRouter()
@@ -54,6 +53,73 @@ export function NavMain({
       currentPath.startsWith(`${targetPath}/`)
     )
   }
+
+  const isRouteExactActive = (url: string) => {
+    if (!url || url === "#") return false
+    const targetPath = url.replace(/^\/+/, "")
+    const currentPath = normalizedPath.replace(/^\/+/, "")
+
+    return currentPath === targetPath
+  }
+
+  const isAnyChildActive = (item: NavItem): boolean => {
+    return !!item.items?.some(
+      (child) => isRouteActive(child.url) || isAnyChildActive(child)
+    )
+  }
+
+  const renderItems = (navItems: NavItem[], isSubmenu = false) =>
+    navItems.map((item) => {
+      const childActive = isAnyChildActive(item)
+      const itemActive = isRouteExactActive(item.url)
+
+      if (item.items && item.items.length > 0) {
+        return (
+          <Collapsible key={item.title} asChild defaultOpen={childActive}>
+            <SidebarMenuItem>
+              <CollapsibleTrigger asChild>
+                {isSubmenu ? (
+                  <SidebarMenuSubButton isActive={itemActive}>
+                    <span>{item.title}</span>
+                    <IconChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
+                  </SidebarMenuSubButton>
+                ) : (
+                  <SidebarMenuButton tooltip={item.title} isActive={itemActive}>
+                    {item.icon && <item.icon />}
+                    <span>{item.title}</span>
+                    <IconChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
+                  </SidebarMenuButton>
+                )}
+              </CollapsibleTrigger>
+              <CollapsibleContent>
+                <SidebarMenuSub>
+                  {renderItems(item.items, true)}
+                </SidebarMenuSub>
+              </CollapsibleContent>
+            </SidebarMenuItem>
+          </Collapsible>
+        )
+      }
+
+      return isSubmenu ? (
+        <SidebarMenuSubItem key={item.title}>
+          <SidebarMenuSubButton asChild isActive={itemActive}>
+            <Link href={item.url}>
+              <span>{item.title}</span>
+            </Link>
+          </SidebarMenuSubButton>
+        </SidebarMenuSubItem>
+      ) : (
+        <SidebarMenuItem key={item.title}>
+          <SidebarMenuButton asChild tooltip={item.title} isActive={itemActive}>
+            <Link href={item.url}>
+              {item.icon && <item.icon />}
+              <span>{item.title}</span>
+            </Link>
+          </SidebarMenuButton>
+        </SidebarMenuItem>
+      )
+    })
 
   const handleDocumentationClick = () => {
     // Navigate to appropriate documentation page based on user role
@@ -91,48 +157,7 @@ export function NavMain({
             </Button>
           </SidebarMenuItem>
         </SidebarMenu>
-        <SidebarMenu>
-          {items.map((item) => {
-            const childActive = item.items?.some((subItem) => isRouteActive(subItem.url))
-            const itemActive = isRouteActive(item.url) || childActive
-
-            return item.items && item.items.length > 0 ? (
-              <Collapsible key={item.title} asChild defaultOpen={childActive}>
-                <SidebarMenuItem>
-                  <CollapsibleTrigger asChild>
-                    <SidebarMenuButton tooltip={item.title} isActive={itemActive}>
-                      {item.icon && <item.icon />}
-                      <span>{item.title}</span>
-                      <IconChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
-                    </SidebarMenuButton>
-                  </CollapsibleTrigger>
-                  <CollapsibleContent>
-                    <SidebarMenuSub>
-                      {item.items.map((subItem) => (
-                        <SidebarMenuSubItem key={subItem.title}>
-                          <SidebarMenuSubButton asChild isActive={isRouteActive(subItem.url)}>
-                            <Link href={subItem.url}>
-                              <span>{subItem.title}</span>
-                            </Link>
-                          </SidebarMenuSubButton>
-                        </SidebarMenuSubItem>
-                      ))}
-                    </SidebarMenuSub>
-                  </CollapsibleContent>
-                </SidebarMenuItem>
-              </Collapsible>
-            ) : (
-              <SidebarMenuItem key={item.title}>
-                <SidebarMenuButton asChild tooltip={item.title} isActive={itemActive}>
-                  <Link href={item.url}>
-                    {item.icon && <item.icon />}
-                    <span>{item.title}</span>
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-            )
-          })}
-        </SidebarMenu>
+        <SidebarMenu>{renderItems(items)}</SidebarMenu>
       </SidebarGroupContent>
     </SidebarGroup>
   )
