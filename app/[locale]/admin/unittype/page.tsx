@@ -206,13 +206,13 @@ export default function UnitTypeManagementPage() {
                   className="pl-8 w-[250px]"
                 />
               </div>
-              <Link
+              {/* <Link
                 href="/admin/unittype/documentation"
                 className="cursor-pointer hover:text-foreground transition-colors"
                 title="Documentation"
               >
                 <IconBook className="size-5 text-muted-foreground" />
-              </Link>
+              </Link> */}
             </div>
           </div>
         </CardHeader>
