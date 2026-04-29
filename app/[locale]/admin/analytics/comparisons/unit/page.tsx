@@ -1,27 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
-import {
-  IconAlertTriangle,
-  IconArrowsDiff,
-  IconArrowDownRight,
-  IconArrowUpRight,
-  IconBuilding,
-  IconChevronLeft,
-  IconGitCompare,
-  IconHierarchy2,
-  IconMinus,
-  IconRefresh,
-  IconSearch,
-  IconSparkles,
-  IconTimeline,
-  IconUser,
-} from "@tabler/icons-react";
-
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -29,8 +9,9 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import {
   Select,
   SelectContent,
@@ -46,864 +27,375 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { api, assessmentAPI, unitAPI } from "@/lib/api";
+import { assessmentAPI, unitAPI, comparisonAPI } from "@/lib/api";
+import {
+  IconChevronLeft,
+  IconRefresh,
+  IconAlertTriangle,
+  IconArrowUp,
+  IconArrowDown,
+  IconMinus,
+  IconSparkles,
+  IconUsers,
+  IconUserPlus,
+  IconUserMinus,
+  IconArrowsTransferUp,
+} from "@tabler/icons-react";
+import { useTranslations } from "next-intl";
 
-interface UnitOption {
-  id: string;
-  name: string;
+type Trend = "improved" | "declined" | "no_change" | "new" | "not_assessed" | "first_assessment" | "not_applicable";
+type StaffStatus = "compared" | "new_member" | "left" | "transferred_in" | "transferred_out" | "no_participation";
+
+interface CompetencyScore {
+  selfScore: number | null;
+  superiorScore: number | null;
+  weightedScore: number | null;
 }
 
-interface AssessmentOption {
-  id: string;
-  name: string;
-  startDate?: string | null;
-  endDate?: string | null;
-  createdAt?: string | null;
-}
-
-interface ComparisonAssessment {
-  id: string;
-  name: string;
-  startDate?: string | null;
-  endDate?: string | null;
-  weightageSelf?: number | null;
-  weightageSuperiror?: number | null;
-  weightageSuperior?: number | null;
-  weightagePeer?: number | null;
-}
-
-interface StructuralChanges {
-  positionChanged: boolean;
-  position1?: string | null;
-  position2?: string | null;
-  unitChanged: boolean;
-  unit1?: string | null;
-  unit2?: string | null;
-}
-
-interface CompetencyAssessmentScore {
-  selfScore?: number | null;
-  superiorScore?: number | null;
-  weightedScore?: number | null;
-  weightageSelf?: number | null;
-  weightageSuperiror?: number | null;
-  weightageSuperior?: number | null;
-}
-
-interface CompetencyChange {
-  selfChange?: number | null;
-  superiorChange?: number | null;
-  weightedChange?: number | null;
-  weightageWarning?: boolean;
-}
-
-interface CompetencyComparisonItem {
+interface CompetencyComparison {
   competencyId: string;
   competencyName: string;
-  appearsIn: "assessment1" | "assessment2" | "both" | string;
-  assessment1?: CompetencyAssessmentScore | null;
-  assessment2?: CompetencyAssessmentScore | null;
-  change?: CompetencyChange | null;
-  trend?: "improved" | "declined" | "unchanged" | string | null;
+  appearsIn: "both" | "assessment1_only" | "assessment2_only";
+  assessment1: CompetencyScore | null;
+  assessment2: CompetencyScore | null;
+  change: { weightedChange: number | null; weightageWarning: boolean } | null;
+  trend: Trend;
 }
 
-interface ComparisonResponse {
-  unitId?: string;
-  unitName?: string;
-  staffId?: string;
-  staffName?: string;
-  assessment1: ComparisonAssessment;
-  assessment2: ComparisonAssessment;
-  structuralChanges: StructuralChanges;
-  competencyComparison: CompetencyComparisonItem[];
-  generatedAt?: string;
+interface StaffBreakdownEntry {
+  staffId: string;
+  staffName: string | null;
+  status: StaffStatus;
+  positionChanged: boolean;
+  position1: string | null;
+  position2: string | null;
+  competencyComparison: CompetencyComparison[];
 }
 
-function sortAssessments(items: AssessmentOption[]) {
-  return [...items].sort((firstItem, secondItem) => {
-    const firstDate = new Date(
-      firstItem.startDate || firstItem.createdAt || 0,
-    ).getTime();
-    const secondDate = new Date(
-      secondItem.startDate || secondItem.createdAt || 0,
-    ).getTime();
-
-    return secondDate - firstDate;
-  });
+interface UnitComparisonResponse {
+  unitId: string;
+  unitName: string | null;
+  assessment1: { id: string; name: string | null };
+  assessment2: { id: string; name: string | null };
+  staffSummary: { compared: number; newMembers: number; left: number; transferredIn: number; transferredOut: number; noParticipation: number };
+  competencyComparison: CompetencyComparison[];
+  staffBreakdown: StaffBreakdownEntry[];
+  generatedAt: string;
 }
 
-function formatDate(value?: string | null) {
-  if (!value) return "Not available";
-
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return "Not available";
-
-  return new Intl.DateTimeFormat("en-MY", {
-    day: "2-digit",
-    month: "short",
-    year: "numeric",
-  }).format(date);
-}
-
-function formatNumber(value?: number | null, fractionDigits = 1) {
-  if (value === null || value === undefined) return "-";
-
-  return new Intl.NumberFormat("en-MY", {
-    minimumFractionDigits: 0,
-    maximumFractionDigits: fractionDigits,
-  }).format(value);
-}
-
-function formatWeightage(value?: number | null) {
-  if (value === null || value === undefined) return "-";
-
-  const normalized = value > 1 ? value : value * 100;
-  return `${formatNumber(normalized, 0)}%`;
-}
-
-function getTrendMeta(trend?: string | null) {
-  if (trend === "improved") {
-    return {
-      label: "Improved",
-      className: "border-emerald-200 bg-emerald-50 text-emerald-700",
-      icon: IconArrowUpRight,
-    };
-  }
-
-  if (trend === "declined") {
-    return {
-      label: "Declined",
-      className: "border-rose-200 bg-rose-50 text-rose-700",
-      icon: IconArrowDownRight,
-    };
-  }
-
-  return {
-    label: "Unchanged",
-    className: "border-slate-200 bg-slate-50 text-slate-700",
-    icon: IconMinus,
+function trendBadge(trend: Trend, t: (k: string) => string) {
+  const map: Record<Trend, { label: string; className: string; icon: React.ReactNode }> = {
+    improved:         { label: t("trendImproved"),        className: "bg-green-100 text-green-800",    icon: <IconArrowUp size={12} /> },
+    declined:         { label: t("trendDeclined"),        className: "bg-red-100 text-red-800",        icon: <IconArrowDown size={12} /> },
+    no_change:        { label: t("trendNoChange"),        className: "bg-gray-100 text-gray-700",      icon: <IconMinus size={12} /> },
+    new:              { label: t("trendNew"),             className: "bg-blue-100 text-blue-800",      icon: <IconSparkles size={12} /> },
+    not_assessed:     { label: t("trendNotAssessed"),     className: "bg-gray-100 text-gray-500",      icon: <IconMinus size={12} /> },
+    first_assessment: { label: t("trendFirstAssessment"), className: "bg-purple-100 text-purple-700",  icon: <IconSparkles size={12} /> },
+    not_applicable:   { label: t("trendNotApplicable"),   className: "bg-gray-100 text-gray-500",      icon: <IconMinus size={12} /> },
   };
+  const { label, className, icon } = map[trend] ?? map.not_applicable;
+  return (
+    <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium ${className}`}>
+      {icon}{label}
+    </span>
+  );
 }
 
-function getAppearBadge(appearsIn: string) {
-  if (appearsIn === "assessment1") {
-    return {
-      label: "Assessment 1 only",
-      className: "border-sky-200 bg-sky-50 text-sky-700",
-    };
-  }
-
-  if (appearsIn === "assessment2") {
-    return {
-      label: "Assessment 2 only",
-      className: "border-violet-200 bg-violet-50 text-violet-700",
-    };
-  }
-
-  return {
-    label: "Both assessments",
-    className: "border-emerald-200 bg-emerald-50 text-emerald-700",
+function staffStatusBadge(status: StaffStatus, t: (k: string) => string) {
+  const map: Record<StaffStatus, string> = {
+    compared:        "bg-green-100 text-green-800",
+    new_member:      "bg-blue-100 text-blue-800",
+    left:            "bg-red-100 text-red-800",
+    transferred_in:  "bg-cyan-100 text-cyan-800",
+    transferred_out: "bg-orange-100 text-orange-800",
+    no_participation:"bg-gray-100 text-gray-500",
   };
+  return (
+    <span className={`inline-flex rounded-full px-2 py-0.5 text-xs font-medium ${map[status] ?? "bg-gray-100 text-gray-500"}`}>
+      {t(`staffStatus_${status}`)}
+    </span>
+  );
 }
 
-function getChangeTone(value?: number | null) {
-  if (value === null || value === undefined) return "text-muted-foreground";
-  if (value > 0) return "text-emerald-600";
-  if (value < 0) return "text-rose-600";
-  return "text-slate-600";
+function formatScore(val: number | null | undefined) {
+  if (val === null || val === undefined) return "—";
+  return val.toFixed(2);
 }
 
-function getAssessmentSuperiorWeightage(assessment?: ComparisonAssessment | null) {
-  if (!assessment) return null;
-  return assessment.weightageSuperior ?? assessment.weightageSuperiror ?? null;
-}
-
-function getScoreSuperiorWeightage(score?: CompetencyAssessmentScore | null) {
-  if (!score) return null;
-  return score.weightageSuperior ?? score.weightageSuperiror ?? null;
-}
-
-function buildErrorMessage(error: unknown) {
-  if (
-    typeof error === "object" &&
-    error !== null &&
-    "response" in error &&
-    typeof error.response === "object" &&
-    error.response !== null &&
-    "data" in error.response &&
-    typeof error.response.data === "object" &&
-    error.response.data !== null &&
-    "error" in error.response.data &&
-    typeof error.response.data.error === "string"
-  ) {
-    return error.response.data.error;
-  }
-
-  if (error instanceof Error) {
-    return error.message;
-  }
-
-  return "Failed to load comparison data.";
+function changeCell(val: number | null | undefined) {
+  if (val === null || val === undefined) return <span className="text-muted-foreground">—</span>;
+  const color = val > 0 ? "text-green-600" : val < 0 ? "text-red-600" : "text-muted-foreground";
+  const prefix = val > 0 ? "+" : "";
+  return <span className={`font-medium ${color}`}>{prefix}{val.toFixed(2)}</span>;
 }
 
 export default function UnitComparisonPage() {
-  const [units, setUnits] = useState<UnitOption[]>([]);
-  const [assessments, setAssessments] = useState<AssessmentOption[]>([]);
-  const [selectedUnitId, setSelectedUnitId] = useState("");
-  const [assessmentId1, setAssessmentId1] = useState("");
-  const [assessmentId2, setAssessmentId2] = useState("");
-  const [searchTerm, setSearchTerm] = useState("");
-  const [comparison, setComparison] = useState<ComparisonResponse | null>(null);
-  const [isBootstrapping, setIsBootstrapping] = useState(true);
-  const [isLoadingComparison, setIsLoadingComparison] = useState(false);
+  const t = useTranslations("AdminAnalyticsUnitComparisonPage");
+
+  const [assessments, setAssessments] = useState<{ id: string; name: string }[]>([]);
+  const [units, setUnits] = useState<{ id: string; name: string }[]>([]);
+  const [selectedUnit, setSelectedUnit] = useState("");
+  const [assessment1, setAssessment1] = useState("");
+  const [assessment2, setAssessment2] = useState("");
+  const [result, setResult] = useState<UnitComparisonResponse | null>(null);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [reloadKey, setReloadKey] = useState(0);
+  const [expandedStaff, setExpandedStaff] = useState<string | null>(null);
 
   useEffect(() => {
-    const loadFilters = async () => {
-      setIsBootstrapping(true);
-
-      try {
-        const [unitData, assessmentData] = await Promise.all([
-          unitAPI.getAll(),
-          assessmentAPI.getAll(),
-        ]);
-
-        const normalizedUnits = Array.isArray(unitData)
-          ? unitData.map((unit) => ({
-              id: String(unit.id),
-              name: String(unit.name),
-            }))
-          : [];
-
-        const normalizedAssessments = Array.isArray(assessmentData)
-          ? sortAssessments(
-              assessmentData.map((assessment) => ({
-                id: String(assessment.id),
-                name: String(assessment.name),
-                startDate: assessment.startDate ?? null,
-                endDate: assessment.endDate ?? null,
-                createdAt: assessment.createdAt ?? null,
-              })),
-            )
-          : [];
-
-        setUnits(normalizedUnits);
-        setAssessments(normalizedAssessments);
-
-        if (normalizedUnits.length > 0) {
-          setSelectedUnitId((currentValue) => currentValue || normalizedUnits[0].id);
-        }
-
-        if (normalizedAssessments.length > 0) {
-          setAssessmentId1((currentValue) => currentValue || normalizedAssessments[0].id);
-        }
-
-        if (normalizedAssessments.length > 1) {
-          setAssessmentId2((currentValue) => currentValue || normalizedAssessments[1].id);
-        }
-      } catch (loadError) {
-        setError(buildErrorMessage(loadError));
-      } finally {
-        setIsBootstrapping(false);
-      }
-    };
-
-    void loadFilters();
+    Promise.all([assessmentAPI.getAll(), unitAPI.getAll()])
+      .then(([a, u]) => {
+        setAssessments(a || []);
+        setUnits(u || []);
+      })
+      .catch(() => setError(t("errorLoadSelectors")));
   }, []);
 
-  useEffect(() => {
-    const loadComparison = async () => {
-      if (!selectedUnitId || !assessmentId1 || !assessmentId2) {
-        return;
-      }
+  const canCompare = selectedUnit && assessment1 && assessment2 && assessment1 !== assessment2;
 
-      if (assessmentId1 === assessmentId2) {
-        setComparison(null);
-        setIsPreviewMode(false);
-        setError("Please choose two different assessments to compare.");
-        return;
-      }
-
-      setIsLoadingComparison(true);
-      setError(null);
-
-      try {
-        const response = await api.get<ComparisonResponse>("/comparison/unit", {
-          params: {
-            unitId: selectedUnitId,
-            assessmentId1,
-            assessmentId2,
-          },
-        });
-
-        setComparison(response.data);
-      } catch (loadError) {
-        setComparison(null);
-        setError(buildErrorMessage(loadError));
-      } finally {
-        setIsLoadingComparison(false);
-      }
-    };
-
-    void loadComparison();
-  }, [selectedUnitId, assessmentId1, assessmentId2, reloadKey]);
-
-  const selectedUnit = units.find((unit) => unit.id === selectedUnitId);
-  const comparisonItems = comparison?.competencyComparison ?? [];
-  const filteredItems = comparisonItems.filter((item) => {
-    if (!searchTerm) return true;
-
-    const query = searchTerm.toLowerCase();
-    return (
-      item.competencyName.toLowerCase().includes(query) ||
-      item.competencyId.toLowerCase().includes(query)
-    );
-  });
-
-  const improvedCount = comparisonItems.filter(
-    (item) => item.trend === "improved",
-  ).length;
-  const declinedCount = comparisonItems.filter(
-    (item) => item.trend === "declined",
-  ).length;
-  const unchangedCount = comparisonItems.filter(
-    (item) => item.trend === "unchanged",
-  ).length;
-  const exclusiveCount = comparisonItems.filter(
-    (item) => item.appearsIn !== "both",
-  ).length;
-  const weightedChanges = comparisonItems
-    .map((item) => item.change?.weightedChange)
-    .filter((value): value is number => value !== null && value !== undefined);
-  const averageWeightedChange = weightedChanges.length
-    ? weightedChanges.reduce((total, value) => total + value, 0) / weightedChanges.length
-    : 0;
-
-  if (isBootstrapping) {
-    return (
-      <div className="space-y-6 p-6">
-        <Skeleton className="h-10 w-64" />
-        <Skeleton className="h-32 w-full" />
-        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-          {Array.from({ length: 4 }).map((_, index) => (
-            <Skeleton key={index} className="h-32 w-full" />
-          ))}
-        </div>
-        <Skeleton className="h-[420px] w-full" />
-      </div>
-    );
-  }
+  const handleCompare = async () => {
+    if (!canCompare) return;
+    setLoading(true);
+    setError(null);
+    setResult(null);
+    setExpandedStaff(null);
+    try {
+      const data = await comparisonAPI.compareByUnit({ unitId: selectedUnit, assessmentId1: assessment1, assessmentId2: assessment2 });
+      setResult(data);
+    } catch (err: any) {
+      setError(err?.response?.data?.error || err?.message || t("errorCompare"));
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
-    <div className="space-y-6 p-6">
-      <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-        <div className="space-y-2">
-          <Link href="/admin/analytics/comparisons">
-            <Button variant="outline" size="sm" className="gap-2">
-              <IconChevronLeft className="h-4 w-4" />
-              Back to comparison menu
-            </Button>
-          </Link>
-          <div>
-            <h1 className="text-3xl font-bold tracking-tight">Unit Comparison</h1>
-            <p className="text-muted-foreground max-w-3xl text-sm sm:text-base">
-              Compare two assessment periods for a selected unit and inspect how
-              competency scores, structural information, and weighted outcomes shifted.
-            </p>
-          </div>
-        </div>
-
-        <div className="flex flex-wrap items-center gap-2">
-          {comparison?.generatedAt ? (
-            <Badge variant="outline">Generated {formatDate(comparison.generatedAt)}</Badge>
-          ) : null}
-        </div>
+    <div className="container mx-auto py-6 max-w-6xl">
+      {/* Back */}
+      <div className="mb-4">
+        <Link href="/admin/analytics/comparisons">
+          <Button variant="ghost" size="sm" className="gap-1 text-muted-foreground hover:text-foreground">
+            <IconChevronLeft size={16} />
+            {t("backToComparisons")}
+          </Button>
+        </Link>
       </div>
 
-      {error ? (
-        <Alert variant="destructive">
-          <IconAlertTriangle className="h-4 w-4" />
-          <AlertDescription>{error}</AlertDescription>
-        </Alert>
-      ) : null}
+      <div className="mb-6">
+        <h1 className="text-2xl font-bold tracking-tight">{t("title")}</h1>
+        <p className="text-muted-foreground mt-1">{t("description")}</p>
+      </div>
 
-      <Card>
+      {/* Selectors */}
+      <Card className="mb-6">
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <IconGitCompare className="h-5 w-5" />
-            Comparison Filters
-          </CardTitle>
-          <CardDescription>
-            Pick the unit and two assessment periods to load the comparison payload.
-          </CardDescription>
+          <CardTitle className="text-base">{t("selectionTitle")}</CardTitle>
+          <CardDescription>{t("selectionDesc")}</CardDescription>
         </CardHeader>
-        <CardContent className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-          <div className="space-y-2">
-            <p className="text-sm font-medium">Unit</p>
-            <Select value={selectedUnitId} onValueChange={setSelectedUnitId}>
-              <SelectTrigger>
-                <SelectValue placeholder="Choose a unit" />
-              </SelectTrigger>
-              <SelectContent>
-                {units.map((unit) => (
-                  <SelectItem key={unit.id} value={unit.id}>
-                    {unit.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div className="space-y-2">
-            <p className="text-sm font-medium">Assessment 1</p>
-            <Select value={assessmentId1} onValueChange={setAssessmentId1}>
-              <SelectTrigger>
-                <SelectValue placeholder="Choose assessment 1" />
-              </SelectTrigger>
-              <SelectContent>
-                {assessments.map((assessment) => (
-                  <SelectItem key={assessment.id} value={assessment.id}>
-                    {assessment.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div className="space-y-2">
-            <p className="text-sm font-medium">Assessment 2</p>
-            <Select value={assessmentId2} onValueChange={setAssessmentId2}>
-              <SelectTrigger>
-                <SelectValue placeholder="Choose assessment 2" />
-              </SelectTrigger>
-              <SelectContent>
-                {assessments.map((assessment) => (
-                  <SelectItem key={assessment.id} value={assessment.id}>
-                    {assessment.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div className="space-y-2">
-            <p className="text-sm font-medium">Search competency</p>
-            <div className="relative">
-              <IconSearch className="text-muted-foreground absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2" />
-              <Input
-                value={searchTerm}
-                onChange={(event) => setSearchTerm(event.target.value)}
-                placeholder="Search by name or competency ID"
-                className="pl-9"
-              />
-            </div>
-          </div>
-
-          <div className="md:col-span-2 xl:col-span-4 flex flex-wrap items-center justify-between gap-3 rounded-lg border bg-muted/30 px-4 py-3">
+        <CardContent>
+          <div className="grid gap-4 md:grid-cols-3">
             <div className="space-y-1">
-              <p className="text-sm font-medium">Current selection</p>
-              <p className="text-muted-foreground text-sm">
-                {selectedUnit?.name || "No unit selected"}
-                {comparison?.staffName ? ` • Payload subject: ${comparison.staffName}` : ""}
-              </p>
+              <label className="text-sm font-medium">{t("labelUnit")}</label>
+              <Select value={selectedUnit} onValueChange={setSelectedUnit}>
+                <SelectTrigger><SelectValue placeholder={t("placeholderUnit")} /></SelectTrigger>
+                <SelectContent>
+                  {units.map((u) => (
+                    <SelectItem key={u.id} value={u.id}>{u.name || u.id}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => setReloadKey((currentValue) => currentValue + 1)}
-              disabled={isLoadingComparison}
-              className="gap-2"
-            >
-              <IconRefresh className="h-4 w-4" />
-              {isLoadingComparison ? "Refreshing..." : "Refresh comparison"}
+            <div className="space-y-1">
+              <label className="text-sm font-medium">{t("labelAssessment1")}</label>
+              <Select value={assessment1} onValueChange={setAssessment1}>
+                <SelectTrigger><SelectValue placeholder={t("placeholderAssessment")} /></SelectTrigger>
+                <SelectContent>
+                  {assessments.map((a) => (
+                    <SelectItem key={a.id} value={a.id}>{a.name || a.id}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-1">
+              <label className="text-sm font-medium">{t("labelAssessment2")}</label>
+              <Select value={assessment2} onValueChange={setAssessment2}>
+                <SelectTrigger><SelectValue placeholder={t("placeholderAssessment")} /></SelectTrigger>
+                <SelectContent>
+                  {assessments.map((a) => (
+                    <SelectItem key={a.id} value={a.id}>{a.name || a.id}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          {assessment1 && assessment2 && assessment1 === assessment2 && (
+            <p className="text-sm text-red-500 mt-2">{t("errorSameAssessment")}</p>
+          )}
+          <div className="mt-4">
+            <Button onClick={handleCompare} disabled={!canCompare || loading} className="gap-2">
+              <IconRefresh size={16} className={loading ? "animate-spin" : ""} />
+              {loading ? t("comparing") : t("compareButton")}
             </Button>
           </div>
         </CardContent>
       </Card>
 
-      {isLoadingComparison ? (
+      {error && (
+        <Alert variant="destructive" className="mb-6">
+          <IconAlertTriangle size={16} />
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
+      )}
+
+      {loading && (
         <div className="space-y-4">
-          <Skeleton className="h-32 w-full" />
-          <Skeleton className="h-64 w-full" />
-          <Skeleton className="h-[420px] w-full" />
+          <Skeleton className="h-24 w-full rounded-lg" />
+          <Skeleton className="h-48 w-full rounded-lg" />
         </div>
-      ) : null}
+      )}
 
-      {!isLoadingComparison && comparison ? (
-        <>
-          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-            <Card>
-              <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-medium text-muted-foreground">
-                  Compared competencies
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-3xl font-semibold">{comparisonItems.length}</div>
-                <p className="text-muted-foreground mt-2 text-sm">
-                  {filteredItems.length} shown after filtering
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-medium text-muted-foreground">
-                  Improved vs declined
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="flex items-end gap-3">
-                  <div>
-                    <div className="text-3xl font-semibold text-emerald-600">
-                      {improvedCount}
-                    </div>
-                    <p className="text-xs text-muted-foreground">Improved</p>
-                  </div>
-                  <div>
-                    <div className="text-xl font-semibold text-rose-600">
-                      {declinedCount}
-                    </div>
-                    <p className="text-xs text-muted-foreground">Declined</p>
-                  </div>
-                  <div>
-                    <div className="text-xl font-semibold text-slate-600">
-                      {unchangedCount}
-                    </div>
-                    <p className="text-xs text-muted-foreground">Unchanged</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-medium text-muted-foreground">
-                  Exclusive competencies
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-3xl font-semibold">{exclusiveCount}</div>
-                <p className="text-muted-foreground mt-2 text-sm">
-                  Competencies appearing in only one assessment period
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-medium text-muted-foreground">
-                  Average weighted delta
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className={`text-3xl font-semibold ${getChangeTone(averageWeightedChange)}`}>
-                  {averageWeightedChange > 0 ? "+" : ""}
-                  {formatNumber(averageWeightedChange)}
-                </div>
-                <p className="text-muted-foreground mt-2 text-sm">
-                  Mean weighted score change across comparable competencies
-                </p>
-              </CardContent>
-            </Card>
+      {result && !loading && (
+        <div className="space-y-6">
+          {/* Staff summary stats */}
+          <div className="grid gap-4 grid-cols-2 md:grid-cols-3 lg:grid-cols-6">
+            {[
+              { label: t("summaryCompared"),        value: result.staffSummary.compared,        icon: <IconUsers size={18} className="text-green-500" /> },
+              { label: t("summaryNew"),              value: result.staffSummary.newMembers,      icon: <IconUserPlus size={18} className="text-blue-500" /> },
+              { label: t("summaryLeft"),             value: result.staffSummary.left,            icon: <IconUserMinus size={18} className="text-red-500" /> },
+              { label: t("summaryTransferredIn"),    value: result.staffSummary.transferredIn,   icon: <IconArrowsTransferUp size={18} className="text-cyan-500" /> },
+              { label: t("summaryTransferredOut"),   value: result.staffSummary.transferredOut,  icon: <IconArrowsTransferUp size={18} className="text-orange-500" style={{ transform: "rotate(180deg)" }} /> },
+              { label: t("summaryNoParticipation"),  value: result.staffSummary.noParticipation, icon: <IconMinus size={18} className="text-gray-400" /> },
+            ].map((item) => (
+              <Card key={item.label} className="text-center py-4 px-2">
+                <div className="flex justify-center mb-1">{item.icon}</div>
+                <div className="text-2xl font-bold">{item.value}</div>
+                <div className="text-xs text-muted-foreground mt-0.5">{item.label}</div>
+              </Card>
+            ))}
           </div>
 
-          <div className="grid gap-4 xl:grid-cols-[1.15fr_0.85fr]">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <IconSparkles className="h-5 w-5" />
-                  Comparison Summary
-                </CardTitle>
-                <CardDescription>
-                  Core subject and organisational context returned by the comparison endpoint.
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                <div className="grid gap-4 md:grid-cols-2">
-                  <div className="rounded-xl border bg-muted/20 p-4">
-                    <div className="mb-3 flex items-center gap-2 text-sm font-medium text-muted-foreground">
-                      <IconBuilding className="h-4 w-4" />
-                      Selected Unit
-                    </div>
-                    <p className="text-lg font-semibold">
-                      {comparison.unitName || selectedUnit?.name || "Not available"}
-                    </p>
-                    <p className="text-muted-foreground mt-1 text-sm">
-                      ID: {comparison.unitId || selectedUnitId || "-"}
-                    </p>
-                  </div>
-
-                  <div className="rounded-xl border bg-muted/20 p-4">
-                    <div className="mb-3 flex items-center gap-2 text-sm font-medium text-muted-foreground">
-                      <IconUser className="h-4 w-4" />
-                      Payload Subject
-                    </div>
-                    <p className="text-lg font-semibold">
-                      {comparison.staffName || "Not available"}
-                    </p>
-                    <p className="text-muted-foreground mt-1 text-sm">
-                      ID: {comparison.staffId || "-"}
-                    </p>
-                  </div>
-                </div>
-
-                <div className="grid gap-4 md:grid-cols-2">
-                  {[comparison.assessment1, comparison.assessment2].map((assessment, index) => (
-                    <div key={assessment.id} className="rounded-xl border p-4">
-                      <div className="mb-3 flex items-center justify-between gap-3">
-                        <div>
-                          <p className="text-sm font-medium text-muted-foreground">
-                            Assessment {index + 1}
-                          </p>
-                          <p className="text-lg font-semibold">{assessment.name}</p>
-                        </div>
-                        <Badge variant="outline">{assessment.id.slice(0, 8)}</Badge>
-                      </div>
-                      <div className="grid gap-3 text-sm md:grid-cols-2">
-                        <div>
-                          <p className="text-muted-foreground">Start date</p>
-                          <p className="font-medium">{formatDate(assessment.startDate)}</p>
-                        </div>
-                        <div>
-                          <p className="text-muted-foreground">End date</p>
-                          <p className="font-medium">{formatDate(assessment.endDate)}</p>
-                        </div>
-                        <div>
-                          <p className="text-muted-foreground">Self weightage</p>
-                          <p className="font-medium">{formatWeightage(assessment.weightageSelf)}</p>
-                        </div>
-                        <div>
-                          <p className="text-muted-foreground">Superior weightage</p>
-                          <p className="font-medium">
-                            {formatWeightage(getAssessmentSuperiorWeightage(assessment))}
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <IconHierarchy2 className="h-5 w-5" />
-                  Structural Changes
-                </CardTitle>
-                <CardDescription>
-                  Position and unit movement between the two assessment snapshots.
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="rounded-xl border p-4">
-                  <div className="mb-3 flex items-center justify-between gap-3">
-                    <p className="font-medium">Position</p>
-                    <Badge
-                      className={
-                        comparison.structuralChanges.positionChanged
-                          ? "border-amber-200 bg-amber-50 text-amber-700"
-                          : "border-emerald-200 bg-emerald-50 text-emerald-700"
-                      }
-                    >
-                      {comparison.structuralChanges.positionChanged ? "Changed" : "No change"}
-                    </Badge>
-                  </div>
-                  <div className="grid gap-3 text-sm sm:grid-cols-2">
-                    <div>
-                      <p className="text-muted-foreground">Assessment 1</p>
-                      <p className="font-medium">{comparison.structuralChanges.position1 || "-"}</p>
-                    </div>
-                    <div>
-                      <p className="text-muted-foreground">Assessment 2</p>
-                      <p className="font-medium">{comparison.structuralChanges.position2 || "-"}</p>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="rounded-xl border p-4">
-                  <div className="mb-3 flex items-center justify-between gap-3">
-                    <p className="font-medium">Unit</p>
-                    <Badge
-                      className={
-                        comparison.structuralChanges.unitChanged
-                          ? "border-amber-200 bg-amber-50 text-amber-700"
-                          : "border-emerald-200 bg-emerald-50 text-emerald-700"
-                      }
-                    >
-                      {comparison.structuralChanges.unitChanged ? "Changed" : "No change"}
-                    </Badge>
-                  </div>
-                  <div className="grid gap-3 text-sm sm:grid-cols-2">
-                    <div>
-                      <p className="text-muted-foreground">Assessment 1</p>
-                      <p className="font-medium">{comparison.structuralChanges.unit1 || "-"}</p>
-                    </div>
-                    <div>
-                      <p className="text-muted-foreground">Assessment 2</p>
-                      <p className="font-medium">{comparison.structuralChanges.unit2 || "-"}</p>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="rounded-xl border border-dashed p-4 text-sm text-muted-foreground">
-                  The backend payload already exposes both the raw structure values and explicit
-                  change flags, so the page can highlight movement without recomputing it in the browser.
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-
+          {/* Aggregate competency comparison */}
           <Card>
-            <CardHeader>
-              <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-                <div>
-                  <CardTitle className="flex items-center gap-2">
-                    <IconTimeline className="h-5 w-5" />
-                    Competency Comparison
-                  </CardTitle>
-                  <CardDescription>
-                    Read the before-and-after scores, weighted changes, and whether a competency
-                    exists in one or both assessment periods.
-                  </CardDescription>
-                </div>
-                <Badge variant="outline">{filteredItems.length} rows</Badge>
-              </div>
+            <CardHeader className="pb-3">
+              <CardTitle className="text-base">{t("aggregateTitle")}</CardTitle>
+              <CardDescription>
+                {result.assessment1.name || result.assessment1.id} vs {result.assessment2.name || result.assessment2.id}
+              </CardDescription>
             </CardHeader>
-            <CardContent>
-              {filteredItems.length === 0 ? (
-                <div className="flex min-h-56 flex-col items-center justify-center rounded-xl border border-dashed text-center">
-                  <IconArrowsDiff className="text-muted-foreground mb-3 h-10 w-10" />
-                  <h3 className="text-lg font-semibold">No competencies found</h3>
-                  <p className="text-muted-foreground mt-1 max-w-md text-sm">
-                    Try a different search keyword or switch to another assessment pair.
-                  </p>
-                </div>
-              ) : (
+            <CardContent className="p-0">
+              <div className="overflow-x-auto">
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead className="min-w-[260px]">Competency</TableHead>
-                      <TableHead className="min-w-[220px]">Assessment 1</TableHead>
-                      <TableHead className="min-w-[220px]">Assessment 2</TableHead>
-                      <TableHead className="min-w-[180px]">Change</TableHead>
-                      <TableHead className="min-w-[120px]">Trend</TableHead>
+                      <TableHead className="w-48">{t("colCompetency")}</TableHead>
+                      <TableHead className="text-center">{t("assessment1")} ({t("scoreWeighted")})</TableHead>
+                      <TableHead className="text-center">{t("assessment2")} ({t("scoreWeighted")})</TableHead>
+                      <TableHead className="text-center">{t("colChange")}</TableHead>
+                      <TableHead>{t("colTrend")}</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {filteredItems.map((item) => {
-                      const trendMeta = getTrendMeta(item.trend);
-                      const appearsMeta = getAppearBadge(item.appearsIn);
-                      const TrendIcon = trendMeta.icon;
-
-                      return (
-                        <TableRow key={item.competencyId}>
-                          <TableCell className="align-top">
-                            <div className="space-y-2">
-                              <div>
-                                <p className="font-medium">{item.competencyName}</p>
-                                <p className="text-muted-foreground text-xs">
-                                  {item.competencyId}
-                                </p>
-                              </div>
-                              <Badge className={appearsMeta.className}>{appearsMeta.label}</Badge>
-                            </div>
-                          </TableCell>
-
-                          <TableCell className="align-top">
-                            <div className="space-y-1 text-sm">
-                              <p>
-                                <span className="text-muted-foreground">Self:</span>{" "}
-                                <span className="font-medium">
-                                  {formatNumber(item.assessment1?.selfScore)}
-                                </span>
-                              </p>
-                              <p>
-                                <span className="text-muted-foreground">Superior:</span>{" "}
-                                <span className="font-medium">
-                                  {formatNumber(item.assessment1?.superiorScore)}
-                                </span>
-                              </p>
-                              <p>
-                                <span className="text-muted-foreground">Weighted:</span>{" "}
-                                <span className="font-medium">
-                                  {formatNumber(item.assessment1?.weightedScore)}
-                                </span>
-                              </p>
-                              <p className="text-muted-foreground text-xs">
-                                Weightage {formatWeightage(item.assessment1?.weightageSelf)} /{" "}
-                                {formatWeightage(getScoreSuperiorWeightage(item.assessment1))}
-                              </p>
-                            </div>
-                          </TableCell>
-
-                          <TableCell className="align-top">
-                            <div className="space-y-1 text-sm">
-                              <p>
-                                <span className="text-muted-foreground">Self:</span>{" "}
-                                <span className="font-medium">
-                                  {formatNumber(item.assessment2?.selfScore)}
-                                </span>
-                              </p>
-                              <p>
-                                <span className="text-muted-foreground">Superior:</span>{" "}
-                                <span className="font-medium">
-                                  {formatNumber(item.assessment2?.superiorScore)}
-                                </span>
-                              </p>
-                              <p>
-                                <span className="text-muted-foreground">Weighted:</span>{" "}
-                                <span className="font-medium">
-                                  {formatNumber(item.assessment2?.weightedScore)}
-                                </span>
-                              </p>
-                              <p className="text-muted-foreground text-xs">
-                                Weightage {formatWeightage(item.assessment2?.weightageSelf)} /{" "}
-                                {formatWeightage(getScoreSuperiorWeightage(item.assessment2))}
-                              </p>
-                            </div>
-                          </TableCell>
-
-                          <TableCell className="align-top">
-                            <div className="space-y-1 text-sm">
-                              <p className={getChangeTone(item.change?.selfChange)}>
-                                Self {item.change?.selfChange && item.change.selfChange > 0 ? "+" : ""}
-                                {formatNumber(item.change?.selfChange)}
-                              </p>
-                              <p className={getChangeTone(item.change?.superiorChange)}>
-                                Superior {item.change?.superiorChange && item.change.superiorChange > 0 ? "+" : ""}
-                                {formatNumber(item.change?.superiorChange)}
-                              </p>
-                              <p className={getChangeTone(item.change?.weightedChange)}>
-                                Weighted {item.change?.weightedChange && item.change.weightedChange > 0 ? "+" : ""}
-                                {formatNumber(item.change?.weightedChange)}
-                              </p>
-                              {item.change?.weightageWarning ? (
-                                <Badge className="border-amber-200 bg-amber-50 text-amber-700">
-                                  Weightage warning
-                                </Badge>
-                              ) : null}
-                            </div>
-                          </TableCell>
-
-                          <TableCell className="align-top">
-                            <Badge className={`gap-1 ${trendMeta.className}`}>
-                              <TrendIcon className="h-3 w-3" />
-                              {trendMeta.label}
-                            </Badge>
-                          </TableCell>
+                    {result.competencyComparison.length === 0 ? (
+                      <TableRow>
+                        <TableCell colSpan={5} className="text-center text-muted-foreground py-8">{t("noCompetencies")}</TableCell>
+                      </TableRow>
+                    ) : (
+                      result.competencyComparison.map((c) => (
+                        <TableRow key={c.competencyId}>
+                          <TableCell className="font-medium">{c.competencyName}</TableCell>
+                          <TableCell className="text-center text-sm">{formatScore(c.assessment1?.weightedScore)}</TableCell>
+                          <TableCell className="text-center text-sm">{formatScore(c.assessment2?.weightedScore)}</TableCell>
+                          <TableCell className="text-center">{changeCell(c.change?.weightedChange)}</TableCell>
+                          <TableCell>{trendBadge(c.trend, t)}</TableCell>
                         </TableRow>
-                      );
-                    })}
+                      ))
+                    )}
                   </TableBody>
                 </Table>
-              )}
+              </div>
             </CardContent>
           </Card>
-        </>
-      ) : null}
+
+          {/* Staff breakdown */}
+          <Card>
+            <CardHeader className="pb-3">
+              <CardTitle className="text-base">{t("staffBreakdownTitle")}</CardTitle>
+              <CardDescription>{t("staffBreakdownDesc")}</CardDescription>
+            </CardHeader>
+            <CardContent className="p-0">
+              <div className="overflow-x-auto">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>{t("colStaffName")}</TableHead>
+                      <TableHead>{t("colStatus")}</TableHead>
+                      <TableHead>{t("colPosition1")}</TableHead>
+                      <TableHead>{t("colPosition2")}</TableHead>
+                      <TableHead className="text-center">{t("colAction")}</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {result.staffBreakdown.length === 0 ? (
+                      <TableRow>
+                        <TableCell colSpan={5} className="text-center text-muted-foreground py-8">{t("noStaff")}</TableCell>
+                      </TableRow>
+                    ) : (
+                      result.staffBreakdown.flatMap((s) => {
+                        const rows = [
+                          <TableRow key={s.staffId} className="cursor-pointer hover:bg-muted/50" onClick={() => setExpandedStaff(expandedStaff === s.staffId ? null : s.staffId)}>
+                            <TableCell className="font-medium">{s.staffName || s.staffId}</TableCell>
+                            <TableCell>{staffStatusBadge(s.status, t)}</TableCell>
+                            <TableCell className="text-sm text-muted-foreground">{s.position1 || "—"}</TableCell>
+                            <TableCell className="text-sm text-muted-foreground">{s.position2 || "—"}</TableCell>
+                            <TableCell className="text-center">
+                              <Button variant="ghost" size="sm" className="text-xs h-7">
+                                {expandedStaff === s.staffId ? t("collapse") : t("expand")}
+                              </Button>
+                            </TableCell>
+                          </TableRow>,
+                        ];
+                        if (expandedStaff === s.staffId && s.competencyComparison.length > 0) {
+                          rows.push(
+                            <TableRow key={`${s.staffId}-expanded`}>
+                              <TableCell colSpan={5} className="bg-muted/30 p-0">
+                                <div className="px-4 py-3">
+                                  <Table>
+                                    <TableHeader>
+                                      <TableRow>
+                                        <TableHead className="text-xs h-8">{t("colCompetency")}</TableHead>
+                                        <TableHead className="text-center text-xs h-8">{t("scoreWeighted")} A1</TableHead>
+                                        <TableHead className="text-center text-xs h-8">{t("scoreWeighted")} A2</TableHead>
+                                        <TableHead className="text-center text-xs h-8">{t("colChange")}</TableHead>
+                                        <TableHead className="text-xs h-8">{t("colTrend")}</TableHead>
+                                      </TableRow>
+                                    </TableHeader>
+                                    <TableBody>
+                                      {s.competencyComparison.map((c) => (
+                                        <TableRow key={c.competencyId}>
+                                          <TableCell className="text-sm">{c.competencyName}</TableCell>
+                                          <TableCell className="text-center text-sm">{formatScore(c.assessment1?.weightedScore)}</TableCell>
+                                          <TableCell className="text-center text-sm">{formatScore(c.assessment2?.weightedScore)}</TableCell>
+                                          <TableCell className="text-center text-sm">{changeCell(c.change?.weightedChange)}</TableCell>
+                                          <TableCell>{trendBadge(c.trend, t)}</TableCell>
+                                        </TableRow>
+                                      ))}
+                                    </TableBody>
+                                  </Table>
+                                </div>
+                              </TableCell>
+                            </TableRow>
+                          );
+                        }
+                        return rows;
+                      })
+                    )}
+                  </TableBody>
+                </Table>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
     </div>
   );
 }

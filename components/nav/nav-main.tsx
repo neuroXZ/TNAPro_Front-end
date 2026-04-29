@@ -2,8 +2,8 @@
 
 import { IconCirclePlusFilled, IconMessages, IconChevronRight, IconBooks, type Icon } from "@tabler/icons-react"
 import Link from "next/link"
-import { useRouter } from "next/navigation"
-import { useEffect, useState } from "react"
+import { usePathname, useRouter } from "next/navigation"
+import { useEffect, useMemo, useState } from "react"
 
 import { Button } from "@/components/ui/button"
 import {
@@ -35,24 +35,25 @@ export function NavMain({
     }[]
   }[]
 }) {
+  const pathname = usePathname()
   const router = useRouter()
   const [userRole, setUserRole] = useState<string | null>(null)
 
-  useEffect(() => {
-    // Get user role from localStorage
-    const storedUser = localStorage.getItem('user')
-    if (storedUser) {
-      try {
-        const userData = JSON.parse(storedUser)
-        console.log('User data:', userData) // Debug: check user data structure
-        console.log('User role:', userData.role) // Debug: check role value
-        console.log('User userType:', userData.userType) // Debug: check if userType exists
-        setUserRole(userData.role || userData.userType) // Try both role and userType fields
-      } catch (error) {
-        console.error("Failed to parse user data:", error)
-      }
-    }
-  }, [])
+  const normalizedPath = useMemo(() => {
+    if (!pathname) return ""
+    return pathname.replace(/^\/(en|ms)(?=\/|$)/, "")
+  }, [pathname])
+
+  const isRouteActive = (url: string) => {
+    if (!url || url === "#") return false
+    const targetPath = url.replace(/^\/+/, "")
+    const currentPath = normalizedPath.replace(/^\/+/, "")
+
+    return (
+      currentPath === targetPath ||
+      currentPath.startsWith(`${targetPath}/`)
+    )
+  }
 
   const handleDocumentationClick = () => {
     // Navigate to appropriate documentation page based on user role
@@ -91,12 +92,15 @@ export function NavMain({
           </SidebarMenuItem>
         </SidebarMenu>
         <SidebarMenu>
-          {items.map((item) =>
-            item.items && item.items.length > 0 ? (
-              <Collapsible key={item.title} asChild defaultOpen={false}>
+          {items.map((item) => {
+            const childActive = item.items?.some((subItem) => isRouteActive(subItem.url))
+            const itemActive = isRouteActive(item.url) || childActive
+
+            return item.items && item.items.length > 0 ? (
+              <Collapsible key={item.title} asChild defaultOpen={childActive}>
                 <SidebarMenuItem>
                   <CollapsibleTrigger asChild>
-                    <SidebarMenuButton tooltip={item.title}>
+                    <SidebarMenuButton tooltip={item.title} isActive={itemActive}>
                       {item.icon && <item.icon />}
                       <span>{item.title}</span>
                       <IconChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
@@ -106,7 +110,7 @@ export function NavMain({
                     <SidebarMenuSub>
                       {item.items.map((subItem) => (
                         <SidebarMenuSubItem key={subItem.title}>
-                          <SidebarMenuSubButton asChild>
+                          <SidebarMenuSubButton asChild isActive={isRouteActive(subItem.url)}>
                             <Link href={subItem.url}>
                               <span>{subItem.title}</span>
                             </Link>
@@ -119,7 +123,7 @@ export function NavMain({
               </Collapsible>
             ) : (
               <SidebarMenuItem key={item.title}>
-                <SidebarMenuButton asChild tooltip={item.title}>
+                <SidebarMenuButton asChild tooltip={item.title} isActive={itemActive}>
                   <Link href={item.url}>
                     {item.icon && <item.icon />}
                     <span>{item.title}</span>
@@ -127,7 +131,7 @@ export function NavMain({
                 </SidebarMenuButton>
               </SidebarMenuItem>
             )
-          )}
+          })}
         </SidebarMenu>
       </SidebarGroupContent>
     </SidebarGroup>
