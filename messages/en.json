@@ -60,6 +60,8 @@
     "staffDevelopment": "Staff Development",
     "staffManagement": "Staff Management",
     "assessors": "Assessors",
+    "assessorsManagement": "Assessor Management",
+    "organizationChart": "Organization Chart",
     "competency": "Competency",
     "levels": "Levels",
     "clusters": "Clusters",
@@ -76,6 +78,14 @@
     "competencyGapByGrade": "Competency Gap by Grade",
     "trainingDemand": "Training Demand",
     "comparisons": "Comparisons"
+  },
+  "AdminAssessorOrgChartPage": {
+    "title": "Organization Chart",
+    "subtitle": "Organization structure based on superior assessor relationships",
+    "fetchError": "Failed to fetch organization chart data",
+    "loading": "Loading organization chart...",
+    "empty": "No superior assessor relationships found.",
+    "noPosition": "No position"
   },
   "StaffSidebar": {
     "dashboard": "Dashboard",

@@ -60,6 +60,8 @@
     "staffDevelopment": "Pembangunan Staf",
     "staffManagement": "Pengurusan Staf",
     "assessors": "Penilai",
+    "assessorsManagement": "Pengurusan Penilai",
+    "organizationChart": "Carta Organisasi",
     "competency": "Kompetensi",
     "levels": "Tahap",
     "clusters": "Kluster",
@@ -76,6 +78,14 @@
     "competencyGapByGrade": "Jurang Kompetensi mengikut Gred",
     "trainingDemand": "Permintaan Latihan",
     "comparisons": "Perbandingan"
+  },
+  "AdminAssessorOrgChartPage": {
+    "title": "Carta Organisasi",
+    "subtitle": "Struktur organisasi berdasarkan penilai penyelia (superior)",
+    "fetchError": "Gagal mendapatkan data carta organisasi",
+    "loading": "Memuatkan carta organisasi...",
+    "empty": "Tiada hubungan superior penilai ditemui.",
+    "noPosition": "Tiada jawatan"
   },
   "StaffSidebar": {
     "dashboard": "Papan Pemuka",

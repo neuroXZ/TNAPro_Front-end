@@ -1,31 +1,33 @@
-import { useTranslations } from 'next-intl';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import React from "react";
 
 const TermsAndConditionsPage = () => {
-  const t = useTranslations('TermsAndConditionsPage');
   return (
     <div className="container mx-auto px-4 py-8">
       <header className="text-center mb-12">
-        <h1 className="text-4xl font-bold mb-2">{t('title')}</h1>
-        <h2 className="text-2xl font-semibold">{t('privacyPolicy')}</h2>
-        <p className="text-lg text-gray-600 mt-4">{t('staffManagementSystem')}</p>
+        <h1 className="text-4xl font-bold mb-2">Terms & Conditions</h1>
+        <h2 className="text-2xl font-semibold">and Privacy Policy</h2>
+        <p className="text-lg text-gray-600 mt-4">
+          Staff Management & Assessment System
+        </p>
         <hr className="my-6" />
         <div className="flex justify-between text-sm text-gray-500">
-          <span>{t('effectiveDate')}</span>
-          <span>{t('version')}</span>
+          <span>Effective Date: 17 March 2026</span>
+          <span>Version 1.0</span>
         </div>
       </header>
 
       <main>
         <Tabs defaultValue="terms">
           <TabsList className="bg-primary text-white rounded-md">
-            <TabsTrigger value="terms" className="data-[state=inactive]:text-white data-[state=active]:text-black">{t('termsTab')}</TabsTrigger>
-            <TabsTrigger value="privacy" className="data-[state=inactive]:text-white data-[state=active]:text-black">{t('privacyTab')}</TabsTrigger>
+            <TabsTrigger value="terms" className="data-[state=inactive]:text-white data-[state=active]:text-black">Terms and Conditions</TabsTrigger>
+            <TabsTrigger value="privacy" className="data-[state=inactive]:text-white data-[state=active]:text-black">Privacy Policy</TabsTrigger>
           </TabsList>
           <TabsContent value="terms">
             <section className="p-10">
-              <h2 className="text-3xl font-bold mb-12 text-primary">{t('partA_title')}</h2>
+              <h2 className="text-3xl font-bold mb-4">
+                PART A — TERMS AND CONDITIONS OF USE
+              </h2>
 
               <div className="mb-6">
                 <h3 className="text-2xl font-semibold mb-2">1. Definitions</h3>
@@ -290,7 +292,7 @@ const TermsAndConditionsPage = () => {
           </TabsContent>
           <TabsContent value="privacy">
             <section className="p-10">
-              <h2 className="text-3xl font-bold mb-12 text-primary">{t('partB_title')}</h2>
+              <h2 className="text-3xl font-bold mb-4">PART B — PRIVACY POLICY</h2>
               <p className="mb-4">
                 This Privacy Policy explains how personal data is collected, used, stored, and protected within the System, in accordance with the Personal Data Protection Act 2010 (PDPA) of Malaysia.
               </p>

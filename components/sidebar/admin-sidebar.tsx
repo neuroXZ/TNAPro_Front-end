@@ -57,6 +57,7 @@ export function AdminSidebar({ ...props }: React.ComponentProps<typeof Sidebar>)
       items: [
         { title: t('staffManagement'), url: "/admin/staff" },
         { title: t('assessors'), url: "/admin/assessors" },
+        { title: t('organizationChart'), url: "/admin/assessors/organization-chart" },
       ],
     },
     {
