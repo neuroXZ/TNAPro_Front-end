@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import axios from "axios"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
@@ -196,16 +197,27 @@ export default function AdminIdpDownloadPage() {
       toast.success(`IDP generated successfully for ${idpData.staffName}!`)
     } catch (error: unknown) {
       console.error("Failed to generate IDP - Full error:", error)
-      console.error("Error response:", error.response)
+      if (axios.isAxiosError(error)) {
+        console.error("Error response:", error.response)
+      }
       
       // Better error message extraction
       let errorMessage = "Failed to generate IDP"
       
-      if (error.response?.data) {
-        const data = error.response.data
-        errorMessage = data.error || data.message || JSON.stringify(data)
-      } else if (error.message) {
-        errorMessage = error.message
+      if (axios.isAxiosError(error)) {
+        const data = error.response?.data
+        if (data) {
+          if (typeof data === "string") {
+            errorMessage = data
+          } else {
+            const anyData = data as { error?: string; message?: string }
+            errorMessage = anyData.error || anyData.message || JSON.stringify(data)
+          }
+        } else if (error.message) {
+          errorMessage = error.message
+        }
+      } else if (error instanceof Error) {
+        errorMessage = error.message || errorMessage
       }
       
       // User-friendly error messages

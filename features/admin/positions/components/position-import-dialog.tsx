@@ -78,7 +78,8 @@ export function PositionImportDialog({
       }
     } catch (error: unknown) {
       console.error('Import error:', error)
-      toast.error(error.message || 'Failed to import positions')
+      const message = error instanceof Error ? error.message : ''
+      toast.error(message || 'Failed to import positions')
     } finally {
       setIsImporting(false)
     }

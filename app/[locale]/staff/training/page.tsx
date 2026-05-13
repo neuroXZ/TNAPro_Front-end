@@ -1,6 +1,7 @@
-﻿"use client"
+"use client"
 
 import React, { useState, useEffect } from "react"
+import axios from "axios"
 import { rtnAPI, assessmentAPI } from "@/lib/api"
 import { useAuth } from "@/providers/auth-provider"
 import { useIsMobile } from "@/hooks/use-mobile"
@@ -131,7 +132,10 @@ export default function StaffTrainingTestingPage() {
       setRecommendedTrainings(rtnReport.results || [])
       
     } catch (error: unknown) {
-      if (error.response?.status === 404) {
+      const isAxios = axios.isAxiosError(error)
+      const status = isAxios ? error.response?.status : undefined
+
+      if (status === 404) {
         toast.info("No training recommendations found. Complete your assessment to get personalized recommendations.")
         setRecommendedTrainings([])
       } else {

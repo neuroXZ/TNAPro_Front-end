@@ -2,6 +2,7 @@
 
 import { useState } from "react"
 import { useRouter } from "next/navigation"
+import axios from "axios"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
@@ -69,10 +70,15 @@ export function SignupForm({
         router.push('/login');
       }, 2000);
     } catch (error: unknown) {
-      if (error.response?.status === 409 || error.response?.data?.message?.includes('unique')) {
+      const isAxios = axios.isAxiosError(error)
+      const status = isAxios ? error.response?.status : undefined
+      const data = isAxios ? (error.response?.data as { message?: string } | undefined) : undefined
+      const message = isAxios ? (data?.message || error.message) : error instanceof Error ? error.message : ""
+
+      if (status === 409 || message.includes('unique')) {
         toast.error("Username already exists. Please choose another one.");
       } else {
-        toast.error(error.response?.data?.message || "Registration failed. Please try again.");
+        toast.error(message || "Registration failed. Please try again.");
       }
     } finally {
       setIsLoading(false);

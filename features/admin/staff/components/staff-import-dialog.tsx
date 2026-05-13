@@ -78,7 +78,8 @@ export function StaffImportDialog({
       }
     } catch (error: unknown) {
       console.error('Import error:', error)
-      toast.error(error.message || 'Failed to import staff')
+      const message = error instanceof Error ? error.message : ''
+      toast.error(message || 'Failed to import staff')
     } finally {
       setIsImporting(false)
     }

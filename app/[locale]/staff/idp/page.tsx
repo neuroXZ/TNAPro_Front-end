@@ -1,6 +1,7 @@
-﻿"use client"
+"use client"
 
 import { useEffect, useState } from "react"
+import axios from "axios"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import {
   MobileCard,
@@ -216,7 +217,10 @@ export default function MyIdpPage() {
       toast.success("IDP opened in new tab!")
     } catch (error: unknown) {
       console.error("Export failed:", error)
-      toast.error(error.response?.data?.error || "Failed to export IDP")
+      const isAxios = axios.isAxiosError(error)
+      const data = isAxios ? (error.response?.data as { error?: string; message?: string } | undefined) : undefined
+      const message = isAxios ? error.message : error instanceof Error ? error.message : ""
+      toast.error(data?.error || data?.message || message || "Failed to export IDP")
     } finally {
       setIsExporting(false)
     }
@@ -279,7 +283,10 @@ export default function MyIdpPage() {
       toast.success("IDP exported successfully!")
     } catch (error: unknown) {
       console.error("Export failed:", error)
-      toast.error(error.response?.data?.error || "Failed to export IDP")
+      const isAxios = axios.isAxiosError(error)
+      const data = isAxios ? (error.response?.data as { error?: string; message?: string } | undefined) : undefined
+      const message = isAxios ? error.message : error instanceof Error ? error.message : ""
+      toast.error(data?.error || data?.message || message || "Failed to export IDP")
     } finally {
       setIsExporting(false)
     }

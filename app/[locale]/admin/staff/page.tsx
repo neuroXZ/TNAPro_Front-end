@@ -1,7 +1,8 @@
-﻿"use client"
+"use client"
 
 import { useState, useEffect, useRef, useMemo } from "react"
 import { useRouter } from "next/navigation"
+import axios from "axios"
 import {
   useReactTable,
   getCoreRowModel,
@@ -186,22 +187,18 @@ export default function StaffManagementPage() {
       fetchStaff()
     } catch (error: unknown) {
       console.error('Staff form submission error:', error)
-      
-      // Handle subscription limit error specifically
-      if (error.response?.data?.message && error.response.data.message.includes('Subscription limit reached')) {
-        toast.error(error.response.data.message)
-      } else if (error.response?.data?.error && error.response.data.error.includes('Subscription limit reached')) {
-        toast.error(error.response.data.error)
-      } else if (error.message && error.message.includes('Subscription limit reached')) {
-        toast.error(error.message)
-      } else {
-        // Handle other types of errors
-        const errorMessage = error.response?.data?.message || 
-                           error.response?.data?.error || 
-                           error.message || 
-                           t('saveError')
-        toast.error(errorMessage)
+
+      const getErrorMessage = (err: unknown) => {
+        if (axios.isAxiosError(err)) {
+          const data = err.response?.data as { message?: string; error?: string } | undefined
+          return data?.message || data?.error || err.message || ""
+        }
+        if (err instanceof Error) return err.message || ""
+        return ""
       }
+
+      const errorMessage = getErrorMessage(error) || t('saveError')
+      toast.error(errorMessage)
     }
   }
 

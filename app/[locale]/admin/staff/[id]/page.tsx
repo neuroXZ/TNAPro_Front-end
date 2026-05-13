@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react"
 import { useParams, useRouter } from "next/navigation"
+import axios from "axios"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -300,20 +301,21 @@ export default function StaffProfilePage() {
             fetchStaffData()
         } catch (error: unknown) {
             console.error("Failed to update staff:", error)
-            
-            // Handle subscription limit error specifically
-            if (error.response?.data?.message && error.response.data.message.includes('Subscription limit reached')) {
-                toast.error(error.response.data.message)
-            } else if (error.response?.data?.error && error.response.data.error.includes('Subscription limit reached')) {
-                toast.error(error.response.data.error)
-            } else if (error.message && error.message.includes('Subscription limit reached')) {
-                toast.error(error.message)
+
+            const getErrorMessage = (err: unknown) => {
+                if (axios.isAxiosError(err)) {
+                    const data = err.response?.data as { message?: string; error?: string } | undefined
+                    return data?.message || data?.error || err.message || ""
+                }
+                if (err instanceof Error) return err.message || ""
+                return ""
+            }
+
+            const errorMessage = getErrorMessage(error) || 'Failed to update staff profile. Please try again.'
+
+            if (errorMessage.includes('Subscription limit reached')) {
+                toast.error(errorMessage)
             } else {
-                // Handle other types of errors
-                const errorMessage = error.response?.data?.message || 
-                                   error.response?.data?.error || 
-                                   error.message || 
-                                   'Failed to update staff profile. Please try again.'
                 toast.error(errorMessage)
             }
         }

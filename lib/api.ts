@@ -131,7 +131,7 @@ export const authAPI = {
     
     // Retry mechanism for Server cold start
     const maxRetries = 2;
-    let lastError;
+    let lastError: unknown = undefined;
     
     for (let attempt = 1; attempt <= maxRetries; attempt++) {
       try {
@@ -146,34 +146,45 @@ export const authAPI = {
       } catch (error: unknown) {
         lastError = error;
         console.log(`❌ ATTEMPT ${attempt} FAILED!`);
-        console.log('❌ Error type:', error.name);
-        console.log('❌ Error message:', error.message);
-        console.log('❌ Error code:', error.code);
-        console.log('❌ Response status:', error.response?.status);
-        console.log('❌ Response data:', error.response);
+        const isAxios = axios.isAxiosError(error);
+        const errorName = error instanceof Error ? error.name : 'UnknownError';
+        const errorMessage = error instanceof Error ? error.message : String(error);
+        const errorCode = isAxios ? error.code : undefined;
+        const status = isAxios ? error.response?.status : undefined;
+        const responseData = isAxios ? error.response?.data : undefined;
+
+        console.log('❌ Error type:', errorName);
+        console.log('❌ Error message:', errorMessage);
+        console.log('❌ Error code:', errorCode);
+        console.log('❌ Response status:', status);
+        console.log('❌ Response data:', responseData);
         
         // If it's a timeout and we have retries left, continue
-        if (error.message?.includes('timeout') && attempt < maxRetries) {
+        if (errorMessage.includes('timeout') && attempt < maxRetries) {
           console.log(`⏳ Timeout on attempt ${attempt}, retrying in 3 seconds...`);
           await new Promise(resolve => setTimeout(resolve, 3000));
           continue;
         }
         
         // If it's not a timeout error, don't retry
-        if (!error.message?.includes('timeout')) {
+        if (!errorMessage.includes('timeout')) {
           break;
         }
       }
     }
     
     // Handle final error after all retries
-    if (lastError.code === 'ECONNREFUSED' || lastError.code === 'NETWORK_ERROR') {
+    if (!lastError) {
+      throw new Error('Forgot password request failed.');
+    }
+
+    if (axios.isAxiosError(lastError) && (lastError.code === 'ECONNREFUSED' || lastError.code === 'NETWORK_ERROR')) {
       throw new Error('Cannot connect to server. Please check your network connection.');
-    } else if (lastError.message?.includes('timeout')) {
+    } else if ((lastError instanceof Error ? lastError.message : '').includes('timeout')) {
       throw new Error('Server is slow to respond. This may be due to cold start. Please wait a moment and try again.');
-    } else if (lastError.response?.status === 404) {
+    } else if (axios.isAxiosError(lastError) && lastError.response?.status === 404) {
       throw new Error('Forgot password endpoint not found on the server.');
-    } else if (lastError.response?.status >= 500) {
+    } else if (axios.isAxiosError(lastError) && (lastError.response?.status ?? 0) >= 500) {
       throw new Error('Server error. Please try again later.');
     }
     
@@ -192,15 +203,21 @@ export const authAPI = {
       return response.data;
     } catch (error: unknown) {
       console.log('❌ RESET PASSWORD FAILED!');
-      console.log('❌ Error:', error.response?.data || error.message);
+      const isAxios = axios.isAxiosError(error);
+      const status = isAxios ? error.response?.status : undefined;
+      const data = isAxios ? error.response?.data : undefined;
+      const message = error instanceof Error ? error.message : String(error);
+
+      console.log('❌ Error:', data || message);
       
-      if (error.response?.status === 400) {
-        throw new Error(error.response.data?.error || 'Invalid request. Please check your input.');
-      } else if (error.response?.status === 404) {
+      if (status === 400) {
+        const anyData = data as { error?: string } | undefined;
+        throw new Error(anyData?.error || 'Invalid request. Please check your input.');
+      } else if (status === 404) {
         throw new Error('Reset password endpoint not found.');
-      } else if (error.response?.status >= 500) {
+      } else if ((status ?? 0) >= 500) {
         throw new Error('Server error. Please try again later.');
-      } else if (error.message?.includes('timeout')) {
+      } else if (message.includes('timeout')) {
         throw new Error('server timeout. Please wait a moment and try again.');
       }
       
@@ -855,7 +872,7 @@ export const rtnAPI = {
       return response.data;
     } catch (error: unknown) {
       // If 404, endpoint not available in deployment
-      if (error.response?.status === 404) {
+      if (axios.isAxiosError(error) && error.response?.status === 404) {
         console.warn("RTN endpoint not available, returning mock data");
         // Return empty response to trigger "no recommendations" flow
         return {

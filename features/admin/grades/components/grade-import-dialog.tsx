@@ -78,7 +78,8 @@ export function GradeImportDialog({
       }
     } catch (error: unknown) {
       console.error('Import error:', error)
-      toast.error(error.message || 'Failed to import grades')
+      const message = error instanceof Error ? error.message : ''
+      toast.error(message || 'Failed to import grades')
     } finally {
       setIsImporting(false)
     }

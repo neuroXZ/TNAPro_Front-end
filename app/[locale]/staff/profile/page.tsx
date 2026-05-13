@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import axios from "axios"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
@@ -267,12 +268,17 @@ export default function MyProfile() {
       toast.success('Photo uploaded and saved successfully!')
     } catch (error: unknown) {
       console.error('Photo upload error:', error)
-      if (error.response?.status === 400) {
+      const isAxios = axios.isAxiosError(error)
+      const status = isAxios ? error.response?.status : undefined
+      const data = isAxios ? (error.response?.data as { error?: string; message?: string } | undefined) : undefined
+      const message = isAxios ? error.message : error instanceof Error ? error.message : ""
+
+      if (status === 400) {
         toast.error('Invalid image file or file too large (max 5MB)')
-      } else if (error.response?.status === 401) {
+      } else if (status === 401) {
         toast.error('Please login again to upload photo')
       } else {
-        toast.error(error.response?.data?.error || 'Failed to upload photo. Please try again.')
+        toast.error(data?.error || data?.message || message || 'Failed to upload photo. Please try again.')
       }
     } finally {
       setIsUploadingPhoto(false)

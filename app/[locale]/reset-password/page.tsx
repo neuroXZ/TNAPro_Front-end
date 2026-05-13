@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Field, FieldLabel } from "@/components/ui/field"
+import axios from "axios"
 import { authAPI } from "@/lib/api"
 import { toast } from "sonner"
 import { IconEye, IconEyeOff, IconArrowLeft } from "@tabler/icons-react"
@@ -85,16 +86,21 @@ function ResetPasswordForm() {
     } catch (error: unknown) {
       console.error('Reset password error:', error)
       
-      if (error.response?.status === 400) {
-        toast.error(error.response.data?.error || "Invalid request. The reset link may be invalid or expired.")
-      } else if (error.response?.status === 404) {
+      const isAxios = axios.isAxiosError(error)
+      const status = isAxios ? error.response?.status : undefined
+      const data = isAxios ? (error.response?.data as { error?: string; message?: string } | undefined) : undefined
+      const message = isAxios ? error.message : error instanceof Error ? error.message : ""
+
+      if (status === 400) {
+        toast.error(data?.error || data?.message || "Invalid request. The reset link may be invalid or expired.")
+      } else if (status === 404) {
         toast.error("Reset password service not available. Please try again later.")
-      } else if (error.message?.includes('timeout')) {
+      } else if (message.includes('timeout')) {
         toast.error("Request timeout. The server is taking too long. Please try again.")
-      } else if (error.message?.includes('network') || error.message?.includes('connect')) {
+      } else if (message.includes('network') || message.includes('connect')) {
         toast.error("Network error. Please check your connection and try again.")
       } else {
-        toast.error(error.message || "Failed to reset password. Please try again or request a new reset link.")
+        toast.error(message || "Failed to reset password. Please try again or request a new reset link.")
       }
     } finally {
       setIsLoading(false)

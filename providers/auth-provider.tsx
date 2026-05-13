@@ -2,6 +2,7 @@
 
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import axios from 'axios';
 import { authAPI } from '@/lib/api';
 
 interface User {
@@ -94,7 +95,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
     } catch (error: unknown) {
       console.error('Login error:', error);
-      throw new Error(error.response?.data?.error || error.response?.data?.message || 'Login failed');
+      if (axios.isAxiosError(error)) {
+        const data = error.response?.data as { error?: string; message?: string } | undefined;
+        throw new Error(data?.error || data?.message || 'Login failed');
+      }
+      if (error instanceof Error) {
+        throw new Error(error.message || 'Login failed');
+      }
+      throw new Error('Login failed');
     }
   };
 

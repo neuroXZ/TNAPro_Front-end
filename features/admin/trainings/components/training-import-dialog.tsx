@@ -74,7 +74,8 @@ export function TrainingImportDialog({
       }
     } catch (error: unknown) {
       console.error('Import error:', error)
-      toast.error(error.message || 'Failed to import trainings')
+      const message = error instanceof Error ? error.message : ''
+      toast.error(message || 'Failed to import trainings')
     } finally {
       setIsImporting(false)
     }
