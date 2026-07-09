@@ -449,7 +449,7 @@ export default function AdminAnalytics() {
   if (loading) {
     return (
       <div className="flex-1 space-y-6 p-4 pt-6">
-        <div className="overflow-hidden rounded-3xl border border-sky-100/80 bg-sky-50 p-6 shadow-sm">
+        <div className="overflow-hidden rounded-3xl border border-sky-100/80 bg-sky-50 dark:border-sky-900/40 dark:bg-sky-950/30 p-6 shadow-sm">
           <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
             <div className="space-y-3">
               <Skeleton className="h-6 w-36 rounded-full" />
@@ -458,7 +458,7 @@ export default function AdminAnalytics() {
             </div>
             <div className="grid w-full max-w-xl gap-3 sm:grid-cols-3">
               {Array.from({ length: 3 }).map((_, index) => (
-                <div key={index} className="rounded-2xl border bg-white/70 p-4 backdrop-blur">
+                <div key={index} className="rounded-2xl border bg-white/70 dark:bg-slate-900/40 p-4 backdrop-blur">
                   <Skeleton className="mb-3 h-3 w-20" />
                   <Skeleton className="mb-2 h-8 w-16" />
                   <Skeleton className="h-3 w-24" />
@@ -470,7 +470,7 @@ export default function AdminAnalytics() {
 
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
           {Array.from({ length: 4 }).map((_, i) => (
-            <Card key={i} className="rounded-2xl border-white/60 shadow-sm">
+            <Card key={i} className="rounded-2xl border-white/60 dark:border-white/10 shadow-sm">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <Skeleton className="h-4 w-[100px]" />
                 <Skeleton className="h-4 w-4" />
@@ -484,7 +484,7 @@ export default function AdminAnalytics() {
         </div>
 
         <div className="grid gap-6 xl:grid-cols-[1.35fr_0.95fr]">
-          <Card className="rounded-3xl border-white/60 shadow-sm">
+          <Card className="rounded-3xl border-white/60 dark:border-white/10 shadow-sm">
             <CardHeader>
               <Skeleton className="mb-2 h-6 w-48" />
               <Skeleton className="h-4 w-64" />
@@ -496,7 +496,7 @@ export default function AdminAnalytics() {
 
           <div className="grid gap-6">
             {Array.from({ length: 2 }).map((_, i) => (
-              <Card key={i} className="rounded-3xl border-white/60 shadow-sm">
+              <Card key={i} className="rounded-3xl border-white/60 dark:border-white/10 shadow-sm">
                 <CardHeader>
                   <Skeleton className="mb-2 h-6 w-40" />
                   <Skeleton className="h-4 w-52" />
@@ -514,25 +514,25 @@ export default function AdminAnalytics() {
 
   return (
     <div className="flex-1 space-y-6 ">
-      <section className="overflow-hidden rounded-3xl border border-sky-100/80 bg-sky-50 shadow-sm">
+      <section className="overflow-hidden rounded-3xl border border-sky-100/80 bg-sky-50 dark:border-sky-900/40 dark:bg-sky-950/30 shadow-sm">
         <div className="p-6 lg:p-8">
           <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
             <div className="max-w-2xl space-y-4">
-              <Badge variant="secondary" className="rounded-full border border-sky-200/70 bg-white/80 px-3 py-1 text-sky-700 shadow-sm">
+              <Badge variant="secondary" className="rounded-full border border-sky-200/70 dark:border-sky-800/40 bg-white/80 dark:bg-white/10 px-3 py-1 text-sky-700 dark:text-sky-300 shadow-sm">
                 {t('overviewBadge')}
               </Badge>
               <div className="space-y-2">
-                <h2 className="text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">
+                <h2 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-slate-50 sm:text-4xl">
                   {t('title')}
                 </h2>
-                <p className="max-w-xl text-sm leading-6 text-slate-600 sm:text-base">
+                <p className="max-w-xl text-sm leading-6 text-slate-600 dark:text-slate-300 sm:text-base">
                   {t('description')}
                 </p>
               </div>
             </div>
 
-            <div className="w-full max-w-xl rounded-3xl border border-sky-100 bg-white/85 p-3 shadow-sm backdrop-blur lg:mt-3">
-              <div className="mb-2 flex items-center gap-2 text-sm font-medium text-slate-700">
+            <div className="w-full max-w-xl rounded-3xl border border-sky-100 dark:border-sky-900/40 bg-white/85 dark:bg-slate-900/60 p-3 shadow-sm backdrop-blur lg:mt-3">
+              <div className="mb-2 flex items-center gap-2 text-sm font-medium text-slate-700 dark:text-slate-200">
                 <IconCalendar className="h-4 w-4 text-sky-600" />
                 {t('assessmentSelectionTitle')}
               </div>
@@ -541,7 +541,7 @@ export default function AdminAnalytics() {
                 onValueChange={setSelectedAssessmentId}
                 disabled={reportLoading || assessments.length === 0}
               >
-                <SelectTrigger className="h-11 rounded-2xl border-sky-100 bg-white text-left">
+                <SelectTrigger className="h-11 rounded-2xl border-sky-100 dark:border-sky-900/40 bg-white dark:bg-slate-900/60 text-left">
                   <SelectValue placeholder={t('selectAssessmentPlaceholder')} />
                 </SelectTrigger>
                 <SelectContent>
@@ -552,7 +552,7 @@ export default function AdminAnalytics() {
                   ))}
                 </SelectContent>
               </Select>
-              <p className="mt-2 text-xs text-slate-500">
+              <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">
                 {selectedAssessmentName
                   ? `${t('latestAssessment')}: ${selectedAssessmentName}`
                   : t('assessmentSelectionDesc')}
@@ -574,18 +574,18 @@ export default function AdminAnalytics() {
       {dashboardData && (
         <>
           <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-            <Card className="rounded-3xl border-white/60 bg-white/85 shadow-sm backdrop-blur">
+            <Card className="rounded-3xl border-white/60 dark:border-white/10 bg-white/85 dark:bg-slate-900/60 shadow-sm backdrop-blur">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
                 <div>
-                  <CardTitle className="text-sm font-medium text-slate-700">{t('totalUnits', { count: dashboardData.summary.totalUnits })}</CardTitle>
+                  <CardTitle className="text-sm font-medium text-slate-700 dark:text-slate-200">{t('totalUnits', { count: dashboardData.summary.totalUnits })}</CardTitle>
                   <CardDescription>{t('staffDistributionDesc')}</CardDescription>
                 </div>
-                <div className="rounded-2xl bg-indigo-100 p-2 text-indigo-700">
+                <div className="rounded-2xl bg-indigo-100 dark:bg-indigo-500/20 p-2 text-indigo-700 dark:text-indigo-300">
                   <IconBuilding className="h-5 w-5" />
                 </div>
               </CardHeader>
               <CardContent>
-                <div className="text-3xl font-semibold text-slate-900">
+                <div className="text-3xl font-semibold text-slate-900 dark:text-slate-50">
                   {dashboardData.summary.totalUnits}
                 </div>
                 <p className="mt-2 text-sm text-muted-foreground">
@@ -594,44 +594,44 @@ export default function AdminAnalytics() {
               </CardContent>
             </Card>
 
-            <Card className="rounded-3xl border-white/60 bg-white/85 shadow-sm backdrop-blur">
+            <Card className="rounded-3xl border-white/60 dark:border-white/10 bg-white/85 dark:bg-slate-900/60 shadow-sm backdrop-blur">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
                 <div>
-                  <CardTitle className="text-sm font-medium text-slate-700">{t('genderDistTitle')}</CardTitle>
+                  <CardTitle className="text-sm font-medium text-slate-700 dark:text-slate-200">{t('genderDistTitle')}</CardTitle>
                   <CardDescription>{t('genderDistDesc')}</CardDescription>
                 </div>
-                <div className="rounded-2xl bg-emerald-100 p-2 text-emerald-700">
+                <div className="rounded-2xl bg-emerald-100 dark:bg-emerald-500/20 p-2 text-emerald-700 dark:text-emerald-300">
                   <IconChartPie className="h-5 w-5" />
                 </div>
               </CardHeader>
               <CardContent className="space-y-3">
                 <div className="flex items-end justify-between gap-4">
-                  <div className="text-3xl font-semibold text-slate-900">
+                  <div className="text-3xl font-semibold text-slate-900 dark:text-slate-50">
                     {totalGenderCount}
                   </div>
                   <Badge variant="secondary" className="rounded-full px-3 py-1">
                     {genderDistributionData.length}
                   </Badge>
                 </div>
-                <div className="rounded-2xl border bg-slate-50/70 p-3 text-sm text-muted-foreground">
+                <div className="rounded-2xl border bg-slate-50/70 dark:bg-slate-800/40 p-3 text-sm text-muted-foreground">
                   {t('genderDistFooter')}
                 </div>
 
               </CardContent>
             </Card>
 
-            <Card className="rounded-3xl border-white/60 bg-white/85 shadow-sm backdrop-blur">
+            <Card className="rounded-3xl border-white/60 dark:border-white/10 bg-white/85 dark:bg-slate-900/60 shadow-sm backdrop-blur">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
                 <div>
-                  <CardTitle className="text-sm font-medium text-slate-700">{t('trainingPrograms')}</CardTitle>
+                  <CardTitle className="text-sm font-medium text-slate-700 dark:text-slate-200">{t('trainingPrograms')}</CardTitle>
                   <CardDescription>{t('trainingProgramsDesc')}</CardDescription>
                 </div>
-                <div className="rounded-2xl bg-orange-100 p-2 text-orange-700">
+                <div className="rounded-2xl bg-orange-100 dark:bg-orange-500/20 p-2 text-orange-700 dark:text-orange-300">
                   <IconBook className="h-5 w-5" />
                 </div>
               </CardHeader>
               <CardContent>
-                <div className="text-3xl font-semibold text-slate-900">
+                <div className="text-3xl font-semibold text-slate-900 dark:text-slate-50">
                   {totalTrainingDemandCount}
                 </div>
                 <p className="mt-2 text-sm text-muted-foreground">
@@ -642,18 +642,18 @@ export default function AdminAnalytics() {
               </CardContent>
             </Card>
 
-            <Card className="rounded-3xl border-white/60 bg-white/85 shadow-sm backdrop-blur">
+            <Card className="rounded-3xl border-white/60 dark:border-white/10 bg-white/85 dark:bg-slate-900/60 shadow-sm backdrop-blur">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
                 <div>
-                  <CardTitle className="text-sm font-medium text-slate-700">{t('gradeDistTitle')}</CardTitle>
+                  <CardTitle className="text-sm font-medium text-slate-700 dark:text-slate-200">{t('gradeDistTitle')}</CardTitle>
                   <CardDescription>{t('gradeDistDesc')}</CardDescription>
                 </div>
-                <div className="rounded-2xl bg-violet-100 p-2 text-violet-700">
+                <div className="rounded-2xl bg-violet-100 dark:bg-violet-500/20 p-2 text-violet-700 dark:text-violet-300">
                   <IconTrendingUp className="h-5 w-5" />
                 </div>
               </CardHeader>
               <CardContent>
-                <div className="text-3xl font-semibold text-slate-900">
+                <div className="text-3xl font-semibold text-slate-900 dark:text-slate-50">
                   {dashboardData.gradeDistribution.length}
                 </div>
                 <p className="mt-2 text-sm text-muted-foreground">
@@ -668,13 +668,13 @@ export default function AdminAnalytics() {
 
 
               {/* Grade Distribution Chart */}
-              <Card className="rounded-3xl border-white/60 bg-white/90 shadow-sm backdrop-blur">
+              <Card className="rounded-3xl border-white/60 dark:border-white/10 bg-white/90 dark:bg-slate-900/60 shadow-sm backdrop-blur">
                 <CardHeader className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                   <div>
-                    <div className="mb-3 inline-flex rounded-2xl bg-violet-100 p-2 text-violet-700">
+                    <div className="mb-3 inline-flex rounded-2xl bg-violet-100 dark:bg-violet-500/20 p-2 text-violet-700 dark:text-violet-300">
                       <IconTrendingUp className="h-5 w-5" />
                     </div>
-                    <CardTitle className="flex items-center gap-2 text-xl text-slate-900">
+                    <CardTitle className="flex items-center gap-2 text-xl text-slate-900 dark:text-slate-50">
                       {t('gradeDistTitle')}
                     </CardTitle>
                     <CardDescription className="mt-2 max-w-xl text-sm leading-6">
@@ -682,7 +682,7 @@ export default function AdminAnalytics() {
                     </CardDescription>
                   </div>
                   <div className="flex flex-wrap items-center gap-2 self-start">
-                    <Badge variant="secondary" className="rounded-full px-3 py-1 text-slate-700">
+                    <Badge variant="secondary" className="rounded-full px-3 py-1 text-slate-700 dark:text-slate-200">
                     {t('totalGrades', { count: dashboardData.gradeDistribution.length })}
                   </Badge>
                     <Link href="/admin/analytics/grade-distribution">
@@ -706,14 +706,14 @@ export default function AdminAnalytics() {
                       return (
                         <div key={item.label} className="space-y-2">
                           <div className="flex items-center justify-between gap-3">
-                            <p className="text-sm font-medium text-slate-700">
+                            <p className="text-sm font-medium text-slate-700 dark:text-slate-200">
                               {item.label}
                             </p>
                             <Badge variant="secondary" className="rounded-full px-2.5 py-0.5">
                               {item.value}
                             </Badge>
                           </div>
-                          <div className="h-3 overflow-hidden rounded-full bg-slate-100">
+                          <div className="h-3 overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800">
                             <div
                               className="h-full rounded-full bg-indigo-600 transition-all"
                               style={{ width: `${barWidth}%` }}
@@ -725,7 +725,7 @@ export default function AdminAnalytics() {
                   </div>
                 </CardContent>
                 <CardFooter className="flex-col items-start gap-3 text-sm">
-                  <div className="flex items-center gap-2 leading-none font-medium text-slate-800">
+                  <div className="flex items-center gap-2 leading-none font-medium text-slate-800 dark:text-slate-100">
                     <TrendingUp className="h-4 w-4 text-violet-600" />
                     {topGrade ? `${t('topGrade')}: ${topGrade.label}` : t('gradeDistDesc')}
                   </div>
@@ -739,13 +739,13 @@ export default function AdminAnalytics() {
             </div>
             <div className="grid gap-6">
               {/* Gender Distribution Chart */}
-              <Card className="flex flex-col rounded-3xl border-white/60 bg-white/90 shadow-sm backdrop-blur">
+              <Card className="flex flex-col rounded-3xl border-white/60 dark:border-white/10 bg-white/90 dark:bg-slate-900/60 shadow-sm backdrop-blur">
                 <CardHeader className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                   <div>
-                    <div className="mb-3 inline-flex rounded-2xl bg-emerald-100 p-2 text-emerald-700">
+                    <div className="mb-3 inline-flex rounded-2xl bg-emerald-100 dark:bg-emerald-500/20 p-2 text-emerald-700 dark:text-emerald-300">
                       <IconChartPie className="h-5 w-5" />
                     </div>
-                    <CardTitle className="flex items-center gap-2 text-xl text-slate-900">
+                    <CardTitle className="flex items-center gap-2 text-xl text-slate-900 dark:text-slate-50">
                       {t('genderDistTitle')}
                     </CardTitle>
                     <CardDescription className="mt-2 text-sm leading-6">{t('genderDistDesc')}</CardDescription>
@@ -798,9 +798,9 @@ export default function AdminAnalytics() {
                     {genderDistributionData.map((item, index) => (
                       <div
                         key={item.label}
-                        className="flex items-center justify-between rounded-2xl border bg-slate-50/70 px-3 py-2"
+                        className="flex items-center justify-between rounded-2xl border bg-slate-50/70 dark:bg-slate-800/40 px-3 py-2"
                       >
-                        <div className="flex items-center gap-2 text-sm font-medium text-slate-700">
+                        <div className="flex items-center gap-2 text-sm font-medium text-slate-700 dark:text-slate-200">
                           <span
                             className="h-2.5 w-2.5 rounded-full"
                             style={{ backgroundColor: `var(--chart-${(index % 3) + 1})` }}
@@ -815,7 +815,7 @@ export default function AdminAnalytics() {
                   </div>
                 </CardContent>
                 <CardFooter className="flex-col items-start gap-3 text-sm">
-                  <div className="flex items-center gap-2 leading-none font-medium text-slate-800">
+                  <div className="flex items-center gap-2 leading-none font-medium text-slate-800 dark:text-slate-100">
                     <TrendingUp className="h-4 w-4 text-emerald-600" />
                     {t('totalStaff', { count: totalGenderCount })}
                   </div>
@@ -827,13 +827,13 @@ export default function AdminAnalytics() {
             </div>
           </div>
           {/* Unit Distribution Chart */}
-          <Card className="rounded-3xl border-white/60 bg-white/90 shadow-sm backdrop-blur">
+          <Card className="rounded-3xl border-white/60 dark:border-white/10 bg-white/90 dark:bg-slate-900/60 shadow-sm backdrop-blur">
             <CardHeader className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
               <div>
-                <div className="mb-3 inline-flex rounded-2xl bg-sky-100 p-2 text-sky-700">
+                <div className="mb-3 inline-flex rounded-2xl bg-sky-100 dark:bg-sky-500/20 p-2 text-sky-700 dark:text-sky-300">
                   <IconChartBar className="h-5 w-5" />
                 </div>
-                <CardTitle className="flex items-center gap-2 text-xl text-slate-900">
+                <CardTitle className="flex items-center gap-2 text-xl text-slate-900 dark:text-slate-50">
                   {t('staffPerUnitTitle')}
                 </CardTitle>
                 <CardDescription className="mt-2 max-w-xl text-sm leading-6">
@@ -841,7 +841,7 @@ export default function AdminAnalytics() {
                 </CardDescription>
               </div>
               <div className="flex flex-wrap items-center gap-2 self-start">
-                <Badge variant="secondary" className="rounded-full px-3 py-1 text-slate-700">
+                <Badge variant="secondary" className="rounded-full px-3 py-1 text-slate-700 dark:text-slate-200">
                   {t('totalUnits', { count: dashboardData.unitDistribution.length })}
                 </Badge>
                 <Link href="/admin/analytics/staff-per-unit">
@@ -865,7 +865,7 @@ export default function AdminAnalytics() {
                     <div key={item.label} className="space-y-2">
                       <div className="flex items-center justify-between gap-3">
                         <p
-                          className="text-sm font-medium text-slate-700"
+                          className="text-sm font-medium text-slate-700 dark:text-slate-200"
                           title={item.label}
                         >
                           {item.label}
@@ -874,7 +874,7 @@ export default function AdminAnalytics() {
                           {item.value}
                         </Badge>
                       </div>
-                      <div className="h-3 overflow-hidden rounded-full bg-slate-100">
+                      <div className="h-3 overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800">
                         <div
                           className="h-full rounded-full bg-blue-600 transition-all"
                           style={{ width: `${barWidth}%` }}
@@ -886,7 +886,7 @@ export default function AdminAnalytics() {
               </div>
             </CardContent>
             <CardFooter className="flex-col items-start gap-3 text-sm">
-              <div className="flex items-center gap-2 leading-none font-medium text-slate-800">
+              <div className="flex items-center gap-2 leading-none font-medium text-slate-800 dark:text-slate-100">
                 <TrendingUp className="h-4 w-4 text-sky-600" />
                 {topUnit ? `${t('topUnit')}: ${topUnit.label}` : t('staffDistributionDesc')}
               </div>
@@ -898,13 +898,13 @@ export default function AdminAnalytics() {
 
 
           {/* Training Demand Chart */}
-          <Card className="rounded-3xl border-white/60 bg-white/90 shadow-sm backdrop-blur">
+          <Card className="rounded-3xl border-white/60 dark:border-white/10 bg-white/90 dark:bg-slate-900/60 shadow-sm backdrop-blur">
             <CardHeader className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
               <div>
-                <div className="mb-3 inline-flex rounded-2xl bg-orange-100 p-2 text-orange-700">
+                <div className="mb-3 inline-flex rounded-2xl bg-orange-100 dark:bg-orange-500/20 p-2 text-orange-700 dark:text-orange-300">
                   <IconBook className="h-5 w-5" />
                 </div>
-                <CardTitle className="flex items-center gap-2 text-xl text-slate-900">
+                <CardTitle className="flex items-center gap-2 text-xl text-slate-900 dark:text-slate-50">
                   {t('trainingDemandTitle')}
                 </CardTitle>
                 <CardDescription className="mt-2 max-w-xl text-sm leading-6">
@@ -913,7 +913,7 @@ export default function AdminAnalytics() {
               </div>
               <div className="flex items-center gap-2">
 
-                <Badge variant="secondary" className="rounded-full px-3 py-1 text-slate-700">
+                <Badge variant="secondary" className="rounded-full px-3 py-1 text-slate-700 dark:text-slate-200">
                   {totalTrainingDemandCount > 8
                     ? t('showingTopTrainings', { count: totalTrainingDemandCount })
                     : t('totalTrainingsRequired', { count: totalTrainingDemandCount })}
@@ -946,14 +946,14 @@ export default function AdminAnalytics() {
                     return (
                       <div key={item.trainingId} className="space-y-2">
                         <div className="flex items-center justify-between gap-3">
-                          <p className="text-sm font-medium text-slate-700">
+                          <p className="text-sm font-medium text-slate-700 dark:text-slate-200">
                             {item.trainingName}
                           </p>
                           <Badge variant="secondary" className="rounded-full px-2.5 py-0.5">
                             {item.totalStaffCount}
                           </Badge>
                         </div>
-                        <div className="h-3 overflow-hidden rounded-full bg-slate-100">
+                        <div className="h-3 overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800">
                           <div
                             className="h-full rounded-full bg-orange-500 transition-all"
                             style={{ width: `${barWidth}%` }}
@@ -970,7 +970,7 @@ export default function AdminAnalytics() {
               )}
             </CardContent>
             <CardFooter className="flex-col items-start gap-3 text-sm">
-              <div className="flex items-center gap-2 leading-none font-medium text-slate-800">
+              <div className="flex items-center gap-2 leading-none font-medium text-slate-800 dark:text-slate-100">
                 <TrendingUp className="h-4 w-4 text-orange-600" />
                 {selectedAssessmentName
                   ? t('basedOnAssessment', { name: selectedAssessmentName })
