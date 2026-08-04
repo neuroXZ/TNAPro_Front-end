@@ -3,7 +3,8 @@ import { getRequestConfig } from 'next-intl/server';
 const SUPPORTED_LOCALES = ['en', 'ms'] as const;
 const DEFAULT_LOCALE: (typeof SUPPORTED_LOCALES)[number] = 'en';
 
-export default getRequestConfig(async ({ locale }) => {
+export default getRequestConfig(async ({ requestLocale }) => {
+  const locale = await requestLocale;
   const resolvedLocale = SUPPORTED_LOCALES.includes(locale as (typeof SUPPORTED_LOCALES)[number])
     ? (locale as (typeof SUPPORTED_LOCALES)[number])
     : DEFAULT_LOCALE;
