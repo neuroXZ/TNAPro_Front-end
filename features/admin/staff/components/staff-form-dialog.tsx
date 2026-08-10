@@ -14,6 +14,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
+import { Combobox } from "@/components/ui/combobox"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -344,43 +345,25 @@ export function StaffFormDialog({
 
             <div className="grid gap-2">
               <Label htmlFor="positionId">Position</Label>
-              <Select
-                value={formData.positionId || undefined}
-                onValueChange={(value) =>
-                  setFormData({ ...formData, positionId: value })
-                }
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select position (optional)" />
-                </SelectTrigger>
-                <SelectContent>
-                  {positions.map((position) => (
-                    <SelectItem key={position.id} value={position.id}>
-                      {position.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <Combobox
+                options={positions.map((position) => ({ value: position.id, label: position.name }))}
+                value={formData.positionId}
+                onChange={(value) => setFormData({ ...formData, positionId: value })}
+                placeholder="Select position (optional)"
+                searchPlaceholder="Search positions..."
+                emptyText="No position found."
+              />
             </div>
             <div className="grid gap-2">
               <Label htmlFor="unitId">Unit</Label>
-              <Select
-                value={formData.unitId || undefined}
-                onValueChange={(value) =>
-                  setFormData({ ...formData, unitId: value })
-                }
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select unit (optional)" />
-                </SelectTrigger>
-                <SelectContent>
-                  {units.map((unit) => (
-                    <SelectItem key={unit.id} value={unit.id}>
-                      {unit.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <Combobox
+                options={units.map((unit) => ({ value: unit.id, label: unit.name }))}
+                value={formData.unitId}
+                onChange={(value) => setFormData({ ...formData, unitId: value })}
+                placeholder="Select unit (optional)"
+                searchPlaceholder="Search units..."
+                emptyText="No unit found."
+              />
             </div>
           </div>
           <DialogFooter>

@@ -10,13 +10,7 @@ import {
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
+import { Combobox } from "@/components/ui/combobox"
 import { Position } from "./columns"
 import { gradeAPI, positionCategoryAPI } from "@/lib/api"
 
@@ -139,43 +133,25 @@ export function PositionFormDialog({
             </div>
             <div className="grid gap-2">
               <Label htmlFor="gradeId">Grade</Label>
-              <Select
-                value={formData.gradeId || undefined}
-                onValueChange={(value) =>
-                  setFormData({ ...formData, gradeId: value })
-                }
-              >
-                <SelectTrigger id="gradeId">
-                  <SelectValue placeholder="Select grade (optional)" />
-                </SelectTrigger>
-                <SelectContent>
-                  {grades.map((grade) => (
-                    <SelectItem key={grade.id} value={grade.id}>
-                      {grade.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <Combobox
+                options={grades.map((grade) => ({ value: grade.id, label: grade.name }))}
+                value={formData.gradeId}
+                onChange={(value) => setFormData({ ...formData, gradeId: value })}
+                placeholder="Select grade (optional)"
+                searchPlaceholder="Search grades..."
+                emptyText="No grade found."
+              />
             </div>
             <div className="grid gap-2">
               <Label htmlFor="categoryId">Position Category</Label>
-              <Select
-                value={formData.categoryId || undefined}
-                onValueChange={(value) =>
-                  setFormData({ ...formData, categoryId: value })
-                }
-              >
-                <SelectTrigger id="categoryId">
-                  <SelectValue placeholder="Select category (optional)" />
-                </SelectTrigger>
-                <SelectContent>
-                  {categories.map((category) => (
-                    <SelectItem key={category.id} value={category.id}>
-                      {category.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <Combobox
+                options={categories.map((category) => ({ value: category.id, label: category.name }))}
+                value={formData.categoryId}
+                onChange={(value) => setFormData({ ...formData, categoryId: value })}
+                placeholder="Select category (optional)"
+                searchPlaceholder="Search categories..."
+                emptyText="No category found."
+              />
             </div>
             <div className="grid gap-2">
               <Label htmlFor="description">Description</Label>
