@@ -26,12 +26,6 @@ import {
   CommandList,
 } from "@/components/ui/command";
 import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
-import {
   Select,
   SelectContent,
   SelectItem,
@@ -52,6 +46,8 @@ import {
   idpAPI,
   unitAPI,
   competencyAPI,
+  developmentStrategyAPI,
+  type DevelopmentStrategy,
 } from "@/lib/api";
 import { toast } from "sonner";
 import { IconCheck, IconSelector } from "@tabler/icons-react";
@@ -62,7 +58,6 @@ import {
   IconUserCheck,
   IconTarget,
   IconTrendingUp,
-  IconInfoCircle,
 } from "@tabler/icons-react";
 import { format } from "date-fns";
 import { useEffect } from "react";
@@ -100,10 +95,17 @@ interface Cluster {
   name: string;
 }
 
+interface DevelopmentStrategySummary {
+  id: string;
+  name: string;
+  color: string;
+  isTrainingLinked: boolean;
+}
+
 interface CompetencyAnalysis {
   competencyId: string;
   competencyName: string;
-  trainingName?: string;
+  trainingNames?: string[];
   requiredLevel: number;
   selfScore: number;
   superiorScore: number;
@@ -111,12 +113,8 @@ interface CompetencyAnalysis {
   gap: number;
   clusterId?: string;
   clusterName?: string;
-  developmentStrategies: {
-    training: boolean;
-    coaching: boolean;
-    selfLearning: boolean;
-    workExperience: boolean;
-  };
+  developmentStrategies: DevelopmentStrategySummary[];
+  requiresTraining: boolean;
 }
 
 interface IdpResult {
@@ -140,6 +138,7 @@ export default function AdminIdpPage() {
   const [selectedResultCluster, setSelectedResultCluster] =
     useState<string>("all");
   const [competenciesData, setCompetenciesData] = useState<any[]>([]);
+  const [strategies, setStrategies] = useState<DevelopmentStrategy[]>([]);
   const [idpResult, setIdpResult] = useState<IdpResult | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
@@ -175,12 +174,13 @@ export default function AdminIdpPage() {
   const fetchInitialData = async () => {
     try {
       setIsLoading(true);
-      const [staffData, assessmentsData, unitsData, competenciesData] =
+      const [staffData, assessmentsData, unitsData, competenciesData, strategiesData] =
         await Promise.all([
           staffAPI.getAll(),
           assessmentAPI.getAll(),
           unitAPI.getAll(),
           competencyAPI.getAll(),
+          developmentStrategyAPI.getAll(),
         ]);
 
       // Extract unique clusters from competency data
@@ -212,6 +212,7 @@ export default function AdminIdpPage() {
       setClusterList(clusters);
       setCompetenciesData(competenciesData);
       setAssessments(assessmentsData);
+      setStrategies(strategiesData);
     } catch (error) {
       console.error("Failed to fetch data:", error);
       toast.error(t('loadDataError'));
@@ -300,26 +301,14 @@ export default function AdminIdpPage() {
     }
   };
 
-  const getStrategyBadges = (
-    strategies: CompetencyAnalysis["developmentStrategies"],
-  ) => {
-    const badges = [];
-    if (strategies.training)
-      badges.push({ label: "Training", color: "bg-red-600" });
-    if (strategies.coaching)
-      badges.push({ label: "Coaching", color: "bg-orange-600" });
-    if (strategies.selfLearning)
-      badges.push({ label: "Self Learning", color: "bg-blue-600" });
-    if (strategies.workExperience)
-      badges.push({ label: "Work Experience", color: "bg-green-600" });
-    return badges;
-  };
-
+  // Color for a given gap: the color of the highest-threshold strategy it
+  // crosses (strategies are sorted ascending by minGap from the API), so
+  // this always agrees with the badges/legend driven by the same config.
+  const NO_GAP_COLOR = "#16A34A";
   const getGapColor = (gap: number) => {
-    if (gap >= 1.5) return "text-red-600 font-bold";
-    if (gap >= 1.0) return "text-purple-600 font-semibold";
-    if (gap > 0) return "text-yellow-600";
-    return "text-green-600";
+    const applicable = strategies.filter((s) => gap >= s.minGap);
+    if (applicable.length === 0) return NO_GAP_COLOR;
+    return applicable[applicable.length - 1].color;
   };
 
   const handleExportCSV = async () => {
@@ -640,9 +629,8 @@ export default function AdminIdpPage() {
                   <CardContent>
                     <div className="text-2xl font-bold text-red-600">
                       {
-                        filteredCompetencies.filter(
-                          (c) => c.developmentStrategies.training,
-                        ).length
+                        filteredCompetencies.filter((c) => c.requiresTraining)
+                          .length
                       }
                     </div>
                   </CardContent>
@@ -731,10 +719,7 @@ export default function AdminIdpPage() {
                               </thead>
                               <tbody>
                                 {filteredCompetencies
-                                  .filter(
-                                    (comp) =>
-                                      comp.developmentStrategies.training,
-                                  )
+                                  .filter((comp) => comp.requiresTraining)
                                   .sort((a, b) => b.gap - a.gap)
                                   .map((comp, index) => (
                                     <tr
@@ -745,13 +730,19 @@ export default function AdminIdpPage() {
                                         {comp.competencyName}
                                       </td>
                                       <td
-                                        className={`px-3 py-3 text-sm text-center font-medium ${getGapColor(comp.gap)}`}
+                                        className="px-3 py-3 text-sm text-center font-medium"
+                                        style={{ color: getGapColor(comp.gap) }}
                                       >
                                         {comp.gap.toFixed(1)}
                                       </td>
                                       <td className="px-3 py-3 text-sm">
-                                        {comp.trainingName ||
-                                          `${comp.competencyName} Training Program`}
+                                        {comp.trainingNames?.length ? (
+                                          comp.trainingNames.join(", ")
+                                        ) : (
+                                          <span className="text-muted-foreground italic">
+                                            {t('noTrainingLinked')}
+                                          </span>
+                                        )}
                                       </td>
                                       <td className="px-3 py-3 text-center">
                                         <Badge
@@ -773,7 +764,7 @@ export default function AdminIdpPage() {
                                     </tr>
                                   ))}
                                 {filteredCompetencies.filter(
-                                  (comp) => comp.developmentStrategies.training,
+                                  (comp) => comp.requiresTraining,
                                 ).length === 0 && (
                                   <tr>
                                     <td
@@ -832,7 +823,7 @@ export default function AdminIdpPage() {
                           {t('colAssessmentResult')}
                         </th>
                         <th
-                          colSpan={4}
+                          colSpan={strategies.length}
                           className="px-3 py-2 text-center text-sm font-medium"
                         >
                           {t('colDevelopmentStrategy')}
@@ -848,32 +839,14 @@ export default function AdminIdpPage() {
                         <th className="px-3 py-2 text-center text-sm font-medium border-r">
                           {t('colGap')}
                         </th>
-                        <th className="px-3 py-2 text-center text-sm font-medium">
-                          {t('colTraining')}
-                        </th>
-                        <th className="px-3 py-2 text-center text-sm font-medium">
-                          {t('colCoaching')}
-                        </th>
-                        <th className="px-3 py-2 text-center text-sm font-medium">
-                          {t('colSelfLearning')}
-                        </th>
-                        <th className="px-3 py-2 text-center text-sm font-medium">
-                          <div className="flex items-center justify-center gap-1">
-                            <span>{t('colWorkExperience')}</span>
-                            <TooltipProvider>
-                              <Tooltip>
-                                <TooltipTrigger asChild>
-                                  <IconInfoCircle className="size-3.5 cursor-help" />
-                                </TooltipTrigger>
-                                <TooltipContent>
-                                  <p>
-                                    {t('workExperienceTooltip')}
-                                  </p>
-                                </TooltipContent>
-                              </Tooltip>
-                            </TooltipProvider>
-                          </div>
-                        </th>
+                        {strategies.map((s) => (
+                          <th
+                            key={s.id}
+                            className="px-3 py-2 text-center text-sm font-medium"
+                          >
+                            {s.name}
+                          </th>
+                        ))}
                       </tr>
                     </thead>
                     <tbody>
@@ -919,45 +892,35 @@ export default function AdminIdpPage() {
                                 : "N/A"}
                             </td>
                             <td
-                              className={`px-3 py-3 text-sm text-center border-r font-medium ${getGapColor(comp.gap)}`}
+                              className="px-3 py-3 text-sm text-center border-r font-medium"
+                              style={{ color: getGapColor(comp.gap) }}
                             >
                               {comp.gap.toFixed(1)}
                             </td>
-                            <td className="px-3 py-3 text-center">
-                              {comp.developmentStrategies.training && (
-                                <span className="text-green-600 text-lg">
-                                  ✓
-                                </span>
-                              )}
-                            </td>
-                            <td className="px-3 py-3 text-center">
-                              {comp.developmentStrategies.coaching && (
-                                <span className="text-green-600 text-lg">
-                                  ✓
-                                </span>
-                              )}
-                            </td>
-                            <td className="px-3 py-3 text-center">
-                              {comp.developmentStrategies.selfLearning && (
-                                <span className="text-green-600 text-lg">
-                                  ✓
-                                </span>
-                              )}
-                            </td>
-                            <td className="px-3 py-3 text-center">
-                              {comp.developmentStrategies.workExperience && (
-                                <span className="text-green-600 text-lg">
-                                  ✓
-                                </span>
-                              )}
-                            </td>
+                            {strategies.map((s) => {
+                              const active = comp.developmentStrategies.some(
+                                (ds) => ds.id === s.id,
+                              );
+                              return (
+                                <td key={s.id} className="px-3 py-3 text-center">
+                                  {active && (
+                                    <span
+                                      className="text-lg"
+                                      style={{ color: s.color }}
+                                    >
+                                      ✓
+                                    </span>
+                                  )}
+                                </td>
+                              );
+                            })}
                           </tr>
                         );
                       })}
                       {filteredCompetencies.length === 0 && (
                         <tr>
                           <td
-                            colSpan={9}
+                            colSpan={5 + strategies.length}
                             className="px-4 py-8 text-center text-muted-foreground"
                           >
                             {t('noCompetenciesFound')}
@@ -980,30 +943,14 @@ export default function AdminIdpPage() {
             </CardHeader>
             <CardContent>
               <div className="grid gap-2 md:grid-cols-2">
-                <div className="flex items-center gap-2 text-sm">
-                  <Badge className="bg-red-600">{t('colTraining')}</Badge>
-                  <span className="text-muted-foreground">
-                    {t('legendTraining')}
-                  </span>
-                </div>
-                <div className="flex items-center gap-2 text-sm">
-                  <Badge className="bg-purple-600">{t('colCoaching')}</Badge>
-                  <span className="text-muted-foreground">
-                    {t('legendCoaching')}
-                  </span>
-                </div>
-                <div className="flex items-center gap-2 text-sm">
-                  <Badge className="bg-blue-600">{t('colSelfLearning')}</Badge>
-                  <span className="text-muted-foreground">
-                    {t('legendSelfLearning')}
-                  </span>
-                </div>
-                <div className="flex items-center gap-2 text-sm">
-                  <Badge className="bg-green-600">{t('colWorkExperience')}</Badge>
-                  <span className="text-muted-foreground">
-                    {t('legendWorkExperience')}
-                  </span>
-                </div>
+                {strategies.map((s) => (
+                  <div key={s.id} className="flex items-center gap-2 text-sm">
+                    <Badge style={{ backgroundColor: s.color }}>{s.name}</Badge>
+                    <span className="text-muted-foreground">
+                      {t('legendItemTemplate', { minGap: s.minGap })}
+                    </span>
+                  </div>
+                ))}
               </div>
             </CardContent>
           </Card>

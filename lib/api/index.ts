@@ -14,6 +14,7 @@
 //   settings.ts       - system settings + logo upload
 //   reports.ts        - IDP, CGA, RTN, dashboard, comparisons, training demand
 //   misc.ts           - mail, contact email, bulk import
+//   developmentStrategy.ts - client-configurable IDP development strategies
 export { api, default } from './client';
 export { invalidateApiCache } from './cache';
 export { createCrudApi } from './crud-factory';
@@ -26,3 +27,4 @@ export * from './assessment';
 export * from './settings';
 export * from './reports';
 export * from './misc';
+export * from './developmentStrategy';

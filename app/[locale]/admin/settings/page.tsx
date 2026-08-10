@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { settingAPI, dashboardAPI } from "@/lib/api"
+import { settingAPI, dashboardAPI, developmentStrategyAPI, type DevelopmentStrategy } from "@/lib/api"
 import {
   Card,
   CardContent,
@@ -15,15 +15,47 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Progress } from "@/components/ui/progress"
 import { Skeleton } from "@/components/ui/skeleton"
-import { 
-  IconSettings, 
-  IconPalette, 
-  IconDeviceFloppy, 
+import { Badge } from "@/components/ui/badge"
+import { Checkbox } from "@/components/ui/checkbox"
+import {
+  Table,
+  TableHeader,
+  TableBody,
+  TableHead,
+  TableRow,
+  TableCell,
+} from "@/components/ui/table"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
+import {
+  IconSettings,
+  IconPalette,
+  IconDeviceFloppy,
   IconRefresh,
   IconUsers,
   IconBuilding,
   IconLicense,
-  IconCalendar
+  IconCalendar,
+  IconTargetArrow,
+  IconPlus,
+  IconPencil,
+  IconTrash,
 } from "@tabler/icons-react"
 import { toast } from "sonner"
 import { hexToOklch, oklchToHex } from "@/lib/color-utils"
@@ -74,10 +106,101 @@ export default function SettingsPage() {
   const [dangerColor, setDangerColor] = useState("#EF4444")
   const [infoColor, setInfoColor] = useState("#06B6D4")
 
+  // Development strategies (IDP gap thresholds)
+  const [strategies, setStrategies] = useState<DevelopmentStrategy[]>([])
+  const [isLoadingStrategies, setIsLoadingStrategies] = useState(true)
+  const [isSavingStrategy, setIsSavingStrategy] = useState(false)
+  const [strategyDialogOpen, setStrategyDialogOpen] = useState(false)
+  const [editingStrategy, setEditingStrategy] = useState<DevelopmentStrategy | null>(null)
+  const [deleteTarget, setDeleteTarget] = useState<DevelopmentStrategy | null>(null)
+  const [strategyName, setStrategyName] = useState("")
+  const [strategyMinGap, setStrategyMinGap] = useState("")
+  const [strategyColor, setStrategyColor] = useState("#DC2626")
+  const [strategyIsTrainingLinked, setStrategyIsTrainingLinked] = useState(false)
+
   useEffect(() => {
     fetchSettings()
     fetchDashboardData()
+    fetchStrategies()
   }, [])
+
+  const fetchStrategies = async () => {
+    try {
+      setIsLoadingStrategies(true)
+      const data = await developmentStrategyAPI.getAll()
+      setStrategies(data)
+    } catch (error) {
+      toast.error(t('devStrategyFetchError'))
+      console.error(error)
+    } finally {
+      setIsLoadingStrategies(false)
+    }
+  }
+
+  const openAddStrategyDialog = () => {
+    setEditingStrategy(null)
+    setStrategyName("")
+    setStrategyMinGap("")
+    setStrategyColor("#DC2626")
+    setStrategyIsTrainingLinked(false)
+    setStrategyDialogOpen(true)
+  }
+
+  const openEditStrategyDialog = (strategy: DevelopmentStrategy) => {
+    setEditingStrategy(strategy)
+    setStrategyName(strategy.name)
+    setStrategyMinGap(String(strategy.minGap))
+    setStrategyColor(strategy.color)
+    setStrategyIsTrainingLinked(strategy.isTrainingLinked)
+    setStrategyDialogOpen(true)
+  }
+
+  const handleSaveStrategy = async () => {
+    const minGap = parseFloat(strategyMinGap)
+    if (!strategyName.trim() || Number.isNaN(minGap) || minGap < 0) {
+      toast.error(t('devStrategyValidationError'))
+      return
+    }
+
+    try {
+      setIsSavingStrategy(true)
+      const data = {
+        name: strategyName.trim(),
+        minGap,
+        color: strategyColor,
+        isTrainingLinked: strategyIsTrainingLinked,
+        order: editingStrategy?.order ?? strategies.length + 1,
+      }
+
+      if (editingStrategy) {
+        await developmentStrategyAPI.update(editingStrategy.id, data)
+      } else {
+        await developmentStrategyAPI.create(data)
+      }
+
+      toast.success(t('devStrategySaveSuccess'))
+      setStrategyDialogOpen(false)
+      await fetchStrategies()
+    } catch (error) {
+      toast.error(t('devStrategySaveError'))
+      console.error(error)
+    } finally {
+      setIsSavingStrategy(false)
+    }
+  }
+
+  const handleDeleteStrategy = async () => {
+    if (!deleteTarget) return
+    try {
+      await developmentStrategyAPI.delete(deleteTarget.id)
+      toast.success(t('devStrategyDeleteSuccess'))
+      setDeleteTarget(null)
+      await fetchStrategies()
+    } catch (error) {
+      toast.error(t('devStrategyDeleteError'))
+      console.error(error)
+    }
+  }
 
   const fetchDashboardData = async () => {
     try {
@@ -315,7 +438,7 @@ export default function SettingsPage() {
       )}
 
       <Tabs defaultValue="general" className="w-full">
-        <TabsList className="grid w-full grid-cols-2">
+        <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="general" className="gap-2">
             <IconSettings className="size-4" />
             {t('tabGeneral')}
@@ -323,6 +446,10 @@ export default function SettingsPage() {
           <TabsTrigger value="theme" className="gap-2">
             <IconPalette className="size-4" />
             {t('tabTheme')}
+          </TabsTrigger>
+          <TabsTrigger value="strategies" className="gap-2">
+            <IconTargetArrow className="size-4" />
+            {t('tabDevelopmentStrategies')}
           </TabsTrigger>
         </TabsList>
 
@@ -583,7 +710,170 @@ export default function SettingsPage() {
             </CardContent>
           </Card>
         </TabsContent>
+
+        <TabsContent value="strategies" className="mt-4">
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0">
+              <div>
+                <CardTitle>{t('devStrategyCardTitle')}</CardTitle>
+                <CardDescription>
+                  {t('devStrategyCardDesc')}
+                </CardDescription>
+              </div>
+              <Button onClick={openAddStrategyDialog}>
+                <IconPlus className="mr-2 size-4" />
+                {t('addStrategy')}
+              </Button>
+            </CardHeader>
+            <CardContent>
+              {isLoadingStrategies ? (
+                <Skeleton className="h-40 w-full" />
+              ) : strategies.length === 0 ? (
+                <p className="text-sm text-muted-foreground py-8 text-center">
+                  {t('noStrategiesFound')}
+                </p>
+              ) : (
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>{t('labelStrategyName')}</TableHead>
+                      <TableHead>{t('labelMinGap')}</TableHead>
+                      <TableHead>{t('labelColor')}</TableHead>
+                      <TableHead>{t('labelIsTrainingLinked')}</TableHead>
+                      <TableHead className="text-right">{t('colActions')}</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {strategies.map((strategy) => (
+                      <TableRow key={strategy.id}>
+                        <TableCell className="font-medium">{strategy.name}</TableCell>
+                        <TableCell>{strategy.minGap}</TableCell>
+                        <TableCell>
+                          <div className="flex items-center gap-2">
+                            <div
+                              className="size-5 rounded border"
+                              style={{ backgroundColor: strategy.color }}
+                            />
+                            <span className="text-xs text-muted-foreground">{strategy.color}</span>
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          {strategy.isTrainingLinked && (
+                            <Badge variant="secondary">{t('trainingLinkedBadge')}</Badge>
+                          )}
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => openEditStrategyDialog(strategy)}
+                          >
+                            <IconPencil className="size-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => setDeleteTarget(strategy)}
+                          >
+                            <IconTrash className="size-4 text-destructive" />
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
       </Tabs>
+
+      <Dialog open={strategyDialogOpen} onOpenChange={setStrategyDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{editingStrategy ? t('editStrategy') : t('addStrategy')}</DialogTitle>
+            <DialogDescription>{t('devStrategyDialogDesc')}</DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-2">
+            <div className="grid gap-2">
+              <Label htmlFor="strategyName">{t('labelStrategyName')}</Label>
+              <Input
+                id="strategyName"
+                value={strategyName}
+                onChange={(e) => setStrategyName(e.target.value)}
+                placeholder={t('placeholderStrategyName')}
+              />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="strategyMinGap">{t('labelMinGap')}</Label>
+              <Input
+                id="strategyMinGap"
+                type="number"
+                step="0.01"
+                min="0"
+                value={strategyMinGap}
+                onChange={(e) => setStrategyMinGap(e.target.value)}
+                placeholder="1.5"
+              />
+              <p className="text-xs text-muted-foreground">{t('minGapHint')}</p>
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="strategyColor">{t('labelColor')}</Label>
+              <div className="flex gap-2">
+                <Input
+                  id="strategyColor"
+                  type="color"
+                  value={strategyColor}
+                  onChange={(e) => setStrategyColor(e.target.value)}
+                  className="h-10 w-20"
+                />
+                <Input
+                  type="text"
+                  value={strategyColor}
+                  onChange={(e) => setStrategyColor(e.target.value)}
+                  placeholder="#DC2626"
+                />
+              </div>
+            </div>
+            <div className="flex items-center gap-2">
+              <Checkbox
+                id="strategyIsTrainingLinked"
+                checked={strategyIsTrainingLinked}
+                onCheckedChange={(checked) => setStrategyIsTrainingLinked(checked === true)}
+              />
+              <Label htmlFor="strategyIsTrainingLinked" className="font-normal">
+                {t('labelIsTrainingLinked')}
+              </Label>
+            </div>
+            <p className="text-xs text-muted-foreground">{t('isTrainingLinkedHint')}</p>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setStrategyDialogOpen(false)} disabled={isSavingStrategy}>
+              {t('cancelButton')}
+            </Button>
+            <Button onClick={handleSaveStrategy} disabled={isSavingStrategy}>
+              {isSavingStrategy ? t('saving') : t('saveButton')}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <AlertDialog open={!!deleteTarget} onOpenChange={(open) => !open && setDeleteTarget(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{t('deleteStrategyConfirmTitle')}</AlertDialogTitle>
+            <AlertDialogDescription>
+              {t('deleteStrategyConfirmDesc', { name: deleteTarget?.name ?? '' })}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>{t('cancelButton')}</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDeleteStrategy}>
+              {t('deleteButton')}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   )
 }
