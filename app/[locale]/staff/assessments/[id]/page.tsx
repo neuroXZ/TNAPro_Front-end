@@ -520,6 +520,34 @@ export default function AssessmentDetailPage() {
         </Card>
       </div>
 
+      {competencies.length > 0 && (
+        <Card className="border-blue-200 bg-blue-50 dark:border-blue-900 dark:bg-blue-950">
+          <CardHeader className="pb-3">
+            <CardTitle className="text-base flex items-center gap-2 text-blue-900 dark:text-blue-100">
+              <IconInfoCircle className="size-5" />
+              {t('howToTitle')}
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <ol className="list-decimal list-inside space-y-1.5 text-sm text-blue-900 dark:text-blue-100">
+              <li>{t('howToStep1Self')}</li>
+              <li>{t('howToStep2')}</li>
+              <li>{t('howToRclInfoButton')}</li>
+              <li>{t('howToStep3')}</li>
+              <li>{t('howToStep4')}</li>
+            </ol>
+            <div className="flex flex-wrap items-center gap-2 pt-1">
+              <span className="text-xs font-medium text-blue-900 dark:text-blue-100">{t('howToLevelsIntro')}</span>
+              {[...levels].sort((a, b) => (a.value || 0) - (b.value || 0)).map((level) => (
+                <Badge key={level.id} variant="outline" className="bg-white dark:bg-blue-900 text-xs font-normal">
+                  {level.value} – {level.name}
+                </Badge>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       <Card>
         <CardHeader>
           <CardTitle>{t('rateYourCompetencies')}</CardTitle>
