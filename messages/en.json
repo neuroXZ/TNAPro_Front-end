@@ -1143,6 +1143,7 @@
     "colRemarks": "Remarks",
     "clusterCompetencies": "{cluster} Competencies",
     "clusterCompleted": "{completed} / {total} Completed",
+    "rclTooltip": "Required Competency Level",
     "rclDialogTitle": "Required Competency Level (RCL)",
     "rclDialogDesc": "RCL indicates the minimum competency level required for your position in this specific competency.",
     "rclMobileHeader": "Required Competency Level (RCL): {rcl}",

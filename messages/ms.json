@@ -1143,6 +1143,7 @@
     "colRemarks": "Catatan",
     "clusterCompetencies": "Kompetensi {cluster}",
     "clusterCompleted": "{completed} / {total} Selesai",
+    "rclTooltip": "Tahap Kompetensi Diperlukan",
     "rclDialogTitle": "Tahap Kompetensi Diperlukan (TKD)",
     "rclDialogDesc": "TKD menunjukkan tahap kompetensi minimum yang diperlukan untuk jawatan anda dalam kompetensi ini.",
     "rclMobileHeader": "Tahap Kompetensi Diperlukan (TKD): {rcl}",

@@ -8,14 +8,15 @@ import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
 import { Progress } from "@/components/ui/progress"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { 
-  assessmentAPI, 
-  assessmentResultAPI, 
-  assessorAPI, 
+import {
+  assessmentAPI,
+  assessmentResultAPI,
+  assessorAPI,
   positionCompetencyAPI,
   levelAPI,
   competencyAPI,
-  clusterAPI
+  clusterAPI,
+  staffAPI
 } from "@/lib/api"
 import { toast } from "sonner"
 import { 
@@ -38,6 +39,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog"
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 
 interface Assessment {
   id: string
@@ -112,11 +114,9 @@ export default function AssessmentDetailPage() {
         const userData = JSON.parse(storedUser)
         console.log("Parsed user data:", userData)
         console.log("User ID:", userData.id)
-        console.log("Position ID:", userData.positionId)
         setUserId(userData.id)
-        setPositionId(userData.positionId || null)
         if (userData.id) {
-          fetchAssessmentData(userData.id, userData.positionId || null)
+          fetchAssessmentData(userData.id)
         } else {
           toast.error("User ID not found")
           setIsLoading(false)
@@ -131,21 +131,26 @@ export default function AssessmentDetailPage() {
     }
   }, [assessmentId])
 
-  const fetchAssessmentData = async (staffId: string, positionId: string | null) => {
+  const fetchAssessmentData = async (staffId: string) => {
     try {
       setIsLoading(true)
 
-      console.log("Fetching assessment data for:", { staffId, positionId })
-
-      // Fetch assessment data, assessors, levels, competencies, and clusters
-      const [assessmentData, allAssessors, levelsData, allCompetencies, allClusters] = await Promise.all([
+      // Fetch assessment data, live staff record, assessors, levels, competencies, and clusters.
+      // Staff's positionId is fetched fresh here (not read from the localStorage login
+      // snapshot) so a position assigned after login is picked up immediately.
+      const [assessmentData, staffData, allAssessors, levelsData, allCompetencies, allClusters] = await Promise.all([
         assessmentAPI.getById(assessmentId),
+        staffAPI.getById(staffId),
         assessorAPI.getAll(),
         levelAPI.getAll(),
         competencyAPI.getAll(),
         clusterAPI.getAll(),
       ])
 
+      const positionId = staffData?.positionId || null
+      setPositionId(positionId)
+
+      console.log("Fetching assessment data for:", { staffId, positionId })
       console.log("Assessment data:", assessmentData)
       console.log("All assessors:", allAssessors)
       console.log("Levels data:", levelsData)
@@ -286,8 +291,8 @@ export default function AssessmentDetailPage() {
       toast.success("Assessment saved successfully!")
       
       // Refresh data
-      if (userId && positionId) {
-        await fetchAssessmentData(userId, positionId)
+      if (userId) {
+        await fetchAssessmentData(userId)
       }
     } catch (error) {
       console.error("Failed to save assessment:", error)
@@ -688,7 +693,12 @@ function CompetencyAssessmentTable({
                         <th className="px-3 py-2 text-left text-sm font-medium min-w-[200px]">{t('colCompetency')}</th>
                         <th className="px-3 py-2 text-center text-sm font-medium w-16">
                           <div className="flex items-center justify-center gap-1">
-                            <span>RCL</span>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <span className="cursor-default">RCL</span>
+                              </TooltipTrigger>
+                              <TooltipContent>{t('rclTooltip')}</TooltipContent>
+                            </Tooltip>
                             <Dialog>
                               <DialogTrigger asChild>
                                 <button className="hover:bg-primary-foreground/10 rounded-full p-1 transition-colors">

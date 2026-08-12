@@ -40,6 +40,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog"
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 
 interface Assessment {
   id: string
@@ -694,7 +695,12 @@ function CompetencyAssessmentTable({
                         {/* <th className="px-3 py-2 text-center text-sm font-medium w-16">RCL</th> */}
                         <th className="px-3 py-2 text-center text-sm font-medium w-16">
                           <div className="flex items-center justify-center gap-1">
-                            <span>RCL</span>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <span className="cursor-default">RCL</span>
+                              </TooltipTrigger>
+                              <TooltipContent>{t('rclTooltip')}</TooltipContent>
+                            </Tooltip>
                             <Dialog>
                               <DialogTrigger asChild>
                                 <button className="hover:bg-primary-foreground/10 rounded-full p-1 transition-colors">
