@@ -10,6 +10,12 @@ import {
 } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 
+interface Level {
+  id: string
+  name: string
+  value: number
+}
+
 interface ResultViewDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
@@ -28,14 +34,20 @@ interface ResultViewDialogProps {
     createdAt: string
     updatedAt: string
   } | null
+  levels: Level[]
 }
 
 export function ResultViewDialog({
   open,
   onOpenChange,
   result,
+  levels,
 }: ResultViewDialogProps) {
   if (!result) return null
+
+  // Highest admin-defined Level value — the score's scale is whatever levels
+  // are currently configured, not a fixed number (see Level module).
+  const maxLevel = levels.length > 0 ? Math.max(...levels.map((l) => l.value ?? 0)) : null
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -73,7 +85,8 @@ export function ResultViewDialog({
           <div className="grid gap-2">
             <div className="text-sm font-medium text-muted-foreground">Score</div>
             <div className="text-2xl font-bold">
-              {result.status === 'SUBMITTED' ? (result.score?.toFixed(2) || "0.00") : "N/A"} / 5.00
+              {result.status === 'SUBMITTED' ? (result.score?.toFixed(2) || "0.00") : "N/A"}
+              {maxLevel !== null && ` / ${maxLevel.toFixed(2)}`}
             </div>
           </div>
           <div className="grid gap-2">

@@ -11,7 +11,7 @@ import {
   SortingState,
   VisibilityState,
 } from "@tanstack/react-table"
-import { assessmentResultAPI, assessmentAPI, positionAPI, competencyAPI, assessorAPI } from "@/lib/api"
+import { assessmentResultAPI, assessmentAPI, positionAPI, competencyAPI, assessorAPI, levelAPI } from "@/lib/api"
 import {
   Card,
   CardContent,
@@ -47,6 +47,7 @@ export default function AssessmentResultsPage() {
   const [positions, setPositions] = useState<any[]>([])
   const [competencies, setCompetencies] = useState<any[]>([])
   const [assessors, setAssessors] = useState<any[]>([])
+  const [levels, setLevels] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
@@ -73,18 +74,20 @@ export default function AssessmentResultsPage() {
   const fetchData = async () => {
     try {
       setIsLoading(true)
-      const [resultsData, assessmentsData, positionsData, competenciesData, assessorsData] = await Promise.all([
+      const [resultsData, assessmentsData, positionsData, competenciesData, assessorsData, levelsData] = await Promise.all([
         assessmentResultAPI.getAll(),
         assessmentAPI.getAll(),
         positionAPI.getAll(),
         competencyAPI.getAll(),
         assessorAPI.getAll(),
+        levelAPI.getAll(),
       ])
       setResults(resultsData)
       setAssessments(assessmentsData)
       setPositions(positionsData)
       setCompetencies(competenciesData)
       setAssessors(assessorsData)
+      setLevels(levelsData)
       setRowSelection({})
     } catch (error: unknown) {
       toast.error(t('fetchError'))
@@ -366,6 +369,7 @@ export default function AssessmentResultsPage() {
         positions={positions}
         competencies={competencies}
         assessors={assessors}
+        levels={levels}
       />
 
       <ResultDeleteDialog
@@ -380,6 +384,7 @@ export default function AssessmentResultsPage() {
         open={isViewDialogOpen}
         onOpenChange={setIsViewDialogOpen}
         result={viewingResult}
+        levels={levels}
       />
     </div>
   )

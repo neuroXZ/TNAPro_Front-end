@@ -10,7 +10,6 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import {
   Select,
@@ -53,6 +52,12 @@ interface Assessor {
   type: string
 }
 
+interface Level {
+  id: string
+  name: string
+  value: number
+}
+
 interface ResultFormDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
@@ -62,6 +67,7 @@ interface ResultFormDialogProps {
   positions: Position[]
   competencies: Competency[]
   assessors: Assessor[]
+  levels: Level[]
 }
 
 export function ResultFormDialog({
@@ -73,7 +79,9 @@ export function ResultFormDialog({
   positions,
   competencies,
   assessors,
+  levels,
 }: ResultFormDialogProps) {
+  const sortedLevels = [...levels].sort((a, b) => (a.value ?? 0) - (b.value ?? 0))
   const [formData, setFormData] = useState({
     assessmentId: "",
     positionId: "",
@@ -220,18 +228,23 @@ export function ResultFormDialog({
               </Select>
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="score">Score (0-5) *</Label>
-              <Input
-                id="score"
-                type="number"
-                step="0.1"
-                min="0"
-                max="5"
+              <Label htmlFor="score">Score *</Label>
+              <Select
                 value={formData.score}
-                onChange={(e) => setFormData({ ...formData, score: e.target.value })}
-                placeholder="e.g., 4.5"
+                onValueChange={(value) => setFormData({ ...formData, score: value })}
                 required
-              />
+              >
+                <SelectTrigger id="score">
+                  <SelectValue placeholder="Select level" />
+                </SelectTrigger>
+                <SelectContent>
+                  {sortedLevels.map((level) => (
+                    <SelectItem key={level.id} value={level.value.toString()}>
+                      {level.value} - {level.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
             <div className="grid gap-2">
               <Label htmlFor="status">Status *</Label>
