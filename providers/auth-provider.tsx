@@ -38,8 +38,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     if (storedToken && storedUser) {
       setToken(storedToken);
       setUser(JSON.parse(storedUser));
-      // Also set cookie for middleware
-      document.cookie = `token=${storedToken}; path=/; max-age=86400`; // 24 hours
     }
     setIsLoading(false);
   }, []);
@@ -52,9 +50,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const { token: authToken, user: userData } = response;
       
       localStorage.setItem('token', authToken);
-      // Set cookie for middleware
-      document.cookie = `token=${authToken}; path=/; max-age=86400`; // 24 hours
-      
+
       // If staff, fetch full data to get positionId and unitId
       if (userData.userType === 'staff' && userData.id) {
         try {
@@ -109,8 +105,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const logout = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
-    // Clear cookie
-    document.cookie = 'token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
     setToken(null);
     setUser(null);
     router.push('/login');
