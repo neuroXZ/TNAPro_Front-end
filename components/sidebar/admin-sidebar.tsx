@@ -10,6 +10,7 @@ import {
   IconChartBar,
   IconBuilding,
   IconCertificate,
+  IconHistory,
 } from "@tabler/icons-react"
 import Image from "next/image"
 import { NavMain } from "@/components/nav/nav-main"
@@ -98,6 +99,14 @@ export function AdminSidebar({ ...props }: React.ComponentProps<typeof Sidebar>)
         { title: t('competencyGapByGrade'), url: "/admin/analytics/competency-gap-by-grade" },
         { title: t('trainingDemand'), url: "/admin/analytics/training-demand" },
         { title: t('comparisons'), url: "/admin/analytics/comparisons" },
+      ],
+    },
+    {
+      title: t('system'),
+      url: "#",
+      icon: IconHistory,
+      items: [
+        { title: t('auditLog'), url: "/admin/audit-log" },
       ],
     },
   ]

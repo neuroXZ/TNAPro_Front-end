@@ -1,6 +1,7 @@
 ﻿"use client"
 
 import { useState, useEffect, useMemo } from "react"
+import axios from "axios"
 import {
   useReactTable,
   getCoreRowModel,
@@ -199,7 +200,11 @@ export default function CompetencyManagementPage() {
       setDeletingCompetency(null)
       fetchCompetencies()
     } catch (error: unknown) {
-      toast.error(t('deleteError'))
+      // A 409 here means the backend blocked the delete because the
+      // competency is still mapped elsewhere (position/training/assessment) —
+      // that message is more useful to the admin than the generic fallback.
+      const backendMessage = axios.isAxiosError(error) ? error.response?.data?.error : undefined
+      toast.error(backendMessage || t('deleteError'))
       console.error(error)
     }
   }

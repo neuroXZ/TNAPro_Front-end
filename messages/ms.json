@@ -77,7 +77,9 @@
     "reportAnalytics": "Laporan & Analitik",
     "competencyGapByGrade": "Jurang Kompetensi mengikut Gred",
     "trainingDemand": "Permintaan Latihan",
-    "comparisons": "Perbandingan"
+    "comparisons": "Perbandingan",
+    "system": "Sistem",
+    "auditLog": "Log Audit"
   },
   "AdminAssessorOrgChartPage": {
     "title": "Carta Organisasi",
@@ -562,6 +564,7 @@
     "positionCompetencies": "Kompetensi Jawatan",
     "requiredCompetenciesFor": "Kompetensi diperlukan untuk jawatan {position}",
     "rclLabel": "RCL {level}",
+    "competencyDeleted": "Kompetensi telah dipadam",
     "noPositionAssigned": "Tiada Jawatan Ditetapkan",
     "noPositionAssignedDesc": "Ahli kakitangan ini belum mempunyai jawatan yang ditetapkan. Tetapkan jawatan untuk melihat kompetensi yang diperlukan.",
     "assignPosition": "Tetapkan Jawatan",

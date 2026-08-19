@@ -15,6 +15,7 @@
 //   reports.ts        - IDP, CGA, RTN, dashboard, comparisons, training demand
 //   misc.ts           - mail, contact email, bulk import
 //   developmentStrategy.ts - client-configurable IDP development strategies
+//   auditLog.ts       - read-only audit trail browsing (who changed what, when)
 export { api, default } from './client';
 export { invalidateApiCache } from './cache';
 export { createCrudApi } from './crud-factory';
@@ -28,3 +29,4 @@ export * from './settings';
 export * from './reports';
 export * from './misc';
 export * from './developmentStrategy';
+export * from './auditLog';

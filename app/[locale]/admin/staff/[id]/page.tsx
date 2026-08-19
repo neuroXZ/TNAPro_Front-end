@@ -29,7 +29,8 @@ import {
     IconUser,
     IconTarget,
     IconTrophy,
-    IconEdit
+    IconEdit,
+    IconAlertTriangle
 } from "@tabler/icons-react"
 import { format } from "date-fns"
 import { StaffFormDialog, type StaffFormData } from "@/features/admin/staff/components/staff-form-dialog"
@@ -85,6 +86,7 @@ interface PositionCompetency {
     positionId: string
     competencyId: string
     level: number
+    isOrphaned?: boolean
     competency: {
         id: string
         name: string
@@ -223,17 +225,24 @@ export default function StaffProfilePage() {
                     clusterAPI.getAll()
                 ])
 
-                // Enrich competencies with cluster data
+                // Enrich competencies with cluster data. A mapping row whose
+                // competency no longer exists (deleted from the master list
+                // after this mapping was created) must be shown as such, not
+                // silently rendered with a blank name / "N/A" cluster that
+                // looks like a bug rather than a deleted-competency mapping.
                 const enrichedCompetencies = rawPositionCompetencies.map((pc: any) => {
                     const fullCompetency = allCompetencies.find((c: any) => c.id === pc.competencyId)
                     const cluster = allClusters.find((cl: any) => cl.id === fullCompetency?.clusterId)
+                    const isOrphaned = !pc.competencyId || !fullCompetency
 
                     return {
                         ...pc,
+                        isOrphaned,
                         competency: {
                             ...pc.competency,
                             ...fullCompetency,
-                            cluster: cluster || { id: '', name: 'N/A' }
+                            name: isOrphaned ? t('competencyDeleted') : (fullCompetency?.name ?? pc.competency?.name),
+                            cluster: cluster || { id: '', name: isOrphaned ? t('competencyDeleted') : 'Uncategorized' }
                         }
                     }
                 })
@@ -534,10 +543,14 @@ export default function StaffProfilePage() {
                                         <TabsContent key={`tab-content-${clusterName}-${index}`} value={clusterName} className="mt-4">
                                             <div className="space-y-3">
                                                 {competencies.map((pc) => (
-                                                    <div key={`competency-${pc.id}-${pc.competencyId}`} className="flex items-center justify-between p-4 border border-l-4 border-l-primary rounded-lg bg-muted/20 hover:bg-muted/40 transition-colors">
+                                                    <div key={`competency-${pc.id}-${pc.competencyId}`} className={`flex items-center justify-between p-4 border border-l-4 rounded-lg transition-colors ${pc.isOrphaned ? 'border-l-destructive bg-destructive/5' : 'border-l-primary bg-muted/20 hover:bg-muted/40'}`}>
                                                         <div className="flex items-center gap-3">
-                                                            <div className="w-2 h-2 bg-primary rounded-full"></div>
-                                                            <h4 className="font-medium">{pc.competency.name}</h4>
+                                                            {pc.isOrphaned ? (
+                                                                <IconAlertTriangle className="size-4 text-destructive" />
+                                                            ) : (
+                                                                <div className="w-2 h-2 bg-primary rounded-full"></div>
+                                                            )}
+                                                            <h4 className={`font-medium ${pc.isOrphaned ? 'text-destructive italic' : ''}`}>{pc.competency.name}</h4>
                                                         </div>
                                                         <div className="flex items-center gap-2">
                                                             <IconTrophy className="size-4 text-primary" />

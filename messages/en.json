@@ -77,7 +77,9 @@
     "reportAnalytics": "Report & Analytics",
     "competencyGapByGrade": "Competency Gap by Grade",
     "trainingDemand": "Training Demand",
-    "comparisons": "Comparisons"
+    "comparisons": "Comparisons",
+    "system": "System",
+    "auditLog": "Audit Log"
   },
   "AdminAssessorOrgChartPage": {
     "title": "Organization Chart",
@@ -562,6 +564,7 @@
     "positionCompetencies": "Position Competencies",
     "requiredCompetenciesFor": "Required competencies for {position} position",
     "rclLabel": "RCL {level}",
+    "competencyDeleted": "Competency deleted",
     "noPositionAssigned": "No Position Assigned",
     "noPositionAssignedDesc": "This staff member doesn't have a position assigned yet. Assign a position to view required competencies.",
     "assignPosition": "Assign Position",

@@ -13,7 +13,7 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { IconArrowLeft, IconPlus, IconEdit, IconTrash, IconEye, IconTrashX, IconSearch } from "@tabler/icons-react"
+import { IconArrowLeft, IconPlus, IconEdit, IconTrash, IconEye, IconTrashX, IconSearch, IconAlertTriangle } from "@tabler/icons-react"
 import { toast } from "sonner"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Checkbox } from "@/components/ui/checkbox"
@@ -83,6 +83,7 @@ export default function PositionCompetencyDetailPage() {
   const [selectedIds, setSelectedIds] = useState<string[]>([])
   const [selectedCompetencyIds, setSelectedCompetencyIds] = useState<string[]>([])
   const [isBulkDeleting, setIsBulkDeleting] = useState(false)
+  const [isRemovingOrphaned, setIsRemovingOrphaned] = useState(false)
   const [isBulkAdding, setIsBulkAdding] = useState(false)
   const [activeTab, setActiveTab] = useState<string>("")
   const [searchQuery, setSearchQuery] = useState("")
@@ -311,6 +312,34 @@ export default function PositionCompetencyDetailPage() {
     }
   }
 
+  // A mapping row whose competency was deleted from the master list keeps
+  // pointing at nothing (competencyId null) — it still counts toward the
+  // row total but never shows up in groupCompetenciesByCluster() since that
+  // walks allCompetencies, not positionCompetencies. Surface it separately
+  // instead of letting it inflate the "assigned" count silently.
+  const orphanedPositionCompetencies = positionCompetencies.filter((pc) => !pc.competencyId)
+  const orphanedPositionCompetencyCount = orphanedPositionCompetencies.length
+  const validPositionCompetencyCount = positionCompetencies.length - orphanedPositionCompetencyCount
+
+  const handleRemoveOrphaned = async () => {
+    if (orphanedPositionCompetencies.length === 0) return
+    if (!confirm(`Remove ${orphanedPositionCompetencies.length} mapping(s) pointing to a deleted competency? This cannot be undone.`)) {
+      return
+    }
+
+    try {
+      setIsRemovingOrphaned(true)
+      await Promise.all(orphanedPositionCompetencies.map((pc) => positionCompetencyAPI.delete(pc.id)))
+      toast.success('Deleted mapping(s) removed')
+      await fetchData()
+    } catch (error) {
+      toast.error(t('removeError'))
+      console.error(error)
+    } finally {
+      setIsRemovingOrphaned(false)
+    }
+  }
+
   const groupedCompetencies = groupCompetenciesByCluster()
 
   if (isLoading) {
@@ -340,10 +369,36 @@ export default function PositionCompetencyDetailPage() {
           <h1 className="text-3xl font-bold text-primary">{position?.name}</h1>
           <p className="text-muted-foreground ">
             {position?.grade?.name && `Grade: ${position.grade.name} â€¢ `}
-            {positionCompetencies.length} {positionCompetencies.length === 1 ? "competency" : "competencies"} assigned
+            {validPositionCompetencyCount} {validPositionCompetencyCount === 1 ? "competency" : "competencies"} assigned
+            {orphanedPositionCompetencyCount > 0 && (
+              <span className="text-destructive"> ({orphanedPositionCompetencyCount} mapped to a deleted competency â€” see below)</span>
+            )}
           </p>
         </div>
       </div>
+
+      {orphanedPositionCompetencyCount > 0 && (
+        <Card className="border-destructive/50 bg-destructive/5">
+          <CardContent className="flex items-center justify-between gap-4 py-4">
+            <div className="flex items-center gap-2 text-sm">
+              <IconAlertTriangle className="size-4 text-destructive shrink-0" />
+              <span>
+                {orphanedPositionCompetencyCount} mapping{orphanedPositionCompetencyCount === 1 ? "" : "s"} point to a
+                competency that no longer exists in the master list. Remove {orphanedPositionCompetencyCount === 1 ? "it" : "them"} and re-map with a current competency.
+              </span>
+            </div>
+            <Button
+              variant="destructive"
+              size="sm"
+              onClick={handleRemoveOrphaned}
+              disabled={isRemovingOrphaned}
+            >
+              <IconTrashX className="mr-2 size-4" />
+              Remove deleted mapping{orphanedPositionCompetencyCount === 1 ? "" : "s"}
+            </Button>
+          </CardContent>
+        </Card>
+      )}
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         <div className="flex gap-4">
