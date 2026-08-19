@@ -65,11 +65,15 @@ import { StaffViewDialog } from "@/features/admin/staff/components/staff-view-di
 import { StaffImportDialog } from "@/features/admin/staff/components/staff-import-dialog"
 import { useTranslations } from "next-intl"
 
+function formatPositionLabel(position: { name: string; grade?: { name: string | null } | null }) {
+  return position.grade?.name ? `${position.name} — ${position.grade.name}` : position.name
+}
+
 export default function StaffManagementPage() {
   const t = useTranslations('AdminStaffPage')
   const router = useRouter()
   const [staff, setStaff] = useState<Staff[]>([])
-  const [positions, setPositions] = useState<Array<{ id: string; name: string }>>([])
+  const [positions, setPositions] = useState<Array<{ id: string; name: string; grade?: { name: string | null } | null }>>([])
   const [units, setUnits] = useState<Array<{ id: string; name: string }>>([])
   const [selectedPositionId, setSelectedPositionId] = useState<string>("all")
   const [selectedUnitId, setSelectedUnitId] = useState<string>("all")
@@ -342,9 +346,12 @@ export default function StaffManagementPage() {
                     aria-expanded={positionPopoverOpen}
                     className="w-[180px] justify-between"
                   >
-                    {selectedPositionId === "all" 
+                    {selectedPositionId === "all"
                       ? t('filterByPosition')
-                      : positions.find((p) => p.id === selectedPositionId)?.name || t('filterByPosition')
+                      : (() => {
+                          const p = positions.find((p) => p.id === selectedPositionId)
+                          return p ? formatPositionLabel(p) : t('filterByPosition')
+                        })()
                     }
                     <IconFilter className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                   </Button>
@@ -368,13 +375,13 @@ export default function StaffManagementPage() {
                         {positions.map((position) => (
                           <CommandItem
                             key={position.id}
-                            value={position.name}
+                            value={formatPositionLabel(position)}
                             onSelect={() => {
                               setSelectedPositionId(position.id)
                               setPositionPopoverOpen(false)
                             }}
                           >
-                            {position.name}
+                            {formatPositionLabel(position)}
                           </CommandItem>
                         ))}
                       </CommandGroup>

@@ -46,6 +46,7 @@ interface StaffFormDialogProps {
 interface Position {
   id: string
   name: string
+  grade?: { name: string | null } | null
 }
 
 interface Unit {
@@ -346,7 +347,12 @@ export function StaffFormDialog({
             <div className="grid gap-2">
               <Label htmlFor="positionId">Position</Label>
               <Combobox
-                options={positions.map((position) => ({ value: position.id, label: position.name }))}
+                options={positions.map((position) => ({
+                  value: position.id,
+                  label: position.grade?.name
+                    ? `${position.name} — ${position.grade.name}`
+                    : position.name,
+                }))}
                 value={formData.positionId}
                 onChange={(value) => setFormData({ ...formData, positionId: value })}
                 placeholder="Select position (optional)"

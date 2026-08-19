@@ -38,6 +38,7 @@ interface Assessment {
 interface Position {
   id: string
   name: string
+  grade?: { name: string | null } | null
 }
 
 interface Competency {
@@ -183,7 +184,7 @@ export function ResultFormDialog({
                 <SelectContent>
                   {positions.map((position) => (
                     <SelectItem key={position.id} value={position.id}>
-                      {position.name}
+                      {position.grade?.name ? `${position.name} — ${position.grade.name}` : position.name}
                     </SelectItem>
                   ))}
                 </SelectContent>
