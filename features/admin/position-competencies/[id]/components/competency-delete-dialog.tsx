@@ -8,6 +8,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
+import { useTranslations } from "next-intl"
 
 interface Competency {
   id: string
@@ -27,22 +28,25 @@ export function CompetencyDeleteDialog({
   competency,
   onConfirm,
 }: CompetencyDeleteDialogProps) {
+  const t = useTranslations('AdminPositionCompetenciesDetailPage')
+  const tc = useTranslations('Common')
+
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+          <AlertDialogTitle>{tc('confirmTitle')}</AlertDialogTitle>
           <AlertDialogDescription>
-            This will remove "{competency?.name}" from this position. This action cannot be undone.
+            {t('removeCompetencyWarning', { name: competency?.name ?? '' })}
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel>Cancel</AlertDialogCancel>
+          <AlertDialogCancel>{tc('cancel')}</AlertDialogCancel>
           <AlertDialogAction
             onClick={onConfirm}
             className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
           >
-            Remove
+            {tc('remove')}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>

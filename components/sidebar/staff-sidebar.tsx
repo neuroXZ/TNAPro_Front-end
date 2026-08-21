@@ -79,17 +79,15 @@ export function StaffSidebar({ ...props }: React.ComponentProps<typeof Sidebar>)
           <SidebarMenuItem>
             <SidebarMenuButton size="lg" asChild>
               <a href="/" className={isMobile ? "gap-3" : undefined}>
-                <div>
+                <div className="h-10 w-auto max-w-[140px] shrink-0">
                   {logoPath ? (
-                    <div>
-                      <Image
-                        src={logoPath}
-                        alt="Company Logo"
-                        width={24}
-                        height={24}
-                        className="h-full w-full object-contain"
-                      />
-                    </div>
+                    <Image
+                      src={logoPath}
+                      alt="Company Logo"
+                      width={140}
+                      height={40}
+                      className="h-full w-auto object-contain"
+                    />
                   ) : (
                     <IconCertificate className={isMobile ? "size-5" : "size-4"} />
                   )}

@@ -6,6 +6,7 @@ import {
   IconTrash,
   IconMail,
 } from "@tabler/icons-react"
+import { useTranslations } from "next-intl"
 
 interface StaffTableActionsProps {
   selectedCount: number
@@ -22,34 +23,37 @@ export function StaffTableActions({
   onDownloadTemplate,
   onImport,
 }: StaffTableActionsProps) {
+  const t = useTranslations('AdminStaffPage')
+  const tc = useTranslations('Common')
+
   return (
     <div className="flex gap-2">
       {onDownloadTemplate && (
         <Button variant="outline" size="sm" onClick={onDownloadTemplate}>
           <IconDownload className="mr-2 size-4" />
-          Download Template
+          {tc('downloadTemplate')}
         </Button>
       )}
       {onImport && (
         <Button variant="outline" size="sm" onClick={onImport}>
           <IconUpload className="mr-2 size-4" />
-          Import CSV
+          {tc('importCsv')}
         </Button>
       )}
       <Button size="sm" onClick={onAdd}>
         <IconPlus className="mr-2 size-4" />
-        Add Staff
+        {t('addStaffButton')}
       </Button>
       {selectedCount > 0 && (
         <Button variant="destructive" size="sm" onClick={onBulkDelete}>
           <IconTrash className="mr-2 size-4" />
-          Delete Selected ({selectedCount})
+          {tc('deleteSelected', { count: selectedCount })}
         </Button>
       )}
       {selectedCount > 0 && (
         <Button variant="default" size="sm" onClick={onBulkDelete}>
           <IconMail className="mr-2 size-4" />
-          Send Email Notification ({selectedCount})
+          {t('sendEmailNotification', { count: selectedCount })}
         </Button>
       )}
     </div>

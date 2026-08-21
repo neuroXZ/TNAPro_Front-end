@@ -9,6 +9,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
 import { UnitType } from "./columns"
+import { useTranslations } from "next-intl"
 
 interface UnitTypeDeleteDialogProps {
   open: boolean
@@ -25,24 +26,27 @@ export function UnitTypeDeleteDialog({
   selectedCount = 0,
   onConfirm,
 }: UnitTypeDeleteDialogProps) {
+  const t = useTranslations('AdminUnitTypePage')
+  const tc = useTranslations('Common')
+
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+          <AlertDialogTitle>{tc('confirmTitle')}</AlertDialogTitle>
           <AlertDialogDescription>
             {deletingUnitType
-              ? `This will permanently delete "${deletingUnitType.name}". This action cannot be undone.`
-              : `This will permanently delete ${selectedCount} selected unit types. This action cannot be undone.`}
+              ? tc('deleteSingleWarning', { name: deletingUnitType.name })
+              : tc('deleteBulkWarning', { count: selectedCount, entity: t('entityNamePlural') })}
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel>Cancel</AlertDialogCancel>
+          <AlertDialogCancel>{tc('cancel')}</AlertDialogCancel>
           <AlertDialogAction
             onClick={onConfirm}
             className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
           >
-            Delete
+            {tc('delete')}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>

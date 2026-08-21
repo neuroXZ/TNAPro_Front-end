@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Level } from "./columns"
+import { useTranslations } from "next-intl"
 
 interface LevelFormData {
   name: string
@@ -31,6 +32,8 @@ export function LevelFormDialog({
   editingLevel,
   onSubmit,
 }: LevelFormDialogProps) {
+  const t = useTranslations('AdminLevelsPage')
+  const tc = useTranslations('Common')
   const [isSaving, setIsSaving] = useState(false)
   const [formData, setFormData] = useState<LevelFormData>({
     name: editingLevel?.name || "",
@@ -75,29 +78,31 @@ export function LevelFormDialog({
         <form onSubmit={handleSubmit}>
           <DialogHeader>
             <DialogTitle>
-              {editingLevel ? "Edit Level" : "Add New Level"}
+              {editingLevel
+                ? tc('editEntity', { entity: t('entityNameSingularCap') })
+                : tc('addNewEntity', { entity: t('entityNameSingularCap') })}
             </DialogTitle>
             <DialogDescription>
               {editingLevel
-                ? "Update level information"
-                : "Add a new level to the system"}
+                ? t('updateDescription', { entity: t('entityNameSingular') })
+                : t('addDescription', { entity: t('entityNameSingular') })}
             </DialogDescription>
           </DialogHeader>
           <div className="grid gap-4 py-4">
             <div className="grid gap-2">
-              <Label htmlFor="name">Level Name *</Label>
+              <Label htmlFor="name">{t('nameLabel')} *</Label>
               <Input
                 id="name"
                 value={formData.name}
                 onChange={(e) =>
                   setFormData({ ...formData, name: e.target.value })
                 }
-                placeholder="Enter level name"
+                placeholder={t('namePlaceholder')}
                 required
               />
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="value">Value</Label>
+              <Label htmlFor="value">{t('valueLabel')}</Label>
               <Input
                 id="value"
                 type="number"
@@ -110,18 +115,18 @@ export function LevelFormDialog({
                     value: e.target.value ? Number(e.target.value) : undefined,
                   })
                 }
-                placeholder="Enter value (optional)"
+                placeholder={t('valuePlaceholder')}
               />
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="description">Description</Label>
+              <Label htmlFor="description">{tc('description')}</Label>
               <textarea
                 id="description"
                 value={formData.description}
                 onChange={(e) =>
                   setFormData({ ...formData, description: e.target.value })
                 }
-                placeholder="Enter description (optional)"
+                placeholder={tc('enterDescriptionOptional')}
                 className="flex min-h-20 w-full rounded-md border border-input bg-background px-3 py-2 text-base ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
               />
             </div>
@@ -133,10 +138,10 @@ export function LevelFormDialog({
               onClick={() => onOpenChange(false)}
               disabled={isSaving}
             >
-              Cancel
+              {tc('cancel')}
             </Button>
             <Button type="submit" disabled={isSaving}>
-              {isSaving ? "Saving..." : editingLevel ? "Update" : "Create"}
+              {isSaving ? tc('saving') : editingLevel ? tc('update') : tc('create')}
             </Button>
           </DialogFooter>
         </form>

@@ -4,6 +4,7 @@ import { ColumnDef } from "@tanstack/react-table"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
 import { IconEdit, IconTrash, IconArrowUp, IconArrowDown, IconArrowsSort } from "@tabler/icons-react"
+import { useTranslations } from "next-intl"
 
 export interface Competency {
   id: string
@@ -21,7 +22,11 @@ interface ColumnActions {
   onDelete: (competency: Competency) => void
 }
 
-export const getColumns = (actions: ColumnActions): ColumnDef<Competency>[] => [
+export const getColumns = (actions: ColumnActions): ColumnDef<Competency>[] => {
+  const t = useTranslations('AdminCompetenciesPage')
+  const tc = useTranslations('Common')
+
+  return [
   {
     id: "select",
     header: ({ table }) => (
@@ -31,7 +36,7 @@ export const getColumns = (actions: ColumnActions): ColumnDef<Competency>[] => [
           (table.getIsSomePageRowsSelected() && "indeterminate")
         }
         onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
-        aria-label="Select all"
+        aria-label={t('selectAll')}
         onClick={(e) => e.stopPropagation()}
       />
     ),
@@ -39,7 +44,7 @@ export const getColumns = (actions: ColumnActions): ColumnDef<Competency>[] => [
       <Checkbox
         checked={row.getIsSelected()}
         onCheckedChange={(value) => row.toggleSelected(!!value)}
-        aria-label="Select row"
+        aria-label={t('selectRow')}
         onClick={(e) => e.stopPropagation()}
       />
     ),
@@ -55,7 +60,7 @@ export const getColumns = (actions: ColumnActions): ColumnDef<Competency>[] => [
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
           className="-ml-4"
         >
-          Competency Name
+          {t('nameLabel')}
           {column.getIsSorted() === "asc" ? (
             <IconArrowUp className="ml-2 size-4" />
           ) : column.getIsSorted() === "desc" ? (
@@ -69,7 +74,7 @@ export const getColumns = (actions: ColumnActions): ColumnDef<Competency>[] => [
   },
   {
     accessorKey: "cluster.name",
-    header: "Cluster",
+    header: t('clusterLabel'),
     cell: ({ row }) => {
       const clusterName = row.original.cluster?.name
       return clusterName ? (
@@ -81,7 +86,7 @@ export const getColumns = (actions: ColumnActions): ColumnDef<Competency>[] => [
   },
   {
     accessorKey: "description",
-    header: "Description",
+    header: tc('description'),
     cell: ({ row }) => {
       const description = row.original.description
       if (!description) return <span className="text-muted-foreground">-</span>
@@ -96,7 +101,7 @@ export const getColumns = (actions: ColumnActions): ColumnDef<Competency>[] => [
   },
   {
     id: "actions",
-    header: () => <div className="text-right">Actions</div>,
+    header: () => <div className="text-right">{tc('actions')}</div>,
     cell: ({ row }) => {
       const competency = row.original
 
@@ -127,3 +132,4 @@ export const getColumns = (actions: ColumnActions): ColumnDef<Competency>[] => [
     },
   },
 ]
+}

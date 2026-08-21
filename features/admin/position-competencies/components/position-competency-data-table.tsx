@@ -9,6 +9,7 @@ import {
 } from "@/components/ui/table"
 import { Position } from "./columns"
 import { useRouter } from "next/navigation"
+import { useTranslations } from "next-intl"
 
 interface PositionCompetencyDataTableProps {
   table: TanStackTable<Position>
@@ -17,6 +18,8 @@ interface PositionCompetencyDataTableProps {
 
 export function PositionCompetencyDataTable({ table, columnsLength }: PositionCompetencyDataTableProps) {
   const router = useRouter()
+  const t = useTranslations('AdminPositionCompetenciesPage')
+  const tc = useTranslations('Common')
 
   return (
     <div className="rounded-md border">
@@ -62,7 +65,7 @@ export function PositionCompetencyDataTable({ table, columnsLength }: PositionCo
                 colSpan={columnsLength}
                 className="h-24 text-center"
               >
-                No positions found
+                {tc('noResultsFound', { entity: t('entityNamePlural') })}
               </TableCell>
             </TableRow>
           )}

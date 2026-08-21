@@ -15,6 +15,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert"
 import { IconUpload, IconAlertCircle, IconCheck } from "@tabler/icons-react"
 import { toast } from "sonner"
 import { importAPI } from "@/lib/api"
+import { useTranslations } from "next-intl"
 
 interface PositionImportDialogProps {
   open: boolean
@@ -37,6 +38,8 @@ export function PositionImportDialog({
   onOpenChange,
   onImportSuccess,
 }: PositionImportDialogProps) {
+  const t = useTranslations('AdminPositionsPage')
+  const tc = useTranslations('Common')
   const [file, setFile] = useState<File | null>(null)
   const [isImporting, setIsImporting] = useState(false)
   const [importResult, setImportResult] = useState<ImportResult | null>(null)
@@ -45,7 +48,7 @@ export function PositionImportDialog({
     const selectedFile = e.target.files?.[0]
     if (selectedFile) {
       if (!selectedFile.name.endsWith('.csv')) {
-        toast.error('Please select a CSV file')
+        toast.error(tc('selectCsvFile'))
         return
       }
       setFile(selectedFile)
@@ -55,7 +58,7 @@ export function PositionImportDialog({
 
   const handleImport = async () => {
     if (!file) {
-      toast.error('Please select a file')
+      toast.error(tc('selectCsvFile'))
       return
     }
 
@@ -64,22 +67,22 @@ export function PositionImportDialog({
       const result = await importAPI.import('position', file)
 
       setImportResult(result.data)
-      
+
       if (result.data.failureCount === 0) {
-        toast.success(`Successfully imported ${result.data.successCount} positions`)
+        toast.success(t('importSuccessToast', { count: result.data.successCount, entity: t('entityNamePlural') }))
         setTimeout(() => {
           onImportSuccess()
           handleClose()
         }, 2000)
       } else {
         toast.warning(
-          `Import completed with ${result.data.successCount} successes and ${result.data.failureCount} failures`
+          t('importWarningToast', { success: result.data.successCount, failure: result.data.failureCount })
         )
       }
     } catch (error: unknown) {
       console.error('Import error:', error)
       const message = error instanceof Error ? error.message : ''
-      toast.error(message || 'Failed to import positions')
+      toast.error(message || t('importErrorToast', { entity: t('entityNamePlural') }))
     } finally {
       setIsImporting(false)
     }
@@ -95,15 +98,15 @@ export function PositionImportDialog({
     <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Import Positions from CSV</DialogTitle>
+          <DialogTitle>{t('importDialogTitle', { entity: t('entityNamePluralCap') })}</DialogTitle>
           <DialogDescription>
-            Upload a CSV file to bulk import positions. Download the template first if you haven't already.
+            {t('importDialogDescription', { entity: t('entityNamePlural') })}
           </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="csv-file">CSV File</Label>
+            <Label htmlFor="csv-file">{t('csvFileLabel')}</Label>
             <Input
               id="csv-file"
               type="file"
@@ -113,7 +116,7 @@ export function PositionImportDialog({
             />
             {file && (
               <p className="text-sm text-muted-foreground">
-                Selected: {file.name} ({(file.size / 1024).toFixed(2)} KB)
+                {t('selectedFileInfo', { fileName: file.name, fileSize: (file.size / 1024).toFixed(2) })}
               </p>
             )}
           </div>
@@ -127,20 +130,20 @@ export function PositionImportDialog({
               )}
               <AlertDescription>
                 <div className="space-y-2">
-                  <p className="font-medium">Import Results:</p>
+                  <p className="font-medium">{t('importResultsTitle')}</p>
                   <ul className="list-disc list-inside space-y-1 text-sm">
-                    <li>Total Rows: {importResult.totalRows}</li>
-                    <li>Successful: {importResult.successCount}</li>
-                    <li>Failed: {importResult.failureCount}</li>
+                    <li>{tc('totalRows')}: {importResult.totalRows}</li>
+                    <li>{tc('successful')}: {importResult.successCount}</li>
+                    <li>{tc('failedCount')}: {importResult.failureCount}</li>
                   </ul>
-                  
+
                   {importResult.errors.length > 0 && (
                     <div className="mt-3">
-                      <p className="font-medium mb-1">Errors:</p>
+                      <p className="font-medium mb-1">{tc('importErrors')}</p>
                       <div className="max-h-40 overflow-y-auto space-y-1">
                         {importResult.errors.map((error, idx) => (
                           <p key={idx} className="text-xs">
-                            Row {error.rowIndex}: {error.message}
+                            {t('importRowError', { row: error.rowIndex, message: error.message })}
                           </p>
                         ))}
                       </div>
@@ -153,15 +156,15 @@ export function PositionImportDialog({
 
           <div className="flex justify-end gap-2">
             <Button variant="outline" onClick={handleClose} disabled={isImporting}>
-              Cancel
+              {tc('cancel')}
             </Button>
             <Button onClick={handleImport} disabled={!file || isImporting}>
               {isImporting ? (
-                <>Importing...</>
+                <>{tc('importing')}</>
               ) : (
                 <>
                   <IconUpload className="mr-2 size-4" />
-                  Import
+                  {tc('import')}
                 </>
               )}
             </Button>

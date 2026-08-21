@@ -92,8 +92,8 @@ export const calculateAverages = (matrix: any): CompetencyAverage[] => {
 
   // Sort by cluster name, then competency name
   return results.sort((a, b) => {
-    const clusterCompare = a.clusterName.localeCompare(b.clusterName)
+    const clusterCompare = (a.clusterName ?? "").localeCompare(b.clusterName ?? "")
     if (clusterCompare !== 0) return clusterCompare
-    return a.competencyName.localeCompare(b.competencyName)
+    return (a.competencyName ?? "").localeCompare(b.competencyName ?? "")
   })
 }

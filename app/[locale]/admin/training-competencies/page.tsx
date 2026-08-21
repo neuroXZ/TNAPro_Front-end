@@ -26,10 +26,11 @@ import { Training, getColumns } from "@/features/admin/training-competencies/com
 import { DataTablePagination } from "@/components/data-table-pagination"
 import { TrainingCompetencyTableSkeleton } from "@/features/admin/training-competencies/components/training-competency-table-skeleton"
 import { TrainingCompetencyDataTable } from "@/features/admin/training-competencies/components/training-competency-data-table"
-import { useTranslations } from "next-intl"
+import { useTranslations, useLocale } from "next-intl"
 
 export default function TrainingCompetencyManagementPage() {
   const t = useTranslations('AdminTrainingCompetenciesPage')
+  const locale = useLocale()
   const [trainings, setTrainings] = useState<Training[]>([])
   const [trainingCompetencies, setTrainingCompetencies] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
@@ -76,7 +77,7 @@ export default function TrainingCompetencyManagementPage() {
   }
 
   // Define columns
-  const columns = useMemo(() => getColumns(), [])
+  const columns = useMemo(() => getColumns(), [locale])
 
   // ==================== TABLE INITIALIZATION ====================
   const table = useReactTable({

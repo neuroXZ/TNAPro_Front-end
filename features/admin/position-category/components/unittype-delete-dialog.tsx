@@ -8,6 +8,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
+import { useTranslations } from "next-intl"
 import { PositionCategory } from "./columns"
 
 interface PositionCategoryDeleteDialogProps {
@@ -25,24 +26,27 @@ export function PositionCategoryDeleteDialog({
   selectedCount = 0,
   onConfirm,
 }: PositionCategoryDeleteDialogProps) {
+  const t = useTranslations('AdminPositionCategoryPage')
+  const tc = useTranslations('Common')
+
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+          <AlertDialogTitle>{tc('confirmTitle')}</AlertDialogTitle>
           <AlertDialogDescription>
             {deletingPositionCategory
-              ? `This will permanently delete "${deletingPositionCategory.name}". This action cannot be undone.`
-              : `This will permanently delete ${selectedCount} selected position categorys. This action cannot be undone.`}
+              ? tc('deleteSingleWarning', { name: deletingPositionCategory.name })
+              : tc('deleteBulkWarning', { count: selectedCount, entity: t('entityNamePlural') })}
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel>Cancel</AlertDialogCancel>
+          <AlertDialogCancel>{tc('cancel')}</AlertDialogCancel>
           <AlertDialogAction
             onClick={onConfirm}
             className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
           >
-            Delete
+            {tc('delete')}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>

@@ -7,6 +7,7 @@ import {
 } from "@/components/ui/dialog"
 import { Label } from "@/components/ui/label"
 import { Level } from "./columns"
+import { useTranslations } from "next-intl"
 
 interface LevelViewDialogProps {
   open: boolean
@@ -19,31 +20,34 @@ export function LevelViewDialog({
   onOpenChange,
   level,
 }: LevelViewDialogProps) {
+  const t = useTranslations('AdminLevelsPage')
+  const tc = useTranslations('Common')
+
   if (!level) return null
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Level Details</DialogTitle>
+          <DialogTitle>{tc('entityDetails', { entity: t('entityNameSingularCap') })}</DialogTitle>
           <DialogDescription>
-            View detailed information about {level.name}
+            {tc('viewDetailedInfo', { name: level.name })}
           </DialogDescription>
         </DialogHeader>
         <div className="grid gap-4 py-4">
           <div className="grid gap-2">
-            <Label className="text-muted-foreground">Level Name</Label>
+            <Label className="text-muted-foreground">{t('nameLabel')}</Label>
             <p className="text-sm font-medium">{level.name}</p>
           </div>
           {level.value !== null && level.value !== undefined && (
             <div className="grid gap-2">
-              <Label className="text-muted-foreground">Value</Label>
+              <Label className="text-muted-foreground">{t('valueLabel')}</Label>
               <p className="text-sm font-medium">{level.value}</p>
             </div>
           )}
           {level.description && (
             <div className="grid gap-2">
-              <Label className="text-muted-foreground">Description</Label>
+              <Label className="text-muted-foreground">{tc('description')}</Label>
               <p className="text-sm">{level.description}</p>
             </div>
           )}

@@ -4,6 +4,7 @@ import { IconCirclePlusFilled, IconMessages, IconChevronRight, IconBooks, type I
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
 import { useEffect, useMemo, useState } from "react"
+import { useTranslations } from "next-intl"
 
 import { Button } from "@/components/ui/button"
 import {
@@ -34,6 +35,7 @@ export function NavMain({
 }: {
   items: NavItem[]
 }) {
+  const t = useTranslations('NavMain')
   const pathname = usePathname()
   const router = useRouter()
   const [userRole, setUserRole] = useState<string | null>(null)
@@ -139,12 +141,12 @@ export function NavMain({
         <SidebarMenu>
           <SidebarMenuItem className="flex items-center gap-2">
             <SidebarMenuButton
-              tooltip="Documentation"
+              tooltip={t('documentation')}
               className="bg-primary text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground active:bg-primary/90 active:text-primary-foreground min-w-8 duration-200 ease-linear cursor-pointer"
               onClick={handleDocumentationClick}
             >
               <IconBooks />
-              <span>Documentation</span>
+              <span>{t('documentation')}</span>
             </SidebarMenuButton>
             <Button
               size="icon"
@@ -153,7 +155,7 @@ export function NavMain({
               onClick={() => router.push('/customer-service')}
             >
               <IconMessages />
-              <span className="sr-only">Inbox</span>
+              <span className="sr-only">{t('inbox')}</span>
             </Button>
           </SidebarMenuItem>
         </SidebarMenu>

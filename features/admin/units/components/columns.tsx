@@ -4,6 +4,7 @@ import { ColumnDef } from "@tanstack/react-table"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
 import { IconEdit, IconTrash, IconArrowUp, IconArrowDown, IconArrowsSort } from "@tabler/icons-react"
+import { useTranslations } from "next-intl"
 
 export interface Unit {
   id: string
@@ -11,11 +12,16 @@ export interface Unit {
   description?: string
   unitTypeId?: string
   parentId?: string
+  negeriId?: string
   unitType?: {
     id: string
     name: string
   }
   parent?: {
+    id: string
+    name: string
+  }
+  negeri?: {
     id: string
     name: string
   }
@@ -26,7 +32,18 @@ interface ColumnActions {
   onDelete: (unit: Unit) => void
 }
 
-export const getColumns = (actions: ColumnActions): ColumnDef<Unit>[] => [
+// Column id used by units/page.tsx to toggle this column's visibility via
+// the table's own columnVisibility state when the zonNegeri feature flag is
+// off — kept as a real, always-defined column (not conditionally included
+// here) since getColumns() calls hooks (useTranslations) and must always
+// call the same hooks in the same order regardless of the flag.
+export const NEGERI_COLUMN_ID = "negeri"
+
+export const getColumns = (actions: ColumnActions): ColumnDef<Unit>[] => {
+  const t = useTranslations('AdminUnitsPage')
+  const tc = useTranslations('Common')
+
+  return [
   {
     id: "select",
     header: ({ table }) => (
@@ -36,7 +53,7 @@ export const getColumns = (actions: ColumnActions): ColumnDef<Unit>[] => [
           (table.getIsSomePageRowsSelected() && "indeterminate")
         }
         onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
-        aria-label="Select all"
+        aria-label={t('selectAll')}
         onClick={(e) => e.stopPropagation()}
       />
     ),
@@ -44,7 +61,7 @@ export const getColumns = (actions: ColumnActions): ColumnDef<Unit>[] => [
       <Checkbox
         checked={row.getIsSelected()}
         onCheckedChange={(value) => row.toggleSelected(!!value)}
-        aria-label="Select row"
+        aria-label={t('selectRow')}
         onClick={(e) => e.stopPropagation()}
       />
     ),
@@ -60,7 +77,7 @@ export const getColumns = (actions: ColumnActions): ColumnDef<Unit>[] => [
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
           className="-ml-4"
         >
-          Unit Name
+          {t('colName')}
           {column.getIsSorted() === "asc" ? (
             <IconArrowUp className="ml-2 size-4" />
           ) : column.getIsSorted() === "desc" ? (
@@ -81,7 +98,7 @@ export const getColumns = (actions: ColumnActions): ColumnDef<Unit>[] => [
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
           className="-ml-4"
         >
-          Unit Type
+          {t('unitTypeLabel')}
           {column.getIsSorted() === "asc" ? (
             <IconArrowUp className="ml-2 size-4" />
           ) : column.getIsSorted() === "desc" ? (
@@ -110,7 +127,7 @@ export const getColumns = (actions: ColumnActions): ColumnDef<Unit>[] => [
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
           className="-ml-4"
         >
-          Parent Unit
+          {t('parentUnitLabel')}
           {column.getIsSorted() === "asc" ? (
             <IconArrowUp className="ml-2 size-4" />
           ) : column.getIsSorted() === "desc" ? (
@@ -131,8 +148,38 @@ export const getColumns = (actions: ColumnActions): ColumnDef<Unit>[] => [
     },
   },
   {
+    id: NEGERI_COLUMN_ID,
+    accessorKey: "negeri.name",
+    header: ({ column }) => {
+      return (
+        <Button
+          variant="ghost"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          className="-ml-4"
+        >
+          {t('negeriLabel')}
+          {column.getIsSorted() === "asc" ? (
+            <IconArrowUp className="ml-2 size-4" />
+          ) : column.getIsSorted() === "desc" ? (
+            <IconArrowDown className="ml-2 size-4" />
+          ) : (
+            <IconArrowsSort className="ml-2 size-4" />
+          )}
+        </Button>
+      )
+    },
+    cell: ({ row }) => {
+      const negeriName = row.original.negeri?.name
+      return negeriName ? (
+        <span>{negeriName}</span>
+      ) : (
+        <span className="text-muted-foreground">-</span>
+      )
+    },
+  },
+  {
     accessorKey: "description",
-    header: "Description",
+    header: tc('description'),
     cell: ({ row }) => {
       const description = row.original.description
       if (!description) return <span className="text-muted-foreground">-</span>
@@ -147,7 +194,7 @@ export const getColumns = (actions: ColumnActions): ColumnDef<Unit>[] => [
   },
   {
     id: "actions",
-    header: () => <div className="text-right">Actions</div>,
+    header: () => <div className="text-right">{tc('actions')}</div>,
     cell: ({ row }) => {
       const unit = row.original
 
@@ -177,4 +224,5 @@ export const getColumns = (actions: ColumnActions): ColumnDef<Unit>[] => [
       )
     },
   },
-]
+  ]
+}

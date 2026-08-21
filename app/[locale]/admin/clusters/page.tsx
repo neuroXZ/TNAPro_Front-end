@@ -30,10 +30,11 @@ import { ClusterTableSkeleton } from "@/features/admin/clusters/components/clust
 import { ClusterDataTable } from "@/features/admin/clusters/components/cluster-data-table"
 import { ClusterTableActions } from "@/features/admin/clusters/components/cluster-table-actions"
 import { ClusterViewDialog } from "@/features/admin/clusters/components/cluster-view-dialog"
-import { useTranslations } from "next-intl"
+import { useTranslations, useLocale } from "next-intl"
 
 export default function ClusterManagementPage() {
   const t = useTranslations('AdminClustersPage')
+  const locale = useLocale()
   const [clusters, setClusters] = useState<Cluster[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [isDialogOpen, setIsDialogOpen] = useState(false)
@@ -107,7 +108,7 @@ export default function ClusterManagementPage() {
         onDelete: handleOpenDeleteDialog,
       }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    []
+    [locale]
   )
 
   // ==================== TABLE INITIALIZATION ====================

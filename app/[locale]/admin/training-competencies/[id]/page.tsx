@@ -311,7 +311,7 @@ export default function TrainingCompetencyDetailPage() {
             {training?.startDate && `${new Date(training.startDate).toLocaleDateString()} - `}
             {training?.endDate && new Date(training.endDate).toLocaleDateString()}
             {training?.startDate && training?.endDate && " â€¢ "}
-            {trainingCompetencies.length} {trainingCompetencies.length === 1 ? "competency" : "competencies"} assigned
+            {t('assignedCompetencies', { count: trainingCompetencies.length })}
           </p>
         </div>
       </div>
@@ -322,7 +322,7 @@ export default function TrainingCompetencyDetailPage() {
             <div className="relative">
               <IconSearch className="absolute left-2.5 top-2.5 size-4 text-muted-foreground" />
               <Input
-                placeholder="Search competencies..."
+                placeholder={t('searchPlaceholder')}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="pl-8"

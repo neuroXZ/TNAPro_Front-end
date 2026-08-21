@@ -9,6 +9,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
 import { Staff } from "./columns"
+import { useTranslations } from "next-intl"
 
 interface StaffDeleteDialogProps {
   open: boolean
@@ -25,24 +26,27 @@ export function StaffDeleteDialog({
   selectedCount = 0,
   onConfirm,
 }: StaffDeleteDialogProps) {
+  const t = useTranslations('AdminStaffPage')
+  const tc = useTranslations('Common')
+
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+          <AlertDialogTitle>{tc('confirmTitle')}</AlertDialogTitle>
           <AlertDialogDescription>
             {deletingStaff
-              ? `This will permanently delete ${deletingStaff.name} (${deletingStaff.staffOrgId}). This action cannot be undone.`
-              : `This will permanently delete ${selectedCount} selected staff. This action cannot be undone.`}
+              ? t('deleteWarningSingle', { name: deletingStaff.name, staffOrgId: deletingStaff.staffOrgId })
+              : t('deleteWarningBulk', { count: selectedCount })}
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel>Cancel</AlertDialogCancel>
+          <AlertDialogCancel>{tc('cancel')}</AlertDialogCancel>
           <AlertDialogAction
             onClick={onConfirm}
             className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
           >
-            Delete
+            {tc('delete')}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>

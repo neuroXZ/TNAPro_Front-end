@@ -9,6 +9,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
 import { Grade } from "./columns"
+import { useTranslations } from "next-intl"
 
 interface GradeDeleteDialogProps {
   open: boolean
@@ -25,24 +26,26 @@ export function GradeDeleteDialog({
   selectedCount = 0,
   onConfirm,
 }: GradeDeleteDialogProps) {
+  const t = useTranslations('AdminGradesPage')
+  const tc = useTranslations('Common')
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+          <AlertDialogTitle>{tc('confirmTitle')}</AlertDialogTitle>
           <AlertDialogDescription>
             {deletingGrade
-              ? `This will permanently delete "${deletingGrade.name}". This action cannot be undone.`
-              : `This will permanently delete ${selectedCount} selected grades. This action cannot be undone.`}
+              ? tc('deleteSingleWarning', { name: deletingGrade.name })
+              : tc('deleteBulkWarning', { count: selectedCount, entity: t('entityNamePlural') })}
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel>Cancel</AlertDialogCancel>
+          <AlertDialogCancel>{tc('cancel')}</AlertDialogCancel>
           <AlertDialogAction
             onClick={onConfirm}
             className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
           >
-            Delete
+            {tc('delete')}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>

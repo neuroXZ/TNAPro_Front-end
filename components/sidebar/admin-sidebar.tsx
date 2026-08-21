@@ -18,6 +18,7 @@ import { NavUser } from "@/components/nav/nav-admin"
 import { useAuth } from "@/providers/auth-provider"
 import { settingAPI } from "@/lib/api"
 import { useTranslations } from "next-intl"
+import { useFeatureFlags } from "@/hooks/use-feature-flags"
 import {
   Sidebar,
   SidebarContent,
@@ -32,6 +33,7 @@ export function AdminSidebar({ ...props }: React.ComponentProps<typeof Sidebar>)
   const { user } = useAuth()
   const t = useTranslations('AdminSidebar')
   const [logoPath, setLogoPath] = React.useState<string | null>(null)
+  const { flags: featureFlags } = useFeatureFlags()
 
   const navMainItems = [
     {
@@ -49,6 +51,10 @@ export function AdminSidebar({ ...props }: React.ComponentProps<typeof Sidebar>)
         { title: t('grades'), url: "/admin/grades" },
         { title: t('positionCategories'), url: "/admin/position-category" },
         { title: t('positions'), url: "/admin/positions" },
+        ...(featureFlags.zonNegeri ? [
+          { title: t('zones'), url: "/admin/zon" },
+          { title: t('negeri'), url: "/admin/negeri" },
+        ] : []),
       ],
     },
     {
@@ -138,13 +144,13 @@ export function AdminSidebar({ ...props }: React.ComponentProps<typeof Sidebar>)
       <SidebarHeader>
         <SidebarMenu>
           {logoPath ? (
-            <div >
+            <div className="h-12 w-auto max-w-[180px] shrink-0 mx-auto">
               <Image
                 src={logoPath}
                 alt="Company Logo"
-                width={24}
-                height={24}
-                className="h-full w-full object-contain"
+                width={180}
+                height={48}
+                className="h-full w-auto object-contain"
               />
             </div>
           ) : (

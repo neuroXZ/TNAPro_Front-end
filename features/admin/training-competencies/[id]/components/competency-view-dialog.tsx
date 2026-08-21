@@ -7,6 +7,7 @@ import {
 } from "@/components/ui/dialog"
 import { Label } from "@/components/ui/label"
 import { Badge } from "@/components/ui/badge"
+import { useTranslations } from "next-intl"
 
 interface Competency {
   id: string
@@ -35,25 +36,29 @@ export function CompetencyViewDialog({
   competency,
   trainingCompetency,
 }: CompetencyViewDialogProps) {
+  const t = useTranslations('AdminTrainingCompetenciesDetailPage')
+  const tc = useTranslations('Common')
+  const tComp = useTranslations('AdminCompetenciesPage')
+
   if (!competency) return null
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Competency Details</DialogTitle>
+          <DialogTitle>{tc('entityDetails', { entity: tComp('entityNameSingularCap') })}</DialogTitle>
           <DialogDescription>
-            View detailed information about {competency.name}
+            {tc('viewDetailedInfo', { name: competency.name })}
           </DialogDescription>
         </DialogHeader>
         <div className="grid gap-4 py-4">
           <div className="grid gap-2">
-            <Label className="text-muted-foreground">Competency Name</Label>
+            <Label className="text-muted-foreground">{t('competencyNameLabel')}</Label>
             <p className="text-sm font-medium">{competency.name}</p>
           </div>
           {competency.cluster && (
             <div className="grid gap-2">
-              <Label className="text-muted-foreground">Cluster</Label>
+              <Label className="text-muted-foreground">{t('clusterLabel')}</Label>
               <div className="flex items-center gap-2">
                 {competency.cluster.color && (
                   <div
@@ -66,25 +71,25 @@ export function CompetencyViewDialog({
             </div>
           )}
           <div className="grid gap-2">
-            <Label className="text-muted-foreground">Status</Label>
+            <Label className="text-muted-foreground">{t('statusLabel')}</Label>
             <div className="flex items-center gap-2">
               {trainingCompetency ? (
-                <Badge variant="default">Added to Training</Badge>
+                <Badge variant="default">{t('addedToTraining')}</Badge>
               ) : (
-                <Badge variant="outline">Not Added</Badge>
+                <Badge variant="outline">{t('badgeNotAdded')}</Badge>
               )}
             </div>
           </div>
           {competency.description && (
             <div className="grid gap-2">
-              <Label className="text-muted-foreground">Description</Label>
+              <Label className="text-muted-foreground">{tc('description')}</Label>
               <p className="text-sm">{competency.description}</p>
             </div>
           )}
           {!trainingCompetency && (
             <div className="rounded-md bg-muted p-3">
               <p className="text-sm text-muted-foreground">
-                This competency has not been added to this training yet.
+                {t('notAddedYet')}
               </p>
             </div>
           )}

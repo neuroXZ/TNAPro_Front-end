@@ -7,6 +7,7 @@ import {
 } from "@/components/ui/dialog"
 import { Label } from "@/components/ui/label"
 import { Cluster } from "./columns"
+import { useTranslations } from "next-intl"
 
 interface ClusterViewDialogProps {
   open: boolean
@@ -19,31 +20,34 @@ export function ClusterViewDialog({
   onOpenChange,
   cluster,
 }: ClusterViewDialogProps) {
+  const t = useTranslations('AdminClustersPage')
+  const tc = useTranslations('Common')
+
   if (!cluster) return null
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Cluster Details</DialogTitle>
+          <DialogTitle>{tc('entityDetails', { entity: t('entityNameSingularCap') })}</DialogTitle>
           <DialogDescription>
-            View detailed information about {cluster.name}
+            {tc('viewDetailedInfo', { name: cluster.name })}
           </DialogDescription>
         </DialogHeader>
         <div className="grid gap-4 py-4">
           <div className="grid gap-2">
-            <Label className="text-muted-foreground">Cluster Name</Label>
+            <Label className="text-muted-foreground">{t('nameLabel')}</Label>
             <p className="text-sm font-medium">{cluster.name}</p>
           </div>
           {cluster.level !== null && cluster.level !== undefined && (
             <div className="grid gap-2">
-              <Label className="text-muted-foreground">Level</Label>
+              <Label className="text-muted-foreground">{t('levelLabel')}</Label>
               <p className="text-sm font-medium">{cluster.level}</p>
             </div>
           )}
           {cluster.color && (
             <div className="grid gap-2">
-              <Label className="text-muted-foreground">Color</Label>
+              <Label className="text-muted-foreground">{t('colorLabel')}</Label>
               <div className="flex items-center gap-2">
                 <div
                   className="size-6 rounded border"
@@ -55,7 +59,7 @@ export function ClusterViewDialog({
           )}
           {cluster.description && (
             <div className="grid gap-2">
-              <Label className="text-muted-foreground">Description</Label>
+              <Label className="text-muted-foreground">{tc('description')}</Label>
               <p className="text-sm">{cluster.description}</p>
             </div>
           )}

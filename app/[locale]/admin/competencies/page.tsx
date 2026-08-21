@@ -46,10 +46,11 @@ import { CompetencyDataTable } from "@/features/admin/competencies/components/co
 import { CompetencyTableActions } from "@/features/admin/competencies/components/competency-table-actions"
 import { CompetencyViewDialog } from "@/features/admin/competencies/components/competency-view-dialog"
 import { CompetencyImportDialog } from "@/features/admin/competencies/components/competency-import-dialog"
-import { useTranslations } from "next-intl"
+import { useTranslations, useLocale } from "next-intl"
 
 export default function CompetencyManagementPage() {
   const t = useTranslations('AdminCompetenciesPage')
+  const locale = useLocale()
   const [competencies, setCompetencies] = useState<Competency[]>([])
   const [clusters, setClusters] = useState<Array<{ id: string; name: string }>>([])
   const [selectedClusterId, setSelectedClusterId] = useState<string>("all")
@@ -143,7 +144,7 @@ export default function CompetencyManagementPage() {
         onDelete: handleOpenDeleteDialog,
       }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    []
+    [locale]
   )
 
   // ==================== TABLE INITIALIZATION ====================

@@ -8,6 +8,7 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { Unit } from "./columns"
+import { useTranslations } from "next-intl"
 
 interface UnitDataTableProps {
   table: TanStackTable<Unit>
@@ -16,6 +17,9 @@ interface UnitDataTableProps {
 }
 
 export function UnitDataTable({ table, columnsLength, onRowClick }: UnitDataTableProps) {
+  const t = useTranslations('AdminUnitsPage')
+  const tc = useTranslations('Common')
+
   return (
     <div className="rounded-md border">
       <Table>
@@ -60,7 +64,7 @@ export function UnitDataTable({ table, columnsLength, onRowClick }: UnitDataTabl
                 colSpan={columnsLength}
                 className="h-24 text-center"
               >
-                No units found
+                {tc('noResultsFound', { entity: t('entityNamePlural') })}
               </TableCell>
             </TableRow>
           )}

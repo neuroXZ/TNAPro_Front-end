@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge"
 import { Checkbox } from "@/components/ui/checkbox"
 import { IconEdit, IconTrash, IconArrowUp, IconArrowDown, IconArrowsSort } from "@tabler/icons-react"
 import { format, isBefore, isAfter } from "date-fns"
+import { useTranslations } from "next-intl"
 
 export interface Training {
   id: string
@@ -20,7 +21,11 @@ interface ColumnActions {
   onDelete: (training: Training) => void
 }
 
-export const getColumns = (actions: ColumnActions): ColumnDef<Training>[] => [
+export const getColumns = (actions: ColumnActions): ColumnDef<Training>[] => {
+  const t = useTranslations('AdminTrainingsPage')
+  const tc = useTranslations('Common')
+
+  return [
   {
     id: "select",
     header: ({ table }) => (
@@ -30,7 +35,7 @@ export const getColumns = (actions: ColumnActions): ColumnDef<Training>[] => [
           (table.getIsSomePageRowsSelected() && "indeterminate")
         }
         onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
-        aria-label="Select all"
+        aria-label={t('selectAll')}
         onClick={(e) => e.stopPropagation()}
       />
     ),
@@ -38,7 +43,7 @@ export const getColumns = (actions: ColumnActions): ColumnDef<Training>[] => [
       <Checkbox
         checked={row.getIsSelected()}
         onCheckedChange={(value) => row.toggleSelected(!!value)}
-        aria-label="Select row"
+        aria-label={t('selectRow')}
         onClick={(e) => e.stopPropagation()}
       />
     ),
@@ -54,7 +59,7 @@ export const getColumns = (actions: ColumnActions): ColumnDef<Training>[] => [
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
           className="-ml-4"
         >
-          Training Name
+          {t('colName')}
           {column.getIsSorted() === "asc" ? (
             <IconArrowUp className="ml-2 size-4" />
           ) : column.getIsSorted() === "desc" ? (
@@ -75,7 +80,7 @@ export const getColumns = (actions: ColumnActions): ColumnDef<Training>[] => [
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
           className="-ml-4"
         >
-          Start Date
+          {t('colStartDate')}
           {column.getIsSorted() === "asc" ? (
             <IconArrowUp className="ml-2 size-4" />
           ) : column.getIsSorted() === "desc" ? (
@@ -97,7 +102,7 @@ export const getColumns = (actions: ColumnActions): ColumnDef<Training>[] => [
   },
   {
     accessorKey: "endDate",
-    header: "End Date",
+    header: t('colEndDate'),
     cell: ({ row }) => {
       const endDate = row.original.endDate
       return endDate ? (
@@ -109,11 +114,11 @@ export const getColumns = (actions: ColumnActions): ColumnDef<Training>[] => [
   },
   {
     id: "status",
-    header: "Status",
+    header: t('colStatus'),
     cell: ({ row }) => {
       const { startDate, endDate } = row.original
       if (!startDate || !endDate) {
-        return <Badge variant="outline">No Date</Badge>
+        return <Badge variant="outline">{t('statusNoDate')}</Badge>
       }
 
       const now = new Date()
@@ -121,11 +126,11 @@ export const getColumns = (actions: ColumnActions): ColumnDef<Training>[] => [
       const end = new Date(endDate)
 
       if (isBefore(now, start)) {
-        return <Badge className="bg-blue-600 hover:bg-blue-700">Upcoming</Badge>
+        return <Badge className="bg-blue-600 hover:bg-blue-700">{t('statusUpcoming')}</Badge>
       } else if (isAfter(now, end)) {
-        return <Badge className="bg-red-600 hover:bg-red-700">Past</Badge>
+        return <Badge className="bg-red-600 hover:bg-red-700">{t('statusPast')}</Badge>
       } else {
-        return <Badge className="bg-green-600 hover:bg-green-700">Ongoing</Badge>
+        return <Badge className="bg-green-600 hover:bg-green-700">{t('statusOngoing')}</Badge>
       }
     },
   },
@@ -146,7 +151,7 @@ export const getColumns = (actions: ColumnActions): ColumnDef<Training>[] => [
   // },
   {
     id: "actions",
-    header: () => <div className="text-right">Actions</div>,
+    header: () => <div className="text-right">{tc('actions')}</div>,
     cell: ({ row }) => {
       const training = row.original
 
@@ -176,4 +181,5 @@ export const getColumns = (actions: ColumnActions): ColumnDef<Training>[] => [
       )
     },
   },
-]
+  ]
+}

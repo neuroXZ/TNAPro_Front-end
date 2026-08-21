@@ -8,6 +8,7 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { Staff } from "./columns"
+import { useTranslations } from "next-intl"
 
 interface StaffDataTableProps {
   table: TanStackTable<Staff>
@@ -16,6 +17,8 @@ interface StaffDataTableProps {
 }
 
 export function StaffDataTable({ table, columnsLength, onRowClick }: StaffDataTableProps) {
+  const t = useTranslations('AdminStaffPage')
+
   return (
     <div className="rounded-md border">
       <Table>
@@ -60,7 +63,7 @@ export function StaffDataTable({ table, columnsLength, onRowClick }: StaffDataTa
                 colSpan={columnsLength}
                 className="h-24 text-center"
               >
-                No staff found
+                {t('noStaffFound')}
               </TableCell>
             </TableRow>
           )}

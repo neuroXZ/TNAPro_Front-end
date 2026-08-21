@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
 import { levelAPI } from "@/lib/api"
 import { toast } from "sonner"
+import { useTranslations } from "next-intl"
 
 interface Level {
   id: string
@@ -34,6 +35,8 @@ export function BulkLevelDialog({
   isLoading,
   onSubmit,
 }: BulkLevelDialogProps) {
+  const t = useTranslations('AdminPositionCompetenciesDetailPage')
+  const tc = useTranslations('Common')
   const [selectedLevel, setSelectedLevel] = useState<number | null>(null)
   const [levels, setLevels] = useState<Level[]>([])
   const [isFetching, setIsFetching] = useState(false)
@@ -54,7 +57,7 @@ export function BulkLevelDialog({
       setLevels(sortedLevels)
     } catch (error) {
       console.error("Failed to fetch levels:", error)
-      toast.error("Failed to load levels")
+      toast.error(t('failedToLoadLevels'))
     } finally {
       setIsFetching(false)
     }
@@ -62,9 +65,9 @@ export function BulkLevelDialog({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    
+
     if (selectedLevel === null) {
-      toast.error("Please select a level")
+      toast.error(t('selectLevelRequired'))
       return
     }
 
@@ -76,21 +79,23 @@ export function BulkLevelDialog({
       <DialogContent className="sm:max-w-[500px]">
         <form onSubmit={handleSubmit}>
           <DialogHeader>
-            <DialogTitle>Set Level for Multiple Competencies</DialogTitle>
+            <DialogTitle>{t('setLevelMultipleTitle')}</DialogTitle>
             <DialogDescription>
-              Choose the required proficiency level for {count} selected competenc{count === 1 ? 'y' : 'ies'}
+              {count === 1
+                ? t('setLevelMultipleDescSingle', { count })
+                : t('setLevelMultipleDescMultiple', { count })}
             </DialogDescription>
           </DialogHeader>
           <div className="grid gap-4 py-4">
             <div className="grid gap-2">
-              <Label>Required Level *</Label>
+              <Label>{t('requiredLevelFieldLabel')}</Label>
               {isFetching ? (
                 <div className="text-sm text-muted-foreground py-4 text-center">
-                  Loading levels...
+                  {t('loadingLevels')}
                 </div>
               ) : levels.length === 0 ? (
                 <div className="text-sm text-muted-foreground py-4 text-center border rounded-md">
-                  No levels found. Please create levels first.
+                  {t('noLevelsFound')}
                 </div>
               ) : (
                 <div className="grid grid-cols-1 gap-2">
@@ -133,10 +138,14 @@ export function BulkLevelDialog({
               onClick={() => onOpenChange(false)}
               disabled={isLoading}
             >
-              Cancel
+              {tc('cancel')}
             </Button>
             <Button type="submit" disabled={isLoading || selectedLevel === null}>
-              {isLoading ? "Adding..." : `Add ${count} Competenc${count === 1 ? 'y' : 'ies'}`}
+              {isLoading
+                ? t('addingLabel')
+                : count === 1
+                  ? t('addCompetencyButtonSingle', { count })
+                  : t('addCompetencyButtonMultiple', { count })}
             </Button>
           </DialogFooter>
         </form>

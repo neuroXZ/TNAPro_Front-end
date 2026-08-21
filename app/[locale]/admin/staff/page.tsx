@@ -63,7 +63,7 @@ import { StaffDataTable } from "@/features/admin/staff/components/staff-data-tab
 import { StaffTableActions } from "@/features/admin/staff/components/staff-table-actions"
 import { StaffViewDialog } from "@/features/admin/staff/components/staff-view-dialog"
 import { StaffImportDialog } from "@/features/admin/staff/components/staff-import-dialog"
-import { useTranslations } from "next-intl"
+import { useTranslations, useLocale } from "next-intl"
 
 function formatPositionLabel(position: { name: string; grade?: { name: string | null } | null }) {
   return position.grade?.name ? `${position.name} — ${position.grade.name}` : position.name
@@ -71,6 +71,7 @@ function formatPositionLabel(position: { name: string; grade?: { name: string | 
 
 export default function StaffManagementPage() {
   const t = useTranslations('AdminStaffPage')
+  const locale = useLocale()
   const router = useRouter()
   const [staff, setStaff] = useState<Staff[]>([])
   const [positions, setPositions] = useState<Array<{ id: string; name: string; grade?: { name: string | null } | null }>>([])
@@ -220,7 +221,7 @@ export default function StaffManagementPage() {
         onDelete: handleOpenDeleteDialog,
       }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    []
+    [locale]
   )
 
   // ==================== TABLE INITIALIZATION ====================

@@ -2,6 +2,7 @@
 
 import * as React from "react"
 import { CheckIcon, ChevronsUpDownIcon } from "lucide-react"
+import { useTranslations } from "next-intl"
 
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
@@ -39,12 +40,16 @@ export function Combobox({
   options,
   value,
   onChange,
-  placeholder = "Select...",
-  searchPlaceholder = "Search...",
-  emptyText = "No results found.",
+  placeholder,
+  searchPlaceholder,
+  emptyText,
   disabled,
   className,
 }: ComboboxProps) {
+  const t = useTranslations('Combobox')
+  const resolvedPlaceholder = placeholder ?? t('selectPlaceholder')
+  const resolvedSearchPlaceholder = searchPlaceholder ?? t('searchPlaceholder')
+  const resolvedEmptyText = emptyText ?? t('noResults')
   const [open, setOpen] = React.useState(false)
   const selected = options.find((option) => option.value === value)
 
@@ -63,15 +68,15 @@ export function Combobox({
             className
           )}
         >
-          <span className="truncate">{selected ? selected.label : placeholder}</span>
+          <span className="truncate">{selected ? selected.label : resolvedPlaceholder}</span>
           <ChevronsUpDownIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-(--radix-popover-trigger-width) p-0" align="start">
         <Command>
-          <CommandInput placeholder={searchPlaceholder} />
+          <CommandInput placeholder={resolvedSearchPlaceholder} />
           <CommandList className="max-h-[200px] overflow-y-auto">
-            <CommandEmpty>{emptyText}</CommandEmpty>
+            <CommandEmpty>{resolvedEmptyText}</CommandEmpty>
             <CommandGroup>
               {options.map((option) => (
                 <CommandItem

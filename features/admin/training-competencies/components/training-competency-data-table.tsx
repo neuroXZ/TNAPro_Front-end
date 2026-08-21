@@ -9,6 +9,7 @@ import {
 } from "@/components/ui/table"
 import { Training } from "./columns"
 import { useRouter } from "next/navigation"
+import { useTranslations } from "next-intl"
 
 interface TrainingCompetencyDataTableProps {
   table: TanStackTable<Training>
@@ -17,6 +18,8 @@ interface TrainingCompetencyDataTableProps {
 
 export function TrainingCompetencyDataTable({ table, columnsLength }: TrainingCompetencyDataTableProps) {
   const router = useRouter()
+  const t = useTranslations('AdminTrainingCompetenciesPage')
+  const tc = useTranslations('Common')
 
   return (
     <div className="rounded-md border">
@@ -62,7 +65,7 @@ export function TrainingCompetencyDataTable({ table, columnsLength }: TrainingCo
                 colSpan={columnsLength}
                 className="h-24 text-center"
               >
-                No trainings found
+                {tc('noResultsFound', { entity: t('entityNamePlural') })}
               </TableCell>
             </TableRow>
           )}

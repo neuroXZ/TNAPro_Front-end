@@ -9,6 +9,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
 import { Training } from "./columns"
+import { useTranslations } from "next-intl"
 
 interface TrainingDeleteDialogProps {
   open: boolean
@@ -25,24 +26,27 @@ export function TrainingDeleteDialog({
   selectedCount = 0,
   onConfirm,
 }: TrainingDeleteDialogProps) {
+  const t = useTranslations('AdminTrainingsPage')
+  const tc = useTranslations('Common')
+
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+          <AlertDialogTitle>{tc('confirmTitle')}</AlertDialogTitle>
           <AlertDialogDescription>
             {deletingTraining
-              ? `This will permanently delete "${deletingTraining.name}". This action cannot be undone.`
-              : `This will permanently delete ${selectedCount} selected trainings. This action cannot be undone.`}
+              ? tc('deleteSingleWarning', { name: deletingTraining.name })
+              : tc('deleteBulkWarning', { count: selectedCount, entity: t('entityNamePlural') })}
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel>Cancel</AlertDialogCancel>
+          <AlertDialogCancel>{tc('cancel')}</AlertDialogCancel>
           <AlertDialogAction
             onClick={onConfirm}
             className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
           >
-            Delete
+            {tc('delete')}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>

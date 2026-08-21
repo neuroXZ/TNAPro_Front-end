@@ -7,6 +7,7 @@ import {
 } from "@/components/ui/dialog"
 import { Label } from "@/components/ui/label"
 import { Competency } from "./columns"
+import { useTranslations } from "next-intl"
 
 interface CompetencyViewDialogProps {
   open: boolean
@@ -19,31 +20,34 @@ export function CompetencyViewDialog({
   onOpenChange,
   competency,
 }: CompetencyViewDialogProps) {
+  const t = useTranslations('AdminCompetenciesPage')
+  const tc = useTranslations('Common')
+
   if (!competency) return null
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Competency Details</DialogTitle>
+          <DialogTitle>{tc('entityDetails', { entity: t('entityNameSingularCap') })}</DialogTitle>
           <DialogDescription>
-            View detailed information about {competency.name}
+            {tc('viewDetailedInfo', { name: competency.name })}
           </DialogDescription>
         </DialogHeader>
         <div className="grid gap-4 py-4">
           <div className="grid gap-2">
-            <Label className="text-muted-foreground">Competency Name</Label>
+            <Label className="text-muted-foreground">{t('nameLabel')}</Label>
             <p className="text-sm font-medium">{competency.name}</p>
           </div>
           {competency.cluster && (
             <div className="grid gap-2">
-              <Label className="text-muted-foreground">Cluster</Label>
+              <Label className="text-muted-foreground">{t('clusterLabel')}</Label>
               <p className="text-sm font-medium">{competency.cluster.name}</p>
             </div>
           )}
           {competency.description && (
             <div className="grid gap-2">
-              <Label className="text-muted-foreground">Description</Label>
+              <Label className="text-muted-foreground">{tc('description')}</Label>
               <p className="text-sm">{competency.description}</p>
             </div>
           )}

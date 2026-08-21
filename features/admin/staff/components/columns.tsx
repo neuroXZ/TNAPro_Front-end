@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Badge } from "@/components/ui/badge"
 import { IconEdit, IconTrash, IconArrowUp, IconArrowDown, IconArrowsSort } from "@tabler/icons-react"
+import { useTranslations } from "next-intl"
 
 export interface Staff {
   id: string
@@ -36,7 +37,11 @@ interface ColumnActions {
   onDelete: (staff: Staff) => void
 }
 
-export const getColumns = (actions: ColumnActions): ColumnDef<Staff>[] => [
+export const getColumns = (actions: ColumnActions): ColumnDef<Staff>[] => {
+  const t = useTranslations('AdminStaffPage')
+  const tc = useTranslations('Common')
+
+  return [
   {
     id: "select",
     header: ({ table }) => (
@@ -46,7 +51,7 @@ export const getColumns = (actions: ColumnActions): ColumnDef<Staff>[] => [
           (table.getIsSomePageRowsSelected() && "indeterminate")
         }
         onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
-        aria-label="Select all"
+        aria-label={t('selectAll')}
         onClick={(e) => e.stopPropagation()}
       />
     ),
@@ -54,14 +59,14 @@ export const getColumns = (actions: ColumnActions): ColumnDef<Staff>[] => [
       <Checkbox
         checked={row.getIsSelected()}
         onCheckedChange={(value) => row.toggleSelected(!!value)}
-        aria-label="Select row"
+        aria-label={t('selectRow')}
         onClick={(e) => e.stopPropagation()}
       />
     ),
     enableSorting: false,
     enableHiding: false,
   },
-  
+
   {
     accessorKey: "name",
     header: ({ column }) => {
@@ -71,7 +76,7 @@ export const getColumns = (actions: ColumnActions): ColumnDef<Staff>[] => [
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
           className="-ml-4"
         >
-          Name
+          {t('colName')}
           {column.getIsSorted() === "asc" ? (
             <IconArrowUp className="ml-2 size-4" />
           ) : column.getIsSorted() === "desc" ? (
@@ -103,22 +108,22 @@ export const getColumns = (actions: ColumnActions): ColumnDef<Staff>[] => [
   },
   {
     accessorKey: "email",
-    header: "Email",
+    header: t('colEmail'),
     cell: ({ row }) => <div>{row.getValue("email") || "-"}</div>,
   },
   {
     accessorKey: "position.name",
-    header: "Position",
+    header: t('colPosition'),
     cell: ({ row }) => <div>{row.original.position?.name || "-"}</div>,
   },
   {
     accessorKey: "unit.name",
-    header: "Unit",
+    header: t('colUnit'),
     cell: ({ row }) => <div>{row.original.unit?.name || "-"}</div>,
   },
   {
     id: "actions",
-    header: () => <div className="text-right">Actions</div>,
+    header: () => <div className="text-right">{tc('actions')}</div>,
     cell: ({ row }) => {
       const staff = row.original
 
@@ -149,3 +154,4 @@ export const getColumns = (actions: ColumnActions): ColumnDef<Staff>[] => [
     },
   },
 ]
+}

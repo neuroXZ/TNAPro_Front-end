@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
 import { IconEye, IconArrowUp, IconArrowDown, IconArrowsSort } from "@tabler/icons-react"
 import { useRouter } from "next/navigation"
+import { useTranslations } from "next-intl"
 
 export interface Position {
   id: string
@@ -19,7 +20,11 @@ export interface Position {
   }
 }
 
-export const getColumns = (): ColumnDef<Position>[] => [
+export const getColumns = (): ColumnDef<Position>[] => {
+  const t = useTranslations('AdminPositionCompetenciesPage')
+  const tc = useTranslations('Common')
+
+  return [
   {
     id: "select",
     header: ({ table }) => (
@@ -29,7 +34,7 @@ export const getColumns = (): ColumnDef<Position>[] => [
           (table.getIsSomePageRowsSelected() && "indeterminate")
         }
         onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
-        aria-label="Select all"
+        aria-label={t('selectAll')}
         onClick={(e) => e.stopPropagation()}
       />
     ),
@@ -37,7 +42,7 @@ export const getColumns = (): ColumnDef<Position>[] => [
       <Checkbox
         checked={row.getIsSelected()}
         onCheckedChange={(value) => row.toggleSelected(!!value)}
-        aria-label="Select row"
+        aria-label={t('selectRow')}
         onClick={(e) => e.stopPropagation()}
       />
     ),
@@ -53,7 +58,7 @@ export const getColumns = (): ColumnDef<Position>[] => [
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
           className="-ml-4"
         >
-          Position Name
+          {t('colPositionName')}
           {column.getIsSorted() === "asc" ? (
             <IconArrowUp className="ml-2 size-4" />
           ) : column.getIsSorted() === "desc" ? (
@@ -67,7 +72,7 @@ export const getColumns = (): ColumnDef<Position>[] => [
   },
   {
     accessorKey: "grade.name",
-    header: "Grade",
+    header: t('colGrade'),
     cell: ({ row }) => {
       const gradeName = row.original.grade?.name
       return gradeName ? (
@@ -79,19 +84,19 @@ export const getColumns = (): ColumnDef<Position>[] => [
   },
   {
     accessorKey: "_count.positionCompetencies",
-    header: "Total Competencies",
+    header: t('colTotalCompetencies'),
     cell: ({ row }) => {
       const count = row.original._count?.positionCompetencies || 0
       return (
         <span className="font-medium">
-          {count} {count === 1 ? "competency" : "competencies"}
+          {count === 1 ? t('competencyCount', { count }) : t('competenciesCount', { count })}
         </span>
       )
     },
   },
   {
     id: "actions",
-    header: () => <div className="text-right">Actions</div>,
+    header: () => <div className="text-right">{tc('actions')}</div>,
     cell: ({ row }) => {
       const position = row.original
       const router = useRouter()
@@ -107,10 +112,11 @@ export const getColumns = (): ColumnDef<Position>[] => [
             }}
           >
             <IconEye className="mr-2 size-4" />
-            Manage Competencies
+            {t('manageCompetencies')}
           </Button>
         </div>
       )
     },
   },
 ]
+}

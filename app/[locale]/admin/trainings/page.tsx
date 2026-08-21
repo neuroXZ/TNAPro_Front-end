@@ -31,10 +31,11 @@ import { TrainingDataTable } from "@/features/admin/trainings/components/trainin
 import { TrainingTableActions } from "@/features/admin/trainings/components/training-table-actions"
 import { TrainingViewDialog } from "@/features/admin/trainings/components/training-view-dialog"
 import { TrainingImportDialog } from "@/features/admin/trainings/components/training-import-dialog"
-import { useTranslations } from "next-intl"
+import { useTranslations, useLocale } from "next-intl"
 
 export default function TrainingManagementPage() {
   const t = useTranslations('AdminTrainingsPage')
+  const locale = useLocale()
   const [trainings, setTrainings] = useState<Training[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [isDialogOpen, setIsDialogOpen] = useState(false)
@@ -109,7 +110,7 @@ export default function TrainingManagementPage() {
         onDelete: handleOpenDeleteDialog,
       }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    []
+    [locale]
   )
 
   // ==================== TABLE INITIALIZATION ====================

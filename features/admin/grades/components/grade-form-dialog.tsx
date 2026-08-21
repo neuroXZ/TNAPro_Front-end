@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Grade } from "./columns"
+import { useTranslations } from "next-intl"
 
 interface GradeFormData {
   name: string
@@ -31,6 +32,8 @@ export function GradeFormDialog({
   editingGrade,
   onSubmit,
 }: GradeFormDialogProps) {
+  const t = useTranslations('AdminGradesPage')
+  const tc = useTranslations('Common')
   const [isSaving, setIsSaving] = useState(false)
   const [formData, setFormData] = useState<GradeFormData>({
     name: editingGrade?.name || "",
@@ -75,29 +78,29 @@ export function GradeFormDialog({
         <form onSubmit={handleSubmit}>
           <DialogHeader>
             <DialogTitle>
-              {editingGrade ? "Edit Grade" : "Add New Grade"}
+              {editingGrade ? tc('editEntity', { entity: t('entityNameSingularCap') }) : tc('addNewEntity', { entity: t('entityNameSingularCap') })}
             </DialogTitle>
             <DialogDescription>
               {editingGrade
-                ? "Update grade information"
-                : "Add a new grade to the system"}
+                ? t('formEditDescription')
+                : t('formAddDescription')}
             </DialogDescription>
           </DialogHeader>
           <div className="grid gap-4 py-4">
             <div className="grid gap-2">
-              <Label htmlFor="name">Grade Name *</Label>
+              <Label htmlFor="name">{t('formNameLabel')}</Label>
               <Input
                 id="name"
                 value={formData.name}
                 onChange={(e) =>
                   setFormData({ ...formData, name: e.target.value })
                 }
-                placeholder="Enter grade name"
+                placeholder={t('formNamePlaceholder')}
                 required
               />
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="level">Level</Label>
+              <Label htmlFor="level">{t('colLevel')}</Label>
               <Input
                 id="level"
                 type="number"
@@ -110,18 +113,18 @@ export function GradeFormDialog({
                     level: e.target.value ? Number(e.target.value) : undefined,
                   })
                 }
-                placeholder="Enter level (optional)"
+                placeholder={t('formLevelPlaceholder')}
               />
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="description">Description</Label>
+              <Label htmlFor="description">{tc('description')}</Label>
               <textarea
                 id="description"
                 value={formData.description}
                 onChange={(e) =>
                   setFormData({ ...formData, description: e.target.value })
                 }
-                placeholder="Enter description (optional)"
+                placeholder={tc('enterDescriptionOptional')}
                 className="flex min-h-20 w-full rounded-md border border-input bg-background px-3 py-2 text-base ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
               />
             </div>
@@ -133,10 +136,10 @@ export function GradeFormDialog({
               onClick={() => onOpenChange(false)}
               disabled={isSaving}
             >
-              Cancel
+              {tc('cancel')}
             </Button>
             <Button type="submit" disabled={isSaving}>
-              {isSaving ? "Saving..." : editingGrade ? "Update" : "Create"}
+              {isSaving ? tc('saving') : editingGrade ? tc('update') : tc('create')}
             </Button>
           </DialogFooter>
         </form>

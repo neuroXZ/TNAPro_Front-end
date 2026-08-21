@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Cluster } from "./columns"
+import { useTranslations } from "next-intl"
 
 interface ClusterFormData {
   name: string
@@ -32,6 +33,8 @@ export function ClusterFormDialog({
   editingCluster,
   onSubmit,
 }: ClusterFormDialogProps) {
+  const t = useTranslations('AdminClustersPage')
+  const tc = useTranslations('Common')
   const [isSaving, setIsSaving] = useState(false)
   const [formData, setFormData] = useState<ClusterFormData>({
     name: editingCluster?.name || "",
@@ -79,29 +82,29 @@ export function ClusterFormDialog({
         <form onSubmit={handleSubmit}>
           <DialogHeader>
             <DialogTitle>
-              {editingCluster ? "Edit Cluster" : "Add New Cluster"}
+              {editingCluster ? tc('editEntity', { entity: t('entityNameSingularCap') }) : tc('addNewEntity', { entity: t('entityNameSingularCap') })}
             </DialogTitle>
             <DialogDescription>
               {editingCluster
-                ? "Update cluster information"
-                : "Add a new competency cluster to the system"}
+                ? t('editDescription')
+                : t('addDescription')}
             </DialogDescription>
           </DialogHeader>
           <div className="grid gap-4 py-4">
             <div className="grid gap-2">
-              <Label htmlFor="name">Cluster Name *</Label>
+              <Label htmlFor="name">{t('nameLabel')} *</Label>
               <Input
                 id="name"
                 value={formData.name}
                 onChange={(e) =>
                   setFormData({ ...formData, name: e.target.value })
                 }
-                placeholder="Enter cluster name"
+                placeholder={t('namePlaceholder')}
                 required
               />
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="level">Level</Label>
+              <Label htmlFor="level">{t('levelLabel')}</Label>
               <Input
                 id="level"
                 type="number"
@@ -114,11 +117,11 @@ export function ClusterFormDialog({
                     level: e.target.value ? Number(e.target.value) : undefined,
                   })
                 }
-                placeholder="Enter level (optional)"
+                placeholder={t('levelPlaceholder')}
               />
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="color">Color</Label>
+              <Label htmlFor="color">{t('colorLabel')}</Label>
               <div className="flex gap-2">
                 <Input
                   id="color"
@@ -134,20 +137,20 @@ export function ClusterFormDialog({
                   onChange={(e) =>
                     setFormData({ ...formData, color: e.target.value })
                   }
-                  placeholder="Enter color code (e.g., #FF5733)"
+                  placeholder={t('colorPlaceholder')}
                   className="flex-1"
                 />
               </div>
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="description">Description</Label>
+              <Label htmlFor="description">{tc('description')}</Label>
               <textarea
                 id="description"
                 value={formData.description}
                 onChange={(e) =>
                   setFormData({ ...formData, description: e.target.value })
                 }
-                placeholder="Enter description (optional)"
+                placeholder={tc('enterDescriptionOptional')}
                 className="flex min-h-20 w-full rounded-md border border-input bg-background px-3 py-2 text-base ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
               />
             </div>
@@ -159,10 +162,10 @@ export function ClusterFormDialog({
               onClick={() => onOpenChange(false)}
               disabled={isSaving}
             >
-              Cancel
+              {tc('cancel')}
             </Button>
             <Button type="submit" disabled={isSaving}>
-              {isSaving ? "Saving..." : editingCluster ? "Update" : "Create"}
+              {isSaving ? tc('saving') : editingCluster ? tc('update') : tc('create')}
             </Button>
           </DialogFooter>
         </form>

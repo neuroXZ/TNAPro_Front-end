@@ -36,7 +36,7 @@ import {
 } from "@/components/ui/popover"
 import { IconSearch, IconFilter } from "@tabler/icons-react"
 import { toast } from "sonner"
-import { Unit, getColumns } from "@/features/admin/units/components/columns"
+import { Unit, getColumns, NEGERI_COLUMN_ID } from "@/features/admin/units/components/columns"
 import { DataTablePagination } from "@/components/data-table-pagination"
 import { UnitFormDialog, type UnitFormData } from "@/features/admin/units/components/unit-form-dialog"
 import { UnitDeleteDialog } from "@/features/admin/units/components/unit-delete-dialog"
@@ -45,6 +45,7 @@ import { UnitDataTable } from "@/features/admin/units/components/unit-data-table
 import { UnitTableActions } from "@/features/admin/units/components/unit-table-actions"
 import { UnitViewDialog } from "@/features/admin/units/components/unit-view-dialog"
 import { useTranslations } from "next-intl"
+import { useFeatureFlags } from "@/hooks/use-feature-flags"
 
 interface UnitType {
   id: string
@@ -53,6 +54,7 @@ interface UnitType {
 
 export default function UnitManagementPage() {
   const t = useTranslations('AdminUnitsPage')
+  const { flags: featureFlags } = useFeatureFlags()
   const [units, setUnits] = useState<Unit[]>([])
   const [unitTypes, setUnitTypes] = useState<UnitType[]>([])
   const [isLoading, setIsLoading] = useState(true)
@@ -76,6 +78,14 @@ export default function UnitManagementPage() {
     fetchUnits()
     fetchUnitTypes()
   }, [])
+
+  // Hide the Negeri column entirely on deployments without the feature
+  // flag on, via the table's own column-visibility state (rather than
+  // conditionally including it in getColumns() — that function calls hooks,
+  // so it must always return the same fixed set of columns).
+  useEffect(() => {
+    setColumnVisibility((prev) => ({ ...prev, [NEGERI_COLUMN_ID]: featureFlags.zonNegeri }))
+  }, [featureFlags.zonNegeri])
 
   // ==================== DATA FETCHING ====================
   const fetchUnits = async () => {
@@ -147,16 +157,15 @@ export default function UnitManagementPage() {
     setIsDeleteDialogOpen(true)
   }
 
-  // Define columns after handler functions are declared
-  const columns = useMemo(
-    () =>
-      getColumns({
-        onEdit: handleOpenDialog,
-        onDelete: handleOpenDeleteDialog,
-      }),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    []
-  )
+  // Not wrapped in useMemo: getColumns() calls hooks (useTranslations), and
+  // hooks can only be called unconditionally at the top level of a render —
+  // wrapping it in useMemo made those calls conditional on the dependency
+  // array, which crashes React with "change in the order of Hooks" the
+  // moment the memo ever recomputes.
+  const columns = getColumns({
+    onEdit: handleOpenDialog,
+    onDelete: handleOpenDeleteDialog,
+  })
 
   // ==================== TABLE INITIALIZATION ====================
   // Initialize table after columns are defined

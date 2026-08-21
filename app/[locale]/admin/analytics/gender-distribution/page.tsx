@@ -145,7 +145,7 @@ export default function GenderDistributionDetailPage() {
       .map((group) => ({
         ...group,
         staff: [...group.staff].sort((firstStaff, secondStaff) =>
-          firstStaff.name.localeCompare(secondStaff.name),
+          (firstStaff.name ?? "").localeCompare(secondStaff.name ?? ""),
         ),
       }))
       .sort((firstGroup, secondGroup) => {

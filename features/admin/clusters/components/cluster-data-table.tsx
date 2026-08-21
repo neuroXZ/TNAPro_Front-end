@@ -8,6 +8,7 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { Cluster } from "./columns"
+import { useTranslations } from "next-intl"
 
 interface ClusterDataTableProps {
   table: TanStackTable<Cluster>
@@ -16,6 +17,9 @@ interface ClusterDataTableProps {
 }
 
 export function ClusterDataTable({ table, columnsLength, onRowClick }: ClusterDataTableProps) {
+  const t = useTranslations('AdminClustersPage')
+  const tc = useTranslations('Common')
+
   return (
     <div className="rounded-md border">
       <Table>
@@ -60,7 +64,7 @@ export function ClusterDataTable({ table, columnsLength, onRowClick }: ClusterDa
                 colSpan={columnsLength}
                 className="h-24 text-center"
               >
-                No clusters found
+                {tc('noResultsFound', { entity: t('entityNamePlural') })}
               </TableCell>
             </TableRow>
           )}

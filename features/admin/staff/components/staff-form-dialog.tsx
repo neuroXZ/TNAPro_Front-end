@@ -23,6 +23,7 @@ import { IconEye, IconEyeOff, IconUpload, IconX, IconUser } from "@tabler/icons-
 import { positionAPI, unitAPI, staffAPI } from "@/lib/api"
 import { Staff } from "./columns"
 import { toast } from "sonner"
+import { useTranslations } from "next-intl"
 
 interface StaffFormData {
   staffOrgId: string
@@ -60,6 +61,8 @@ export function StaffFormDialog({
   editingStaff,
   onSubmit,
 }: StaffFormDialogProps) {
+  const t = useTranslations('AdminStaffPage')
+  const tc = useTranslations('Common')
   const [isSaving, setIsSaving] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
   const [positions, setPositions] = useState<Position[]>([])
@@ -134,13 +137,13 @@ export function StaffFormDialog({
     // Validate file type
     const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp']
     if (!allowedTypes.includes(file.type)) {
-      toast.error('Invalid file type. Only JPEG, PNG, GIF, and WEBP are allowed.')
+      toast.error(t('invalidFileType'))
       return
     }
 
     // Validate file size (5MB max)
     if (file.size > 5 * 1024 * 1024) {
-      toast.error('File size too large. Maximum size is 5MB.')
+      toast.error(t('fileTooLarge'))
       return
     }
 
@@ -153,10 +156,10 @@ export function StaffFormDialog({
       setFormData({ ...formData, image: result.photoPath })
       setPreviewUrl(result.photoPath)
       
-      toast.success('Photo uploaded successfully!')
+      toast.success(t('photoUploadSuccess'))
     } catch (error) {
       console.error('Upload error:', error)
-      toast.error('Failed to upload photo')
+      toast.error(t('photoUploadError'))
     } finally {
       setIsUploading(false)
     }
@@ -190,44 +193,44 @@ export function StaffFormDialog({
         <form onSubmit={handleSubmit}>
           <DialogHeader>
             <DialogTitle>
-              {editingStaff ? "Edit Staff" : "Add New Staff"}
+              {editingStaff ? t('editStaffTitle') : t('addNewStaffTitle')}
             </DialogTitle>
             <DialogDescription>
               {editingStaff
-                ? "Update staff member information"
-                : "Add a new staff member to the system"}
+                ? t('updateStaffInfoDesc')
+                : t('addStaffDesc')}
             </DialogDescription>
           </DialogHeader>
           <div className="grid gap-4 py-4">
 
             <div className="grid gap-2">
-              <Label htmlFor="name">Full Name *</Label>
+              <Label htmlFor="name">{t('fieldFullNameRequired')}</Label>
               <Input
                 id="name"
                 value={formData.name}
                 onChange={(e) =>
                   setFormData({ ...formData, name: e.target.value })
                 }
-                placeholder="Enter full name"
+                placeholder={t('placeholderFullName')}
                 required
               />
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div className="grid gap-2">
-                <Label htmlFor="staffOrgId">Staff ID *</Label>
+                <Label htmlFor="staffOrgId">{t('fieldStaffIdRequired')}</Label>
                 <Input
                   id="staffOrgId"
                   value={formData.staffOrgId}
                   onChange={(e) =>
                     setFormData({ ...formData, staffOrgId: e.target.value })
                   }
-                  placeholder="e.g., STF001"
+                  placeholder={t('placeholderStaffId')}
                   required
                   disabled={!!editingStaff}
                 />
               </div>
               <div className="grid gap-2">
-                <Label htmlFor="email">Email *</Label>
+                <Label htmlFor="email">{t('fieldEmailRequired')}</Label>
                 <Input
                   id="email"
                   type="email"
@@ -235,14 +238,14 @@ export function StaffFormDialog({
                   onChange={(e) =>
                     setFormData({ ...formData, email: e.target.value })
                   }
-                  placeholder="email@example.com"
+                  placeholder={t('placeholderEmail')}
                   required
                 />
               </div>
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div className="grid gap-2">
-                <Label htmlFor="gender">Gender</Label>
+                <Label htmlFor="gender">{t('fieldGender')}</Label>
                 <Select
                   value={formData.gender || undefined}
                   onValueChange={(value) =>
@@ -250,18 +253,17 @@ export function StaffFormDialog({
                   }
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder="Select gender (optional)" />
+                    <SelectValue placeholder={t('placeholderGender')} />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="male">Male</SelectItem>
-                    <SelectItem value="female">Female</SelectItem>
+                    <SelectItem value="male">{t('genderMale')}</SelectItem>
+                    <SelectItem value="female">{t('genderFemale')}</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
               <div className="grid gap-2">
                 <Label htmlFor="password">
-                  Password {!editingStaff && "*"}
-                  {editingStaff && " (leave blank to keep current)"}
+                  {editingStaff ? t('fieldPasswordOptional') : t('fieldPasswordRequired')}
                 </Label>
                 <div className="relative">
                   <Input
@@ -271,7 +273,7 @@ export function StaffFormDialog({
                     onChange={(e) =>
                       setFormData({ ...formData, password: e.target.value })
                     }
-                    placeholder="Enter password"
+                    placeholder={t('placeholderPassword')}
                     required={!editingStaff}
                     className="pr-10"
                   />
@@ -292,11 +294,11 @@ export function StaffFormDialog({
               </div>
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="image">Profile Photo</Label>
+              <Label htmlFor="image">{t('fieldProfilePhoto')}</Label>
               <div className="flex items-center gap-4">
                 <Avatar className="h-20 w-20">
                   {previewUrl ? (
-                    <AvatarImage src={previewUrl} alt="Preview" className="object-cover" />
+                    <AvatarImage src={previewUrl} alt={t('previewImageAlt')} className="object-cover" />
                   ) : (
                     <AvatarFallback className="bg-muted">
                       <IconUser className="h-8 w-8 text-muted-foreground" />
@@ -314,7 +316,7 @@ export function StaffFormDialog({
                       className="gap-2"
                     >
                       <IconUpload className="h-4 w-4" />
-                      {isUploading ? "Uploading..." : "Upload Photo"}
+                      {isUploading ? t('uploadingPhoto') : t('uploadPhoto')}
                     </Button>
                     {previewUrl && (
                       <Button
@@ -326,12 +328,12 @@ export function StaffFormDialog({
                         className="gap-2"
                       >
                         <IconX className="h-4 w-4" />
-                        Remove
+                        {tc('remove')}
                       </Button>
                     )}
                   </div>
                   <p className="text-xs text-muted-foreground">
-                    Upload JPEG, PNG, GIF, or WEBP. Max 5MB.
+                    {t('uploadHelpText')}
                   </p>
                 </div>
               </div>
@@ -345,7 +347,7 @@ export function StaffFormDialog({
             </div>
 
             <div className="grid gap-2">
-              <Label htmlFor="positionId">Position</Label>
+              <Label htmlFor="positionId">{t('fieldPosition')}</Label>
               <Combobox
                 options={positions.map((position) => ({
                   value: position.id,
@@ -355,20 +357,20 @@ export function StaffFormDialog({
                 }))}
                 value={formData.positionId}
                 onChange={(value) => setFormData({ ...formData, positionId: value })}
-                placeholder="Select position (optional)"
-                searchPlaceholder="Search positions..."
-                emptyText="No position found."
+                placeholder={t('placeholderPosition')}
+                searchPlaceholder={t('searchPositions')}
+                emptyText={t('noPositionFound')}
               />
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="unitId">Unit</Label>
+              <Label htmlFor="unitId">{t('fieldUnit')}</Label>
               <Combobox
                 options={units.map((unit) => ({ value: unit.id, label: unit.name }))}
                 value={formData.unitId}
                 onChange={(value) => setFormData({ ...formData, unitId: value })}
-                placeholder="Select unit (optional)"
-                searchPlaceholder="Search units..."
-                emptyText="No unit found."
+                placeholder={t('placeholderUnit')}
+                searchPlaceholder={t('searchUnits')}
+                emptyText={t('noUnitFound')}
               />
             </div>
           </div>
@@ -379,10 +381,10 @@ export function StaffFormDialog({
               onClick={() => onOpenChange(false)}
               disabled={isSaving}
             >
-              Cancel
+              {tc('cancel')}
             </Button>
             <Button type="submit" disabled={isSaving}>
-              {isSaving ? "Saving..." : editingStaff ? "Update" : "Create"}
+              {isSaving ? tc('saving') : editingStaff ? tc('update') : tc('create')}
             </Button>
           </DialogFooter>
         </form>

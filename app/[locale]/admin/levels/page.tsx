@@ -30,10 +30,11 @@ import { LevelTableSkeleton } from "@/features/admin/levels/components/level-tab
 import { LevelDataTable } from "@/features/admin/levels/components/level-data-table"
 import { LevelTableActions } from "@/features/admin/levels/components/level-table-actions"
 import { LevelViewDialog } from "@/features/admin/levels/components/level-view-dialog"
-import { useTranslations } from "next-intl"
+import { useTranslations, useLocale } from "next-intl"
 
 export default function LevelManagementPage() {
   const t = useTranslations('AdminLevelsPage')
+  const locale = useLocale()
   const [levels, setLevels] = useState<Level[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [isDialogOpen, setIsDialogOpen] = useState(false)
@@ -107,7 +108,7 @@ export default function LevelManagementPage() {
         onDelete: handleOpenDeleteDialog,
       }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    []
+    [locale]
   )
 
   // ==================== TABLE INITIALIZATION ====================

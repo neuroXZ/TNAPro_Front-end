@@ -8,6 +8,7 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { Competency } from "./columns"
+import { useTranslations } from "next-intl"
 
 interface CompetencyDataTableProps {
   table: TanStackTable<Competency>
@@ -16,6 +17,9 @@ interface CompetencyDataTableProps {
 }
 
 export function CompetencyDataTable({ table, columnsLength, onRowClick }: CompetencyDataTableProps) {
+  const t = useTranslations('AdminCompetenciesPage')
+  const tc = useTranslations('Common')
+
   return (
     <div className="rounded-md border">
       <Table>
@@ -60,7 +64,7 @@ export function CompetencyDataTable({ table, columnsLength, onRowClick }: Compet
                 colSpan={columnsLength}
                 className="h-24 text-center"
               >
-                No competencies found
+                {tc('noResultsFound', { entity: t('entityNamePlural') })}
               </TableCell>
             </TableRow>
           )}

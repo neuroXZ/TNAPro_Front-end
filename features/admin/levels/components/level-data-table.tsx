@@ -8,6 +8,7 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { Level } from "./columns"
+import { useTranslations } from "next-intl"
 
 interface LevelDataTableProps {
   table: TanStackTable<Level>
@@ -16,6 +17,9 @@ interface LevelDataTableProps {
 }
 
 export function LevelDataTable({ table, columnsLength, onRowClick }: LevelDataTableProps) {
+  const t = useTranslations('AdminLevelsPage')
+  const tc = useTranslations('Common')
+
   return (
     <div className="rounded-md border">
       <Table>
@@ -60,7 +64,7 @@ export function LevelDataTable({ table, columnsLength, onRowClick }: LevelDataTa
                 colSpan={columnsLength}
                 className="h-24 text-center"
               >
-                No levels found
+                {tc('noResultsFound', { entity: t('entityNamePlural') })}
               </TableCell>
             </TableRow>
           )}

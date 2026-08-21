@@ -124,7 +124,7 @@ export function LoginForm({
                   <div>
                     <Image
                       src={logoPath}
-                      alt="Company Logo"
+                      alt={t('companyLogo')}
                       width={40}
                       height={40}
                       className="h-[40px] w-full object-cover"
@@ -286,7 +286,7 @@ export function LoginForm({
               src={LoginImage}
               width={500}
               height={500}
-              alt="login-image"
+              alt={t('loginImageAlt')}
               className="absolute inset-0 h-full w-full object-cover dark:brightness-[0.2] dark:grayscale"
             />
             </div>

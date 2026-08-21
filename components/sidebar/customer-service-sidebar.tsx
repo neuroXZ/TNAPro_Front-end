@@ -14,6 +14,7 @@ import {
   IconMessagePlus,
 } from "@tabler/icons-react"
 import Image from "next/image"
+import { useTranslations } from "next-intl"
 
 import { NavMain } from "@/components/nav/nav-main"
 import { NavUser } from "@/components/nav/nav-staff"
@@ -30,44 +31,42 @@ import {
 } from "@/components/ui/sidebar"
 
 
-const navMainItems = [
-  {
-    title: "Main Page",
-    url: "/",
-    icon: IconAppWindow,
-  },
-  {
-    title: "Customer Service",
-    url: "/customer-service",
-    icon: IconUserCog,
-  },
-  {
-    title: "FAQ",
-    url: "/customer-service/faq",
-    icon: IconMessages,
-  },
-  {
-    title: "Contact Support",
-    url: "/customer-service/contact-us",
-    icon: IconMessagePlus,
-  },
-  {
-    title: "Terms & Conditions",
-    url: "/customer-service/terms-conditions",
-    icon: IconFileText,
-  },
-  {
-    title: "Development",
-    url: "/customer-service/development",
-    icon: IconDashboard,
-  },
-  
-]
-
-
-
 export function CustomerServiceSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+  const t = useTranslations('CustomerServiceSidebar')
   const { user } = useAuth()
+
+  const navMainItems = React.useMemo(() => [
+    {
+      title: t('mainPage'),
+      url: "/",
+      icon: IconAppWindow,
+    },
+    {
+      title: t('customerService'),
+      url: "/customer-service",
+      icon: IconUserCog,
+    },
+    {
+      title: t('faq'),
+      url: "/customer-service/faq",
+      icon: IconMessages,
+    },
+    {
+      title: t('contactSupport'),
+      url: "/customer-service/contact-us",
+      icon: IconMessagePlus,
+    },
+    {
+      title: t('termsAndConditions'),
+      url: "/customer-service/terms-conditions",
+      icon: IconFileText,
+    },
+    {
+      title: t('development'),
+      url: "/customer-service/development",
+      icon: IconDashboard,
+    },
+  ], [t])
 
   const getAvatarImage = () => {
     if (user?.image) return user.image
@@ -76,7 +75,7 @@ export function CustomerServiceSidebar({ ...props }: React.ComponentProps<typeof
   }
 
   const userData = {
-    name: user?.name || "Staff User",
+    name: user?.name || t('staffUser'),
     email: user?.email || "staff@tnapro.com",
     avatar: getAvatarImage(),
   }
@@ -85,13 +84,13 @@ export function CustomerServiceSidebar({ ...props }: React.ComponentProps<typeof
     <Sidebar collapsible="offcanvas" {...props}>
       <SidebarHeader>
         <SidebarMenu>
-          <div>
+          <div className="h-12 w-auto max-w-[180px] shrink-0 mx-auto">
             <Image
               src="/uploads/logos/tnapro-vertical-transparent.png"
-              alt="Company Logo"
-              width={24}
-              height={24}
-              className="h-full w-full object-contain"
+              alt={t('companyLogo')}
+              width={180}
+              height={48}
+              className="h-full w-auto object-contain"
             />
           </div>
         </SidebarMenu>

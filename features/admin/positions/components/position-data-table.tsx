@@ -8,6 +8,7 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { Position } from "./columns"
+import { useTranslations } from "next-intl"
 
 interface PositionDataTableProps {
   table: TanStackTable<Position>
@@ -16,6 +17,9 @@ interface PositionDataTableProps {
 }
 
 export function PositionDataTable({ table, columnsLength, onRowClick }: PositionDataTableProps) {
+  const t = useTranslations('AdminPositionsPage')
+  const tc = useTranslations('Common')
+
   return (
     <div className="rounded-md border">
       <Table>
@@ -60,7 +64,7 @@ export function PositionDataTable({ table, columnsLength, onRowClick }: Position
                 colSpan={columnsLength}
                 className="h-24 text-center"
               >
-                No positions found
+                {tc('noResultsFound', { entity: t('entityNamePlural') })}
               </TableCell>
             </TableRow>
           )}

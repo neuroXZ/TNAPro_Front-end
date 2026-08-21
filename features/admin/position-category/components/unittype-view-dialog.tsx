@@ -6,6 +6,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 import { Label } from "@/components/ui/label"
+import { useTranslations } from "next-intl"
 import { PositionCategory } from "./columns"
 
 interface PositionCategoryViewDialogProps {
@@ -19,25 +20,28 @@ export function PositionCategoryViewDialog({
   onOpenChange,
   positionCategory,
 }: PositionCategoryViewDialogProps) {
+  const t = useTranslations('AdminPositionCategoryPage')
+  const tc = useTranslations('Common')
+
   if (!positionCategory) return null
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Position Category Details</DialogTitle>
+          <DialogTitle>{tc('entityDetails', { entity: t('entityNameSingularCap') })}</DialogTitle>
           <DialogDescription>
-            View detailed information about {positionCategory.name}
+            {tc('viewDetailedInfo', { name: positionCategory.name })}
           </DialogDescription>
         </DialogHeader>
         <div className="grid gap-4 py-4">
           <div className="grid gap-2">
-            <Label className="text-muted-foreground">Position Category Name</Label>
+            <Label className="text-muted-foreground">{t('colName')}</Label>
             <p className="text-sm font-medium">{positionCategory.name}</p>
           </div>
           {positionCategory.description && (
             <div className="grid gap-2">
-              <Label className="text-muted-foreground">Description</Label>
+              <Label className="text-muted-foreground">{tc('description')}</Label>
               <p className="text-sm">{positionCategory.description}</p>
             </div>
           )}

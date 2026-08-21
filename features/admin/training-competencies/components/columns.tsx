@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
 import { IconEye, IconArrowUp, IconArrowDown, IconArrowsSort } from "@tabler/icons-react"
 import { useRouter } from "next/navigation"
+import { useTranslations } from "next-intl"
 
 export interface Training {
   id: string
@@ -17,7 +18,11 @@ export interface Training {
   }
 }
 
-export const getColumns = (): ColumnDef<Training>[] => [
+export const getColumns = (): ColumnDef<Training>[] => {
+  const t = useTranslations('AdminTrainingCompetenciesPage')
+  const tc = useTranslations('Common')
+
+  return [
   {
     id: "select",
     header: ({ table }) => (
@@ -27,7 +32,7 @@ export const getColumns = (): ColumnDef<Training>[] => [
           (table.getIsSomePageRowsSelected() && "indeterminate")
         }
         onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
-        aria-label="Select all"
+        aria-label={t('selectAll')}
         onClick={(e) => e.stopPropagation()}
       />
     ),
@@ -35,7 +40,7 @@ export const getColumns = (): ColumnDef<Training>[] => [
       <Checkbox
         checked={row.getIsSelected()}
         onCheckedChange={(value) => row.toggleSelected(!!value)}
-        aria-label="Select row"
+        aria-label={t('selectRow')}
         onClick={(e) => e.stopPropagation()}
       />
     ),
@@ -51,7 +56,7 @@ export const getColumns = (): ColumnDef<Training>[] => [
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
           className="-ml-4"
         >
-          Training Name
+          {t('colTrainingName')}
           {column.getIsSorted() === "asc" ? (
             <IconArrowUp className="ml-2 size-4" />
           ) : column.getIsSorted() === "desc" ? (
@@ -65,7 +70,7 @@ export const getColumns = (): ColumnDef<Training>[] => [
   },
   {
     accessorKey: "startDate",
-    header: "Start Date",
+    header: t('colStartDate'),
     cell: ({ row }) => {
       const startDate = row.original.startDate
       return startDate ? (
@@ -77,7 +82,7 @@ export const getColumns = (): ColumnDef<Training>[] => [
   },
   {
     accessorKey: "endDate",
-    header: "End Date",
+    header: t('colEndDate'),
     cell: ({ row }) => {
       const endDate = row.original.endDate
       return endDate ? (
@@ -89,19 +94,19 @@ export const getColumns = (): ColumnDef<Training>[] => [
   },
   {
     accessorKey: "_count.trainingCompetencies",
-    header: "Total Competencies",
+    header: t('colTotalCompetencies'),
     cell: ({ row }) => {
       const count = row.original._count?.trainingCompetencies || 0
       return (
         <span className="font-medium">
-          {count} {count === 1 ? "competency" : "competencies"}
+          {t('competencyCount', { count })}
         </span>
       )
     },
   },
   {
     id: "actions",
-    header: () => <div className="text-right">Actions</div>,
+    header: () => <div className="text-right">{tc('actions')}</div>,
     cell: ({ row }) => {
       const training = row.original
       const router = useRouter()
@@ -117,10 +122,11 @@ export const getColumns = (): ColumnDef<Training>[] => [
             }}
           >
             <IconEye className="mr-2 size-4" />
-            Manage Competencies
+            {t('manageCompetencies')}
           </Button>
         </div>
       )
     },
   },
 ]
+}

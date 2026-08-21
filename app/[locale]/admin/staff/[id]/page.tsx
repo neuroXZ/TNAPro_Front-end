@@ -242,7 +242,7 @@ export default function StaffProfilePage() {
                             ...pc.competency,
                             ...fullCompetency,
                             name: isOrphaned ? t('competencyDeleted') : (fullCompetency?.name ?? pc.competency?.name),
-                            cluster: cluster || { id: '', name: isOrphaned ? t('competencyDeleted') : 'Uncategorized' }
+                            cluster: cluster || { id: '', name: isOrphaned ? t('competencyDeleted') : t('uncategorizedCluster') }
                         }
                     }
                 })
@@ -320,7 +320,7 @@ export default function StaffProfilePage() {
                 return ""
             }
 
-            const errorMessage = getErrorMessage(error) || 'Failed to update staff profile. Please try again.'
+            const errorMessage = getErrorMessage(error) || t('updateProfileErrorFallback')
 
             if (errorMessage.includes('Subscription limit reached')) {
                 toast.error(errorMessage)
@@ -332,7 +332,7 @@ export default function StaffProfilePage() {
 
     // Group competencies by cluster
     const groupedCompetencies = positionCompetencies.reduce((acc, pc) => {
-        const clusterName = pc.competency?.cluster?.name || 'Uncategorized'
+        const clusterName = pc.competency?.cluster?.name || t('uncategorizedCluster')
         if (!acc[clusterName]) {
             acc[clusterName] = []
         }
@@ -425,7 +425,7 @@ export default function StaffProfilePage() {
                                     <IconBriefcase className="size-4 text-muted-foreground" />
                                     <div className="flex items-center gap-1">
                                         <span className="text-sm">
-                                            {staff.position?.name || (staff.positionId ? 'Position Assigned' : t('noPosition'))}
+                                            {staff.position?.name || (staff.positionId ? t('positionAssigned') : t('noPosition'))}
                                         </span>
                                         {staff.position?.grade?.name && (
                                             <Badge variant="secondary" className="text-xs text-white">
@@ -439,7 +439,7 @@ export default function StaffProfilePage() {
                                     <IconBuilding className="size-4 text-muted-foreground" />
                                     <div className="flex items-center gap-1">
                                         <span className="text-sm">
-                                            {staff.unit?.name || (staff.unitId ? 'Unit Assigned' : t('noUnit'))}
+                                            {staff.unit?.name || (staff.unitId ? t('unitAssigned') : t('noUnit'))}
                                         </span>
                                         {staff.unit?.unitType?.name && (
                                             <Badge >
@@ -453,7 +453,7 @@ export default function StaffProfilePage() {
                                     <div className="flex items-center gap-2">
                                         <IconUser className="size-4 text-muted-foreground" />
                                         <span className="text-sm">
-                                            {t('reportsTo')} {staff.supervisor?.name || 'Supervisor Assigned'}
+                                            {t('reportsTo')} {staff.supervisor?.name || t('supervisorAssigned')}
                                         </span>
                                     </div>
                                 )}

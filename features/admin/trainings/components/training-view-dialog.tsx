@@ -8,6 +8,7 @@ import {
 import { Label } from "@/components/ui/label"
 import { Training } from "./columns"
 import { format } from "date-fns"
+import { useTranslations } from "next-intl"
 
 interface TrainingViewDialogProps {
   open: boolean
@@ -20,25 +21,28 @@ export function TrainingViewDialog({
   onOpenChange,
   training,
 }: TrainingViewDialogProps) {
+  const t = useTranslations('AdminTrainingsPage')
+  const tc = useTranslations('Common')
+
   if (!training) return null
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Training Details</DialogTitle>
+          <DialogTitle>{tc('entityDetails', { entity: t('entityNameSingularCap') })}</DialogTitle>
           <DialogDescription>
-            View detailed information about {training.name}
+            {tc('viewDetailedInfo', { name: training.name })}
           </DialogDescription>
         </DialogHeader>
         <div className="grid gap-4 py-4">
           <div className="grid gap-2">
-            <Label className="text-muted-foreground">Training Name</Label>
+            <Label className="text-muted-foreground">{t('colName')}</Label>
             <p className="text-sm font-medium">{training.name}</p>
           </div>
           {training.startDate && (
             <div className="grid gap-2">
-              <Label className="text-muted-foreground">Start Date</Label>
+              <Label className="text-muted-foreground">{t('colStartDate')}</Label>
               <p className="text-sm font-medium">
                 {format(new Date(training.startDate), "dd MMMM yyyy")}
               </p>
@@ -46,7 +50,7 @@ export function TrainingViewDialog({
           )}
           {training.endDate && (
             <div className="grid gap-2">
-              <Label className="text-muted-foreground">End Date</Label>
+              <Label className="text-muted-foreground">{t('colEndDate')}</Label>
               <p className="text-sm font-medium">
                 {format(new Date(training.endDate), "dd MMMM yyyy")}
               </p>
@@ -54,7 +58,7 @@ export function TrainingViewDialog({
           )}
           {training.description && (
             <div className="grid gap-2">
-              <Label className="text-muted-foreground">Description</Label>
+              <Label className="text-muted-foreground">{tc('description')}</Label>
               <p className="text-sm">{training.description}</p>
             </div>
           )}

@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
 import { levelAPI } from "@/lib/api"
 import { toast } from "sonner"
+import { useTranslations } from "next-intl"
 
 interface Competency {
   id: string
@@ -42,6 +43,8 @@ export function CompetencyLevelDialog({
   isEdit,
   onSubmit,
 }: CompetencyLevelDialogProps) {
+  const t = useTranslations('AdminPositionCompetenciesDetailPage')
+  const tc = useTranslations('Common')
   const [selectedLevel, setSelectedLevel] = useState<number | null>(currentLevel || null)
   const [levels, setLevels] = useState<Level[]>([])
   const [isLoading, setIsLoading] = useState(false)
@@ -63,7 +66,7 @@ export function CompetencyLevelDialog({
       setLevels(sortedLevels)
     } catch (error) {
       console.error("Failed to fetch levels:", error)
-      toast.error("Failed to load levels")
+      toast.error(t('failedToLoadLevels'))
     } finally {
       setIsLoading(false)
     }
@@ -71,9 +74,9 @@ export function CompetencyLevelDialog({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    
+
     if (selectedLevel === null) {
-      toast.error("Please select a level")
+      toast.error(t('selectLevelRequired'))
       return
     }
 
@@ -96,15 +99,15 @@ export function CompetencyLevelDialog({
         <form onSubmit={handleSubmit}>
           <DialogHeader>
             <DialogTitle>
-              {isEdit ? "Edit Competency Level" : "Add Competency"}
+              {isEdit ? t('editCompetencyLevelTitle') : t('addCompetencyTitle')}
             </DialogTitle>
             <DialogDescription>
-              Set the required proficiency level for {competency.name}
+              {t('setLevelDescription', { name: competency.name })}
             </DialogDescription>
           </DialogHeader>
           <div className="grid gap-4 py-4">
             <div className="grid gap-2">
-              <Label>Competency</Label>
+              <Label>{t('competencyFieldLabel')}</Label>
               <div className="text-sm font-medium px-3 py-2 bg-muted rounded-md">
                 {competency.name}
               </div>
@@ -115,14 +118,14 @@ export function CompetencyLevelDialog({
               )}
             </div>
             <div className="grid gap-2">
-              <Label>Required Level *</Label>
+              <Label>{t('requiredLevelFieldLabel')}</Label>
               {isLoading ? (
                 <div className="text-sm text-muted-foreground py-4 text-center">
-                  Loading levels...
+                  {t('loadingLevels')}
                 </div>
               ) : levels.length === 0 ? (
                 <div className="text-sm text-muted-foreground py-4 text-center border rounded-md">
-                  No levels found. Please create levels first.
+                  {t('noLevelsFound')}
                 </div>
               ) : (
                 <div className="grid grid-cols-1 gap-2">
@@ -165,10 +168,10 @@ export function CompetencyLevelDialog({
               onClick={() => onOpenChange(false)}
               disabled={isSaving}
             >
-              Cancel
+              {tc('cancel')}
             </Button>
             <Button type="submit" disabled={isSaving || selectedLevel === null}>
-              {isSaving ? "Saving..." : isEdit ? "Update" : "Add"}
+              {isSaving ? tc('saving') : isEdit ? tc('update') : t('actionAdd')}
             </Button>
           </DialogFooter>
         </form>

@@ -7,6 +7,7 @@ import {
 } from "@/components/ui/dialog"
 import { Label } from "@/components/ui/label"
 import { Position } from "./columns"
+import { useTranslations } from "next-intl"
 
 interface PositionViewDialogProps {
   open: boolean
@@ -19,37 +20,40 @@ export function PositionViewDialog({
   onOpenChange,
   position,
 }: PositionViewDialogProps) {
+  const t = useTranslations('AdminPositionsPage')
+  const tc = useTranslations('Common')
+
   if (!position) return null
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Position Details</DialogTitle>
+          <DialogTitle>{tc('entityDetails', { entity: t('entityNameSingularCap') })}</DialogTitle>
           <DialogDescription>
-            View detailed information about {position.name}
+            {tc('viewDetailedInfo', { name: position.name })}
           </DialogDescription>
         </DialogHeader>
         <div className="grid gap-4 py-4">
           <div className="grid gap-2">
-            <Label className="text-muted-foreground">Position Name</Label>
+            <Label className="text-muted-foreground">{t('colName')}</Label>
             <p className="text-sm font-medium">{position.name}</p>
           </div>
           {position.grade?.name && (
             <div className="grid gap-2">
-              <Label className="text-muted-foreground">Grade</Label>
+              <Label className="text-muted-foreground">{t('gradeLabel')}</Label>
               <p className="text-sm font-medium">{position.grade.name}</p>
             </div>
           )}
           {position.category?.name && (
             <div className="grid gap-2">
-              <Label className="text-muted-foreground">Category</Label>
+              <Label className="text-muted-foreground">{t('categoryLabel')}</Label>
               <p className="text-sm font-medium">{position.category.name}</p>
             </div>
           )}
           {position.description && (
             <div className="grid gap-2">
-              <Label className="text-muted-foreground">Description</Label>
+              <Label className="text-muted-foreground">{tc('description')}</Label>
               <p className="text-sm">{position.description}</p>
             </div>
           )}

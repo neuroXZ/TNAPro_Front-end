@@ -2,9 +2,11 @@
 
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { useAuth } from '@/providers/auth-provider';
 
 export function AdminRoute({ children }: { children: React.ReactNode }) {
+  const t = useTranslations('RouteGuard');
   const { user, isAuthenticated, isLoading } = useAuth();
   const router = useRouter();
 
@@ -25,7 +27,7 @@ export function AdminRoute({ children }: { children: React.ReactNode }) {
       <div className="flex min-h-screen items-center justify-center">
         <div className="text-center">
           <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent mx-auto mb-4"></div>
-          <p className="text-muted-foreground">Loading...</p>
+          <p className="text-muted-foreground">{t('loading')}</p>
         </div>
       </div>
     );

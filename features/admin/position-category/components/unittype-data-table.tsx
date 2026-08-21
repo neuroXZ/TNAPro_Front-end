@@ -1,4 +1,5 @@
 import { Table as TanStackTable, flexRender } from "@tanstack/react-table"
+import { useTranslations } from "next-intl"
 import {
   Table,
   TableBody,
@@ -16,6 +17,9 @@ interface PositionCategoryDataTableProps {
 }
 
 export function PositionCategoryDataTable({ table, columnsLength, onRowClick }: PositionCategoryDataTableProps) {
+  const t = useTranslations('AdminPositionCategoryPage')
+  const tc = useTranslations('Common')
+
   return (
     <div className="rounded-md border">
       <Table>
@@ -60,7 +64,7 @@ export function PositionCategoryDataTable({ table, columnsLength, onRowClick }: 
                 colSpan={columnsLength}
                 className="h-24 text-center"
               >
-                No position categorys found
+                {tc('noResultsFound', { entity: t('entityNamePlural') })}
               </TableCell>
             </TableRow>
           )}

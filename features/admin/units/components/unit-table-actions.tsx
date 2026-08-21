@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button"
 import { IconPlus, IconTrash } from "@tabler/icons-react"
+import { useTranslations } from "next-intl"
 
 interface UnitTableActionsProps {
   selectedCount: number
@@ -12,16 +13,19 @@ export function UnitTableActions({
   onAdd,
   onBulkDelete,
 }: UnitTableActionsProps) {
+  const t = useTranslations('AdminUnitsPage')
+  const tc = useTranslations('Common')
+
   return (
     <div className="flex gap-2">
       <Button size="sm" onClick={onAdd}>
         <IconPlus className="mr-2 size-4" />
-        Add Unit
+        {tc('addEntity', { entity: t('entityNameSingularCap') })}
       </Button>
       {selectedCount > 0 && (
         <Button variant="destructive" size="sm" onClick={onBulkDelete}>
           <IconTrash className="mr-2 size-4" />
-          Delete Selected ({selectedCount})
+          {tc('deleteSelected', { count: selectedCount })}
         </Button>
       )}
     </div>

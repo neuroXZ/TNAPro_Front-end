@@ -45,10 +45,11 @@ import { PositionDataTable } from "@/features/admin/positions/components/positio
 import { PositionTableActions } from "@/features/admin/positions/components/position-table-actions"
 import { PositionViewDialog } from "@/features/admin/positions/components/position-view-dialog"
 import { PositionImportDialog } from "@/features/admin/positions/components/position-import-dialog"
-import { useTranslations } from "next-intl"
+import { useTranslations, useLocale } from "next-intl"
 
 export default function PositionManagementPage() {
   const t = useTranslations('AdminPositionsPage')
+  const locale = useLocale()
   const [positions, setPositions] = useState<Position[]>([])
   const [grades, setGrades] = useState<Array<{ id: string; name: string }>>([])
   const [selectedGradeId, setSelectedGradeId] = useState<string>("all")
@@ -166,7 +167,7 @@ export default function PositionManagementPage() {
         onDelete: handleOpenDeleteDialog,
       }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    []
+    [locale]
   )
 
   // ==================== TABLE INITIALIZATION ====================

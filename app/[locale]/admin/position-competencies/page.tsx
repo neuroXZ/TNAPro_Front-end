@@ -26,10 +26,11 @@ import { Position, getColumns } from "@/features/admin/position-competencies/com
 import { DataTablePagination } from "@/components/data-table-pagination"
 import { PositionCompetencyTableSkeleton } from "@/features/admin/position-competencies/components/position-competency-table-skeleton"
 import { PositionCompetencyDataTable } from "@/features/admin/position-competencies/components/position-competency-data-table"
-import { useTranslations } from "next-intl"
+import { useTranslations, useLocale } from "next-intl"
 
 export default function PositionCompetencyManagementPage() {
   const t = useTranslations('AdminPositionCompetenciesPage')
+  const locale = useLocale()
   const [positions, setPositions] = useState<Position[]>([])
   const [positionCompetencies, setPositionCompetencies] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
@@ -76,7 +77,7 @@ export default function PositionCompetencyManagementPage() {
   }
 
   // Define columns
-  const columns = useMemo(() => getColumns(), [])
+  const columns = useMemo(() => getColumns(), [locale])
 
   // ==================== TABLE INITIALIZATION ====================
   const table = useReactTable({

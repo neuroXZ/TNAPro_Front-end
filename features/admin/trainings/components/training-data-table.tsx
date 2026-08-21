@@ -8,6 +8,7 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { Training } from "./columns"
+import { useTranslations } from "next-intl"
 
 interface TrainingDataTableProps {
   table: TanStackTable<Training>
@@ -16,6 +17,9 @@ interface TrainingDataTableProps {
 }
 
 export function TrainingDataTable({ table, columnsLength, onRowClick }: TrainingDataTableProps) {
+  const t = useTranslations('AdminTrainingsPage')
+  const tc = useTranslations('Common')
+
   return (
     <div className="rounded-md border">
       <Table>
@@ -60,7 +64,7 @@ export function TrainingDataTable({ table, columnsLength, onRowClick }: Training
                 colSpan={columnsLength}
                 className="h-24 text-center"
               >
-                No trainings found
+                {tc('noResultsFound', { entity: t('entityNamePlural') })}
               </TableCell>
             </TableRow>
           )}

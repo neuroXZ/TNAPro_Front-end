@@ -19,6 +19,7 @@ import {
 } from "@/components/ui/select"
 import { Competency } from "./columns"
 import { clusterAPI } from "@/lib/api"
+import { useTranslations } from "next-intl"
 
 interface CompetencyFormData {
   name: string
@@ -44,6 +45,8 @@ export function CompetencyFormDialog({
   editingCompetency,
   onSubmit,
 }: CompetencyFormDialogProps) {
+  const t = useTranslations('AdminCompetenciesPage')
+  const tc = useTranslations('Common')
   const [isSaving, setIsSaving] = useState(false)
   const [clusters, setClusters] = useState<Cluster[]>([])
   const [formData, setFormData] = useState<CompetencyFormData>({
@@ -104,29 +107,29 @@ export function CompetencyFormDialog({
         <form onSubmit={handleSubmit}>
           <DialogHeader>
             <DialogTitle>
-              {editingCompetency ? "Edit Competency" : "Add New Competency"}
+              {editingCompetency ? tc('editEntity', { entity: t('entityNameSingularCap') }) : tc('addNewEntity', { entity: t('entityNameSingularCap') })}
             </DialogTitle>
             <DialogDescription>
               {editingCompetency
-                ? "Update competency information"
-                : "Add a new competency to the system"}
+                ? t('formUpdateDescription')
+                : t('formAddDescription')}
             </DialogDescription>
           </DialogHeader>
           <div className="grid gap-4 py-4">
             <div className="grid gap-2">
-              <Label htmlFor="name">Competency Name *</Label>
+              <Label htmlFor="name">{t('nameFieldLabel')}</Label>
               <Input
                 id="name"
                 value={formData.name}
                 onChange={(e) =>
                   setFormData({ ...formData, name: e.target.value })
                 }
-                placeholder="Enter competency name"
+                placeholder={t('namePlaceholder')}
                 required
               />
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="clusterId">Cluster</Label>
+              <Label htmlFor="clusterId">{t('clusterLabel')}</Label>
               <Select
                 value={formData.clusterId}
                 onValueChange={(value) =>
@@ -134,7 +137,7 @@ export function CompetencyFormDialog({
                 }
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="Select cluster (optional)" />
+                  <SelectValue placeholder={t('clusterPlaceholder')} />
                 </SelectTrigger>
                 <SelectContent>
                   {clusters.map((cluster) => (
@@ -146,14 +149,14 @@ export function CompetencyFormDialog({
               </Select>
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="description">Description</Label>
+              <Label htmlFor="description">{tc('description')}</Label>
               <textarea
                 id="description"
                 value={formData.description}
                 onChange={(e) =>
                   setFormData({ ...formData, description: e.target.value })
                 }
-                placeholder="Enter description (optional)"
+                placeholder={tc('enterDescriptionOptional')}
                 className="flex min-h-20 w-full rounded-md border border-input bg-background px-3 py-2 text-base ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
               />
             </div>
@@ -165,10 +168,10 @@ export function CompetencyFormDialog({
               onClick={() => onOpenChange(false)}
               disabled={isSaving}
             >
-              Cancel
+              {tc('cancel')}
             </Button>
             <Button type="submit" disabled={isSaving}>
-              {isSaving ? "Saving..." : editingCompetency ? "Update" : "Create"}
+              {isSaving ? tc('saving') : editingCompetency ? tc('update') : tc('create')}
             </Button>
           </DialogFooter>
         </form>

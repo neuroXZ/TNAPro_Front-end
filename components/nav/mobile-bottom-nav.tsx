@@ -2,6 +2,7 @@
 
 import * as React from "react"
 import { usePathname, useRouter } from "next/navigation"
+import { useTranslations } from "next-intl"
 import Image from "next/image"
 import {
   IconDashboard,
@@ -27,52 +28,53 @@ interface MobileBottomNavProps {
   className?: string
 }
 
-const navItems = [
-  {
-    title: "Dashboard",
-    url: "/staff/dashboard",
-    icon: IconDashboard,
-  },
-  {
-    title: "Assessment",
-    url: "/staff/assessments",
-    icon: IconClipboardCheck,
-    hasDropdown: true,
-    dropdownItems: [
-      {
-        title: "Self Assessment",
-        url: "/staff/assessments",
-        icon: IconClipboardCheck,
-      },
-      {
-        title: "Superior Assessment",
-        url: "/staff/superior-assessments",
-        icon: IconUserCheck,
-      },
-    ],
-  },
-  {
-    title: "Training",
-    url: "/staff/training",
-    icon: IconSchool,
-  },
-  {
-    title: "IDP",
-    url: "/staff/idp",
-    icon: IconFileText,
-  },
-  {
-    title: "Profile",
-    url: "/staff/profile",
-    icon: IconCertificate,
-  },
-]
-
 export function MobileBottomNav({ className }: MobileBottomNavProps) {
+  const t = useTranslations('MobileBottomNav')
   const pathname = usePathname()
   const router = useRouter()
   const isMobile = useIsMobile()
   const { user } = useAuth()
+
+  const navItems = React.useMemo(() => [
+    {
+      title: t('dashboard'),
+      url: "/staff/dashboard",
+      icon: IconDashboard,
+    },
+    {
+      title: t('assessment'),
+      url: "/staff/assessments",
+      icon: IconClipboardCheck,
+      hasDropdown: true,
+      dropdownItems: [
+        {
+          title: t('selfAssessment'),
+          url: "/staff/assessments",
+          icon: IconClipboardCheck,
+        },
+        {
+          title: t('superiorAssessment'),
+          url: "/staff/superior-assessments",
+          icon: IconUserCheck,
+        },
+      ],
+    },
+    {
+      title: t('training'),
+      url: "/staff/training",
+      icon: IconSchool,
+    },
+    {
+      title: t('idp'),
+      url: "/staff/idp",
+      icon: IconFileText,
+    },
+    {
+      title: t('profile'),
+      url: "/staff/profile",
+      icon: IconCertificate,
+    },
+  ], [t])
 
   // Get user avatar image
   const getAvatarImage = () => {
@@ -173,7 +175,7 @@ export function MobileBottomNav({ className }: MobileBottomNavProps) {
                   )}>
                     <Image
                       src={getAvatarImage()}
-                      alt="Profile"
+                      alt={t('profile')}
                       width={20}
                       height={20}
                       className="size-full object-cover"

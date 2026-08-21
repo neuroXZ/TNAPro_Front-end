@@ -31,10 +31,11 @@ import { GradeDataTable } from "@/features/admin/grades/components/grade-data-ta
 import { GradeTableActions } from "@/features/admin/grades/components/grade-table-actions"
 import { GradeViewDialog } from "@/features/admin/grades/components/grade-view-dialog"
 import { GradeImportDialog } from "@/features/admin/grades/components/grade-import-dialog"
-import { useTranslations } from "next-intl"
+import { useTranslations, useLocale } from "next-intl"
 
 export default function GradeManagementPage() {
   const t = useTranslations('AdminGradesPage')
+  const locale = useLocale()
   const [grades, setGrades] = useState<Grade[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [isDialogOpen, setIsDialogOpen] = useState(false)
@@ -109,7 +110,7 @@ export default function GradeManagementPage() {
         onDelete: handleOpenDeleteDialog,
       }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    []
+    [locale]
   )
 
   // ==================== TABLE INITIALIZATION ====================

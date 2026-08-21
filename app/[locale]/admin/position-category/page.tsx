@@ -30,10 +30,11 @@ import { PositionCategoryTableSkeleton } from "@/features/admin/position-categor
 import { PositionCategoryDataTable } from "@/features/admin/position-category/components/unittype-data-table"
 import { PositionCategoryTableActions } from "@/features/admin/position-category/components/unittype-table-actions"
 import { PositionCategoryViewDialog } from "@/features/admin/position-category/components/unittype-view-dialog"
-import { useTranslations } from "next-intl"
+import { useTranslations, useLocale } from "next-intl"
 
 export default function PositionCategoryManagementPage() {
   const t = useTranslations('AdminPositionCategoryPage')
+  const locale = useLocale()
   const [positionCategorys, setPositionCategorys] = useState<PositionCategory[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [isDialogOpen, setIsDialogOpen] = useState(false)
@@ -107,7 +108,7 @@ export default function PositionCategoryManagementPage() {
         onDelete: handleOpenDeleteDialog,
       }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    []
+    [locale]
   )
 
   // ==================== TABLE INITIALIZATION ====================

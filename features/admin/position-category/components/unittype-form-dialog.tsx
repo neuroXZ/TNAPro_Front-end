@@ -10,6 +10,7 @@ import {
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { useTranslations } from "next-intl"
 import { PositionCategory } from "./columns"
 
 interface PositionCategoryFormData {
@@ -30,6 +31,8 @@ export function PositionCategoryFormDialog({
   editingPositionCategory,
   onSubmit,
 }: PositionCategoryFormDialogProps) {
+  const t = useTranslations('AdminPositionCategoryPage')
+  const tc = useTranslations('Common')
   const [isSaving, setIsSaving] = useState(false)
   const [formData, setFormData] = useState<PositionCategoryFormData>({
     name: editingPositionCategory?.name || "",
@@ -71,36 +74,38 @@ export function PositionCategoryFormDialog({
         <form onSubmit={handleSubmit}>
           <DialogHeader>
             <DialogTitle>
-              {editingPositionCategory ? "Edit Position Category" : "Add New Position Category"}
+              {editingPositionCategory
+                ? tc('editEntity', { entity: t('entityNameSingularCap') })
+                : tc('addNewEntity', { entity: t('entityNameSingularCap') })}
             </DialogTitle>
             <DialogDescription>
               {editingPositionCategory
-                ? "Update position category information"
-                : "Add a new position category to the system"}
+                ? t('updateEntityInfo', { entity: t('entityNameSingular') })
+                : t('addEntityToSystem', { entity: t('entityNameSingular') })}
             </DialogDescription>
           </DialogHeader>
           <div className="grid gap-4 py-4">
             <div className="grid gap-2">
-              <Label htmlFor="name">Position Category Name *</Label>
+              <Label htmlFor="name">{t('colName')} *</Label>
               <Input
                 id="name"
                 value={formData.name}
                 onChange={(e) =>
                   setFormData({ ...formData, name: e.target.value })
                 }
-                placeholder="Enter position category name"
+                placeholder={t('namePlaceholder')}
                 required
               />
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="description">Description</Label>
+              <Label htmlFor="description">{tc('description')}</Label>
               <textarea
                 id="description"
                 value={formData.description}
                 onChange={(e) =>
                   setFormData({ ...formData, description: e.target.value })
                 }
-                placeholder="Enter description (optional)"
+                placeholder={tc('enterDescriptionOptional')}
                 className="flex min-h-20 w-full rounded-md border border-input bg-background px-3 py-2 text-base ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
               />
             </div>
@@ -112,10 +117,10 @@ export function PositionCategoryFormDialog({
               onClick={() => onOpenChange(false)}
               disabled={isSaving}
             >
-              Cancel
+              {tc('cancel')}
             </Button>
             <Button type="submit" disabled={isSaving}>
-              {isSaving ? "Saving..." : editingPositionCategory ? "Update" : "Create"}
+              {isSaving ? tc('saving') : editingPositionCategory ? tc('update') : tc('create')}
             </Button>
           </DialogFooter>
         </form>

@@ -8,7 +8,7 @@ import { Separator } from "@/components/ui/separator"
 import { SidebarTrigger } from "@/components/ui/sidebar"
 import { IconUser, IconChevronDown, IconMoon, IconSun, IconLanguage } from "@tabler/icons-react"
 import { useRouter as useIntlRouter, usePathname as useIntlPathname } from '@/navigation'
-import { useLocale } from 'next-intl'
+import { useLocale, useTranslations } from 'next-intl'
 import { useIsMobile } from "@/hooks/use-mobile"
 import {
   Breadcrumb,
@@ -25,7 +25,14 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 
+const LOCALE_SHORT_LABEL: Record<string, string> = {
+  en: "EN",
+  ms: "MS",
+  "ms-kerajaan": "MS-K",
+}
+
 export function SiteHeader() {
+  const t = useTranslations('SiteHeader')
   const pathname = usePathname()
   const [user, setUser] = useState<{ name: string; userType: string } | null>(null)
   const isMobile = useIsMobile()
@@ -51,23 +58,32 @@ export function SiteHeader() {
     }
   }, [])
   
+  // Breadcrumb labels are normally just the capitalized URL segment (works
+  // fine since most admin route slugs already are the English word — units,
+  // positions, grades, ...). A few slugs are Malay words that need an actual
+  // translated label instead (negeri/zon), so those get an override here.
+  const BREADCRUMB_SEGMENT_OVERRIDES: Record<string, string> = {
+    negeri: t('breadcrumbNegeri'),
+    zon: t('breadcrumbZon'),
+  }
+
   // Generate breadcrumb items from pathname
   const generateBreadcrumbs = () => {
     const paths = pathname.split('/').filter(Boolean)
     const breadcrumbs = []
-    
+
     for (let i = 0; i < paths.length; i++) {
       const path = paths[i]
       const href = '/' + paths.slice(0, i + 1).join('/')
-      const label = path.charAt(0).toUpperCase() + path.slice(1)
-      
+      const label = BREADCRUMB_SEGMENT_OVERRIDES[path] ?? (path.charAt(0).toUpperCase() + path.slice(1))
+
       breadcrumbs.push({
         label,
         href,
         isLast: i === paths.length - 1
       })
     }
-    
+
     return breadcrumbs
   }
   
@@ -76,9 +92,9 @@ export function SiteHeader() {
   // Get current page title for mobile
   const getCurrentPageTitle = () => {
     const paths = pathname.split('/').filter(Boolean)
-    if (paths.length === 0) return "Home"
+    if (paths.length === 0) return t('home')
     const lastPath = paths[paths.length - 1]
-    return lastPath.charAt(0).toUpperCase() + lastPath.slice(1)
+    return BREADCRUMB_SEGMENT_OVERRIDES[lastPath] ?? (lastPath.charAt(0).toUpperCase() + lastPath.slice(1))
   }
 
   return (
@@ -122,7 +138,9 @@ export function SiteHeader() {
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" size="sm" className="gap-1.5 px-2">
                 <IconLanguage className="size-4" />
-                <span className="hidden sm:inline-block text-xs font-medium uppercase">{locale}</span>
+                <span className="hidden sm:inline-block text-xs font-medium uppercase">
+                  {LOCALE_SHORT_LABEL[locale] ?? locale}
+                </span>
                 <IconChevronDown className="size-3" />
               </Button>
             </DropdownMenuTrigger>
@@ -131,13 +149,19 @@ export function SiteHeader() {
                 onClick={() => switchLocale('en')}
                 className={locale === 'en' ? 'font-semibold text-primary' : ''}
               >
-                English
+                {t('english')}
               </DropdownMenuItem>
               <DropdownMenuItem
                 onClick={() => switchLocale('ms')}
                 className={locale === 'ms' ? 'font-semibold text-primary' : ''}
               >
-                Bahasa Melayu
+                {t('bahasaMelayu')}
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={() => switchLocale('ms-kerajaan')}
+                className={locale === 'ms-kerajaan' ? 'font-semibold text-primary' : ''}
+              >
+                {t('bahasaMelayuKerajaan')}
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
@@ -151,7 +175,7 @@ export function SiteHeader() {
           >
             <IconSun className="size-4 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
             <IconMoon className="absolute size-4 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
-            <span className="sr-only">Toggle theme</span>
+            <span className="sr-only">{t('toggleTheme')}</span>
           </Button>
           
           {user && (
@@ -167,7 +191,7 @@ export function SiteHeader() {
                   <DropdownMenuItem disabled>
                     <div className="flex flex-col">
                       <span className="text-sm font-medium">{user.name}</span>
-                      <span className="text-xs text-muted-foreground">{user.userType === 'admin' ? 'Admin' : 'Staff'}</span>
+                      <span className="text-xs text-muted-foreground">{user.userType === 'admin' ? t('admin') : t('staff')}</span>
                     </div>
                   </DropdownMenuItem>
                 </DropdownMenuContent>
@@ -176,7 +200,7 @@ export function SiteHeader() {
               <Button variant="ghost" size="sm" className="gap-2">
                 <IconUser className="size-4" />
                 <span className="hidden sm:inline-flex">
-                  {user.name || (user.userType === 'admin' ? 'Admin' : 'Staff')}
+                  {user.name || (user.userType === 'admin' ? t('admin') : t('staff'))}
                 </span>
               </Button>
             )

@@ -160,7 +160,7 @@ export function useAssessmentData(assessmentId: string) {
           hasResults,
         }
       })
-      .sort((a, b) => a.name.localeCompare(b.name))
+      .sort((a, b) => (a.name ?? "").localeCompare(b.name ?? ""))
   }
 
   return {

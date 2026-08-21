@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Training } from "./columns"
+import { useTranslations } from "next-intl"
 
 interface TrainingFormData {
   name: string
@@ -32,6 +33,8 @@ export function TrainingFormDialog({
   editingTraining,
   onSubmit,
 }: TrainingFormDialogProps) {
+  const t = useTranslations('AdminTrainingsPage')
+  const tc = useTranslations('Common')
   const [isSaving, setIsSaving] = useState(false)
   const [formData, setFormData] = useState<TrainingFormData>({
     name: editingTraining?.name || "",
@@ -84,29 +87,29 @@ export function TrainingFormDialog({
         <form onSubmit={handleSubmit}>
           <DialogHeader>
             <DialogTitle>
-              {editingTraining ? "Edit Training" : "Add New Training"}
+              {editingTraining ? tc('editEntity', { entity: t('entityNameSingularCap') }) : tc('addNewEntity', { entity: t('entityNameSingularCap') })}
             </DialogTitle>
             <DialogDescription>
               {editingTraining
-                ? "Update training information"
-                : "Add a new training program to the system"}
+                ? t('updateEntityInfo')
+                : t('addEntityToSystem')}
             </DialogDescription>
           </DialogHeader>
           <div className="grid gap-4 py-4">
             <div className="grid gap-2">
-              <Label htmlFor="name">Training Name *</Label>
+              <Label htmlFor="name">{t('colName')} *</Label>
               <Input
                 id="name"
                 value={formData.name}
                 onChange={(e) =>
                   setFormData({ ...formData, name: e.target.value })
                 }
-                placeholder="Enter training name"
+                placeholder={t('namePlaceholder')}
                 required
               />
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="startDate">Start Date</Label>
+              <Label htmlFor="startDate">{t('colStartDate')}</Label>
               <Input
                 id="startDate"
                 type="date"
@@ -117,7 +120,7 @@ export function TrainingFormDialog({
               />
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="endDate">End Date</Label>
+              <Label htmlFor="endDate">{t('colEndDate')}</Label>
               <Input
                 id="endDate"
                 type="date"
@@ -128,14 +131,14 @@ export function TrainingFormDialog({
               />
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="description">Description</Label>
+              <Label htmlFor="description">{tc('description')}</Label>
               <textarea
                 id="description"
                 value={formData.description}
                 onChange={(e) =>
                   setFormData({ ...formData, description: e.target.value })
                 }
-                placeholder="Enter description (optional)"
+                placeholder={tc('enterDescriptionOptional')}
                 className="flex min-h-20 w-full rounded-md border border-input bg-background px-3 py-2 text-base ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
               />
             </div>
@@ -147,10 +150,10 @@ export function TrainingFormDialog({
               onClick={() => onOpenChange(false)}
               disabled={isSaving}
             >
-              Cancel
+              {tc('cancel')}
             </Button>
             <Button type="submit" disabled={isSaving}>
-              {isSaving ? "Saving..." : editingTraining ? "Update" : "Create"}
+              {isSaving ? tc('saving') : editingTraining ? tc('update') : tc('create')}
             </Button>
           </DialogFooter>
         </form>

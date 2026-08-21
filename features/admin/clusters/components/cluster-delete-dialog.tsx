@@ -9,6 +9,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
 import { Cluster } from "./columns"
+import { useTranslations } from "next-intl"
 
 interface ClusterDeleteDialogProps {
   open: boolean
@@ -25,24 +26,27 @@ export function ClusterDeleteDialog({
   selectedCount = 0,
   onConfirm,
 }: ClusterDeleteDialogProps) {
+  const t = useTranslations('AdminClustersPage')
+  const tc = useTranslations('Common')
+
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+          <AlertDialogTitle>{tc('confirmTitle')}</AlertDialogTitle>
           <AlertDialogDescription>
             {deletingCluster
-              ? `This will permanently delete "${deletingCluster.name}". This action cannot be undone.`
-              : `This will permanently delete ${selectedCount} selected clusters. This action cannot be undone.`}
+              ? tc('deleteSingleWarning', { name: deletingCluster.name })
+              : tc('deleteBulkWarning', { count: selectedCount, entity: t('entityNamePlural') })}
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel>Cancel</AlertDialogCancel>
+          <AlertDialogCancel>{tc('cancel')}</AlertDialogCancel>
           <AlertDialogAction
             onClick={onConfirm}
             className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
           >
-            Delete
+            {tc('delete')}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>

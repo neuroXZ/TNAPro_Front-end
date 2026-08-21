@@ -8,6 +8,7 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { Grade } from "./columns"
+import { useTranslations } from "next-intl"
 
 interface GradeDataTableProps {
   table: TanStackTable<Grade>
@@ -16,6 +17,8 @@ interface GradeDataTableProps {
 }
 
 export function GradeDataTable({ table, columnsLength, onRowClick }: GradeDataTableProps) {
+  const t = useTranslations('AdminGradesPage')
+  const tc = useTranslations('Common')
   return (
     <div className="rounded-md border">
       <Table>
@@ -60,7 +63,7 @@ export function GradeDataTable({ table, columnsLength, onRowClick }: GradeDataTa
                 colSpan={columnsLength}
                 className="h-24 text-center"
               >
-                No grades found
+                {tc('noResultsFound', { entity: t('entityNamePlural') })}
               </TableCell>
             </TableRow>
           )}

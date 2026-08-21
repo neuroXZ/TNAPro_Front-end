@@ -4,6 +4,7 @@ import { ColumnDef } from "@tanstack/react-table"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
 import { IconEdit, IconTrash, IconArrowUp, IconArrowDown, IconArrowsSort } from "@tabler/icons-react"
+import { useTranslations } from "next-intl"
 
 export interface Grade {
   id: string
@@ -20,38 +21,45 @@ interface ColumnActions {
 export const getColumns = (actions: ColumnActions): ColumnDef<Grade>[] => [
   {
     id: "select",
-    header: ({ table }) => (
-      <Checkbox
-        checked={
-          table.getIsAllPageRowsSelected() ||
-          (table.getIsSomePageRowsSelected() && "indeterminate")
-        }
-        onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
-        aria-label="Select all"
-        onClick={(e) => e.stopPropagation()}
-      />
-    ),
-    cell: ({ row }) => (
-      <Checkbox
-        checked={row.getIsSelected()}
-        onCheckedChange={(value) => row.toggleSelected(!!value)}
-        aria-label="Select row"
-        onClick={(e) => e.stopPropagation()}
-      />
-    ),
+    header: ({ table }) => {
+      const t = useTranslations('AdminGradesPage')
+      return (
+        <Checkbox
+          checked={
+            table.getIsAllPageRowsSelected() ||
+            (table.getIsSomePageRowsSelected() && "indeterminate")
+          }
+          onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
+          aria-label={t('selectAll')}
+          onClick={(e) => e.stopPropagation()}
+        />
+      )
+    },
+    cell: ({ row }) => {
+      const t = useTranslations('AdminGradesPage')
+      return (
+        <Checkbox
+          checked={row.getIsSelected()}
+          onCheckedChange={(value) => row.toggleSelected(!!value)}
+          aria-label={t('selectRow')}
+          onClick={(e) => e.stopPropagation()}
+        />
+      )
+    },
     enableSorting: false,
     enableHiding: false,
   },
   {
     accessorKey: "name",
     header: ({ column }) => {
+      const t = useTranslations('AdminGradesPage')
       return (
         <Button
           variant="ghost"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
           className="-ml-4"
         >
-          Grade Name
+          {t('colName')}
           {column.getIsSorted() === "asc" ? (
             <IconArrowUp className="ml-2 size-4" />
           ) : column.getIsSorted() === "desc" ? (
@@ -66,13 +74,14 @@ export const getColumns = (actions: ColumnActions): ColumnDef<Grade>[] => [
   {
     accessorKey: "level",
     header: ({ column }) => {
+      const t = useTranslations('AdminGradesPage')
       return (
         <Button
           variant="ghost"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
           className="-ml-4"
         >
-          Level
+          {t('colLevel')}
           {column.getIsSorted() === "asc" ? (
             <IconArrowUp className="ml-2 size-4" />
           ) : column.getIsSorted() === "desc" ? (
@@ -94,7 +103,10 @@ export const getColumns = (actions: ColumnActions): ColumnDef<Grade>[] => [
   },
   {
     accessorKey: "description",
-    header: "Description",
+    header: () => {
+      const tc = useTranslations('Common')
+      return tc('description')
+    },
     cell: ({ row }) => {
       const description = row.original.description
       if (!description) return <span className="text-muted-foreground">-</span>
@@ -109,7 +121,10 @@ export const getColumns = (actions: ColumnActions): ColumnDef<Grade>[] => [
   },
   {
     id: "actions",
-    header: () => <div className="text-right">Actions</div>,
+    header: () => {
+      const tc = useTranslations('Common')
+      return <div className="text-right">{tc('actions')}</div>
+    },
     cell: ({ row }) => {
       const grade = row.original
 

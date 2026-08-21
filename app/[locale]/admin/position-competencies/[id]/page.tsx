@@ -323,14 +323,14 @@ export default function PositionCompetencyDetailPage() {
 
   const handleRemoveOrphaned = async () => {
     if (orphanedPositionCompetencies.length === 0) return
-    if (!confirm(`Remove ${orphanedPositionCompetencies.length} mapping(s) pointing to a deleted competency? This cannot be undone.`)) {
+    if (!confirm(t('confirmRemoveOrphaned', { count: orphanedPositionCompetencies.length }))) {
       return
     }
 
     try {
       setIsRemovingOrphaned(true)
       await Promise.all(orphanedPositionCompetencies.map((pc) => positionCompetencyAPI.delete(pc.id)))
-      toast.success('Deleted mapping(s) removed')
+      toast.success(t('orphanedMappingsRemoved'))
       await fetchData()
     } catch (error) {
       toast.error(t('removeError'))
@@ -368,10 +368,12 @@ export default function PositionCompetencyDetailPage() {
         <div>
           <h1 className="text-3xl font-bold text-primary">{position?.name}</h1>
           <p className="text-muted-foreground ">
-            {position?.grade?.name && `Grade: ${position.grade.name} â€¢ `}
-            {validPositionCompetencyCount} {validPositionCompetencyCount === 1 ? "competency" : "competencies"} assigned
+            {position?.grade?.name && `${t('gradeLabel', { grade: position.grade.name })} • `}
+            {validPositionCompetencyCount === 1
+              ? t('statusAssignedSingle', { count: validPositionCompetencyCount })
+              : t('statusAssignedMultiple', { count: validPositionCompetencyCount })}
             {orphanedPositionCompetencyCount > 0 && (
-              <span className="text-destructive"> ({orphanedPositionCompetencyCount} mapped to a deleted competency â€” see below)</span>
+              <span className="text-destructive"> {t('orphanedInlineNote', { count: orphanedPositionCompetencyCount })}</span>
             )}
           </p>
         </div>
@@ -383,8 +385,9 @@ export default function PositionCompetencyDetailPage() {
             <div className="flex items-center gap-2 text-sm">
               <IconAlertTriangle className="size-4 text-destructive shrink-0" />
               <span>
-                {orphanedPositionCompetencyCount} mapping{orphanedPositionCompetencyCount === 1 ? "" : "s"} point to a
-                competency that no longer exists in the master list. Remove {orphanedPositionCompetencyCount === 1 ? "it" : "them"} and re-map with a current competency.
+                {orphanedPositionCompetencyCount === 1
+                  ? t('orphanedWarningSingle', { count: orphanedPositionCompetencyCount })
+                  : t('orphanedWarningMultiple', { count: orphanedPositionCompetencyCount })}
               </span>
             </div>
             <Button
@@ -394,7 +397,9 @@ export default function PositionCompetencyDetailPage() {
               disabled={isRemovingOrphaned}
             >
               <IconTrashX className="mr-2 size-4" />
-              Remove deleted mapping{orphanedPositionCompetencyCount === 1 ? "" : "s"}
+              {orphanedPositionCompetencyCount === 1
+                ? t('removeDeletedMappingSingle')
+                : t('removeDeletedMappingMultiple')}
             </Button>
           </CardContent>
         </Card>
@@ -406,7 +411,7 @@ export default function PositionCompetencyDetailPage() {
             <div className="relative">
               <IconSearch className="absolute left-2.5 top-2.5 size-4 text-muted-foreground" />
               <Input
-                placeholder="Search competencies..."
+                placeholder={t('searchPlaceholder')}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="pl-8"
