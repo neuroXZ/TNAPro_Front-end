@@ -1577,6 +1577,7 @@
   "CustomerServicePage": {
     "badge": "Training Needs Analysis System",
     "heroTitle": "Welcome to",
+    "heroBrand": "TNAPro",
     "heroSubtitle": "Leading competency assessment platform that helps organizations identify training needs and develop employee potential through comprehensive and accurate competency gap analysis.",
     "startAssessment": "Start Assessment",
     "learnMore": "Learn More",

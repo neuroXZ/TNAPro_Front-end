@@ -31,7 +31,7 @@ const CustomerServicePage = () => {
             </Badge>
             <h1 className="text-4xl font-bold tracking-tight sm:text-6xl">
               {t('heroTitle')}{' '}
-              <span className="text-primary">TNAPro</span>
+              <span className="text-primary">{t('heroBrand')}</span>
             </h1>
             <p className="text-lg text-muted-foreground max-w-3xl mx-auto leading-relaxed">
               {t('heroSubtitle')}

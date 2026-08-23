@@ -1577,6 +1577,7 @@
   "CustomerServicePage": {
     "badge": "Sistem Analisis Keperluan Latihan",
     "heroTitle": "Selamat Datang ke",
+    "heroBrand": "TNAPro",
     "heroSubtitle": "Platform penilaian kompetensi terkemuka yang membantu organisasi mengenal pasti keperluan latihan dan mengembangkan potensi pekerja melalui analisis jurang kompetensi yang komprehensif dan tepat.",
     "startAssessment": "Mulakan Penilaian",
     "learnMore": "Ketahui Lebih Lanjut",
