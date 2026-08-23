@@ -11,6 +11,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Accordion } from "@/components/ui/accordion"
 import { Badge } from "@/components/ui/badge"
 import { IconCheck, IconX, IconSearch, IconChartBar, IconClock } from "@tabler/icons-react"
+import { useTranslations } from "next-intl"
 import type { StaffMemberWithResults, StaffCompetencyMatrix, Position } from "../types"
 import { calculateAverages } from "../utils"
 import { StaffAccordionItem } from "./StaffAccordionItem"
@@ -25,6 +26,7 @@ interface StaffListProps {
 }
 
 export function StaffList({ allStaff, matrix, positions, assessmentId, onDataUpdate }: StaffListProps) {
+  const t = useTranslations('AdminAssessmentDetailPage')
   const [searchQuery, setSearchQuery] = useState("")
   const [selectedPosition, setSelectedPosition] = useState<string>("all")
 
@@ -58,10 +60,10 @@ export function StaffList({ allStaff, matrix, positions, assessmentId, onDataUpd
     <Tabs defaultValue="all" className="space-y-4">
       <div className="flex items-center justify-between gap-4">
         <TabsList>
-          <TabsTrigger value="all">All Staff ({filteredStaff.length})</TabsTrigger>
+          <TabsTrigger value="all">{t('allStaffTab', { count: filteredStaff.length })}</TabsTrigger>
           <TabsTrigger value="completed" className="gap-2">
             <IconCheck className="size-3" />
-            Complete ({(() => {
+            {t('completeTab', { count: (() => {
               return filteredStaff.filter(s => {
                 const staffData = matrix[s.id]
                 if (!staffData) return false
@@ -70,15 +72,15 @@ export function StaffList({ allStaff, matrix, positions, assessmentId, onDataUpd
                   comp => comp.scores.self !== undefined && comp.scores.superior !== undefined
                 )
               }).length
-            })()})
+            })() })}
           </TabsTrigger>
           <TabsTrigger value="pending" className="gap-2">
             <IconClock className="size-3" />
-            In Progress/Incomplete ({incompleteCount})
+            {t('inProgressIncompleteTab', { count: incompleteCount })}
           </TabsTrigger>
           <TabsTrigger value="average" className="gap-2">
             <IconChartBar className="size-3" />
-            Average Statistics
+            {t('averageStatisticsTab')}
           </TabsTrigger>
         </TabsList>
 
@@ -86,7 +88,7 @@ export function StaffList({ allStaff, matrix, positions, assessmentId, onDataUpd
           <div className="relative">
             <IconSearch className="absolute left-2 top-2.5 size-4 text-muted-foreground" />
             <Input
-              placeholder="Search staff..."
+              placeholder={t('searchStaffPlaceholder')}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="pl-8 w-[200px]"
@@ -94,10 +96,10 @@ export function StaffList({ allStaff, matrix, positions, assessmentId, onDataUpd
           </div>
           <Select value={selectedPosition} onValueChange={setSelectedPosition}>
             <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder="Filter by position" />
+              <SelectValue placeholder={t('filterByPositionPlaceholder')} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All Positions</SelectItem>
+              <SelectItem value="all">{t('allPositionsOption')}</SelectItem>
               {uniquePositions.map((position) => (
                 <SelectItem key={position.id} value={position.id}>
                   {position.name}
@@ -110,7 +112,7 @@ export function StaffList({ allStaff, matrix, positions, assessmentId, onDataUpd
 
       <TabsContent value="all" className="space-y-2">
         {filteredStaff.length === 0 ? (
-          <div className="text-center py-8 text-muted-foreground">No staff found.</div>
+          <div className="text-center py-8 text-muted-foreground">{t('noStaffFound')}</div>
         ) : (
           <Accordion type="single" collapsible className="w-full space-y-2">
             {filteredStaff.map((staffMember) => (
@@ -139,7 +141,7 @@ export function StaffList({ allStaff, matrix, positions, assessmentId, onDataUpd
           
           return completeStaff.length === 0 ? (
             <div className="text-center py-8 text-muted-foreground">
-              No completed assessments yet.
+              {t('noCompletedAssessmentsYet')}
             </div>
           ) : (
             <Accordion type="single" collapsible className="w-full space-y-2">
@@ -160,7 +162,7 @@ export function StaffList({ allStaff, matrix, positions, assessmentId, onDataUpd
       <TabsContent value="pending" className="space-y-4">
         {incompleteCount === 0 ? (
           <div className="text-center py-8 text-muted-foreground">
-            All staff have completed their assessments!
+            {t('allStaffCompletedMsg')}
           </div>
         ) : (
           <div className="space-y-2">
@@ -178,7 +180,7 @@ export function StaffList({ allStaff, matrix, positions, assessmentId, onDataUpd
                     </div>
                     <Badge className="gap-1 ml-4 bg-red-600 hover:bg-red-700 text-white">
                       <IconX className="size-3" />
-                      Incomplete
+                      {t('statusIncomplete')}
                     </Badge>
                   </div>
                 </div>
@@ -191,11 +193,12 @@ export function StaffList({ allStaff, matrix, positions, assessmentId, onDataUpd
         <div className="rounded-lg border bg-muted/50 p-4 mb-4">
           <div className="flex items-center gap-2 mb-2">
             <IconChartBar className="size-5 text-primary" />
-            <h3 className="font-semibold">Competency Average Statistics</h3>
+            <h3 className="font-semibold">{t('avgStatsCardTitle')}</h3>
           </div>
           <p className="text-sm text-muted-foreground">
-            Average scores and gaps calculated from {completedCount} completed staff {completedCount === 1 ? 'assessment' : 'assessments'}.
-            Only staff with both Self and Superior assessments are included.
+            {completedCount === 1
+              ? t('avgStatsDescSingle', { count: completedCount })
+              : t('avgStatsDescMultiple', { count: completedCount })}
           </p>
         </div>
         <AverageTable averages={averages} />

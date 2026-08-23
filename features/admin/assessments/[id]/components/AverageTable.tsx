@@ -7,6 +7,7 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { Badge } from "@/components/ui/badge"
+import { useTranslations } from "next-intl"
 import { getScoreColor, getGapColor, type CompetencyAverage } from "../utils"
 
 interface AverageTableProps {
@@ -14,10 +15,12 @@ interface AverageTableProps {
 }
 
 export function AverageTable({ averages }: AverageTableProps) {
+  const t = useTranslations('AdminAssessmentDetailPage')
+
   if (averages.length === 0) {
     return (
       <div className="text-center py-8 text-muted-foreground">
-        No completed assessments to calculate averages.
+        {t('noAveragesData')}
       </div>
     )
   }
@@ -47,18 +50,18 @@ export function AverageTable({ averages }: AverageTableProps) {
             )}
             <h4 className="text-sm font-semibold">{clusterName}</h4>
             <Badge variant="outline" className="text-xs">
-              {items.length} {items.length === 1 ? 'competency' : 'competencies'}
+              {items.length} {items.length === 1 ? t('competencySingular') : t('competenciesPlural')}
             </Badge>
           </div>
           <div className="rounded-md border">
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Competency</TableHead>
-                  <TableHead className="text-center">Staff Count</TableHead>
-                  <TableHead className="text-center">Avg RCL</TableHead>
-                  <TableHead className="text-center">Avg Score</TableHead>
-                  <TableHead className="text-center">Avg Gap</TableHead>
+                  <TableHead>{t('colCompetency')}</TableHead>
+                  <TableHead className="text-center">{t('colStaffCount')}</TableHead>
+                  <TableHead className="text-center">{t('colAvgRcl')}</TableHead>
+                  <TableHead className="text-center">{t('colAvgScore')}</TableHead>
+                  <TableHead className="text-center">{t('colAvgGap')}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>

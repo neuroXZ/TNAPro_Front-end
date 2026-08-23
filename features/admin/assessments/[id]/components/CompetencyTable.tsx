@@ -21,6 +21,7 @@ import {
 import { IconTrash } from "@tabler/icons-react"
 import { useState } from "react"
 import { toast } from "sonner"
+import { useTranslations } from "next-intl"
 import { assessmentResultAPI } from "@/lib/api"
 import type { CompetencyData } from "../types"
 import { getScoreColor, getGapColor } from "../utils"
@@ -34,6 +35,9 @@ interface CompetencyTableProps {
 }
 
 export function CompetencyTable({ competencies, clusterName, onDataUpdate, staffId, staffName }: CompetencyTableProps) {
+  const t = useTranslations('AdminAssessmentDetailPage')
+  const tc = useTranslations('Common')
+  const typeLabel = (type: 'self' | 'superior' | null) => type === 'self' ? t('selfWord') : type === 'superior' ? t('superiorWord') : ''
   const [deleteDialog, setDeleteDialog] = useState<{
     open: boolean
     type: 'self' | 'superior' | null
@@ -54,7 +58,7 @@ export function CompetencyTable({ competencies, clusterName, onDataUpdate, staff
 
   const handleDeleteClick = (type: 'self' | 'superior', competencyName: string, resultId: string | null) => {
     if (!resultId) {
-      toast.error("Cannot delete - no assessment result ID found")
+      toast.error(t('noResultIdError'))
       return
     }
     setDeleteDialog({
@@ -72,7 +76,7 @@ export function CompetencyTable({ competencies, clusterName, onDataUpdate, staff
     )
     
     if (relevantScores.length === 0) {
-      toast.error(`No ${type} assessment data found to delete`)
+      toast.error(t('noDataToDeleteError', { type: typeLabel(type) }))
       return
     }
     
@@ -94,28 +98,28 @@ export function CompetencyTable({ competencies, clusterName, onDataUpdate, staff
           .filter(Boolean) as string[]
         
         if (resultIds.length === 0) {
-          toast.error('No assessment data found to delete')
+          toast.error(t('noDataToDeleteError', { type: typeLabel(deleteDialog.type) }))
           return
         }
 
         // Delete all results in parallel
         await Promise.all(resultIds.map(id => assessmentResultAPI.delete(id)))
-        toast.success(`All ${deleteDialog.type} assessment data deleted successfully (${resultIds.length} records)`)
+        toast.success(t('bulkDeleteSuccess', { type: typeLabel(deleteDialog.type), count: resultIds.length }))
       } else {
         // Single delete
         if (!deleteDialog.resultId) return
         await assessmentResultAPI.delete(deleteDialog.resultId)
-        toast.success(`${deleteDialog.type === 'self' ? 'Self' : 'Superior'} assessment deleted successfully`)
+        toast.success(t('singleDeleteSuccess', { type: typeLabel(deleteDialog.type) }))
       }
-      
+
       setDeleteDialog({ open: false, type: null, competencyName: '', resultId: null, isBulk: false })
-      
+
       // Trigger data refresh if callback provided
       if (onDataUpdate) {
         onDataUpdate()
       }
     } catch (error) {
-      toast.error(`Failed to delete ${deleteDialog.type} assessment data`)
+      toast.error(t('bulkDeleteFailed', { type: typeLabel(deleteDialog.type) }))
       console.error(error)
     }
   }
@@ -126,17 +130,17 @@ export function CompetencyTable({ competencies, clusterName, onDataUpdate, staff
         <Table>
         <TableHeader>
           <TableRow>
-            <TableHead className="w-[200px]">Competency</TableHead>
-            <TableHead className="text-center">RCL</TableHead>
+            <TableHead className="w-[200px]">{t('colCompetency')}</TableHead>
+            <TableHead className="text-center">{t('colRcl')}</TableHead>
             <TableHead className="text-center">
               <div className="flex items-center justify-center gap-2">
-                Self
+                {t('colSelf')}
                 <Button
                   size="sm"
                   variant="ghost"
                   className="h-5 w-5 p-0 text-destructive hover:bg-destructive/10"
                   onClick={() => handleBulkDeleteClick('self')}
-                  title="Delete all Self assessments for this staff"
+                  title={t('deleteAllSelfTitle')}
                 >
                   <IconTrash className="size-3" />
                 </Button>
@@ -144,21 +148,21 @@ export function CompetencyTable({ competencies, clusterName, onDataUpdate, staff
             </TableHead>
             <TableHead className="text-center">
               <div className="flex items-center justify-center gap-2">
-                Superior
+                {t('colSuperior')}
                 <Button
                   size="sm"
                   variant="ghost"
                   className="h-5 w-5 p-0 text-destructive hover:bg-destructive/10"
                   onClick={() => handleBulkDeleteClick('superior')}
-                  title="Delete all Superior assessments for this staff"
+                  title={t('deleteAllSuperiorTitle')}
                 >
                   <IconTrash className="size-3" />
                 </Button>
               </div>
             </TableHead>
-            <TableHead className="text-center font-semibold">Total Score</TableHead>
-            <TableHead className="text-center font-semibold">Gap</TableHead>
-            <TableHead className="text-center">Actions</TableHead>
+            <TableHead className="text-center font-semibold">{t('colTotalScore')}</TableHead>
+            <TableHead className="text-center font-semibold">{t('colGap')}</TableHead>
+            <TableHead className="text-center">{tc('actions')}</TableHead>
           </TableRow>
         </TableHeader>
           <TableBody>
@@ -199,11 +203,11 @@ export function CompetencyTable({ competencies, clusterName, onDataUpdate, staff
                     
                     <div className="flex items-center justify-center gap-1">
                       {scores.self && scores.superior ? (
-                        <span className="text-xs text-green-600 font-medium">Complete</span>
+                        <span className="text-xs text-green-600 font-medium">{t('statusComplete')}</span>
                       ) : scores.self || scores.superior ? (
-                        <span className="text-xs text-yellow-500 font-medium">In Progress</span>
+                        <span className="text-xs text-yellow-500 font-medium">{t('statusInProgress')}</span>
                       ) : (
-                        <span className="text-xs text-red-600 font-medium">Incomplete</span>
+                        <span className="text-xs text-red-600 font-medium">{t('statusIncomplete')}</span>
                       )}
                     </div>
                   </TableCell>
@@ -218,30 +222,21 @@ export function CompetencyTable({ competencies, clusterName, onDataUpdate, staff
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>
-              {deleteDialog.isBulk ? 'Bulk Delete Assessment Data' : 'Delete Assessment Data'}
+              {deleteDialog.isBulk ? t('bulkDeleteDialogTitle') : t('deleteDialogTitle')}
             </AlertDialogTitle>
             <AlertDialogDescription>
-              {deleteDialog.isBulk ? (
-                <>
-                  Are you sure you want to delete <strong>ALL {deleteDialog.type}</strong> assessment data for{" "}
-                  <strong>{staffName || 'this staff member'}</strong>? This will remove all {deleteDialog.type} scores 
-                  across all competencies. This action cannot be undone.
-                </>
-              ) : (
-                <>
-                  Are you sure you want to delete the <strong>{deleteDialog.type}</strong> assessment data for{" "}
-                  <strong>{deleteDialog.competencyName}</strong>? This action cannot be undone.
-                </>
-              )}
+              {deleteDialog.isBulk
+                ? t('bulkDeleteConfirmMsg', { type: typeLabel(deleteDialog.type), name: staffName || t('thisStaffMemberFallback') })
+                : t('singleDeleteConfirmMsg', { type: typeLabel(deleteDialog.type), competency: deleteDialog.competencyName })}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel>{tc('cancel')}</AlertDialogCancel>
             <AlertDialogAction
               onClick={handleDeleteConfirm}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
-              {deleteDialog.isBulk ? `Delete All ${deleteDialog.type?.charAt(0).toUpperCase()}${deleteDialog.type?.slice(1)}` : 'Delete'}
+              {deleteDialog.isBulk ? t('deleteAllButtonLabel', { type: typeLabel(deleteDialog.type) }) : tc('delete')}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

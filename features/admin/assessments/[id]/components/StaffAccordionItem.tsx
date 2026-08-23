@@ -8,6 +8,7 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { IconCheck, IconX, IconFileTypePdf, IconFileTypeCsv, IconClock } from "@tabler/icons-react"
 import { toast } from "sonner"
+import { useTranslations } from "next-intl"
 import type { StaffMemberWithResults, StaffCompetencyMatrix } from "../types"
 import { CompetencyTable } from "./CompetencyTable"
 import { cgaAPI } from "@/lib/api"
@@ -20,6 +21,7 @@ interface StaffAccordionItemProps {
 }
 
 export function StaffAccordionItem({ staffMember, staffData, assessmentId, onDataUpdate }: StaffAccordionItemProps) {
+  const t = useTranslations('AdminAssessmentDetailPage')
   const clusterNames = staffData
     ? Array.from(
         new Set(
@@ -47,10 +49,10 @@ export function StaffAccordionItem({ staffMember, staffData, assessmentId, onDat
       link.remove();
       window.URL.revokeObjectURL(url);
       
-      toast.success("CSV exported successfully");
+      toast.success(t('exportCsvSuccess'));
     } catch (error) {
       console.error('Export CSV error:', error);
-      toast.error("Failed to export CSV");
+      toast.error(t('exportCsvFailed'));
     }
   };
 
@@ -80,17 +82,17 @@ export function StaffAccordionItem({ staffMember, staffData, assessmentId, onDat
                   }}
                 >
                   <IconFileTypeCsv className="size-4" />
-                  Export CSV
+                  {t('exportCsvButton')}
                 </div>
                 <div
                   className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-7 px-3 gap-1.5 cursor-pointer"
                   onClick={(e) => {
                     e.stopPropagation()
-                    toast.info("PDF export feature coming soon")
+                    toast.info(t('pdfComingSoon'))
                   }}
                 >
                   <IconFileTypePdf className="size-4" />
-                  Save PDF
+                  {t('savePdfButton')}
                 </div>
               </>
             )}
@@ -99,29 +101,29 @@ export function StaffAccordionItem({ staffMember, staffData, assessmentId, onDat
                 return (
                   <Badge className="gap-1 bg-red-600 hover:bg-red-700 text-white">
                     <IconX className="size-3" />
-                    Incomplete
+                    {t('statusIncomplete')}
                   </Badge>
                 )
               }
-              
+
               // Check if all competencies have both self and superior scores
               const competencyEntries = Object.values(staffData?.competencies || {})
               const allComplete = competencyEntries.length > 0 && competencyEntries.every(
                 (comp) => comp.scores.self !== undefined && comp.scores.superior !== undefined
               )
-              
+
               if (allComplete) {
                 return (
                   <Badge className="gap-1 bg-green-600 hover:bg-green-700 text-white">
                     <IconCheck className="size-3" />
-                    Complete
+                    {t('statusComplete')}
                   </Badge>
                 )
               } else {
                 return (
                   <Badge className="gap-1 bg-yellow-500 hover:bg-yellow-600 text-white">
                     <IconClock className="size-3" />
-                    In Progress
+                    {t('statusInProgress')}
                   </Badge>
                 )
               }
@@ -133,7 +135,7 @@ export function StaffAccordionItem({ staffMember, staffData, assessmentId, onDat
         {staffData ? (
           <Tabs defaultValue="all-clusters" className="w-full">
             <TabsList className="mb-3">
-              <TabsTrigger value="all-clusters">All</TabsTrigger>
+              <TabsTrigger value="all-clusters">{t('allClustersTab')}</TabsTrigger>
               {clusterNames.map((clusterName) => (
                 <TabsTrigger key={clusterName} value={clusterName || ""}>
                   {clusterName}
@@ -164,7 +166,7 @@ export function StaffAccordionItem({ staffMember, staffData, assessmentId, onDat
           </Tabs>
         ) : (
           <div className="rounded-md border p-4 text-center text-muted-foreground">
-            Assessment not yet completed
+            {t('notYetCompleted')}
           </div>
         )}
       </AccordionContent>
