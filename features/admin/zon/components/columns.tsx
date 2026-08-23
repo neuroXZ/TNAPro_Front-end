@@ -17,10 +17,11 @@ interface ColumnActions {
   onDelete: (zon: Zon) => void
 }
 
-export const getColumns = (actions: ColumnActions): ColumnDef<Zon>[] => {
-  const t = useTranslations('AdminZonPage')
-  const tc = useTranslations('Common')
-
+export const getColumns = (
+  actions: ColumnActions,
+  t: ReturnType<typeof useTranslations>,
+  tc: ReturnType<typeof useTranslations>
+): ColumnDef<Zon>[] => {
   return [
   {
     id: "select",

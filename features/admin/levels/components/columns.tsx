@@ -18,10 +18,11 @@ interface ColumnActions {
   onDelete: (level: Level) => void
 }
 
-export const getColumns = (actions: ColumnActions): ColumnDef<Level>[] => {
-  const t = useTranslations('AdminLevelsPage')
-  const tc = useTranslations('Common')
-
+export const getColumns = (
+  actions: ColumnActions,
+  t: ReturnType<typeof useTranslations>,
+  tc: ReturnType<typeof useTranslations>
+): ColumnDef<Level>[] => {
   return [
   {
     id: "select",

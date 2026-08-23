@@ -18,11 +18,14 @@ interface ColumnActions {
   onDelete: (grade: Grade) => void
 }
 
-export const getColumns = (actions: ColumnActions): ColumnDef<Grade>[] => [
+export const getColumns = (
+  actions: ColumnActions,
+  t: ReturnType<typeof useTranslations>,
+  tc: ReturnType<typeof useTranslations>
+): ColumnDef<Grade>[] => [
   {
     id: "select",
     header: ({ table }) => {
-      const t = useTranslations('AdminGradesPage')
       return (
         <Checkbox
           checked={
@@ -36,7 +39,6 @@ export const getColumns = (actions: ColumnActions): ColumnDef<Grade>[] => [
       )
     },
     cell: ({ row }) => {
-      const t = useTranslations('AdminGradesPage')
       return (
         <Checkbox
           checked={row.getIsSelected()}
@@ -52,7 +54,6 @@ export const getColumns = (actions: ColumnActions): ColumnDef<Grade>[] => [
   {
     accessorKey: "name",
     header: ({ column }) => {
-      const t = useTranslations('AdminGradesPage')
       return (
         <Button
           variant="ghost"
@@ -74,7 +75,6 @@ export const getColumns = (actions: ColumnActions): ColumnDef<Grade>[] => [
   {
     accessorKey: "level",
     header: ({ column }) => {
-      const t = useTranslations('AdminGradesPage')
       return (
         <Button
           variant="ghost"
@@ -104,7 +104,6 @@ export const getColumns = (actions: ColumnActions): ColumnDef<Grade>[] => [
   {
     accessorKey: "description",
     header: () => {
-      const tc = useTranslations('Common')
       return tc('description')
     },
     cell: ({ row }) => {
@@ -122,7 +121,6 @@ export const getColumns = (actions: ColumnActions): ColumnDef<Grade>[] => [
   {
     id: "actions",
     header: () => {
-      const tc = useTranslations('Common')
       return <div className="text-right">{tc('actions')}</div>
     },
     cell: ({ row }) => {

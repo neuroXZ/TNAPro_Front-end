@@ -22,10 +22,11 @@ interface ColumnActions {
   onDelete: (negeri: Negeri) => void
 }
 
-export const getColumns = (actions: ColumnActions): ColumnDef<Negeri>[] => {
-  const t = useTranslations('AdminNegeriPage')
-  const tc = useTranslations('Common')
-
+export const getColumns = (
+  actions: ColumnActions,
+  t: ReturnType<typeof useTranslations>,
+  tc: ReturnType<typeof useTranslations>
+): ColumnDef<Negeri>[] => {
   return [
   {
     id: "select",

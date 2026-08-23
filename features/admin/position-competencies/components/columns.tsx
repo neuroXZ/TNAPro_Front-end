@@ -20,10 +20,10 @@ export interface Position {
   }
 }
 
-export const getColumns = (): ColumnDef<Position>[] => {
-  const t = useTranslations('AdminPositionCompetenciesPage')
-  const tc = useTranslations('Common')
-
+export const getColumns = (
+  t: ReturnType<typeof useTranslations>,
+  tc: ReturnType<typeof useTranslations>
+): ColumnDef<Position>[] => {
   return [
   {
     id: "select",

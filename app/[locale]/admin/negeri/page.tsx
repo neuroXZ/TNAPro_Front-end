@@ -30,7 +30,7 @@ import { NegeriTableSkeleton } from "@/features/admin/negeri/components/negeri-t
 import { NegeriDataTable } from "@/features/admin/negeri/components/negeri-data-table"
 import { NegeriTableActions } from "@/features/admin/negeri/components/negeri-table-actions"
 import { NegeriViewDialog } from "@/features/admin/negeri/components/negeri-view-dialog"
-import { useTranslations } from "next-intl"
+import { useTranslations, useLocale } from "next-intl"
 import { FeatureRoute } from "@/components/route/feature-route"
 
 export default function NegeriManagementPage() {
@@ -43,6 +43,8 @@ export default function NegeriManagementPage() {
 
 function NegeriManagementPageContent() {
   const t = useTranslations('AdminNegeriPage')
+  const tc = useTranslations('Common')
+  const locale = useLocale()
   const [negeriList, setNegeriList] = useState<Negeri[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [isDialogOpen, setIsDialogOpen] = useState(false)
@@ -108,15 +110,20 @@ function NegeriManagementPageContent() {
     setIsDeleteDialogOpen(true)
   }
 
-  // Not wrapped in useMemo: getColumns() calls hooks (useTranslations), and
-  // hooks can only be called unconditionally at the top level of a render —
-  // wrapping it in useMemo made those calls conditional on the dependency
-  // array, which crashes React with "change in the order of Hooks" the
-  // moment the memo ever recomputes.
-  const columns = getColumns({
-    onEdit: handleOpenDialog,
-    onDelete: handleOpenDeleteDialog,
-  })
+  // Define columns after handler functions are declared
+  const columns = useMemo(
+    () =>
+      getColumns(
+        {
+          onEdit: handleOpenDialog,
+          onDelete: handleOpenDeleteDialog,
+        },
+        t,
+        tc
+      ),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [locale]
+  )
 
   // ==================== TABLE INITIALIZATION ====================
   // Initialize table after columns are defined

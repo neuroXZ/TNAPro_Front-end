@@ -17,10 +17,11 @@ interface ColumnActions {
   onDelete: (positionCategory: PositionCategory) => void
 }
 
-export const getColumns = (actions: ColumnActions): ColumnDef<PositionCategory>[] => {
-  const t = useTranslations('AdminPositionCategoryPage')
-  const tc = useTranslations('Common')
-
+export const getColumns = (
+  actions: ColumnActions,
+  t: ReturnType<typeof useTranslations>,
+  tc: ReturnType<typeof useTranslations>
+): ColumnDef<PositionCategory>[] => {
   return [
   {
     id: "select",

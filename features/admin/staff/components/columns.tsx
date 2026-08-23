@@ -37,10 +37,11 @@ interface ColumnActions {
   onDelete: (staff: Staff) => void
 }
 
-export const getColumns = (actions: ColumnActions): ColumnDef<Staff>[] => {
-  const t = useTranslations('AdminStaffPage')
-  const tc = useTranslations('Common')
-
+export const getColumns = (
+  actions: ColumnActions,
+  t: ReturnType<typeof useTranslations>,
+  tc: ReturnType<typeof useTranslations>
+): ColumnDef<Staff>[] => {
   return [
   {
     id: "select",

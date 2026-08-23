@@ -19,10 +19,11 @@ interface ColumnActions {
   onDelete: (cluster: Cluster) => void
 }
 
-export const getColumns = (actions: ColumnActions): ColumnDef<Cluster>[] => {
-  const t = useTranslations('AdminClustersPage')
-  const tc = useTranslations('Common')
-
+export const getColumns = (
+  actions: ColumnActions,
+  t: ReturnType<typeof useTranslations>,
+  tc: ReturnType<typeof useTranslations>
+): ColumnDef<Cluster>[] => {
   return [
   {
     id: "select",

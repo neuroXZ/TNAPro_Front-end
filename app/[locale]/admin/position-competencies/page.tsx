@@ -30,6 +30,7 @@ import { useTranslations, useLocale } from "next-intl"
 
 export default function PositionCompetencyManagementPage() {
   const t = useTranslations('AdminPositionCompetenciesPage')
+  const tc = useTranslations('Common')
   const locale = useLocale()
   const [positions, setPositions] = useState<Position[]>([])
   const [positionCompetencies, setPositionCompetencies] = useState<any[]>([])
@@ -77,7 +78,11 @@ export default function PositionCompetencyManagementPage() {
   }
 
   // Define columns
-  const columns = useMemo(() => getColumns(), [locale])
+  const columns = useMemo(
+    () => getColumns(t, tc),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [locale]
+  )
 
   // ==================== TABLE INITIALIZATION ====================
   const table = useReactTable({

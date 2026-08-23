@@ -21,10 +21,11 @@ interface ColumnActions {
   onDelete: (training: Training) => void
 }
 
-export const getColumns = (actions: ColumnActions): ColumnDef<Training>[] => {
-  const t = useTranslations('AdminTrainingsPage')
-  const tc = useTranslations('Common')
-
+export const getColumns = (
+  actions: ColumnActions,
+  t: ReturnType<typeof useTranslations>,
+  tc: ReturnType<typeof useTranslations>
+): ColumnDef<Training>[] => {
   return [
   {
     id: "select",

@@ -35,6 +35,7 @@ import { useTranslations, useLocale } from "next-intl"
 
 export default function UnitTypeManagementPage() {
   const t = useTranslations('AdminUnitTypePage')
+  const tc = useTranslations('Common')
   const locale = useLocale()
   const [unitTypes, setUnitTypes] = useState<UnitType[]>([])
   const [isLoading, setIsLoading] = useState(true)
@@ -104,10 +105,14 @@ export default function UnitTypeManagementPage() {
   // Define columns after handler functions are declared
   const columns = useMemo(
     () =>
-      getColumns({
-        onEdit: handleOpenDialog,
-        onDelete: handleOpenDeleteDialog,
-      }),
+      getColumns(
+        {
+          onEdit: handleOpenDialog,
+          onDelete: handleOpenDeleteDialog,
+        },
+        t,
+        tc
+      ),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [locale]
   )

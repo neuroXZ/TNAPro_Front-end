@@ -34,6 +34,7 @@ import { useTranslations, useLocale } from "next-intl"
 
 export default function LevelManagementPage() {
   const t = useTranslations('AdminLevelsPage')
+  const tc = useTranslations('Common')
   const locale = useLocale()
   const [levels, setLevels] = useState<Level[]>([])
   const [isLoading, setIsLoading] = useState(true)
@@ -103,10 +104,14 @@ export default function LevelManagementPage() {
   // Define columns after handler functions are declared
   const columns = useMemo(
     () =>
-      getColumns({
-        onEdit: handleOpenDialog,
-        onDelete: handleOpenDeleteDialog,
-      }),
+      getColumns(
+        {
+          onEdit: handleOpenDialog,
+          onDelete: handleOpenDeleteDialog,
+        },
+        t,
+        tc
+      ),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [locale]
   )

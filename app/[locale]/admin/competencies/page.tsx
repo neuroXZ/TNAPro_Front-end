@@ -50,6 +50,7 @@ import { useTranslations, useLocale } from "next-intl"
 
 export default function CompetencyManagementPage() {
   const t = useTranslations('AdminCompetenciesPage')
+  const tc = useTranslations('Common')
   const locale = useLocale()
   const [competencies, setCompetencies] = useState<Competency[]>([])
   const [clusters, setClusters] = useState<Array<{ id: string; name: string }>>([])
@@ -139,10 +140,14 @@ export default function CompetencyManagementPage() {
   // Define columns after handler functions are declared
   const columns = useMemo(
     () =>
-      getColumns({
-        onEdit: handleOpenDialog,
-        onDelete: handleOpenDeleteDialog,
-      }),
+      getColumns(
+        {
+          onEdit: handleOpenDialog,
+          onDelete: handleOpenDeleteDialog,
+        },
+        t,
+        tc
+      ),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [locale]
   )

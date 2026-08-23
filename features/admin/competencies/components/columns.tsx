@@ -22,10 +22,11 @@ interface ColumnActions {
   onDelete: (competency: Competency) => void
 }
 
-export const getColumns = (actions: ColumnActions): ColumnDef<Competency>[] => {
-  const t = useTranslations('AdminCompetenciesPage')
-  const tc = useTranslations('Common')
-
+export const getColumns = (
+  actions: ColumnActions,
+  t: ReturnType<typeof useTranslations>,
+  tc: ReturnType<typeof useTranslations>
+): ColumnDef<Competency>[] => {
   return [
   {
     id: "select",

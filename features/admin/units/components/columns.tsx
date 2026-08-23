@@ -35,14 +35,14 @@ interface ColumnActions {
 // Column id used by units/page.tsx to toggle this column's visibility via
 // the table's own columnVisibility state when the zonNegeri feature flag is
 // off — kept as a real, always-defined column (not conditionally included
-// here) since getColumns() calls hooks (useTranslations) and must always
-// call the same hooks in the same order regardless of the flag.
+// here) so the column set stays stable regardless of the flag.
 export const NEGERI_COLUMN_ID = "negeri"
 
-export const getColumns = (actions: ColumnActions): ColumnDef<Unit>[] => {
-  const t = useTranslations('AdminUnitsPage')
-  const tc = useTranslations('Common')
-
+export const getColumns = (
+  actions: ColumnActions,
+  t: ReturnType<typeof useTranslations>,
+  tc: ReturnType<typeof useTranslations>
+): ColumnDef<Unit>[] => {
   return [
   {
     id: "select",

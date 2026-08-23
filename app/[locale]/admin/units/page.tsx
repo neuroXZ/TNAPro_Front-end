@@ -44,7 +44,7 @@ import { UnitTableSkeleton } from "@/features/admin/units/components/unit-table-
 import { UnitDataTable } from "@/features/admin/units/components/unit-data-table"
 import { UnitTableActions } from "@/features/admin/units/components/unit-table-actions"
 import { UnitViewDialog } from "@/features/admin/units/components/unit-view-dialog"
-import { useTranslations } from "next-intl"
+import { useTranslations, useLocale } from "next-intl"
 import { useFeatureFlags } from "@/hooks/use-feature-flags"
 
 interface UnitType {
@@ -54,6 +54,8 @@ interface UnitType {
 
 export default function UnitManagementPage() {
   const t = useTranslations('AdminUnitsPage')
+  const tc = useTranslations('Common')
+  const locale = useLocale()
   const { flags: featureFlags } = useFeatureFlags()
   const [units, setUnits] = useState<Unit[]>([])
   const [unitTypes, setUnitTypes] = useState<UnitType[]>([])
@@ -81,8 +83,8 @@ export default function UnitManagementPage() {
 
   // Hide the Negeri column entirely on deployments without the feature
   // flag on, via the table's own column-visibility state (rather than
-  // conditionally including it in getColumns() — that function calls hooks,
-  // so it must always return the same fixed set of columns).
+  // conditionally including it in getColumns()) so the column set stays
+  // stable regardless of the flag.
   useEffect(() => {
     setColumnVisibility((prev) => ({ ...prev, [NEGERI_COLUMN_ID]: featureFlags.zonNegeri }))
   }, [featureFlags.zonNegeri])
@@ -157,15 +159,20 @@ export default function UnitManagementPage() {
     setIsDeleteDialogOpen(true)
   }
 
-  // Not wrapped in useMemo: getColumns() calls hooks (useTranslations), and
-  // hooks can only be called unconditionally at the top level of a render —
-  // wrapping it in useMemo made those calls conditional on the dependency
-  // array, which crashes React with "change in the order of Hooks" the
-  // moment the memo ever recomputes.
-  const columns = getColumns({
-    onEdit: handleOpenDialog,
-    onDelete: handleOpenDeleteDialog,
-  })
+  // Define columns after handler functions are declared
+  const columns = useMemo(
+    () =>
+      getColumns(
+        {
+          onEdit: handleOpenDialog,
+          onDelete: handleOpenDeleteDialog,
+        },
+        t,
+        tc
+      ),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [locale]
+  )
 
   // ==================== TABLE INITIALIZATION ====================
   // Initialize table after columns are defined

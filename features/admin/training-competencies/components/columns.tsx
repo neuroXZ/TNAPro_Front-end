@@ -18,10 +18,10 @@ export interface Training {
   }
 }
 
-export const getColumns = (): ColumnDef<Training>[] => {
-  const t = useTranslations('AdminTrainingCompetenciesPage')
-  const tc = useTranslations('Common')
-
+export const getColumns = (
+  t: ReturnType<typeof useTranslations>,
+  tc: ReturnType<typeof useTranslations>
+): ColumnDef<Training>[] => {
   return [
   {
     id: "select",

@@ -34,6 +34,7 @@ import { useTranslations, useLocale } from "next-intl"
 
 export default function ClusterManagementPage() {
   const t = useTranslations('AdminClustersPage')
+  const tc = useTranslations('Common')
   const locale = useLocale()
   const [clusters, setClusters] = useState<Cluster[]>([])
   const [isLoading, setIsLoading] = useState(true)
@@ -103,10 +104,14 @@ export default function ClusterManagementPage() {
   // Define columns after handler functions are declared
   const columns = useMemo(
     () =>
-      getColumns({
-        onEdit: handleOpenDialog,
-        onDelete: handleOpenDeleteDialog,
-      }),
+      getColumns(
+        {
+          onEdit: handleOpenDialog,
+          onDelete: handleOpenDeleteDialog,
+        },
+        t,
+        tc
+      ),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [locale]
   )

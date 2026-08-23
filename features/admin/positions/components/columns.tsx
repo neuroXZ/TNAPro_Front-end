@@ -27,10 +27,11 @@ interface ColumnActions {
   onDelete: (position: Position) => void
 }
 
-export const getColumns = (actions: ColumnActions): ColumnDef<Position>[] => {
-  const t = useTranslations('AdminPositionsPage')
-  const tc = useTranslations('Common')
-
+export const getColumns = (
+  actions: ColumnActions,
+  t: ReturnType<typeof useTranslations>,
+  tc: ReturnType<typeof useTranslations>
+): ColumnDef<Position>[] => {
   return [
   {
     id: "select",

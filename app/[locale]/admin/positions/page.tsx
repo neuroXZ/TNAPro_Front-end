@@ -49,6 +49,7 @@ import { useTranslations, useLocale } from "next-intl"
 
 export default function PositionManagementPage() {
   const t = useTranslations('AdminPositionsPage')
+  const tc = useTranslations('Common')
   const locale = useLocale()
   const [positions, setPositions] = useState<Position[]>([])
   const [grades, setGrades] = useState<Array<{ id: string; name: string }>>([])
@@ -162,10 +163,14 @@ export default function PositionManagementPage() {
   // Define columns after handler functions are declared
   const columns = useMemo(
     () =>
-      getColumns({
-        onEdit: handleOpenDialog,
-        onDelete: handleOpenDeleteDialog,
-      }),
+      getColumns(
+        {
+          onEdit: handleOpenDialog,
+          onDelete: handleOpenDeleteDialog,
+        },
+        t,
+        tc
+      ),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [locale]
   )

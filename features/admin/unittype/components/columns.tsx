@@ -17,10 +17,11 @@ interface ColumnActions {
   onDelete: (unitType: UnitType) => void
 }
 
-export const getColumns = (actions: ColumnActions): ColumnDef<UnitType>[] => {
-  const t = useTranslations('AdminUnitTypePage')
-  const tc = useTranslations('Common')
-
+export const getColumns = (
+  actions: ColumnActions,
+  t: ReturnType<typeof useTranslations>,
+  tc: ReturnType<typeof useTranslations>
+): ColumnDef<UnitType>[] => {
   return [
   {
     id: "select",

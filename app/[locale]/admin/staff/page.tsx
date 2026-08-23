@@ -71,6 +71,7 @@ function formatPositionLabel(position: { name: string; grade?: { name: string | 
 
 export default function StaffManagementPage() {
   const t = useTranslations('AdminStaffPage')
+  const tc = useTranslations('Common')
   const locale = useLocale()
   const router = useRouter()
   const [staff, setStaff] = useState<Staff[]>([])
@@ -216,10 +217,14 @@ export default function StaffManagementPage() {
   // Define columns after handler functions are declared
   const columns = useMemo(
     () =>
-      getColumns({
-        onEdit: handleOpenDialog,
-        onDelete: handleOpenDeleteDialog,
-      }),
+      getColumns(
+        {
+          onEdit: handleOpenDialog,
+          onDelete: handleOpenDeleteDialog,
+        },
+        t,
+        tc
+      ),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [locale]
   )
