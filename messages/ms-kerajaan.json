@@ -1384,7 +1384,8 @@
     "scoreAverage": "Purata",
     "scoreSelf": "Diri",
     "scoreSuperior": "Penyelia",
-    "competenciesLabel": "{completed} / {total} kompetensi"
+    "competenciesLabel": "{completed} / {total} kompetensi",
+    "loadAssessmentsFailedToast": "Gagal memuatkan penilaian"
   },
   "StaffCompetenciesPage": {
     "title": "Kompetensi Saya",
@@ -1504,7 +1505,11 @@
     "badgeClosed": "Ditutup",
     "selectSubordinate": "Pilih bawahan untuk dinilai:",
     "badgePending": "Tertunda",
-    "badgeCompleted": "Selesai"
+    "badgeCompleted": "Selesai",
+    "weightageSuperiorBadge": "Penyelia: {value}%",
+    "authErrorToast": "Ralat pengesahan",
+    "loginRequiredToast": "Sila log masuk untuk meneruskan",
+    "loadDataFailedToast": "Gagal memuatkan data"
   },
   "StaffAssessmentFormPage": {
     "loading": "Memuatkan...",
@@ -1561,7 +1566,20 @@
     "tabCounter": "Tab {current} daripada {total}",
     "previous": "Sebelum",
     "next": "Seterusnya",
-    "uncategorized": "Tidak Dikategorikan"
+    "uncategorized": "Tidak Dikategorikan",
+    "userIdNotFoundToast": "ID Pengguna tidak ditemui",
+    "loginRequiredToast": "Sila log masuk untuk meneruskan",
+    "notAssignedSuperiorToast": "Anda tidak ditetapkan sebagai penyelia untuk pegawai ini",
+    "subordinateNoPositionToast": "Bawahan tidak mempunyai jawatan yang ditetapkan",
+    "loadAssessmentFailedToast": "Gagal memuatkan penilaian",
+    "missingRequiredDataToast": "Data diperlukan tiada",
+    "saveSuccessToast": "Penilaian berjaya disimpan!",
+    "saveFailedToast": "Gagal menyimpan penilaian",
+    "submitSuccessToast": "Penilaian berjaya dihantar!",
+    "submitFailedToast": "Gagal menghantar penilaian",
+    "rateAllCompetenciesToast": "Sila nilai semua kompetensi ({count} lagi belum dinilai)",
+    "noPositionAssignedToast": "Tiada jawatan ditetapkan. Sila hubungi admin untuk menetapkan jawatan.",
+    "selfAssessorNotFoundToast": "Rekod penilai kendiri tidak ditemui. Sila hubungi admin."
   },
   "UnauthorizedPage": {
     "title": "403 - Tidak Dibenarkan",

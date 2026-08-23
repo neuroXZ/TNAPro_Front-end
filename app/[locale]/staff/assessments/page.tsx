@@ -203,7 +203,7 @@ export default function MyAssessments() {
       setAssessments(processedAssessments)
     } catch (error) {
       console.error("Failed to fetch assessments:", error)
-      toast.error("Failed to load assessments")
+      toast.error(t('loadAssessmentsFailedToast'))
     } finally {
       setIsLoading(false)
     }

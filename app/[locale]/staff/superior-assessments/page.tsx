@@ -54,11 +54,11 @@ export default function SuperiorAssessmentsPage() {
         }
       } catch (error) {
         console.error("Failed to parse user data:", error)
-        toast.error("Authentication error")
+        toast.error(t('authErrorToast'))
         setIsLoading(false)
       }
     } else {
-      toast.error("Please login to continue")
+      toast.error(t('loginRequiredToast'))
       setIsLoading(false)
     }
   }, [])
@@ -132,7 +132,7 @@ export default function SuperiorAssessmentsPage() {
       }
     } catch (error) {
       console.error("Failed to fetch data:", error)
-      toast.error("Failed to load data")
+      toast.error(t('loadDataFailedToast'))
     } finally {
       setIsLoading(false)
     }
@@ -333,7 +333,7 @@ export default function SuperiorAssessmentsPage() {
                       {format(new Date(selectedAssessment.startDate), "dd MMM yyyy")} - {format(new Date(selectedAssessment.endDate), "dd MMM yyyy")}
                     </span>
                     <Badge variant="outline">
-                      Superior: {(selectedAssessment.weightageSuperior * 100).toFixed(0)}%
+                      {t('weightageSuperiorBadge', { value: (selectedAssessment.weightageSuperior * 100).toFixed(0) })}
                     </Badge>
                   </div>
                 </CardHeader>

@@ -118,7 +118,7 @@ export default function AssessmentDetailPage() {
         if (userData.id) {
           fetchAssessmentData(userData.id)
         } else {
-          toast.error("User ID not found")
+          toast.error(t('userIdNotFoundToast'))
           setIsLoading(false)
         }
       } catch (error) {
@@ -126,7 +126,7 @@ export default function AssessmentDetailPage() {
         setIsLoading(false)
       }
     } else {
-      toast.error("Please login to continue")
+      toast.error(t('loginRequiredToast'))
       setIsLoading(false)
     }
   }, [assessmentId])
@@ -186,7 +186,7 @@ export default function AssessmentDetailPage() {
       } else {
         console.warn("No positionId - cannot fetch competencies")
         if (!hasShownWarning) {
-          toast.warning("No position assigned. Please contact admin to assign a position.")
+          toast.warning(t('noPositionAssignedToast'))
           setHasShownWarning(true)
         }
       }
@@ -200,7 +200,7 @@ export default function AssessmentDetailPage() {
       )
 
       if (!selfAssessor) {
-        toast.error("Self-assessor record not found. Please contact admin.")
+        toast.error(t('selfAssessorNotFoundToast'))
         setIsLoading(false)
         return
       }
@@ -230,7 +230,7 @@ export default function AssessmentDetailPage() {
       setScores(initialScores)
     } catch (error) {
       console.error("Failed to fetch assessment data:", error)
-      toast.error("Failed to load assessment")
+      toast.error(t('loadAssessmentFailedToast'))
     } finally {
       setIsLoading(false)
     }
@@ -258,7 +258,7 @@ export default function AssessmentDetailPage() {
 
   const handleSaveAll = async () => {
     if (!selfAssessorId || !positionId) {
-      toast.error("Missing required data")
+      toast.error(t('missingRequiredDataToast'))
       return
     }
 
@@ -288,15 +288,15 @@ export default function AssessmentDetailPage() {
       })
 
       await Promise.all(promises)
-      toast.success("Assessment saved successfully!")
-      
+      toast.success(t('saveSuccessToast'))
+
       // Refresh data
       if (userId) {
         await fetchAssessmentData(userId)
       }
     } catch (error) {
       console.error("Failed to save assessment:", error)
-      toast.error("Failed to save assessment")
+      toast.error(t('saveFailedToast'))
     } finally {
       setIsSaving(false)
     }
@@ -306,12 +306,12 @@ export default function AssessmentDetailPage() {
     const unanswered = Object.values(scores).filter(s => s.score === null)
     
     if (unanswered.length > 0) {
-      toast.error(`Please rate all competencies (${unanswered.length} remaining)`)
+      toast.error(t('rateAllCompetenciesToast', { count: unanswered.length }))
       return
     }
 
     if (!selfAssessorId || !positionId) {
-      toast.error("Missing required data")
+      toast.error(t('missingRequiredDataToast'))
       return
     }
 
@@ -356,14 +356,14 @@ export default function AssessmentDetailPage() {
         return updatedScores
       })
       
-      toast.success("Assessment submitted successfully!")
-      
+      toast.success(t('submitSuccessToast'))
+
       setTimeout(() => {
         router.push("/staff/assessments")
       }, 1500)
     } catch (error) {
       console.error("Failed to submit assessment:", error)
-      toast.error("Failed to submit assessment")
+      toast.error(t('submitFailedToast'))
     } finally {
       setIsSaving(false)
     }

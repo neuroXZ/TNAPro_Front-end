@@ -127,7 +127,7 @@ export default function SuperiorAssessmentDetailPage() {
         if (userData.id) {
           fetchAssessmentData(userData.id)
         } else {
-          toast.error("User ID not found")
+          toast.error(t('userIdNotFoundToast'))
           setIsLoading(false)
         }
       } catch (error) {
@@ -135,7 +135,7 @@ export default function SuperiorAssessmentDetailPage() {
         setIsLoading(false)
       }
     } else {
-      toast.error("Please login to continue")
+      toast.error(t('loginRequiredToast'))
       setIsLoading(false)
     }
   }, [assessmentId, subordinateId])
@@ -183,7 +183,7 @@ export default function SuperiorAssessmentDetailPage() {
       console.log("Found superior assessor:", superiorAssessor)
 
       if (!superiorAssessor) {
-        toast.error("You are not assigned as superior for this staff member")
+        toast.error(t('notAssignedSuperiorToast'))
         setIsLoading(false)
         return
       }
@@ -214,7 +214,7 @@ export default function SuperiorAssessmentDetailPage() {
         
         setCompetencies(positionCompetenciesData)
       } else {
-        toast.warning("Subordinate has no position assigned")
+        toast.warning(t('subordinateNoPositionToast'))
       }
 
       // Fetch existing results
@@ -244,7 +244,7 @@ export default function SuperiorAssessmentDetailPage() {
       setScores(initialScores)
     } catch (error) {
       console.error("Failed to fetch assessment data:", error)
-      toast.error("Failed to load assessment")
+      toast.error(t('loadAssessmentFailedToast'))
     } finally {
       setIsLoading(false)
     }
@@ -272,7 +272,7 @@ export default function SuperiorAssessmentDetailPage() {
 
   const handleSaveAll = async () => {
     if (!superiorAssessorId || !subordinate?.positionId) {
-      toast.error("Missing required data")
+      toast.error(t('missingRequiredDataToast'))
       return
     }
 
@@ -300,15 +300,15 @@ export default function SuperiorAssessmentDetailPage() {
       })
 
       await Promise.all(promises)
-      toast.success("Assessment saved successfully!")
-      
+      toast.success(t('saveSuccessToast'))
+
       // Refresh data
       if (userId) {
         await fetchAssessmentData(userId)
       }
     } catch (error) {
       console.error("Failed to save assessment:", error)
-      toast.error("Failed to save assessment")
+      toast.error(t('saveFailedToast'))
     } finally {
       setIsSaving(false)
     }
@@ -318,12 +318,12 @@ export default function SuperiorAssessmentDetailPage() {
     const unanswered = Object.values(scores).filter(s => s.score === null)
     
     if (unanswered.length > 0) {
-      toast.error(`Please rate all competencies (${unanswered.length} remaining)`)
+      toast.error(t('rateAllCompetenciesToast', { count: unanswered.length }))
       return
     }
 
     if (!superiorAssessorId || !subordinate?.positionId) {
-      toast.error("Missing required data")
+      toast.error(t('missingRequiredDataToast'))
       return
     }
 
@@ -366,14 +366,14 @@ export default function SuperiorAssessmentDetailPage() {
         return updatedScores
       })
       
-      toast.success("Assessment submitted successfully!")
-      
+      toast.success(t('submitSuccessToast'))
+
       setTimeout(() => {
         router.push("/staff/superior-assessments")
       }, 1500)
     } catch (error) {
       console.error("Failed to submit assessment:", error)
-      toast.error("Failed to submit assessment")
+      toast.error(t('submitFailedToast'))
     } finally {
       setIsSaving(false)
     }

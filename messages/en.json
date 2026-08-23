@@ -1384,7 +1384,8 @@
     "scoreAverage": "Average",
     "scoreSelf": "Self",
     "scoreSuperior": "Superior",
-    "competenciesLabel": "{completed} / {total} competencies"
+    "competenciesLabel": "{completed} / {total} competencies",
+    "loadAssessmentsFailedToast": "Failed to load assessments"
   },
   "StaffCompetenciesPage": {
     "title": "My Competencies",
@@ -1504,7 +1505,11 @@
     "badgeClosed": "Closed",
     "selectSubordinate": "Select a subordinate to assess:",
     "badgePending": "Pending",
-    "badgeCompleted": "Completed"
+    "badgeCompleted": "Completed",
+    "weightageSuperiorBadge": "Superior: {value}%",
+    "authErrorToast": "Authentication error",
+    "loginRequiredToast": "Please login to continue",
+    "loadDataFailedToast": "Failed to load data"
   },
   "StaffAssessmentFormPage": {
     "loading": "Loading...",
@@ -1561,7 +1566,20 @@
     "tabCounter": "Tab {current} of {total}",
     "previous": "Previous",
     "next": "Next",
-    "uncategorized": "Uncategorized"
+    "uncategorized": "Uncategorized",
+    "userIdNotFoundToast": "User ID not found",
+    "loginRequiredToast": "Please login to continue",
+    "notAssignedSuperiorToast": "You are not assigned as superior for this staff member",
+    "subordinateNoPositionToast": "Subordinate has no position assigned",
+    "loadAssessmentFailedToast": "Failed to load assessment",
+    "missingRequiredDataToast": "Missing required data",
+    "saveSuccessToast": "Assessment saved successfully!",
+    "saveFailedToast": "Failed to save assessment",
+    "submitSuccessToast": "Assessment submitted successfully!",
+    "submitFailedToast": "Failed to submit assessment",
+    "rateAllCompetenciesToast": "Please rate all competencies ({count} remaining)",
+    "noPositionAssignedToast": "No position assigned. Please contact admin to assign a position.",
+    "selfAssessorNotFoundToast": "Self-assessor record not found. Please contact admin."
   },
   "UnauthorizedPage": {
     "title": "403 - Unauthorized",
