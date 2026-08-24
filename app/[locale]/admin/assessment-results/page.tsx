@@ -260,7 +260,7 @@ export default function AssessmentResultsPage() {
   // ==================== RENDER ====================
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-3xl font-bold text-primary">{t('title')}</h1>
           <p className="text-muted-foreground">
@@ -277,7 +277,7 @@ export default function AssessmentResultsPage() {
 
       <Card>
         <CardHeader>
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <CardTitle>{t('cardTitle')}</CardTitle>
               <CardDescription>
@@ -286,9 +286,9 @@ export default function AssessmentResultsPage() {
                   : t('showingResults', { filtered: filteredResults.length, total: results.length })}
               </CardDescription>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center">
               <Select value={assessorTypeFilter} onValueChange={setAssessorTypeFilter}>
-                <SelectTrigger className="w-[180px]">
+                <SelectTrigger className="w-full sm:w-[180px]">
                   <SelectValue placeholder={t('assessorTypeLabel')} />
                 </SelectTrigger>
                 <SelectContent>
@@ -299,7 +299,7 @@ export default function AssessmentResultsPage() {
                 </SelectContent>
               </Select>
               <Select value={assessorNameFilter} onValueChange={setAssessorNameFilter}>
-                <SelectTrigger className="w-[200px]">
+                <SelectTrigger className="w-full sm:w-[200px]">
                   <SelectValue placeholder={t('assessorNameLabel')} />
                 </SelectTrigger>
                 <SelectContent>
@@ -312,7 +312,7 @@ export default function AssessmentResultsPage() {
                 </SelectContent>
               </Select>
               <Select value={statusFilter} onValueChange={setStatusFilter}>
-                <SelectTrigger className="w-[150px]">
+                <SelectTrigger className="w-full sm:w-[150px]">
                   <SelectValue placeholder={t('statusLabel')} />
                 </SelectTrigger>
                 <SelectContent>
@@ -327,7 +327,7 @@ export default function AssessmentResultsPage() {
                   placeholder={t('searchPlaceholder')}
                   value={globalFilter ?? ""}
                   onChange={(e) => setGlobalFilter(e.target.value)}
-                  className="pl-8 w-[250px]"
+                  className="pl-8 w-full sm:w-[250px]"
                 />
               </div>
               {hasActiveFilters && (

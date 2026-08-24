@@ -438,7 +438,7 @@ export default function SettingsPage() {
       )}
 
       <Tabs defaultValue="general" className="w-full">
-        <TabsList className="grid w-full grid-cols-3">
+        <TabsList className="grid h-auto w-full grid-cols-1 gap-1 sm:h-9 sm:grid-cols-3 sm:gap-0">
           <TabsTrigger value="general" className="gap-2">
             <IconSettings className="size-4" />
             {t('tabGeneral')}

@@ -20,7 +20,7 @@ export function GradeTableActions({
   const t = useTranslations('AdminGradesPage')
   const tc = useTranslations('Common')
   return (
-    <div className="flex gap-2">
+    <div className="flex flex-wrap gap-2">
       {onDownloadTemplate && (
         <Button variant="outline" size="sm" onClick={onDownloadTemplate}>
           <IconDownload className="mr-2 size-4" />

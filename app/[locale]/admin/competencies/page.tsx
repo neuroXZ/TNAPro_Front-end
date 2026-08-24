@@ -245,7 +245,7 @@ export default function CompetencyManagementPage() {
   // ==================== RENDER ====================
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-3xl font-bold text-primary">{t('title')}</h1>
           <p className="text-muted-foreground">
@@ -263,21 +263,21 @@ export default function CompetencyManagementPage() {
 
       <Card>
         <CardHeader>
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <CardTitle>{t('cardTitle')}</CardTitle>
               <CardDescription>
                 {t('cardDescription')}
               </CardDescription>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center">
               <Popover open={clusterPopoverOpen} onOpenChange={setClusterPopoverOpen}>
                 <PopoverTrigger asChild>
                   <Button
                     variant="outline"
                     role="combobox"
                     aria-expanded={clusterPopoverOpen}
-                    className="w-[180px] justify-between"
+                    className="w-full sm:w-[180px] justify-between"
                   >
                     {selectedClusterId === "all" 
                       ? t('filterByCluster')
@@ -325,7 +325,7 @@ export default function CompetencyManagementPage() {
                   placeholder={t('searchPlaceholder')}
                   value={globalFilter ?? ""}
                   onChange={(e) => setGlobalFilter(e.target.value)}
-                  className="pl-8 w-[250px]"
+                  className="pl-8 w-full sm:w-[250px]"
                 />
               </div>
             </div>

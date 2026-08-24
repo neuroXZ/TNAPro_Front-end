@@ -24,8 +24,8 @@ export function DataTablePagination<TData>({
 }: DataTablePaginationProps<TData>) {
   const t = useTranslations('DataTablePagination')
   return (
-    <div className="flex items-center justify-between px-2 py-4">
-      <div className="flex items-center gap-4">
+    <div className="flex flex-col gap-3 px-2 py-4 sm:flex-row sm:items-center sm:justify-between">
+      <div className="flex flex-wrap items-center gap-4">
         <p className="text-sm text-muted-foreground">
           {t('showingRange', {
             from:
@@ -47,7 +47,7 @@ export function DataTablePagination<TData>({
         )}
       </div>
 
-      <div className="flex items-center gap-6">
+      <div className="flex flex-wrap items-center gap-3 sm:gap-6">
         <div className="flex items-center gap-2">
           <p className="text-sm font-medium">{t('rowsPerPage')}</p>
           <Select

@@ -200,9 +200,9 @@ export default function TrainingDemandPage() {
           {isLoadingAssessments ? (
             <Skeleton className="h-10 w-full" />
           ) : (
-            <div className="flex gap-3">
+            <div className="flex flex-wrap gap-3">
               <Select value={selectedAssessmentId} onValueChange={setSelectedAssessmentId}>
-                <SelectTrigger className="flex-1">
+                <SelectTrigger className="min-w-0 flex-1">
                   <SelectValue placeholder={t('selectAssessmentPlaceholder')} />
                 </SelectTrigger>
                 <SelectContent>

@@ -318,7 +318,7 @@ export default function StaffManagementPage() {
   // ==================== RENDER ====================
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-3xl font-bold text-primary">{t('title')}</h1>
           <p className="text-muted-foreground">
@@ -336,21 +336,21 @@ export default function StaffManagementPage() {
 
       <Card>
         <CardHeader>
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <CardTitle>{t('cardTitle')}</CardTitle>
               <CardDescription>
                 {t('cardDescription')}
               </CardDescription>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center">
               <Popover open={positionPopoverOpen} onOpenChange={setPositionPopoverOpen}>
                 <PopoverTrigger asChild>
                   <Button
                     variant="outline"
                     role="combobox"
                     aria-expanded={positionPopoverOpen}
-                    className="w-[180px] justify-between"
+                    className="w-full sm:w-[180px] justify-between"
                   >
                     {selectedPositionId === "all"
                       ? t('filterByPosition')
@@ -401,7 +401,7 @@ export default function StaffManagementPage() {
                     variant="outline"
                     role="combobox"
                     aria-expanded={unitPopoverOpen}
-                    className="w-[180px] justify-between"
+                    className="w-full sm:w-[180px] justify-between"
                   >
                     {selectedUnitId === "all" 
                       ? t('filterByUnit')
@@ -449,7 +449,7 @@ export default function StaffManagementPage() {
                   placeholder={t('searchPlaceholder')}
                   value={globalFilter ?? ""}
                   onChange={(e) => setGlobalFilter(e.target.value)}
-                  className="pl-8 w-[250px]"
+                  className="pl-8 w-full sm:w-[250px]"
                 />
               </div>
             </div>
