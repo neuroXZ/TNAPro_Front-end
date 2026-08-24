@@ -280,7 +280,7 @@ export default function AdminIdpPage() {
       if (errorMessage.includes("assessment score missing")) {
         const staff = staffList.find((s) => s.id === selectedStaff);
         toast.error(
-          t('assessmentIncompleteError', { name: staff?.name || "this staff" }),
+          t('assessmentIncompleteError', { name: staff?.name || t('thisStaffFallback') }),
           { duration: 5000 },
         );
       } else if (errorMessage.includes("No assessment results found")) {
@@ -451,7 +451,7 @@ export default function AdminIdpPage() {
               <Label htmlFor="unit">{t('filterByUnit')}</Label>
               <Select value={selectedUnit} onValueChange={setSelectedUnit}>
                 <SelectTrigger id="unit" className="w-full">
-                  <SelectValue placeholder="All Units" className="truncate" />
+                  <SelectValue placeholder={t('allUnits')} className="truncate" />
                 </SelectTrigger>
                 <SelectContent className="max-w-[300px]">
                   <SelectItem value="all">{t('allUnits')}</SelectItem>

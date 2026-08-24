@@ -262,7 +262,7 @@ export default function StaffComparisonPage() {
             <CardHeader className="pb-3">
               <CardTitle className="text-base">{t("competencyTableTitle")}</CardTitle>
               <CardDescription>
-                {result.assessment1.name || result.assessment1.id} vs {result.assessment2.name || result.assessment2.id}
+                {t('comparisonSubtitle', { name1: result.assessment1.name || result.assessment1.id, name2: result.assessment2.name || result.assessment2.id })}
               </CardDescription>
             </CardHeader>
             <CardContent className="p-0">

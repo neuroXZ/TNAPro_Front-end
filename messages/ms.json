@@ -221,7 +221,9 @@
     "statusClosed": "Ditutup",
     "statusRecommended": "Disyorkan",
     "noRecommendedTraining": "Tiada latihan yang disyorkan",
-    "noRecommendedTrainingDesc": "Lengkapkan penilaian anda untuk mendapatkan cadangan yang diperibadikan"
+    "noRecommendedTrainingDesc": "Lengkapkan penilaian anda untuk mendapatkan cadangan yang diperibadikan",
+    "defaultStaffName": "Kakitangan",
+    "unknownTraining": "Latihan Tidak Diketahui"
   },
   "AdminGradesPage": {
     "entityNameSingular": "gred",
@@ -1043,7 +1045,8 @@
     "legendItemTemplate": "Jurang ≥ {minGap} - disyorkan",
     "assessmentIncompleteError": "Penilaian tidak lengkap untuk {name}. Sila pastikan semua penilaian kompetensi (Sendiri & Atasan) telah diselesaikan.",
     "noAssessmentResultsError": "Tiada keputusan penilaian ditemui untuk kakitangan ini. Sila lengkapkan penilaian terlebih dahulu.",
-    "noCompetenciesDefinedError": "Tiada kompetensi ditakrifkan untuk jawatan kakitangan ini. Sila konfigurasi kompetensi jawatan terlebih dahulu."
+    "noCompetenciesDefinedError": "Tiada kompetensi ditakrifkan untuk jawatan kakitangan ini. Sila konfigurasi kompetensi jawatan terlebih dahulu.",
+    "thisStaffFallback": "kakitangan ini"
   },
   "AdminReportsSubmissionsPage": {
     "title": "Laporan Penghantaran",
@@ -1210,7 +1213,15 @@
     "totalTrainingsRequired": "Jumlah {count} latihan diperlukan",
     "basedOnAssessment": "Berdasarkan penilaian: {name}",
     "viewFullTrainingReport": "Lihat Laporan Permintaan Latihan Penuh",
-    "viewDetail": "View Detail"
+    "viewDetail": "Lihat Butiran",
+    "staffCountLabel": "Bilangan Kakitangan",
+    "genderMale": "Lelaki",
+    "genderFemale": "Perempuan",
+    "genderUnspecified": "Tidak Dinyatakan",
+    "noUnitAssigned": "Tiada Unit Ditetapkan",
+    "noGradeAssigned": "Tiada Gred Ditetapkan",
+    "loadAnalyticsError": "Gagal memuatkan analitik penilaian",
+    "loadDashboardError": "Gagal memuatkan data papan pemuka"
   },
   "AdminAnalyticsTrainingDemandPage": {
     "title": "Analisis Permintaan Latihan",
@@ -1234,13 +1245,23 @@
     "staffRequireSingle": "{count} ahli kakitangan memerlukan latihan ini",
     "staffRequireMultiple": "{count} ahli kakitangan memerlukan latihan ini",
     "trainingsRequiredTitle": "Latihan Diperlukan",
-    "trainingsRequiredDesc": "Diperlukan untuk jurang kompetensi"
+    "trainingsRequiredDesc": "Diperlukan untuk jurang kompetensi",
+    "loadAssessmentsError": "Gagal memuatkan penilaian",
+    "loadDemandDataError": "Gagal memuatkan data permintaan latihan",
+    "exportSuccess": "Laporan berjaya dieksport",
+    "exportError": "Gagal mengeksport laporan",
+    "overviewCardTitle": "Permintaan Latihan",
+    "overviewCardDesc": "Kakitangan yang memerlukan latihan mengikut program",
+    "noTrainingDemandsShort": "Tiada permintaan latihan dikenal pasti",
+    "basedOnAssessment": "Berdasarkan penilaian: {name}",
+    "viewFullReport": "Lihat Laporan Permintaan Latihan Penuh",
+    "hideFullReport": "Sembunyikan Laporan Penuh"
   },
   "AdminAnalyticsStaffPerUnitPage": {
     "title": "Kakitangan per Unit - Pandangan Terperinci",
     "description": "Pandangan menyeluruh semua ahli kakitangan yang disusun mengikut unit organisasi",
     "backToAnalytics": "Kembali ke Analitik",
-    "statTotalStaff": "Total Staff",
+    "statTotalStaff": "Jumlah Kakitangan",
     "statTotalStaffDesc": "Ahli kakitangan aktif",
     "statTotalUnits": "Jumlah Unit",
     "statTotalUnitsDesc": "Unit organisasi",
@@ -1264,7 +1285,13 @@
     "colEmail": "E-mel",
     "colPhone": "Telefon",
     "colSupervisor": "Penyelia",
-    "levelLabel": "Tahap {level}"
+    "levelLabel": "Tahap {level}",
+    "noUnitAssigned": "Tiada Unit Ditetapkan",
+    "loadDataError": "Gagal memuatkan data kakitangan",
+    "colUnit": "Unit",
+    "colGender": "Jantina",
+    "colStaffOrgId": "ID Kakitangan",
+    "statAvgPerUnitDesc": "Kakitangan per unit"
   },
   "AdminAnalyticsGradeDistributionPage": {
     "title": "Taburan Gred - Pandangan Terperinci",
@@ -1297,7 +1324,13 @@
     "colEmail": "E-mel",
     "colPhone": "Telefon",
     "colSupervisor": "Penyelia",
-    "levelLabel": "(Tahap {level})"
+    "levelLabel": "(Tahap {level})",
+    "noGradeAssigned": "Tiada Gred Ditetapkan",
+    "loadDataError": "Gagal memuatkan data",
+    "colGrade": "Gred",
+    "colLevel": "Tahap",
+    "colGender": "Jantina",
+    "colStaffOrgId": "ID Kakitangan"
   },
   "AdminAnalyticsGenderDistributionPage": {
     "title": "Taburan Jantina - Pandangan Terperinci",
@@ -1329,7 +1362,9 @@
     "colEmail": "E-mel",
     "genderMale": "Lelaki",
     "genderFemale": "Perempuan",
-    "genderUnspecified": "Tidak Dinyatakan"
+    "genderUnspecified": "Tidak Dinyatakan",
+    "loadDataError": "Gagal memuatkan data taburan jantina",
+    "colGender": "Jantina"
   },
   "AdminAnalyticsCompetencyGapPage": {
     "title": "Jurang Kompetensi mengikut Gred",
@@ -1349,7 +1384,9 @@
     "gapMinimal": "Jurang Minimum",
     "gapLow": "Jurang Rendah",
     "gapMedium": "Jurang Sederhana",
-    "gapHigh": "Jurang Tinggi"
+    "gapHigh": "Jurang Tinggi",
+    "loadAssessmentsError": "Gagal memuatkan penilaian",
+    "loadGapDataError": "Gagal memuatkan data jurang kompetensi. Sila cuba lagi."
   },
   "StaffAssessmentsPage": {
     "title": "Penilaian Saya",
@@ -1429,7 +1466,20 @@
     "colDevStrategy": "Strategi Pembangunan",
     "showingFilter": "Menunjukkan {count} daripada {total} kompetensi",
     "legendTitle": "Petunjuk Strategi Pembangunan",
-    "legendItemTemplate": "Jurang ≥ {minGap} - disyorkan"
+    "legendItemTemplate": "Jurang ≥ {minGap} - disyorkan",
+    "loadAssessmentsError": "Gagal memuatkan penilaian",
+    "selectAssessmentError": "Sila pilih penilaian",
+    "generateSuccess": "IDP berjaya dijana!",
+    "generateError": "Gagal menjana IDP",
+    "assessmentIncompleteError": "Penilaian tidak lengkap. Sila pastikan semua penilaian kompetensi (Diri & Ketua) telah diselesaikan.",
+    "noAssessmentResultsError": "Tiada keputusan penilaian ditemui. Sila lengkapkan penilaian terlebih dahulu.",
+    "noCompetenciesDefinedError": "Tiada kompetensi ditakrifkan untuk jawatan anda. Sila hubungi pentadbir.",
+    "exportError": "Gagal mengeksport IDP",
+    "noDataToExport": "Tiada data IDP untuk dieksport",
+    "pdfOpenedSuccess": "IDP dibuka dalam tab baharu!",
+    "csvExportSuccess": "IDP berjaya dieksport!",
+    "totalSuffix": "daripada {total} jumlah",
+    "gapValue": "Jurang: {gap}"
   },
   "StaffTrainingPage": {
     "titleMobile": "Program",
@@ -1455,7 +1505,14 @@
     "statusClosed": "Ditutup",
     "statusNoDates": "Tiada tarikh",
     "competencyCount": "{count} kompetensi",
-    "competenciesCount": "{count} kompetensi"
+    "competenciesCount": "{count} kompetensi",
+    "selectAssessmentError": "Sila pilih penilaian dahulu",
+    "noRecommendationsInfo": "Tiada cadangan latihan ditemui. Lengkapkan penilaian anda untuk mendapatkan cadangan peribadi.",
+    "fetchError": "Gagal mendapatkan latihan disyorkan",
+    "noDateSet": "Tiada tarikh ditetapkan",
+    "invalidDate": "Tarikh tidak sah",
+    "notAvailable": "T/B",
+    "searchQuerySuffix": "untuk \"{query}\""
   },
   "StaffProfilePage": {
     "title": "Profil Saya",
@@ -1982,7 +2039,8 @@
     "trendNew": "Baharu",
     "trendNotAssessed": "Tidak Dinilai",
     "trendFirstAssessment": "Penilaian Pertama",
-    "trendNotApplicable": "T/B"
+    "trendNotApplicable": "T/B",
+    "comparisonSubtitle": "{name1} berbanding {name2}"
   },
   "AdminAnalyticsUnitComparisonPage": {
     "backToComparisons": "Kembali ke Perbandingan",
@@ -2036,7 +2094,8 @@
     "trendNew": "Baharu",
     "trendNotAssessed": "Tidak Dinilai",
     "trendFirstAssessment": "Penilaian Pertama",
-    "trendNotApplicable": "T/B"
+    "trendNotApplicable": "T/B",
+    "comparisonSubtitle": "{name1} berbanding {name2}"
   },
   "AdminAnalyticsOrgComparisonPage": {
     "backToComparisons": "Kembali ke Perbandingan",
@@ -2085,7 +2144,8 @@
     "trendNew": "Baharu",
     "trendNotAssessed": "Tidak Dinilai",
     "trendFirstAssessment": "Penilaian Pertama",
-    "trendNotApplicable": "T/B"
+    "trendNotApplicable": "T/B",
+    "comparisonSubtitle": "{name1} berbanding {name2}"
   },
   "DataTablePagination": {
     "showingRange": "Memaparkan {from} hingga {to} daripada {total} rekod",

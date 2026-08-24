@@ -115,7 +115,7 @@ export default function StaffTrainingTestingPage() {
 
   const fetchRecommendedTrainings = async () => {
     if (!user?.id || !selectedAssessmentId) {
-      toast.error("Please select an assessment first")
+      toast.error(t('selectAssessmentError'))
       return
     }
     
@@ -136,10 +136,10 @@ export default function StaffTrainingTestingPage() {
       const status = isAxios ? error.response?.status : undefined
 
       if (status === 404) {
-        toast.info("No training recommendations found. Complete your assessment to get personalized recommendations.")
+        toast.info(t('noRecommendationsInfo'))
         setRecommendedTrainings([])
       } else {
-        toast.error("Failed to fetch recommended trainings")
+        toast.error(t('fetchError'))
         console.error(error)
       }
     } finally {
@@ -156,11 +156,11 @@ export default function StaffTrainingTestingPage() {
   )
 
   const formatDate = (dateString?: string) => {
-    if (!dateString) return "No date set"
+    if (!dateString) return t('noDateSet')
     try {
       return format(new Date(dateString), "MMM dd, yyyy")
     } catch {
-      return "Invalid date"
+      return t('invalidDate')
     }
   }
 
@@ -246,7 +246,7 @@ export default function StaffTrainingTestingPage() {
                       <IconTarget className="h-4 w-4 text-blue-500 mt-0.5 shrink-0" />
                       <div className="min-w-0 flex-1">
                         <h3 className="font-medium text-sm leading-tight truncate">
-                          {training.trainingName || "N/A"}
+                          {training.trainingName || t('notAvailable')}
                         </h3>
                         <div className="flex items-center gap-2 mt-1">
                           <Badge 
@@ -361,7 +361,7 @@ export default function StaffTrainingTestingPage() {
                   <TableCell className="font-medium">
                     <div className="flex items-center gap-2">
                       <IconTarget className="h-4 w-4 text-blue-500" />
-                      {training.trainingName || "N/A"}
+                      {training.trainingName || t('notAvailable')}
                     </div>
                   </TableCell>
                   <TableCell>
@@ -407,7 +407,7 @@ export default function StaffTrainingTestingPage() {
                                 <div className="flex-1">
                                   <div className="flex items-center gap-2 mb-1">
                                     <span className="font-medium text-sm">
-                                      {record.relatedCompetency.competencyName || "N/A"}
+                                      {record.relatedCompetency.competencyName || t('notAvailable')}
                                     </span>
                                     {record.relatedCompetency.clusterName && (
                                       <Badge variant="outline" className="text-xs">
@@ -522,7 +522,7 @@ export default function StaffTrainingTestingPage() {
             {!isLoadingRecommended && filteredRecommendedTrainings.length > 0 && (
               <div className="mt-3 text-center text-xs text-muted-foreground">
                 {t('showingCount', { count: filteredRecommendedTrainings.length, total: recommendedTrainings.length })}
-                {searchQuery && ` for "${searchQuery}"`}
+                {searchQuery && ` ${t('searchQuerySuffix', { query: searchQuery })}`}
               </div>
             )}
           </MobileCardContent>
@@ -587,7 +587,7 @@ export default function StaffTrainingTestingPage() {
             {!isLoadingRecommended && (
               <div className="mt-4 text-center text-sm text-muted-foreground">
                 {t('showingCount', { count: filteredRecommendedTrainings.length, total: recommendedTrainings.length })}
-                {searchQuery && ` for "${searchQuery}"`}
+                {searchQuery && ` ${t('searchQuerySuffix', { query: searchQuery })}`}
               </div>
             )}
           </CardContent>

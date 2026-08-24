@@ -123,10 +123,12 @@ interface AssessmentResult {
   assessmentId: string;
 }
 
-const createGenderChartConfig = (data: ChartData[]) => {
+type Translate = ReturnType<typeof useTranslations>;
+
+const createGenderChartConfig = (data: ChartData[], t: Translate) => {
   const config: ChartConfig = {
     value: {
-      label: "Staff Count",
+      label: t('staffCountLabel'),
     },
   };
 
@@ -140,31 +142,31 @@ const createGenderChartConfig = (data: ChartData[]) => {
   return config;
 };
 
-const normalizeGenderLabel = (label: string) => {
+const normalizeGenderLabel = (label: string, t: Translate) => {
   const value = label.trim();
 
-  if (!value) return "Unspecified";
+  if (!value) return t('genderUnspecified');
 
   const normalized = value.toLowerCase();
 
-  if (["male", "lelaki", "m"].includes(normalized)) return "Male";
-  if (["female", "perempuan", "f"].includes(normalized)) return "Female";
+  if (["male", "lelaki", "m"].includes(normalized)) return t('genderMale');
+  if (["female", "perempuan", "f"].includes(normalized)) return t('genderFemale');
 
   return value.charAt(0).toUpperCase() + value.slice(1).toLowerCase();
 };
 
-const mergeGenderDistribution = (data: ChartData[]) => {
+const mergeGenderDistribution = (data: ChartData[], t: Translate) => {
   const groupedData = new Map<string, number>();
 
   data.forEach((item) => {
-    const normalizedLabel = normalizeGenderLabel(item.label);
+    const normalizedLabel = normalizeGenderLabel(item.label, t);
     groupedData.set(
       normalizedLabel,
       (groupedData.get(normalizedLabel) || 0) + item.value,
     );
   });
 
-  const displayOrder = ["Male", "Female", "Unspecified"];
+  const displayOrder = [t('genderMale'), t('genderFemale'), t('genderUnspecified')];
 
   return Array.from(groupedData.entries())
     .map(([label, value]) => ({ label, value }))
@@ -225,6 +227,7 @@ const buildAssessmentDashboardData = (
   staffMembers: StaffMember[],
   assessors: Assessor[],
   assessmentResults: AssessmentResult[],
+  t: Translate,
 ): DashboardResponse => {
   const assessorStaffMap = new Map(
     assessors.map((assessor) => [assessor.id, assessor.staffId]),
@@ -248,12 +251,12 @@ const buildAssessmentDashboardData = (
 
   const unitDistribution = buildDistribution(
     selectedStaff.map(
-      (staffMember) => staffMember.unit?.name || "No Unit Assigned",
+      (staffMember) => staffMember.unit?.name || t('noUnitAssigned'),
     ),
   );
   const genderDistribution = buildDistribution(
     selectedStaff.map(
-      (staffMember) => normalizeGenderLabel(staffMember.gender || ""),
+      (staffMember) => normalizeGenderLabel(staffMember.gender || "", t),
     ),
   );
   const gradeDistribution = buildDistribution(
@@ -261,7 +264,7 @@ const buildAssessmentDashboardData = (
       (staffMember) =>
         staffMember.position?.grade?.name ||
         staffMember.grade?.name ||
-        "No Grade Assigned",
+        t('noGradeAssigned'),
     ),
   );
 
@@ -359,6 +362,7 @@ export default function AdminAnalytics() {
           currentStaffMembers,
           currentAssessors,
           assessmentResults,
+          t,
         ),
       );
       setTrainingDemandData(trainingDemandReport);
@@ -366,12 +370,12 @@ export default function AdminAnalytics() {
       console.error("Failed to fetch assessment analytics:", err);
       setDashboardData(createEmptyDashboardData());
       setTrainingDemandData([]);
-      setError(getErrorMessage(err, "Failed to load assessment analytics"));
+      setError(getErrorMessage(err, t('loadAnalyticsError')));
     } finally {
       setTrainingDemandLoading(false);
       setReportLoading(false);
     }
-  }, []);
+  }, [t]);
 
   const fetchDashboardData = useCallback(async (preferredAssessmentId?: string) => {
     setLoading(true);
@@ -409,11 +413,11 @@ export default function AdminAnalytics() {
       console.error("Failed to fetch dashboard data:", err);
       setDashboardData(createEmptyDashboardData());
       setTrainingDemandData([]);
-      setError(getErrorMessage(err, "Failed to load dashboard data"));
+      setError(getErrorMessage(err, t('loadDashboardError')));
     } finally {
       setLoading(false);
     }
-  }, [fetchAssessmentReports]);
+  }, [fetchAssessmentReports, t]);
 
   useEffect(() => {
     if (
@@ -433,7 +437,7 @@ export default function AdminAnalytics() {
   }, [fetchDashboardData]);
 
   const genderDistributionData = dashboardData
-    ? mergeGenderDistribution(dashboardData.genderDistribution)
+    ? mergeGenderDistribution(dashboardData.genderDistribution, t)
     : [];
   const selectedAssessmentName = assessments.find(
     (assessment) => assessment.id === selectedAssessmentId,
@@ -761,7 +765,7 @@ export default function AdminAnalytics() {
                 </CardHeader>
                 <CardContent className="flex-1">
                   <ChartContainer
-                    config={createGenderChartConfig(genderDistributionData)}
+                    config={createGenderChartConfig(genderDistributionData, t)}
                     className="[&_.recharts-text]:fill-background mx-auto aspect-square max-h-[230px]"
                   >
                     <PieChart>
@@ -785,7 +789,7 @@ export default function AdminAnalytics() {
                           stroke="none"
                           fontSize={12}
                           formatter={(value: string) => {
-                            const config = createGenderChartConfig(genderDistributionData);
+                            const config = createGenderChartConfig(genderDistributionData, t);
                             return (
                               config[value as keyof typeof config]?.label || value
                             );

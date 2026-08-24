@@ -279,7 +279,7 @@ export default function UnitComparisonPage() {
             <CardHeader className="pb-3">
               <CardTitle className="text-base">{t("aggregateTitle")}</CardTitle>
               <CardDescription>
-                {result.assessment1.name || result.assessment1.id} vs {result.assessment2.name || result.assessment2.id}
+                {t('comparisonSubtitle', { name1: result.assessment1.name || result.assessment1.id, name2: result.assessment2.name || result.assessment2.id })}
               </CardDescription>
             </CardHeader>
             <CardContent className="p-0">
@@ -363,8 +363,8 @@ export default function UnitComparisonPage() {
                                     <TableHeader>
                                       <TableRow>
                                         <TableHead className="text-xs h-8">{t("colCompetency")}</TableHead>
-                                        <TableHead className="text-center text-xs h-8">{t("scoreWeighted")} A1</TableHead>
-                                        <TableHead className="text-center text-xs h-8">{t("scoreWeighted")} A2</TableHead>
+                                        <TableHead className="text-center text-xs h-8">{t("scoreWeighted")} {t('assessment1')}</TableHead>
+                                        <TableHead className="text-center text-xs h-8">{t("scoreWeighted")} {t('assessment2')}</TableHead>
                                         <TableHead className="text-center text-xs h-8">{t("colChange")}</TableHead>
                                         <TableHead className="text-xs h-8">{t("colTrend")}</TableHead>
                                       </TableRow>

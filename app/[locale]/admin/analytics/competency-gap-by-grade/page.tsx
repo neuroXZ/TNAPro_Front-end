@@ -105,7 +105,7 @@ export default function CompetencyGapByGradePage() {
       }
     } catch (err) {
       console.error("Failed to fetch assessments:", err);
-      setError("Failed to load assessments");
+      setError(t('loadAssessmentsError'));
     }
   };
 
@@ -136,7 +136,7 @@ export default function CompetencyGapByGradePage() {
       setGrades(Array.from(gradeSet));
     } catch (err) {
       console.error("Failed to fetch gap data:", err);
-      setError("Failed to load competency gap data. Please try again.");
+      setError(t('loadGapDataError'));
       setData([]);
     } finally {
       setLoading(false);

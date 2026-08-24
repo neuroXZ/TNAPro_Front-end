@@ -108,7 +108,7 @@ export default function TrainingDemandPage() {
           setSelectedAssessmentId(sortedData[0].id);
         }
       } catch (err) {
-        toast.error("Failed to load assessments");
+        toast.error(t('loadAssessmentsError'));
         console.error(err);
       } finally {
         setIsLoadingAssessments(false);
@@ -129,7 +129,7 @@ export default function TrainingDemandPage() {
         const data = await trainingDemandAPI.generateReport(selectedAssessmentId);
         setDemandData(data);
       } catch (err) {
-        const errorMessage = err instanceof Error ? err.message : "Failed to load training demand data";
+        const errorMessage = err instanceof Error ? err.message : t('loadDemandDataError');
         setError(errorMessage);
         toast.error(errorMessage);
         setDemandData([]);
@@ -158,9 +158,9 @@ export default function TrainingDemandPage() {
       link.click();
       document.body.removeChild(link);
       
-      toast.success("Report exported successfully");
+      toast.success(t('exportSuccess'));
     } catch (err) {
-      toast.error("Failed to export report");
+      toast.error(t('exportError'));
       console.error(err);
     } finally {
       setIsExporting(false);
@@ -269,10 +269,10 @@ export default function TrainingDemandPage() {
                     <div>
                       <CardTitle className="flex items-center gap-2">
                         <IconBook className="w-5 h-5" />
-                        Training Demand
+                        {t('overviewCardTitle')}
                       </CardTitle>
                       <CardDescription className="mt-1">
-                        Staff requiring training by program
+                        {t('overviewCardDesc')}
                       </CardDescription>
                     </div>
                   </div>
@@ -315,7 +315,7 @@ export default function TrainingDemandPage() {
                     </div>
                   ) : (
                     <div className="text-center py-8 text-muted-foreground">
-                      No training demands identified
+                      {t('noTrainingDemandsShort')}
                     </div>
                   )}
 
@@ -325,10 +325,10 @@ export default function TrainingDemandPage() {
                   <div className="flex items-center justify-between pt-2">
                     <div className="flex items-center gap-2 text-sm">
                       <IconTrendingUp className="w-4 h-4 text-muted-foreground" />
-                      <span className="font-semibold">Total {totalTrainingsRecommended} trainings required</span>
+                      <span className="font-semibold">{t('statTotalTrainings', { count: totalTrainingsRecommended })}</span>
                     </div>
                     <div className="text-xs text-muted-foreground">
-                      Based on assessment: {selectedAssessment?.name}
+                      {t('basedOnAssessment', { name: selectedAssessment?.name ?? '' })}
                     </div>
                   </div>
 
@@ -340,7 +340,7 @@ export default function TrainingDemandPage() {
                       onClick={() => setShowFullReport(!showFullReport)}
                     >
                       <IconBook className="w-4 h-4 mr-2" />
-                      {showFullReport ? "Hide Full Report" : "View Full Training Demand Report"}
+                      {showFullReport ? t('hideFullReport') : t('viewFullReport')}
                     </Button>
                   )}
                 </CardContent>

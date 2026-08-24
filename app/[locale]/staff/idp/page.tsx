@@ -130,7 +130,7 @@ export default function MyIdpPage() {
       }
     } catch (error) {
       console.error("Failed to fetch assessments:", error)
-      toast.error("Failed to load assessments")
+      toast.error(t('loadAssessmentsError'))
     } finally {
       setIsLoadingAssessments(false)
     }
@@ -156,7 +156,7 @@ export default function MyIdpPage() {
 
   const generateIdp = async () => {
     if (!selectedAssessmentId || !user?.id) {
-      toast.error("Please select an assessment")
+      toast.error(t('selectAssessmentError'))
       return
     }
 
@@ -170,29 +170,29 @@ export default function MyIdpPage() {
 
       if (response.data) {
         setIdpResult(response.data)
-        toast.success(response.message || "IDP generated successfully!")
+        toast.success(response.message || t('generateSuccess'))
       } else {
         setIdpResult(response)
-        toast.success("IDP generated successfully!")
+        toast.success(t('generateSuccess'))
       }
     } catch (err: any) {
       console.error("IDP generation failed:", err)
-      const errorMessage = err.response?.data?.error || err.message || "Failed to generate IDP"
+      const errorMessage = err.response?.data?.error || err.message || t('generateError')
 
       // User-friendly error messages
       if (errorMessage.includes("assessment score missing")) {
         toast.error(
-          "Assessment incomplete. Please ensure all competency assessments (Self & Superior) are completed.",
+          t('assessmentIncompleteError'),
           { duration: 5000 }
         )
       } else if (errorMessage.includes("No assessment results found")) {
         toast.error(
-          "No assessment results found. Please complete the assessment first.",
+          t('noAssessmentResultsError'),
           { duration: 5000 }
         )
       } else if (errorMessage.includes("No competencies defined")) {
         toast.error(
-          "No competencies defined for your position. Please contact administrator.",
+          t('noCompetenciesDefinedError'),
           { duration: 5000 }
         )
       } else {
@@ -205,7 +205,7 @@ export default function MyIdpPage() {
 
   const handleExportPdf = async () => {
     if (!idpResult || !user?.id) {
-      toast.error("No IDP data to export")
+      toast.error(t('noDataToExport'))
       return
     }
 
@@ -228,13 +228,13 @@ export default function MyIdpPage() {
         window.URL.revokeObjectURL(url)
       }, 1000)
 
-      toast.success("IDP opened in new tab!")
+      toast.success(t('pdfOpenedSuccess'))
     } catch (error: unknown) {
       console.error("Export failed:", error)
       const isAxios = axios.isAxiosError(error)
       const data = isAxios ? (error.response?.data as { error?: string; message?: string } | undefined) : undefined
       const message = isAxios ? error.message : error instanceof Error ? error.message : ""
-      toast.error(data?.error || data?.message || message || "Failed to export IDP")
+      toast.error(data?.error || data?.message || message || t('exportError'))
     } finally {
       setIsExporting(false)
     }
@@ -267,7 +267,7 @@ export default function MyIdpPage() {
 
   const handleExportCsv = async () => {
     if (!idpResult || !user?.id) {
-      toast.error("No IDP data to export")
+      toast.error(t('noDataToExport'))
       return
     }
 
@@ -294,13 +294,13 @@ export default function MyIdpPage() {
       document.body.removeChild(link)
       window.URL.revokeObjectURL(url)
 
-      toast.success("IDP exported successfully!")
+      toast.success(t('csvExportSuccess'))
     } catch (error: unknown) {
       console.error("Export failed:", error)
       const isAxios = axios.isAxiosError(error)
       const data = isAxios ? (error.response?.data as { error?: string; message?: string } | undefined) : undefined
       const message = isAxios ? error.message : error instanceof Error ? error.message : ""
-      toast.error(data?.error || data?.message || message || "Failed to export IDP")
+      toast.error(data?.error || data?.message || message || t('exportError'))
     } finally {
       setIsExporting(false)
     }
@@ -455,7 +455,7 @@ export default function MyIdpPage() {
                     <div className="text-xs text-muted-foreground">{t('totalCompetencies')}</div>
                     <div className="text-lg font-bold">{filteredCompetencies.length}</div>
                     {selectedResultCluster !== "all" && (
-                      <div className="text-[10px] text-muted-foreground">of {idpResult.competencyAnalysis.length} total</div>
+                      <div className="text-[10px] text-muted-foreground">{t('totalSuffix', { total: idpResult.competencyAnalysis.length })}</div>
                     )}
                   </div>
                   <div className="bg-muted/50 rounded-lg p-3">
@@ -494,7 +494,7 @@ export default function MyIdpPage() {
                     <CardContent>
                       <div className="text-2xl font-bold">{filteredCompetencies.length}</div>
                       {selectedResultCluster !== "all" && (
-                        <div className="text-xs text-muted-foreground">of {idpResult.competencyAnalysis.length} total</div>
+                        <div className="text-xs text-muted-foreground">{t('totalSuffix', { total: idpResult.competencyAnalysis.length })}</div>
                       )}
                     </CardContent>
                   </Card>
@@ -552,21 +552,21 @@ export default function MyIdpPage() {
                           variant={comp.gap > 0 ? "destructive" : "secondary"}
                           className="text-xs ml-2 shrink-0"
                         >
-                          Gap: {comp.gap.toFixed(1)}
+                          {t('gapValue', { gap: comp.gap.toFixed(1) })}
                         </Badge>
                       </div>
 
                       <div className="grid grid-cols-3 gap-2 mb-2 text-xs">
                         <div className="text-center">
-                          <div className="text-muted-foreground">Required</div>
+                          <div className="text-muted-foreground">{t('required')}</div>
                           <div className="font-medium">{comp.requiredLevel}</div>
                         </div>
                         <div className="text-center">
-                          <div className="text-muted-foreground">Self</div>
+                          <div className="text-muted-foreground">{t('self')}</div>
                           <div className="font-medium">{comp.selfScore !== undefined ? comp.selfScore : 'N/A'}</div>
                         </div>
                         <div className="text-center">
-                          <div className="text-muted-foreground">Superior</div>
+                          <div className="text-muted-foreground">{t('superior')}</div>
                           <div className="font-medium">{comp.superiorScore !== undefined ? comp.superiorScore : 'N/A'}</div>
                         </div>
                       </div>

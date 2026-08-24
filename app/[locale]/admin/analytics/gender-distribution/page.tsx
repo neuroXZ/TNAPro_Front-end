@@ -112,7 +112,7 @@ export default function GenderDistributionDetailPage() {
       setAllStaff(staffData)
     } catch (err: any) {
       console.error("Failed to fetch gender distribution data:", err)
-      setError(err.response?.data?.error || "Failed to load gender distribution data")
+      setError(err.response?.data?.error || t("loadDataError"))
     } finally {
       setLoading(false)
     }
@@ -196,7 +196,7 @@ export default function GenderDistributionDetailPage() {
   const femaleCount = baseGroups.find((group) => group.key === "female")?.totalStaff || 0
 
   const handleExportCSV = () => {
-    const csvHeaders = ["Gender", "Staff ID", "Name", "Unit", "Position", "Email"]
+    const csvHeaders = [t("colGender"), t("colStaffId"), t("colName"), t("colUnit"), t("colPosition"), t("colEmail")]
     const csvRows = [csvHeaders.join(",")]
 
     filteredGroups.forEach((group) => {

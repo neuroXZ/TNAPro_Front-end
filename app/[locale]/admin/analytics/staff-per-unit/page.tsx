@@ -156,7 +156,7 @@ export default function StaffPerUnitDetailPage() {
       const staffWithoutUnit = unitStaffMap.get('no-unit') || []
       if (staffWithoutUnit.length > 0) {
         unitStaffArray.push({
-          unit: { id: 'no-unit', name: 'No Unit Assigned' },
+          unit: { id: 'no-unit', name: t('noUnitAssigned') },
           staff: staffWithoutUnit,
           totalStaff: staffWithoutUnit.length
         })
@@ -169,7 +169,7 @@ export default function StaffPerUnitDetailPage() {
       
     } catch (err: any) {
       console.error('Failed to fetch staff data:', err)
-      setError(err.response?.data?.error || 'Failed to load staff data')
+      setError(err.response?.data?.error || t('loadDataError'))
     } finally {
       setLoading(false)
     }
@@ -206,15 +206,15 @@ export default function StaffPerUnitDetailPage() {
   const handleExportCSV = () => {
     // Generate CSV content
     const csvHeaders = [
-      'Unit', 
-      'Staff Org ID', 
-      'Name', 
-      'Position', 
-      'Grade', 
-      'Email', 
-      'Phone', 
-      'Gender', 
-      'Supervisor'
+      t('colUnit'),
+      t('colStaffOrgId'),
+      t('colName'),
+      t('colPosition'),
+      t('colGrade'),
+      t('colEmail'),
+      t('colPhone'),
+      t('colGender'),
+      t('colSupervisor')
     ]
     
     const csvRows = []
@@ -332,7 +332,7 @@ export default function StaffPerUnitDetailPage() {
               {totalUnitsCount > 0 ? Math.round(totalStaffCount / totalUnitsCount) : 0}
             </div>
             <p className="text-xs text-muted-foreground">
-              Staff per unit
+              {t('statAvgPerUnitDesc')}
             </p>
           </CardContent>
         </Card>

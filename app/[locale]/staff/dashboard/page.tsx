@@ -254,7 +254,7 @@ export default function StaffDashboard() {
       <div>
         <h1 className="text-3xl font-bold">{t('title')}</h1>
         <p className="text-muted-foreground mt-1">
-          {t('welcome', { name: user?.name || 'Staff' })}
+          {t('welcome', { name: user?.name || t('defaultStaffName') })}
         </p>
       </div>
 
@@ -520,7 +520,7 @@ export default function StaffDashboard() {
                     className="flex items-start justify-between p-3 border rounded-lg hover:bg-muted/50 transition-colors"
                   >
                     <div className="flex-1">
-                      <div className="font-medium text-sm gap-2 flex">{training.trainingName || 'Unknown Training'}
+                      <div className="font-medium text-sm gap-2 flex">{training.trainingName || t('unknownTraining')}
                         <Badge 
                           variant={getRecommendedTrainingStatus(training) === 'Upcoming' ? 'default' : 
                                   getRecommendedTrainingStatus(training) === 'Ongoing' ? 'secondary' : 

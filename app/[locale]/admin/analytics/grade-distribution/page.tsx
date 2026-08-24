@@ -146,7 +146,7 @@ export default function GradeDistributionDetailPage() {
       const noGradeKey = 'no-grade'
       gradeMap.set(noGradeKey, {
         id: noGradeKey,
-        name: 'No Grade Assigned'
+        name: t('noGradeAssigned')
       })
       gradeStaffMap.set(noGradeKey, [])
       
@@ -192,7 +192,7 @@ export default function GradeDistributionDetailPage() {
       
     } catch (err: any) {
       console.error('Failed to fetch data:', err)
-      setError(err.response?.data?.error || 'Failed to load data')
+      setError(err.response?.data?.error || t('loadDataError'))
     } finally {
       setLoading(false)
     }
@@ -242,16 +242,16 @@ export default function GradeDistributionDetailPage() {
   const handleExportCSV = () => {
     // Generate CSV content
     const csvHeaders = [
-      'Grade', 
-      'Level',
-      'Staff Org ID', 
-      'Name', 
-      'Unit',
-      'Position', 
-      'Email', 
-      'Phone', 
-      'Gender', 
-      'Supervisor'
+      t('colGrade'),
+      t('colLevel'),
+      t('colStaffOrgId'),
+      t('colName'),
+      t('colUnit'),
+      t('colPosition'),
+      t('colEmail'),
+      t('colPhone'),
+      t('colGender'),
+      t('colSupervisor')
     ]
     
     const csvRows = []

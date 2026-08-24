@@ -221,7 +221,9 @@
     "statusClosed": "Closed",
     "statusRecommended": "Recommended",
     "noRecommendedTraining": "No recommended training available",
-    "noRecommendedTrainingDesc": "Complete your assessment to get personalized recommendations"
+    "noRecommendedTrainingDesc": "Complete your assessment to get personalized recommendations",
+    "defaultStaffName": "Staff",
+    "unknownTraining": "Unknown Training"
   },
   "AdminGradesPage": {
     "entityNameSingular": "grade",
@@ -1043,7 +1045,8 @@
     "legendItemTemplate": "Gap ≥ {minGap} - recommended",
     "assessmentIncompleteError": "Assessment incomplete for {name}. Please ensure all competency assessments (Self & Superior) are completed.",
     "noAssessmentResultsError": "No assessment results found for this staff member. Please complete the assessment first.",
-    "noCompetenciesDefinedError": "No competencies defined for this staff's position. Please configure position competencies first."
+    "noCompetenciesDefinedError": "No competencies defined for this staff's position. Please configure position competencies first.",
+    "thisStaffFallback": "this staff"
   },
   "AdminReportsSubmissionsPage": {
     "title": "Submission Reports",
@@ -1210,7 +1213,15 @@
     "totalTrainingsRequired": "Total {count} trainings required",
     "basedOnAssessment": "Based on assessment: {name}",
     "viewFullTrainingReport": "View Full Training Demand Report",
-    "viewDetail": "View Detail"
+    "viewDetail": "View Detail",
+    "staffCountLabel": "Staff Count",
+    "genderMale": "Male",
+    "genderFemale": "Female",
+    "genderUnspecified": "Unspecified",
+    "noUnitAssigned": "No Unit Assigned",
+    "noGradeAssigned": "No Grade Assigned",
+    "loadAnalyticsError": "Failed to load assessment analytics",
+    "loadDashboardError": "Failed to load dashboard data"
   },
   "AdminAnalyticsTrainingDemandPage": {
     "title": "Training Demand Analysis",
@@ -1234,7 +1245,17 @@
     "staffRequireSingle": "{count} staff member requires this training",
     "staffRequireMultiple": "{count} staff members require this training",
     "trainingsRequiredTitle": "Trainings Required",
-    "trainingsRequiredDesc": "Required for competency gaps"
+    "trainingsRequiredDesc": "Required for competency gaps",
+    "loadAssessmentsError": "Failed to load assessments",
+    "loadDemandDataError": "Failed to load training demand data",
+    "exportSuccess": "Report exported successfully",
+    "exportError": "Failed to export report",
+    "overviewCardTitle": "Training Demand",
+    "overviewCardDesc": "Staff requiring training by program",
+    "noTrainingDemandsShort": "No training demands identified",
+    "basedOnAssessment": "Based on assessment: {name}",
+    "viewFullReport": "View Full Training Demand Report",
+    "hideFullReport": "Hide Full Report"
   },
   "AdminAnalyticsStaffPerUnitPage": {
     "title": "Staff per Unit - Detailed View",
@@ -1264,7 +1285,13 @@
     "colEmail": "Email",
     "colPhone": "Phone",
     "colSupervisor": "Supervisor",
-    "levelLabel": "Level {level}"
+    "levelLabel": "Level {level}",
+    "noUnitAssigned": "No Unit Assigned",
+    "loadDataError": "Failed to load staff data",
+    "colUnit": "Unit",
+    "colGender": "Gender",
+    "colStaffOrgId": "Staff Org ID",
+    "statAvgPerUnitDesc": "Staff per unit"
   },
   "AdminAnalyticsGradeDistributionPage": {
     "title": "Grade Distribution - Detailed View",
@@ -1297,7 +1324,13 @@
     "colEmail": "Email",
     "colPhone": "Phone",
     "colSupervisor": "Supervisor",
-    "levelLabel": "(Level {level})"
+    "levelLabel": "(Level {level})",
+    "noGradeAssigned": "No Grade Assigned",
+    "loadDataError": "Failed to load data",
+    "colGrade": "Grade",
+    "colLevel": "Level",
+    "colGender": "Gender",
+    "colStaffOrgId": "Staff Org ID"
   },
   "AdminAnalyticsGenderDistributionPage": {
     "title": "Gender Distribution - Detailed View",
@@ -1329,7 +1362,9 @@
     "colEmail": "Email",
     "genderMale": "Male",
     "genderFemale": "Female",
-    "genderUnspecified": "Unspecified"
+    "genderUnspecified": "Unspecified",
+    "loadDataError": "Failed to load gender distribution data",
+    "colGender": "Gender"
   },
   "AdminAnalyticsCompetencyGapPage": {
     "title": "Competency Gap by Grade",
@@ -1349,7 +1384,9 @@
     "gapMinimal": "Minimal Gap",
     "gapLow": "Low Gap",
     "gapMedium": "Medium Gap",
-    "gapHigh": "High Gap"
+    "gapHigh": "High Gap",
+    "loadAssessmentsError": "Failed to load assessments",
+    "loadGapDataError": "Failed to load competency gap data. Please try again."
   },
   "StaffAssessmentsPage": {
     "title": "My Assessments",
@@ -1429,7 +1466,20 @@
     "colDevStrategy": "Development Strategy",
     "showingFilter": "Showing {count} of {total} competencies",
     "legendTitle": "Development Strategy Legend",
-    "legendItemTemplate": "Gap ≥ {minGap} - recommended"
+    "legendItemTemplate": "Gap ≥ {minGap} - recommended",
+    "loadAssessmentsError": "Failed to load assessments",
+    "selectAssessmentError": "Please select an assessment",
+    "generateSuccess": "IDP generated successfully!",
+    "generateError": "Failed to generate IDP",
+    "assessmentIncompleteError": "Assessment incomplete. Please ensure all competency assessments (Self & Superior) are completed.",
+    "noAssessmentResultsError": "No assessment results found. Please complete the assessment first.",
+    "noCompetenciesDefinedError": "No competencies defined for your position. Please contact administrator.",
+    "exportError": "Failed to export IDP",
+    "noDataToExport": "No IDP data to export",
+    "pdfOpenedSuccess": "IDP opened in new tab!",
+    "csvExportSuccess": "IDP exported successfully!",
+    "totalSuffix": "of {total} total",
+    "gapValue": "Gap: {gap}"
   },
   "StaffTrainingPage": {
     "titleMobile": "Programs",
@@ -1455,7 +1505,14 @@
     "statusClosed": "Closed",
     "statusNoDates": "No dates",
     "competencyCount": "{count} competency",
-    "competenciesCount": "{count} competencies"
+    "competenciesCount": "{count} competencies",
+    "selectAssessmentError": "Please select an assessment first",
+    "noRecommendationsInfo": "No training recommendations found. Complete your assessment to get personalized recommendations.",
+    "fetchError": "Failed to fetch recommended trainings",
+    "noDateSet": "No date set",
+    "invalidDate": "Invalid date",
+    "notAvailable": "N/A",
+    "searchQuerySuffix": "for \"{query}\""
   },
   "StaffProfilePage": {
     "title": "My Profile",
@@ -1982,7 +2039,8 @@
     "trendNew": "New",
     "trendNotAssessed": "Not Assessed",
     "trendFirstAssessment": "First Assessment",
-    "trendNotApplicable": "N/A"
+    "trendNotApplicable": "N/A",
+    "comparisonSubtitle": "{name1} vs {name2}"
   },
   "AdminAnalyticsUnitComparisonPage": {
     "backToComparisons": "Back to Comparisons",
@@ -2036,7 +2094,8 @@
     "trendNew": "New",
     "trendNotAssessed": "Not Assessed",
     "trendFirstAssessment": "First Assessment",
-    "trendNotApplicable": "N/A"
+    "trendNotApplicable": "N/A",
+    "comparisonSubtitle": "{name1} vs {name2}"
   },
   "AdminAnalyticsOrgComparisonPage": {
     "backToComparisons": "Back to Comparisons",
@@ -2085,7 +2144,8 @@
     "trendNew": "New",
     "trendNotAssessed": "Not Assessed",
     "trendFirstAssessment": "First Assessment",
-    "trendNotApplicable": "N/A"
+    "trendNotApplicable": "N/A",
+    "comparisonSubtitle": "{name1} vs {name2}"
   },
   "DataTablePagination": {
     "showingRange": "Showing {from} to {to} of {total} entries",
