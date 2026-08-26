@@ -686,7 +686,7 @@ function CompetencyAssessmentTable({
         }
       }} className="w-full">
         <TabsList
-          className="flex w-full items-stretch gap-1 overflow-x-auto md:grid md:overflow-visible"
+          className="flex w-full items-stretch justify-start gap-1 overflow-x-auto md:grid md:justify-center md:overflow-visible"
           style={{ gridTemplateColumns: `repeat(${clusterEntries.length}, minmax(0, 1fr))` }}
         >
           {clusterEntries.map(([clusterName, clusterCompetencies], index) => {
