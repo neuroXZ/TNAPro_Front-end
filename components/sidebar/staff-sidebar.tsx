@@ -104,48 +104,7 @@ export function StaffSidebar({ ...props }: React.ComponentProps<typeof Sidebar>)
         </SidebarMenu>
       </SidebarHeader>
       <SidebarContent>
-        {isMobile ? (
-          /* Mobile: Show system description instead of navigation */
-          <div className="flex flex-col gap-4 p-4">
-            <div className="space-y-3">
-              <div className="border-l-4 border-primary pl-3">
-                <h3 className="font-semibold text-sm text-foreground">{t('systemTitle')}</h3>
-                <p className="text-xs text-muted-foreground mt-1">
-                  {t('systemSubtitle')}
-                </p>
-              </div>
-              
-              <div className="space-y-2 text-xs text-muted-foreground leading-relaxed">
-                <p>
-                  {t('systemDesc')}
-                </p>
-                
-                <div className="bg-muted/50 rounded-lg p-3 mt-3">
-                  <div className="flex items-center gap-2 mb-2">
-                    <div className="size-2 bg-primary rounded-full"></div>
-                    <span className="font-medium text-xs">{t('version')}</span>
-                  </div>
-                  <p className="text-[11px]">
-                    {t('versionDesc')}
-                  </p>
-                </div>
-
-                <div className="space-y-1 mt-3">
-                  <p className="font-medium text-xs text-foreground">{t('keyFeatures')}</p>
-                  <ul className="text-[11px] space-y-0.5 ml-2">
-                    <li>â€¢ {t('feature1')}</li>
-                    <li>â€¢ {t('feature2')}</li>
-                    <li>â€¢ {t('feature3')}</li>
-                    <li>â€¢ {t('feature4')}</li>
-                  </ul>
-                </div>
-              </div>
-            </div>
-          </div>
-        ) : (
-          /* Desktop: Show normal navigation menu */
-          <NavMain items={navMainItems} />
-        )}
+        <NavMain items={navMainItems} />
       </SidebarContent>
       <SidebarFooter>
         <NavUser user={userData} />

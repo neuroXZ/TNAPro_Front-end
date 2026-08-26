@@ -310,7 +310,7 @@ export default function TrainingCompetencyDetailPage() {
           <p className="text-muted-foreground">
             {training?.startDate && `${new Date(training.startDate).toLocaleDateString()} - `}
             {training?.endDate && new Date(training.endDate).toLocaleDateString()}
-            {training?.startDate && training?.endDate && " â€¢ "}
+            {training?.startDate && training?.endDate && " • "}
             {t('assignedCompetencies', { count: trainingCompetencies.length })}
           </p>
         </div>

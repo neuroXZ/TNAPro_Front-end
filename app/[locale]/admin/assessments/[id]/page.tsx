@@ -58,7 +58,7 @@ export default function AssessmentDetailPage() {
             {assessment?.startDate &&
               `${new Date(assessment.startDate).toLocaleDateString()} - `}
             {assessment?.endDate && new Date(assessment.endDate).toLocaleDateString()}
-            {assessment?.startDate && assessment?.endDate && " â€¢ "}
+            {assessment?.startDate && assessment?.endDate && " • "}
             {results.length === 1 ? t('resultsRecordedSingle', { count: results.length }) : t('resultsRecordedMultiple', { count: results.length })}
           </p>
         </div>
