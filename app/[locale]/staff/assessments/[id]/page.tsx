@@ -685,14 +685,23 @@ function CompetencyAssessmentTable({
           setCurrentTabIndex(index)
         }
       }} className="w-full">
-        <TabsList className="grid w-full" style={{ gridTemplateColumns: `repeat(${clusterEntries.length}, minmax(0, 1fr))` }}>
+        <TabsList
+          className="flex w-full items-stretch gap-1 overflow-x-auto md:grid md:overflow-visible"
+          style={{ gridTemplateColumns: `repeat(${clusterEntries.length}, minmax(0, 1fr))` }}
+        >
           {clusterEntries.map(([clusterName, clusterCompetencies], index) => {
             const completed = clusterCompetencies.filter(pc => scores[pc.competency.id]?.score !== null).length
             const total = clusterCompetencies.length
-            
+
             return (
-              <TabsTrigger key={clusterName} value={clusterName} className="gap-2">
-                <span>{index + 1}. {clusterName}</span>
+              <TabsTrigger
+                key={clusterName}
+                value={clusterName}
+                className="shrink-0 basis-auto gap-2 md:shrink md:basis-0"
+              >
+                <span className="max-w-[40vw] truncate md:max-w-none" title={clusterName}>
+                  {index + 1}. {clusterName}
+                </span>
                 <span className="text-xs text-muted-foreground hidden md:inline">({completed}/{total})</span>
               </TabsTrigger>
             )
