@@ -5,7 +5,7 @@ import { featuresAPI, type FeatureFlags } from "@/lib/api/features"
 
 // Hidden by default — if the flags endpoint hasn't resolved yet (or fails),
 // every optional feature stays off rather than briefly flashing on.
-const DEFAULT_FLAGS: FeatureFlags = { zonNegeri: false }
+const DEFAULT_FLAGS: FeatureFlags = { zonNegeri: false, unitScopedCompetency: false }
 
 export function useFeatureFlags() {
   const [flags, setFlags] = useState<FeatureFlags>(DEFAULT_FLAGS)

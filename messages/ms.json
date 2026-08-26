@@ -828,7 +828,14 @@
     "orphanedWarningSingle": "{count} pemetaan menghala kepada kompetensi yang tidak lagi wujud dalam senarai induk. Buang dan petakan semula dengan kompetensi semasa.",
     "orphanedWarningMultiple": "{count} pemetaan menghala kepada kompetensi yang tidak lagi wujud dalam senarai induk. Buang dan petakan semula dengan kompetensi semasa.",
     "removeDeletedMappingSingle": "Buang pemetaan yang dipadam",
-    "removeDeletedMappingMultiple": "Buang pemetaan yang dipadam"
+    "removeDeletedMappingMultiple": "Buang pemetaan yang dipadam",
+    "unitScopeLabel": "Skop",
+    "unitScopeGlobal": "Global (semua organisasi)",
+    "unitScopePlaceholder": "Pilih unit...",
+    "unitScopeSearchPlaceholder": "Cari unit...",
+    "unitScopeEmptyText": "Tiada unit dijumpai.",
+    "unitScopeBadgeGlobal": "Global",
+    "unitScopeHelperText": "Pemetaan yang ditambah atau dilihat di sini hanya terpakai dalam unit yang dipilih dan sub-unitnya."
   },
   "AdminTrainingCompetenciesPage": {
     "entityNameSingular": "latihan",

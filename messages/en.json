@@ -828,7 +828,14 @@
     "orphanedWarningSingle": "{count} mapping points to a competency that no longer exists in the master list. Remove it and re-map with a current competency.",
     "orphanedWarningMultiple": "{count} mappings point to a competency that no longer exists in the master list. Remove them and re-map with a current competency.",
     "removeDeletedMappingSingle": "Remove deleted mapping",
-    "removeDeletedMappingMultiple": "Remove deleted mappings"
+    "removeDeletedMappingMultiple": "Remove deleted mappings",
+    "unitScopeLabel": "Scope",
+    "unitScopeGlobal": "Global (org-wide)",
+    "unitScopePlaceholder": "Select a unit...",
+    "unitScopeSearchPlaceholder": "Search units...",
+    "unitScopeEmptyText": "No unit found.",
+    "unitScopeBadgeGlobal": "Global",
+    "unitScopeHelperText": "Mappings you add or view here apply only within the selected unit and its sub-units."
   },
   "AdminTrainingCompetenciesPage": {
     "entityNameSingular": "training",

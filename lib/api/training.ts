@@ -11,6 +11,15 @@ export const positionCompetencyAPI = {
     const data = await cachedGet<any[]>('/positioncompetency');
     return data.filter((pc: any) => pc.positionId === positionId);
   },
+
+  // Resolves to one row per required competency, honoring unit-scoped
+  // mappings when unitId is supplied (a scoped mapping for that unit or an
+  // ancestor of it wins over an org-wide one for the same competency).
+  getEffective: async (positionId: string, unitId?: string | null) => {
+    const params = new URLSearchParams({ positionId });
+    if (unitId) params.set('unitId', unitId);
+    return cachedGet<any[]>(`/positioncompetency/effective?${params.toString()}`);
+  },
 };
 
 export const trainingCompetencyAPI = {
