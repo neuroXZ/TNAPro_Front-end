@@ -2,7 +2,8 @@
 
 import { useState, useEffect } from "react"
 import { useParams, useRouter } from "next/navigation"
-import { positionAPI, competencyAPI, positionCompetencyAPI } from "@/lib/api"
+import { positionAPI, competencyAPI, positionCompetencyAPI, unitAPI } from "@/lib/api"
+import { useFeatureFlags } from "@/hooks/use-feature-flags"
 import {
   Card,
   CardContent,
@@ -13,11 +14,24 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { IconArrowLeft, IconPlus, IconEdit, IconTrash, IconEye, IconTrashX, IconSearch, IconAlertTriangle } from "@tabler/icons-react"
+import { IconArrowLeft, IconPlus, IconEdit, IconTrash, IconEye, IconTrashX, IconSearch, IconAlertTriangle, IconBuilding } from "@tabler/icons-react"
 import { toast } from "sonner"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Input } from "@/components/ui/input"
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command"
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover"
 import { CompetencyLevelDialog } from "@/features/admin/position-competencies/[id]/components/competency-level-dialog"
 import { CompetencyViewDialog } from "@/features/admin/position-competencies/[id]/components/competency-view-dialog"
 import { CompetencyDeleteDialog } from "@/features/admin/position-competencies/[id]/components/competency-delete-dialog"
@@ -44,10 +58,17 @@ interface Competency {
   cluster?: Cluster
 }
 
+interface Unit {
+  id: string
+  name: string
+}
+
 interface PositionCompetency {
   id: string
   positionId: string
   competencyId: string
+  unitId?: string | null
+  unit?: Unit | null
   level: number
   competency: Competency
 }
@@ -67,11 +88,18 @@ export default function PositionCompetencyDetailPage() {
   const params = useParams()
   const router = useRouter()
   const positionId = params.id as string
+  const { flags: featureFlags } = useFeatureFlags()
 
   const [position, setPosition] = useState<Position | null>(null)
   const [allCompetencies, setAllCompetencies] = useState<Competency[]>([])
   const [positionCompetencies, setPositionCompetencies] = useState<PositionCompetency[]>([])
   const [isLoading, setIsLoading] = useState(true)
+
+  // Unit scope: null = Global (org-wide) mappings, matching every client's
+  // existing data. Only relevant when unitScopedCompetency is on.
+  const [units, setUnits] = useState<Unit[]>([])
+  const [selectedUnitId, setSelectedUnitId] = useState<string | null>(null)
+  const [unitScopePopoverOpen, setUnitScopePopoverOpen] = useState(false)
 
   // Dialog states
   const [isLevelDialogOpen, setIsLevelDialogOpen] = useState(false)
@@ -91,7 +119,17 @@ export default function PositionCompetencyDetailPage() {
 
   useEffect(() => {
     fetchData()
-  }, [positionId])
+  }, [positionId, selectedUnitId])
+
+  // Fetched separately from fetchData() so switching feature flags on/off
+  // never affects the competency-list fetch above.
+  useEffect(() => {
+    if (!featureFlags.unitScopedCompetency) return
+    unitAPI.getAll().then(setUnits).catch(() => {
+      // Scope selector just shows no options - non-fatal, matches how
+      // unit-form-dialog.tsx treats a failed negeriAPI.getAll().
+    })
+  }, [featureFlags.unitScopedCompetency])
 
   // Set initial active tab after data loads
   useEffect(() => {
@@ -104,10 +142,14 @@ export default function PositionCompetencyDetailPage() {
   const fetchData = async () => {
     try {
       setIsLoading(true)
+      // Selections reference this scope's own mapping ids - stale once the
+      // scope changes underneath them.
+      setSelectedIds([])
+      setSelectedCompetencyIds([])
       const [positionData, competenciesData, positionCompetenciesData] = await Promise.all([
         positionAPI.getById(positionId),
         competencyAPI.getAll(),
-        positionCompetencyAPI.getByPosition(positionId),
+        positionCompetencyAPI.getByPositionAndUnit(positionId, selectedUnitId),
       ])
       setPosition(positionData)
       setAllCompetencies(competenciesData)
@@ -195,6 +237,7 @@ export default function PositionCompetencyDetailPage() {
         await positionCompetencyAPI.create({
           positionId,
           competencyId: selectedCompetency!.id,
+          unitId: selectedUnitId,
           level,
         })
         toast.success(t('competencyAdded'))
@@ -292,10 +335,11 @@ export default function PositionCompetencyDetailPage() {
     try {
       setIsBulkAdding(true)
       await Promise.all(
-        selectedCompetencyIds.map(competencyId => 
+        selectedCompetencyIds.map(competencyId =>
           positionCompetencyAPI.create({
             positionId,
             competencyId,
+            unitId: selectedUnitId,
             level,
           })
         )
@@ -364,7 +408,7 @@ export default function PositionCompetencyDetailPage() {
         </Button>
       </div>
 
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-3xl font-bold text-primary">{position?.name}</h1>
           <p className="text-muted-foreground ">
@@ -377,6 +421,66 @@ export default function PositionCompetencyDetailPage() {
             )}
           </p>
         </div>
+
+        {featureFlags.unitScopedCompetency && (
+          <div className="flex flex-col gap-1 sm:items-end">
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-muted-foreground">{t('unitScopeLabel')}:</span>
+              <Popover open={unitScopePopoverOpen} onOpenChange={setUnitScopePopoverOpen}>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    role="combobox"
+                    aria-expanded={unitScopePopoverOpen}
+                    className="w-full justify-between sm:w-[220px]"
+                  >
+                    <span className="flex items-center gap-2 truncate">
+                      <IconBuilding className="size-4 shrink-0 opacity-50" />
+                      {selectedUnitId
+                        ? units.find((u) => u.id === selectedUnitId)?.name ?? t('unitScopeGlobal')
+                        : t('unitScopeGlobal')}
+                    </span>
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-[260px] p-0">
+                  <Command>
+                    <CommandInput placeholder={t('unitScopeSearchPlaceholder')} />
+                    <CommandList className="max-h-[260px] overflow-y-auto">
+                      <CommandEmpty>{t('unitScopeEmptyText')}</CommandEmpty>
+                      <CommandGroup>
+                        <CommandItem
+                          key="global"
+                          value={t('unitScopeGlobal')}
+                          onSelect={() => {
+                            setSelectedUnitId(null)
+                            setUnitScopePopoverOpen(false)
+                          }}
+                        >
+                          {t('unitScopeGlobal')}
+                        </CommandItem>
+                        {units.map((unit) => (
+                          <CommandItem
+                            key={unit.id}
+                            value={unit.name}
+                            onSelect={() => {
+                              setSelectedUnitId(unit.id)
+                              setUnitScopePopoverOpen(false)
+                            }}
+                          >
+                            {unit.name}
+                          </CommandItem>
+                        ))}
+                      </CommandGroup>
+                    </CommandList>
+                  </Command>
+                </PopoverContent>
+              </Popover>
+            </div>
+            <p className="max-w-[260px] text-right text-xs text-muted-foreground">
+              {t('unitScopeHelperText')}
+            </p>
+          </div>
+        )}
       </div>
 
       {orphanedPositionCompetencyCount > 0 && (

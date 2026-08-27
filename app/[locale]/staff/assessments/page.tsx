@@ -54,7 +54,7 @@ export default function MyAssessments() {
         setUserId(userData.id)
         setPositionId(userData.positionId || null)
         if (userData.id) {
-          fetchAssessments(userData.id, userData.positionId || null)
+          fetchAssessments(userData.id, userData.positionId || null, userData.unitId ?? null)
         } else {
           console.warn("Missing user ID")
           setIsLoading(false)
@@ -69,11 +69,11 @@ export default function MyAssessments() {
     }
   }, [])
 
-  const fetchAssessments = async (staffId: string, positionId: string | null) => {
+  const fetchAssessments = async (staffId: string, positionId: string | null, unitId: string | null = null) => {
     try {
       setIsLoading(true)
       console.log("Fetching assessments for staffId:", staffId, "positionId:", positionId)
-      
+
       const [allAssessments, allResults, allAssessors] = await Promise.all([
         assessmentAPI.getAll(),
         assessmentResultAPI.getAll(),
@@ -83,7 +83,7 @@ export default function MyAssessments() {
       // Fetch position competencies only if positionId exists
       let positionCompetencies: any[] = []
       if (positionId) {
-        positionCompetencies = await positionCompetencyAPI.getByPosition(positionId)
+        positionCompetencies = await positionCompetencyAPI.getEffective(positionId, unitId)
       }
 
       console.log("All assessments:", allAssessments)

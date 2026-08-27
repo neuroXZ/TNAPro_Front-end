@@ -12,6 +12,15 @@ export const positionCompetencyAPI = {
     return data.filter((pc: any) => pc.positionId === positionId);
   },
 
+  // Raw rows for one exact scope (not resolved/inherited) - what the admin
+  // mapping editor needs: "does this position have its own mapping for this
+  // unit (or org-wide, when unitId is null)", as opposed to getEffective's
+  // "what applies to a staff member here after resolving inheritance".
+  getByPositionAndUnit: async (positionId: string, unitId: string | null) => {
+    const data = await cachedGet<any[]>('/positioncompetency');
+    return data.filter((pc: any) => pc.positionId === positionId && (pc.unitId ?? null) === unitId);
+  },
+
   // Resolves to one row per required competency, honoring unit-scoped
   // mappings when unitId is supplied (a scoped mapping for that unit or an
   // ancestor of it wins over an org-wide one for the same competency).

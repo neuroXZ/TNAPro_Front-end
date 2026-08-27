@@ -30,6 +30,7 @@ interface Subordinate {
     id: string
     name: string
   }
+  unitId?: string | null
   assessorId: string
 }
 
@@ -117,6 +118,7 @@ export default function SuperiorAssessmentsPage() {
             email: staff.email,
             staffOrgId: staff.staffOrgId,
             position: staff.position,
+            unitId: staff.unitId ?? null,
             assessorId: assessor?.id || '',
           }
         })
@@ -152,7 +154,7 @@ export default function SuperiorAssessmentsPage() {
       if (!subordinate?.position?.id) return { completed: 0, total: 0, isComplete: false }
 
       // Get position competencies count
-      const positionCompetencies = await positionCompetencyAPI.getByPosition(subordinate.position.id)
+      const positionCompetencies = await positionCompetencyAPI.getEffective(subordinate.position.id, subordinate.unitId ?? null)
       const totalCompetencies = positionCompetencies.length
 
       // Count how many results exist for this assessment + assessor + subordinate position

@@ -220,7 +220,7 @@ export default function StaffProfilePage() {
             // Fetch position competencies if staff has a position
             if (enrichedStaffData.positionId) {
                 const [rawPositionCompetencies, allCompetencies, allClusters] = await Promise.all([
-                    positionCompetencyAPI.getByPosition(enrichedStaffData.positionId!),
+                    positionCompetencyAPI.getEffective(enrichedStaffData.positionId!, enrichedStaffData.unitId ?? null),
                     competencyAPI.getAll(),
                     clusterAPI.getAll()
                 ])

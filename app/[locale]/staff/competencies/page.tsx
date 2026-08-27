@@ -55,7 +55,7 @@ export default function MyCompetencies() {
         const userData = JSON.parse(storedUser)
         if (userData.positionId) {
           setUserPositionId(userData.positionId)
-          fetchCompetencies(userData.positionId)
+          fetchCompetencies(userData.positionId, userData.unitId ?? null)
         } else {
           setIsLoading(false)
         }
@@ -68,12 +68,12 @@ export default function MyCompetencies() {
     }
   }, [])
 
-  const fetchCompetencies = async (positionId: string) => {
+  const fetchCompetencies = async (positionId: string, unitId: string | null = null) => {
     try {
       setIsLoading(true)
-      
+
       // Fetch position competencies
-      const positionCompetenciesData = await positionCompetencyAPI.getByPosition(positionId)
+      const positionCompetenciesData = await positionCompetencyAPI.getEffective(positionId, unitId)
       
       // Fetch all competencies with cluster info to enrich the data
       const competencyAPI = (await import("@/lib/api")).competencyAPI

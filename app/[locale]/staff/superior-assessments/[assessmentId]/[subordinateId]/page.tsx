@@ -193,7 +193,7 @@ export default function SuperiorAssessmentDetailPage() {
       // Fetch position competencies for subordinate's position
       let positionCompetenciesData: Competency[] = []
       if (subordinateData.positionId) {
-        const rawPositionCompetencies = await positionCompetencyAPI.getByPosition(subordinateData.positionId)
+        const rawPositionCompetencies = await positionCompetencyAPI.getEffective(subordinateData.positionId, subordinateData.unitId ?? null)
         
         // Enrich competencies with cluster and level data
         positionCompetenciesData = rawPositionCompetencies.map((pc: any) => {

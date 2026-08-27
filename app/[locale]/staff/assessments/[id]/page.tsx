@@ -162,7 +162,7 @@ export default function AssessmentDetailPage() {
       let positionCompetenciesData: Competency[] = []
       if (positionId) {
         console.log("Fetching position competencies for positionId:", positionId)
-        const rawPositionCompetencies = await positionCompetencyAPI.getByPosition(positionId)
+        const rawPositionCompetencies = await positionCompetencyAPI.getEffective(positionId, staffData?.unitId ?? null)
         
         // Enrich competencies with cluster and level data
         positionCompetenciesData = rawPositionCompetencies.map((pc: any) => {
