@@ -14,6 +14,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Checkbox } from "@/components/ui/checkbox"
+import { useFeatureFlags } from "@/hooks/use-feature-flags"
 
 interface Assessment {
   id: string
@@ -38,6 +39,7 @@ export function AssessmentFormDialog({
   assessment,
   onSubmit,
 }: AssessmentFormDialogProps) {
+  const { flags: featureFlags } = useFeatureFlags()
   const [formData, setFormData] = useState({
     name: "",
     description: "",
@@ -74,20 +76,20 @@ export function AssessmentFormDialog({
   useEffect(() => {
     if (open && assessment) {
       // Check if values are already in percentage format (>1) or decimal format (0-1)
-      const selfValue = assessment.weightageSelf 
-        ? (assessment.weightageSelf > 1 ? assessment.weightageSelf : assessment.weightageSelf * 100).toString() 
+      const selfValue = assessment.weightageSelf
+        ? (assessment.weightageSelf > 1 ? assessment.weightageSelf : assessment.weightageSelf * 100).toString()
         : ""
-      const superiorValue = assessment.weightageSuperior 
-        ? (assessment.weightageSuperior > 1 ? assessment.weightageSuperior : assessment.weightageSuperior * 100).toString() 
+      const superiorValue = assessment.weightageSuperior
+        ? (assessment.weightageSuperior > 1 ? assessment.weightageSuperior : assessment.weightageSuperior * 100).toString()
         : ""
-      
+
       setFormData({
         name: assessment.name || "",
         description: assessment.description || "",
         startDate: assessment.startDate?.split("T")[0] || "",
         endDate: assessment.endDate?.split("T")[0] || "",
-        weightageSelf: selfValue,
-        weightageSuperior: superiorValue,
+        weightageSelf: featureFlags.superiorOnlyAssessment ? "0" : selfValue,
+        weightageSuperior: featureFlags.superiorOnlyAssessment ? "100" : superiorValue,
       })
     } else if (open) {
       setFormData({
@@ -95,11 +97,11 @@ export function AssessmentFormDialog({
         description: "",
         startDate: "",
         endDate: "",
-        weightageSelf: "",
-        weightageSuperior: "",
+        weightageSelf: featureFlags.superiorOnlyAssessment ? "0" : "",
+        weightageSuperior: featureFlags.superiorOnlyAssessment ? "100" : "",
       })
     }
-  }, [open, assessment])
+  }, [open, assessment, featureFlags.superiorOnlyAssessment])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -174,40 +176,49 @@ export function AssessmentFormDialog({
                 />
               </div>
             </div>
-            <div className="space-y-2">
-              <Label>Weightage Configuration</Label>
-              <p className="text-xs text-muted-foreground">
-                Set the weight for each assessment type (should total 100%)
-              </p>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="grid gap-2">
-                  <Label htmlFor="weightageSelf">Self (%)</Label>
-                  <Input
-                    id="weightageSelf"
-                    type="number"
-                    step="1"
-                    min="0"
-                    max="100"
-                    value={formData.weightageSelf}
-                    onChange={(e) => handleWeightageChange("weightageSelf", e.target.value)}
-                    placeholder="30"
-                  />
-                </div>
-                <div className="grid gap-2">
-                  <Label htmlFor="weightageSuperior">Superior (%)</Label>
-                  <Input
-                    id="weightageSuperior"
-                    type="number"
-                    step="1"
-                    min="0"
-                    max="100"
-                    value={formData.weightageSuperior}
-                    onChange={(e) => handleWeightageChange("weightageSuperior", e.target.value)}
-                    placeholder="70"
-                  />
+            {featureFlags.superiorOnlyAssessment ? (
+              <div className="space-y-2">
+                <Label>Weightage Configuration</Label>
+                <p className="text-xs text-muted-foreground">
+                  This deployment is superior-only — assessments are scored 100% from the superior's rating, no self-assessment weight.
+                </p>
+              </div>
+            ) : (
+              <div className="space-y-2">
+                <Label>Weightage Configuration</Label>
+                <p className="text-xs text-muted-foreground">
+                  Set the weight for each assessment type (should total 100%)
+                </p>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="grid gap-2">
+                    <Label htmlFor="weightageSelf">Self (%)</Label>
+                    <Input
+                      id="weightageSelf"
+                      type="number"
+                      step="1"
+                      min="0"
+                      max="100"
+                      value={formData.weightageSelf}
+                      onChange={(e) => handleWeightageChange("weightageSelf", e.target.value)}
+                      placeholder="30"
+                    />
+                  </div>
+                  <div className="grid gap-2">
+                    <Label htmlFor="weightageSuperior">Superior (%)</Label>
+                    <Input
+                      id="weightageSuperior"
+                      type="number"
+                      step="1"
+                      min="0"
+                      max="100"
+                      value={formData.weightageSuperior}
+                      onChange={(e) => handleWeightageChange("weightageSuperior", e.target.value)}
+                      placeholder="70"
+                    />
+                  </div>
                 </div>
               </div>
-            </div>
+            )}
           </div>
           <DialogFooter>
             <Button

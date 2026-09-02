@@ -17,6 +17,7 @@ import {
 import { cn } from "@/lib/utils"
 import { useIsMobile } from "@/hooks/use-mobile"
 import { useAuth } from "@/providers/auth-provider"
+import { useFeatureFlags } from "@/hooks/use-feature-flags"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -34,47 +35,52 @@ export function MobileBottomNav({ className }: MobileBottomNavProps) {
   const router = useRouter()
   const isMobile = useIsMobile()
   const { user } = useAuth()
+  const { flags: featureFlags } = useFeatureFlags()
 
-  const navItems = React.useMemo(() => [
-    {
-      title: t('dashboard'),
-      url: "/staff/dashboard",
-      icon: IconDashboard,
-    },
-    {
-      title: t('assessment'),
-      url: "/staff/assessments",
-      icon: IconClipboardCheck,
-      hasDropdown: true,
-      dropdownItems: [
-        {
-          title: t('selfAssessment'),
-          url: "/staff/assessments",
-          icon: IconClipboardCheck,
-        },
-        {
-          title: t('superiorAssessment'),
-          url: "/staff/superior-assessments",
-          icon: IconUserCheck,
-        },
-      ],
-    },
-    {
-      title: t('training'),
-      url: "/staff/training",
-      icon: IconSchool,
-    },
-    {
-      title: t('idp'),
-      url: "/staff/idp",
-      icon: IconFileText,
-    },
-    {
-      title: t('profile'),
-      url: "/staff/profile",
-      icon: IconCertificate,
-    },
-  ], [t])
+  const navItems = React.useMemo(() => {
+    const assessmentDropdownItems = [
+      ...(featureFlags.superiorOnlyAssessment ? [] : [{
+        title: t('selfAssessment'),
+        url: "/staff/assessments",
+        icon: IconClipboardCheck,
+      }]),
+      {
+        title: t('superiorAssessment'),
+        url: "/staff/superior-assessments",
+        icon: IconUserCheck,
+      },
+    ]
+
+    return [
+      {
+        title: t('dashboard'),
+        url: "/staff/dashboard",
+        icon: IconDashboard,
+      },
+      {
+        title: t('assessment'),
+        url: assessmentDropdownItems.length > 1 ? "/staff/assessments" : assessmentDropdownItems[0].url,
+        icon: IconClipboardCheck,
+        hasDropdown: assessmentDropdownItems.length > 1,
+        dropdownItems: assessmentDropdownItems,
+      },
+      {
+        title: t('training'),
+        url: "/staff/training",
+        icon: IconSchool,
+      },
+      {
+        title: t('idp'),
+        url: "/staff/idp",
+        icon: IconFileText,
+      },
+      {
+        title: t('profile'),
+        url: "/staff/profile",
+        icon: IconCertificate,
+      },
+    ]
+  }, [t, featureFlags.superiorOnlyAssessment])
 
   // Get user avatar image
   const getAvatarImage = () => {

@@ -31,6 +31,7 @@ import {
 import { format } from "date-fns"
 import { useTranslations } from "next-intl"
 import { Textarea } from "@/components/ui/textarea"
+import { FeatureRoute } from "@/components/route/feature-route"
 import {
   Dialog,
   DialogContent,
@@ -89,6 +90,14 @@ interface CompetencyScore {
 }
 
 export default function AssessmentDetailPage() {
+  return (
+    <FeatureRoute feature="superiorOnlyAssessment" negate redirectTo="/staff/dashboard">
+      <AssessmentDetailPageContent />
+    </FeatureRoute>
+  )
+}
+
+function AssessmentDetailPageContent() {
   const params = useParams()
   const router = useRouter()
   const assessmentId = params.id as string

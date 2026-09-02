@@ -17,6 +17,7 @@ import { NavUser } from "@/components/nav/nav-staff"
 import { useAuth } from "@/providers/auth-provider"
 import { settingAPI } from "@/lib/api"
 import { useIsMobile } from "@/hooks/use-mobile"
+import { useFeatureFlags } from "@/hooks/use-feature-flags"
 import { useTranslations } from "next-intl"
 import {
   Sidebar,
@@ -34,10 +35,13 @@ export function StaffSidebar({ ...props }: React.ComponentProps<typeof Sidebar>)
   const t = useTranslations('StaffSidebar')
   const [logoPath, setLogoPath] = React.useState<string | null>(null)
   const isMobile = useIsMobile()
+  const { flags: featureFlags } = useFeatureFlags()
 
   const navMainItems = [
     { title: t('dashboard'), url: "/staff/dashboard", icon: IconDashboard },
-    { title: t('selfAssessment'), url: "/staff/assessments", icon: IconClipboardCheck },
+    ...(featureFlags.superiorOnlyAssessment ? [] : [
+      { title: t('selfAssessment'), url: "/staff/assessments", icon: IconClipboardCheck },
+    ]),
     { title: t('superiorAssessment'), url: "/staff/superior-assessments", icon: IconUserCheck },
     { title: t('myCompetencies'), url: "/staff/competencies", icon: IconCertificate },
     { title: t('myIdp'), url: "/staff/idp", icon: IconFileText },

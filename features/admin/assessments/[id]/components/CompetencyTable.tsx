@@ -25,7 +25,7 @@ import { useTranslations } from "next-intl"
 import { assessmentResultAPI } from "@/lib/api"
 import { useFeatureFlags } from "@/hooks/use-feature-flags"
 import type { CompetencyData } from "../types"
-import { getScoreColor, getGapColor } from "../utils"
+import { getScoreColor, getGapColor, isResultComplete } from "../utils"
 
 interface CompetencyTableProps {
   competencies: { [competencyId: string]: CompetencyData }
@@ -134,20 +134,22 @@ export function CompetencyTable({ competencies, clusterName, onDataUpdate, staff
           <TableRow>
             <TableHead className="w-[200px]">{t('colCompetency')}</TableHead>
             <TableHead className="text-center">{t('colRcl')}</TableHead>
-            <TableHead className="text-center">
-              <div className="flex items-center justify-center gap-2">
-                {t('colSelf')}
-                <Button
-                  size="sm"
-                  variant="ghost"
-                  className="h-5 w-5 p-0 text-destructive hover:bg-destructive/10"
-                  onClick={() => handleBulkDeleteClick('self')}
-                  title={t('deleteAllSelfTitle')}
-                >
-                  <IconTrash className="size-3" />
-                </Button>
-              </div>
-            </TableHead>
+            {!featureFlags.superiorOnlyAssessment && (
+              <TableHead className="text-center">
+                <div className="flex items-center justify-center gap-2">
+                  {t('colSelf')}
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    className="h-5 w-5 p-0 text-destructive hover:bg-destructive/10"
+                    onClick={() => handleBulkDeleteClick('self')}
+                    title={t('deleteAllSelfTitle')}
+                  >
+                    <IconTrash className="size-3" />
+                  </Button>
+                </div>
+              </TableHead>
+            )}
             <TableHead className="text-center">
               <div className="flex items-center justify-center gap-2">
                 {t('colSuperior')}
@@ -183,9 +185,11 @@ export function CompetencyTable({ competencies, clusterName, onDataUpdate, staff
                     </div>
                   </TableCell>
                   <TableCell className="text-center">{requiredLevel || "-"}</TableCell>
-                  <TableCell className={`text-center ${getScoreColor(scores.self)}`}>
-                    {scores.self?.toFixed(1) || "-"}
-                  </TableCell>
+                  {!featureFlags.superiorOnlyAssessment && (
+                    <TableCell className={`text-center ${getScoreColor(scores.self)}`}>
+                      {scores.self?.toFixed(1) || "-"}
+                    </TableCell>
+                  )}
                   <TableCell className={`text-center ${getScoreColor(scores.superior)}`}>
                     {scores.superior?.toFixed(1) || "-"}
                   </TableCell>
@@ -209,7 +213,7 @@ export function CompetencyTable({ competencies, clusterName, onDataUpdate, staff
                   <TableCell className="text-center">
                     
                     <div className="flex items-center justify-center gap-1">
-                      {scores.self && scores.superior ? (
+                      {isResultComplete(scores, featureFlags.superiorOnlyAssessment) ? (
                         <span className="text-xs text-green-600 font-medium">{t('statusComplete')}</span>
                       ) : scores.self || scores.superior ? (
                         <span className="text-xs text-yellow-500 font-medium">{t('statusInProgress')}</span>

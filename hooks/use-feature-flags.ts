@@ -11,6 +11,7 @@ const DEFAULT_FLAGS: FeatureFlags = {
   staffGred: false,
   modulFungsi: false,
   gapRatio: false,
+  superiorOnlyAssessment: false,
 }
 
 export function useFeatureFlags() {

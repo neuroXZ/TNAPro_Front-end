@@ -12,8 +12,9 @@ import { Accordion } from "@/components/ui/accordion"
 import { Badge } from "@/components/ui/badge"
 import { IconCheck, IconX, IconSearch, IconChartBar, IconClock } from "@tabler/icons-react"
 import { useTranslations } from "next-intl"
+import { useFeatureFlags } from "@/hooks/use-feature-flags"
 import type { StaffMemberWithResults, StaffCompetencyMatrix, Position } from "../types"
-import { calculateAverages } from "../utils"
+import { calculateAverages, isResultComplete } from "../utils"
 import { StaffAccordionItem } from "./StaffAccordionItem"
 import { AverageTable } from "./AverageTable"
 
@@ -28,11 +29,13 @@ interface StaffListProps {
 
 export function StaffList({ allStaff, matrix, positions, assessmentId, onDataUpdate, gapRatioFloorNegative }: StaffListProps) {
   const t = useTranslations('AdminAssessmentDetailPage')
+  const { flags: featureFlags } = useFeatureFlags()
+  const superiorOnly = featureFlags.superiorOnlyAssessment
   const [searchQuery, setSearchQuery] = useState("")
   const [selectedPosition, setSelectedPosition] = useState<string>("all")
 
   // Calculate averages for completed staff
-  const averages = calculateAverages(matrix, gapRatioFloorNegative)
+  const averages = calculateAverages(matrix, gapRatioFloorNegative, superiorOnly)
 
   // Filter staff based on search and position
   const filteredStaff = allStaff.filter((staffMember) => {
@@ -70,7 +73,7 @@ export function StaffList({ allStaff, matrix, positions, assessmentId, onDataUpd
                 if (!staffData) return false
                 const competencyEntries = Object.values(staffData.competencies || {})
                 return competencyEntries.length > 0 && competencyEntries.every(
-                  comp => comp.scores.self !== undefined && comp.scores.superior !== undefined
+                  comp => isResultComplete(comp.scores, superiorOnly)
                 )
               }).length
             })() })}
@@ -136,7 +139,7 @@ export function StaffList({ allStaff, matrix, positions, assessmentId, onDataUpd
             if (!staffData) return false
             const competencyEntries = Object.values(staffData.competencies || {})
             return competencyEntries.length > 0 && competencyEntries.every(
-              comp => comp.scores.self !== undefined && comp.scores.superior !== undefined
+              comp => isResultComplete(comp.scores, superiorOnly)
             )
           })
           

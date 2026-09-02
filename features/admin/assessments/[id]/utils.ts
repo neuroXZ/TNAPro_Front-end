@@ -7,6 +7,14 @@ export const getScoreColor = (score?: number) => {
   return "text-red-600 font-semibold"
 }
 
+// "Complete" normally means both self and superior have submitted scores —
+// with superiorOnlyAssessment on, self is never collected, so completeness
+// depends on superior alone.
+export const isResultComplete = (
+  scores: { self?: number; superior?: number },
+  superiorOnly: boolean
+) => (superiorOnly ? scores.superior !== undefined : scores.self !== undefined && scores.superior !== undefined)
+
 export const getGapColor = (gap?: number) => {
   if (gap === undefined) return "text-muted-foreground"
   if (gap >= 1.5) return "text-red-600 font-semibold"
@@ -27,7 +35,7 @@ export interface CompetencyAverage {
   averageGapRatioPercent: string
 }
 
-export const calculateAverages = (matrix: any, floorNegative: boolean = false): CompetencyAverage[] => {
+export const calculateAverages = (matrix: any, floorNegative: boolean = false, superiorOnly: boolean = false): CompetencyAverage[] => {
   const aggregatedData = new Map<string, {
     totalScore: number
     totalGap: number
@@ -46,8 +54,8 @@ export const calculateAverages = (matrix: any, floorNegative: boolean = false): 
     Object.keys(staffData.competencies).forEach((competencyId) => {
       const compData = staffData.competencies[competencyId]
       
-      // Only include if staff has both self and superior scores (completed)
-      if (compData.scores.self !== undefined && compData.scores.superior !== undefined) {
+      // Only include completed results — see isResultComplete
+      if (isResultComplete(compData.scores, superiorOnly)) {
         if (!aggregatedData.has(competencyId)) {
           aggregatedData.set(competencyId, {
             totalScore: 0,

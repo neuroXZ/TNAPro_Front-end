@@ -10,6 +10,7 @@ export interface FeatureFlags {
   staffGred: boolean;
   modulFungsi: boolean;
   gapRatio: boolean;
+  superiorOnlyAssessment: boolean;
 }
 
 export const featuresAPI = {

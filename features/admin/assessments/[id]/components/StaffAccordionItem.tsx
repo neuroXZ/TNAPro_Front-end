@@ -9,8 +9,10 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { IconCheck, IconX, IconFileTypePdf, IconFileTypeCsv, IconClock } from "@tabler/icons-react"
 import { toast } from "sonner"
 import { useTranslations } from "next-intl"
+import { useFeatureFlags } from "@/hooks/use-feature-flags"
 import type { StaffMemberWithResults, StaffCompetencyMatrix } from "../types"
 import { CompetencyTable } from "./CompetencyTable"
+import { isResultComplete } from "../utils"
 import { cgaAPI } from "@/lib/api"
 
 interface StaffAccordionItemProps {
@@ -22,6 +24,7 @@ interface StaffAccordionItemProps {
 
 export function StaffAccordionItem({ staffMember, staffData, assessmentId, onDataUpdate }: StaffAccordionItemProps) {
   const t = useTranslations('AdminAssessmentDetailPage')
+  const { flags: featureFlags } = useFeatureFlags()
   const clusterNames = staffData
     ? Array.from(
         new Set(
@@ -109,7 +112,7 @@ export function StaffAccordionItem({ staffMember, staffData, assessmentId, onDat
               // Check if all competencies have both self and superior scores
               const competencyEntries = Object.values(staffData?.competencies || {})
               const allComplete = competencyEntries.length > 0 && competencyEntries.every(
-                (comp) => comp.scores.self !== undefined && comp.scores.superior !== undefined
+                (comp) => isResultComplete(comp.scores, featureFlags.superiorOnlyAssessment)
               )
 
               if (allComplete) {

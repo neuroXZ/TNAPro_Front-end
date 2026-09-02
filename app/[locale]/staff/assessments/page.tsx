@@ -10,6 +10,7 @@ import { assessmentAPI, assessmentResultAPI, assessorAPI, positionCompetencyAPI 
 import { toast } from "sonner"
 import { IconCalendar, IconClipboardCheck, IconFileText, IconCheck, IconPencil } from "@tabler/icons-react"
 import { format } from "date-fns"
+import { FeatureRoute } from "@/components/route/feature-route"
 
 interface Assessment {
   id: string
@@ -36,6 +37,14 @@ interface AssessmentWithStatus extends Assessment {
 }
 
 export default function MyAssessments() {
+  return (
+    <FeatureRoute feature="superiorOnlyAssessment" negate redirectTo="/staff/dashboard">
+      <MyAssessmentsContent />
+    </FeatureRoute>
+  )
+}
+
+function MyAssessmentsContent() {
   const t = useTranslations('StaffAssessmentsPage')
   const [assessments, setAssessments] = useState<AssessmentWithStatus[]>([])
   const [isLoading, setIsLoading] = useState(true)
