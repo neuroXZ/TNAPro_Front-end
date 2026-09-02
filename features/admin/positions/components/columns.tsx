@@ -20,6 +20,10 @@ export interface Position {
     id: string
     name: string
   }
+  modul?: {
+    id: string
+    name: string
+  }[]
 }
 
 interface ColumnActions {

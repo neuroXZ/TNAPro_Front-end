@@ -17,6 +17,7 @@ export interface Staff {
   positionId?: string
   unitId?: string
   supervisorId?: string
+  gred?: string
   position?: {
     name: string
   }
@@ -24,6 +25,12 @@ export interface Staff {
     name: string
   }
 }
+
+// Column id used by staff/page.tsx to toggle this column's visibility via
+// the table's own columnVisibility state when the staffGred feature flag is
+// off — kept as a real, always-defined column (not conditionally included
+// here) so the column set stays stable regardless of the flag.
+export const GRED_COLUMN_ID = "gred"
 
 // Helper function to get avatar image
 const getAvatarImage = (staff: Staff) => {
@@ -121,6 +128,12 @@ export const getColumns = (
     accessorKey: "unit.name",
     header: t('colUnit'),
     cell: ({ row }) => <div>{row.original.unit?.name || "-"}</div>,
+  },
+  {
+    id: GRED_COLUMN_ID,
+    accessorKey: "gred",
+    header: t('fieldGred'),
+    cell: ({ row }) => <div>{row.original.gred || "-"}</div>,
   },
   {
     id: "actions",

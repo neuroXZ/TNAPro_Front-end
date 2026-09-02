@@ -9,6 +9,7 @@ export const unitTypeAPI = createCrudApi('/unittype');
 export const clusterAPI = createCrudApi('/cluster');
 export const zonAPI = createCrudApi('/zon');
 export const negeriAPI = createCrudApi('/negeri');
+export const modulAPI = createCrudApi('/modul');
 export const gradeAPI = createCrudApi('/grade');
 export const levelAPI = createCrudApi('/level');
 export const assessorAPI = createCrudApi('/assessor');

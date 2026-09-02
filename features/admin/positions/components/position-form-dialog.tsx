@@ -11,15 +11,18 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Combobox } from "@/components/ui/combobox"
+import { Checkbox } from "@/components/ui/checkbox"
 import { Position } from "./columns"
-import { gradeAPI, positionCategoryAPI } from "@/lib/api"
+import { gradeAPI, positionCategoryAPI, modulAPI } from "@/lib/api"
 import { useTranslations } from "next-intl"
+import { useFeatureFlags } from "@/hooks/use-feature-flags"
 
 interface PositionFormData {
   name: string
   description?: string
   gradeId?: string
   categoryId?: string
+  modulIds?: string[]
 }
 
 interface PositionFormDialogProps {
@@ -36,15 +39,19 @@ export function PositionFormDialog({
   onSubmit,
 }: PositionFormDialogProps) {
   const t = useTranslations('AdminPositionsPage')
+  const tm = useTranslations('AdminModulPage')
   const tc = useTranslations('Common')
+  const { flags: featureFlags } = useFeatureFlags()
   const [isSaving, setIsSaving] = useState(false)
   const [grades, setGrades] = useState<any[]>([])
   const [categories, setCategories] = useState<any[]>([])
+  const [moduls, setModuls] = useState<any[]>([])
   const [formData, setFormData] = useState<PositionFormData>({
     name: editingPosition?.name || "",
     description: editingPosition?.description || "",
     gradeId: editingPosition?.gradeId,
     categoryId: editingPosition?.categoryId,
+    modulIds: editingPosition?.modul?.map((m) => m.id) || [],
   })
 
   // Fetch grades on mount
@@ -74,6 +81,21 @@ export function PositionFormDialog({
     fetchCategories()
   }, [])
 
+  // Fetch moduls — only when this deployment has the feature on
+  useEffect(() => {
+    if (!featureFlags.modulFungsi) return
+    const fetchModuls = async () => {
+      try {
+        const data = await modulAPI.getAll()
+        setModuls(data)
+      } catch (error) {
+        console.error("Failed to fetch moduls:", error)
+        setModuls([])
+      }
+    }
+    fetchModuls()
+  }, [featureFlags.modulFungsi])
+
   // Update form when editingPosition or open state changes
   useEffect(() => {
     if (editingPosition) {
@@ -82,6 +104,7 @@ export function PositionFormDialog({
         description: editingPosition.description || "",
         gradeId: editingPosition.gradeId,
         categoryId: editingPosition.categoryId,
+        modulIds: editingPosition.modul?.map((m) => m.id) || [],
       })
     } else {
       setFormData({
@@ -89,9 +112,22 @@ export function PositionFormDialog({
         description: "",
         gradeId: undefined,
         categoryId: undefined,
+        modulIds: [],
       })
     }
   }, [editingPosition, open])
+
+  const toggleModul = (modulId: string, checked: boolean) => {
+    setFormData((prev) => {
+      const current = prev.modulIds || []
+      return {
+        ...prev,
+        modulIds: checked
+          ? [...current, modulId]
+          : current.filter((id) => id !== modulId),
+      }
+    })
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -158,6 +194,29 @@ export function PositionFormDialog({
                 emptyText={t('noCategoryFound')}
               />
             </div>
+            {featureFlags.modulFungsi && (
+              <div className="grid gap-2">
+                <Label>{tm('positionModulLabel')}</Label>
+                {moduls.length === 0 ? (
+                  <p className="text-sm text-muted-foreground">{tm('noModulFound')}</p>
+                ) : (
+                  <div className="grid gap-2 max-h-40 overflow-y-auto rounded-md border p-3">
+                    {moduls.map((modul) => (
+                      <div key={modul.id} className="flex items-center gap-2">
+                        <Checkbox
+                          id={`modul-${modul.id}`}
+                          checked={(formData.modulIds || []).includes(modul.id)}
+                          onCheckedChange={(value) => toggleModul(modul.id, !!value)}
+                        />
+                        <Label htmlFor={`modul-${modul.id}`} className="font-normal cursor-pointer">
+                          {modul.name}
+                        </Label>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
             <div className="grid gap-2">
               <Label htmlFor="description">{tc('description')}</Label>
               <textarea

@@ -54,7 +54,8 @@ import {
 } from "@/components/ui/popover"
 import { IconSearch, IconFilter } from "@tabler/icons-react"
 import { toast } from "sonner"
-import { Staff, getColumns } from "@/features/admin/staff/components/columns"
+import { Staff, getColumns, GRED_COLUMN_ID } from "@/features/admin/staff/components/columns"
+import { useFeatureFlags } from "@/hooks/use-feature-flags"
 import { DataTablePagination } from "@/components/data-table-pagination"
 import { StaffFormDialog, type StaffFormData } from "@/features/admin/staff/components/staff-form-dialog"
 import { StaffDeleteDialog } from "@/features/admin/staff/components/staff-delete-dialog"
@@ -96,6 +97,13 @@ export default function StaffManagementPage() {
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({})
   const [rowSelection, setRowSelection] = useState({})
   const [globalFilter, setGlobalFilter] = useState("")
+  const { flags: featureFlags } = useFeatureFlags()
+
+  // Kept as a stable column (see GRED_COLUMN_ID in columns.tsx) and toggled
+  // here so a client without FEATURE_STAFF_GRED never sees the column.
+  useEffect(() => {
+    setColumnVisibility((prev) => ({ ...prev, [GRED_COLUMN_ID]: featureFlags.staffGred }))
+  }, [featureFlags.staffGred])
 
   // Filter staff based on selected position and unit
   const filteredStaff = useMemo(() => {
@@ -173,6 +181,7 @@ export default function StaffManagementPage() {
         positionId: formData.positionId || undefined,
         unitId: formData.unitId || undefined,
         supervisorId: formData.supervisorId || undefined,
+        gred: formData.gred || undefined,
       }
 
       // Remove password if empty (for edit)

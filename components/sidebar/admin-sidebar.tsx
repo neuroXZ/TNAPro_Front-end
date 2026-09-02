@@ -55,6 +55,9 @@ export function AdminSidebar({ ...props }: React.ComponentProps<typeof Sidebar>)
           { title: t('zones'), url: "/admin/zon" },
           { title: t('negeri'), url: "/admin/negeri" },
         ] : []),
+        ...(featureFlags.modulFungsi ? [
+          { title: t('modulFungsi'), url: "/admin/modul" },
+        ] : []),
       ],
     },
     {

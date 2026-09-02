@@ -7,6 +7,8 @@ import { cachedGet } from './cache';
 export interface FeatureFlags {
   zonNegeri: boolean;
   unitScopedCompetency: boolean;
+  staffGred: boolean;
+  modulFungsi: boolean;
 }
 
 export const featuresAPI = {

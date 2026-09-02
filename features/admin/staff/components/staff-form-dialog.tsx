@@ -24,6 +24,7 @@ import { positionAPI, unitAPI, staffAPI } from "@/lib/api"
 import { Staff } from "./columns"
 import { toast } from "sonner"
 import { useTranslations } from "next-intl"
+import { useFeatureFlags } from "@/hooks/use-feature-flags"
 
 interface StaffFormData {
   staffOrgId: string
@@ -35,6 +36,7 @@ interface StaffFormData {
   positionId?: string
   unitId?: string
   supervisorId?: string
+  gred?: string
 }
 
 interface StaffFormDialogProps {
@@ -63,6 +65,7 @@ export function StaffFormDialog({
 }: StaffFormDialogProps) {
   const t = useTranslations('AdminStaffPage')
   const tc = useTranslations('Common')
+  const { flags: featureFlags } = useFeatureFlags()
   const [isSaving, setIsSaving] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
   const [positions, setPositions] = useState<Position[]>([])
@@ -80,6 +83,7 @@ export function StaffFormDialog({
     positionId: editingStaff?.positionId || "",
     unitId: editingStaff?.unitId || "",
     supervisorId: editingStaff?.supervisorId || "",
+    gred: editingStaff?.gred || "",
   })
 
   // Fetch positions, units on mount
@@ -112,6 +116,7 @@ export function StaffFormDialog({
         positionId: editingStaff.positionId || "",
         unitId: editingStaff.unitId || "",
         supervisorId: editingStaff.supervisorId || "",
+        gred: editingStaff.gred || "",
       })
       setPreviewUrl(editingStaff.image || null)
     } else {
@@ -125,6 +130,7 @@ export function StaffFormDialog({
         positionId: "",
         unitId: "",
         supervisorId: "",
+        gred: "",
       })
       setPreviewUrl(null)
     }
@@ -346,6 +352,19 @@ export function StaffFormDialog({
               />
             </div>
 
+            {featureFlags.staffGred && (
+              <div className="grid gap-2">
+                <Label htmlFor="gred">{t('fieldGred')}</Label>
+                <Input
+                  id="gred"
+                  value={formData.gred}
+                  onChange={(e) =>
+                    setFormData({ ...formData, gred: e.target.value })
+                  }
+                  placeholder={t('placeholderGred')}
+                />
+              </div>
+            )}
             <div className="grid gap-2">
               <Label htmlFor="positionId">{t('fieldPosition')}</Label>
               <Combobox
