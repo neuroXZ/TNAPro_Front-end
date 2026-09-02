@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import {
   Select,
@@ -40,15 +41,27 @@ import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { useFeatureFlags } from "@/hooks/use-feature-flags";
 
-interface GapResult {
-  Grade: string;
-  AverageGap: string | number;
-  AverageGapRatioPercent?: string;
+// Breakdown dimension — item 11, NIISe JAP requirements (see
+// DEVELOPER_NOTES.md). Grade/Negeri/Unit share one response shape
+// (Competency × group), Cluster is a flat aggregate (see below).
+type Dimension = "grade" | "negeri" | "unit" | "cluster";
+
+interface GroupedResult {
+  groupLabel: string;
+  averageGap: string | number;
+  averageGapRatioPercent?: string;
 }
 
 interface CompetencyGapData {
   Competency: string;
-  Results: GapResult[];
+  Results: GroupedResult[];
+}
+
+interface ClusterGapRow {
+  Cluster: string;
+  AverageGap: string | number;
+  AverageGapRatioPercent?: string;
+  competencyCount: number;
 }
 
 interface Assessment {
@@ -76,22 +89,17 @@ const getGapColor = (
   return { bg: "bg-green-50", text: "text-green-700", badge: "bg-green-100" };
 };
 
-const getGapLabel = (gap: number): string => {
-  if (gap >= 0.75) return "High Gap";
-  if (gap >= 0.5) return "Medium Gap";
-  if (gap >= 0.25) return "Low Gap";
-  return "Minimal Gap";
-};
-
 export default function CompetencyGapByGradePage() {
   const t = useTranslations('AdminAnalyticsCompetencyGapPage');
   const { flags: featureFlags } = useFeatureFlags();
   const [assessments, setAssessments] = useState<Assessment[]>([]);
   const [selectedAssessmentId, setSelectedAssessmentId] = useState<string>("");
+  const [dimension, setDimension] = useState<Dimension>("grade");
   const [data, setData] = useState<CompetencyGapData[]>([]);
+  const [clusterData, setClusterData] = useState<ClusterGapRow[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [grades, setGrades] = useState<string[]>([]);
+  const [groups, setGroups] = useState<string[]>([]);
 
   useEffect(() => {
     fetchAssessments();
@@ -116,7 +124,8 @@ export default function CompetencyGapByGradePage() {
     if (selectedAssessmentId) {
       fetchGapData();
     }
-  }, [selectedAssessmentId]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedAssessmentId, dimension]);
 
   const fetchGapData = async () => {
     if (!selectedAssessmentId) return;
@@ -125,47 +134,70 @@ export default function CompetencyGapByGradePage() {
     setError(null);
 
     try {
-      const reportData =
-        await competencyReportAPI.getGapByGrade(selectedAssessmentId);
-      setData(reportData || []);
+      if (dimension === "cluster") {
+        const reportData = await competencyReportAPI.getGapByCluster(selectedAssessmentId);
+        setClusterData(reportData || []);
+        setData([]);
+        setGroups([]);
+      } else {
+        const rawData =
+          dimension === "grade"
+            ? await competencyReportAPI.getGapByGrade(selectedAssessmentId)
+            : dimension === "negeri"
+              ? await competencyReportAPI.getGapByNegeri(selectedAssessmentId)
+              : await competencyReportAPI.getGapByUnit(selectedAssessmentId);
 
-      // Extract all unique grades
-      const gradeSet = new Set<string>();
-      reportData.forEach((item: CompetencyGapData) => {
-        item.Results.forEach((result: GapResult) => {
-          gradeSet.add(result.Grade);
+        // Normalize: the by-Grade endpoint uses a `Grade` field (kept for
+        // backward compat), by-Negeri/Unit use a generic `GroupLabel` — map
+        // both onto one shape so this page has a single table to render.
+        const normalized: CompetencyGapData[] = (rawData || []).map((item: any) => ({
+          Competency: item.Competency,
+          Results: item.Results.map((r: any) => ({
+            groupLabel: r.Grade ?? r.GroupLabel,
+            averageGap: r.AverageGap,
+            averageGapRatioPercent: r.AverageGapRatioPercent,
+          })),
+        }));
+        setData(normalized);
+        setClusterData([]);
+
+        const groupSet = new Set<string>();
+        normalized.forEach((item) => {
+          item.Results.forEach((result) => groupSet.add(result.groupLabel));
         });
-      });
-      setGrades(Array.from(gradeSet));
+        setGroups(Array.from(groupSet));
+      }
     } catch (err) {
       console.error("Failed to fetch gap data:", err);
       setError(t('loadGapDataError'));
       setData([]);
+      setClusterData([]);
+      setGroups([]);
     } finally {
       setLoading(false);
     }
   };
 
-  const getGradeValue = (
+  const getGroupValue = (
     competency: CompetencyGapData,
-    grade: string,
+    group: string,
   ): number | null => {
-    const result = competency.Results.find((r) => r.Grade === grade);
-    return result ? parseFloat(result.AverageGap.toString()) : null;
+    const result = competency.Results.find((r) => r.groupLabel === group);
+    return result ? parseFloat(result.averageGap.toString()) : null;
   };
 
-  const getGradeRatioPercent = (
+  const getGroupRatioPercent = (
     competency: CompetencyGapData,
-    grade: string,
+    group: string,
   ): string | null => {
-    const result = competency.Results.find((r) => r.Grade === grade);
-    return result?.AverageGapRatioPercent ?? null;
+    const result = competency.Results.find((r) => r.groupLabel === group);
+    return result?.averageGapRatioPercent ?? null;
   };
 
   const calculateAverageGap = (competency: CompetencyGapData): number => {
     if (competency.Results.length === 0) return 0;
     const sum = competency.Results.reduce(
-      (acc, result) => acc + parseFloat(result.AverageGap.toString()),
+      (acc, result) => acc + parseFloat(result.averageGap.toString()),
       0,
     );
     return sum / competency.Results.length;
@@ -222,6 +254,8 @@ export default function CompetencyGapByGradePage() {
       console.error("PDF Export Error:", error);
     }
   };
+
+  const isEmpty = dimension === "cluster" ? clusterData.length === 0 : data.length === 0;
 
   return (
     <div className="flex flex-col gap-6">
@@ -283,6 +317,18 @@ export default function CompetencyGapByGradePage() {
         </CardContent>
       </Card>
 
+      {/* Breakdown Dimension Tabs */}
+      <Tabs value={dimension} onValueChange={(v) => setDimension(v as Dimension)}>
+        <TabsList>
+          <TabsTrigger value="grade">{t('dimensionGrade')}</TabsTrigger>
+          {featureFlags.zonNegeri && (
+            <TabsTrigger value="negeri">{t('dimensionNegeri')}</TabsTrigger>
+          )}
+          <TabsTrigger value="unit">{t('dimensionUnit')}</TabsTrigger>
+          <TabsTrigger value="cluster">{t('dimensionCluster')}</TabsTrigger>
+        </TabsList>
+      </Tabs>
+
       {/* Error Alert */}
       {error && (
         <Alert variant="destructive">
@@ -300,17 +346,19 @@ export default function CompetencyGapByGradePage() {
               {t('gapAnalysisSubtitle')}
             </span>
 
-            <div className="flex gap-2">
-              <Button variant="default" size="sm" onClick={handleExportCSV}>
-                <IconDownload className="size-4 mr-2" />
-                {t('exportCsv')}
-              </Button>
+            {dimension === "grade" && (
+              <div className="flex gap-2">
+                <Button variant="default" size="sm" onClick={handleExportCSV}>
+                  <IconDownload className="size-4 mr-2" />
+                  {t('exportCsv')}
+                </Button>
 
-              <Button variant="default" size="sm" onClick={handleExportPDF}>
-                <IconDownload className="size-4 mr-2" />
-                {t('exportPdf')}
-              </Button>
-            </div>
+                <Button variant="default" size="sm" onClick={handleExportPDF}>
+                  <IconDownload className="size-4 mr-2" />
+                  {t('exportPdf')}
+                </Button>
+              </div>
+            )}
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -320,29 +368,69 @@ export default function CompetencyGapByGradePage() {
                 <Skeleton key={i} className="h-12 w-full" />
               ))}
             </div>
-          ) : data.length === 0 ? (
+          ) : isEmpty ? (
             <div className="flex flex-col items-center justify-center p-8 text-center">
               <IconFileBarcode className="h-12 w-12 text-muted-foreground mb-2" />
               <p className="text-muted-foreground">
                 {t('noGapData')}
               </p>
             </div>
+          ) : dimension === "cluster" ? (
+            <Card className="max-h-[500px] overflow-scroll">
+              <CardContent>
+                <Table>
+                  <TableHeader>
+                    <TableRow className="bg-muted/50">
+                      <TableHead className="font-semibold">{t('colCluster')}</TableHead>
+                      <TableHead className="text-center font-semibold">{t('colCompetencyCount')}</TableHead>
+                      <TableHead className="text-center font-semibold">{t('colAvgGap')}</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {clusterData.map((row, idx) => {
+                      const gapValue = parseFloat(row.AverageGap.toString());
+                      const gapColor = getGapColor(gapValue);
+                      return (
+                        <TableRow key={idx} className="hover:bg-muted/50">
+                          <TableCell className="font-medium">{row.Cluster}</TableCell>
+                          <TableCell className="text-center">{row.competencyCount}</TableCell>
+                          <TableCell className="text-center">
+                            <div className="flex flex-col items-center gap-0.5">
+                              <Badge
+                                variant="outline"
+                                className={`${gapColor.badge} ${gapColor.text} border-0 font-semibold`}
+                              >
+                                {gapValue.toFixed(2)}
+                              </Badge>
+                              {featureFlags.gapRatio && row.AverageGapRatioPercent && (
+                                <span className="text-xs text-muted-foreground">
+                                  {row.AverageGapRatioPercent}
+                                </span>
+                              )}
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      );
+                    })}
+                  </TableBody>
+                </Table>
+              </CardContent>
+            </Card>
           ) : (
             <Card className="max-h-[500px] overflow-scroll">
               <CardContent>
-                {/* < className="max-h-[500px] overflow-y-auto overflow-x-auto  "> */}
                 <Table>
                   <TableHeader>
                     <TableRow className="bg-muted/50">
                       <TableHead className="font-semibold">
                         {t('colCompetency')}
                       </TableHead>
-                      {grades.map((grade) => (
+                      {groups.map((group) => (
                         <TableHead
-                          key={grade}
+                          key={group}
                           className="text-center font-semibold"
                         >
-                          {grade}
+                          {group}
                         </TableHead>
                       ))}
                       <TableHead className="text-center font-semibold">
@@ -360,12 +448,12 @@ export default function CompetencyGapByGradePage() {
                           <TableCell className="font-medium">
                             {competency.Competency}
                           </TableCell>
-                          {grades.map((grade) => {
-                            const gapValue = getGradeValue(competency, grade);
-                            const ratioPercent = getGradeRatioPercent(competency, grade);
+                          {groups.map((group) => {
+                            const gapValue = getGroupValue(competency, group);
+                            const ratioPercent = getGroupRatioPercent(competency, group);
 
                             return (
-                              <TableCell key={grade} className="text-center">
+                              <TableCell key={group} className="text-center">
                                 {gapValue !== null ? (
                                   (() => {
                                     const color = getGapColor(gapValue);
@@ -413,7 +501,7 @@ export default function CompetencyGapByGradePage() {
       </Card>
 
       {/* Legend */}
-      {data.length > 0 && (
+      {!isEmpty && (
         <Card>
           <CardHeader>
             <CardTitle className="text-sm">{t('gapInterpTitle')}</CardTitle>

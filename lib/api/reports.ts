@@ -94,6 +94,21 @@ export const competencyReportAPI = {
     return cachedGet('/competencyreport/competency-gap-by-grade', { assessmentId });
   },
 
+  // Breakdowns by Negeri/Unit/Cluster (item 11, NIISe JAP requirements) —
+  // Negeri only meaningful when FEATURE_ZON_NEGERI is on, Unit/Cluster are
+  // general and available to every deployment.
+  getGapByNegeri: async (assessmentId: string) => {
+    return cachedGet('/competencyreport/competency-gap-by-negeri', { assessmentId });
+  },
+
+  getGapByUnit: async (assessmentId: string) => {
+    return cachedGet('/competencyreport/competency-gap-by-unit', { assessmentId });
+  },
+
+  getGapByCluster: async (assessmentId: string) => {
+    return cachedGet('/competencyreport/competency-gap-by-cluster', { assessmentId });
+  },
+
   exportCsv: async (data: { assessmentId: string }) => {
     const params = new URLSearchParams();
     params.append('assessmentId', data.assessmentId);
