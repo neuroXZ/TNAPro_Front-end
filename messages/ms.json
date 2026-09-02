@@ -1136,6 +1136,8 @@
     "labelLogoPath": "Laluan Logo (Baca Sahaja)",
     "logoPathHint": "Logo akan dimuat naik dan laluan akan muncul di sini",
     "logoPathNote": "Laluan ini ditetapkan secara automatik selepas logo dimuat naik",
+    "labelGapRatioFloorNegative": "Jadikan Jurang ÷ RCL negatif sebagai sifar",
+    "gapRatioFloorNegativeHint": "Apabila diaktifkan, kompetensi yang telah melebihi tahap keperluan akan memaparkan 0% dan bukannya peratusan negatif dalam laporan Jurang ÷ RCL.",
     "labelLogoPreview": "Pratonton Logo",
     "logoFileTypeError": "Sila pilih fail imej",
     "logoFileSizeError": "Saiz fail mestilah kurang daripada 5MB",

@@ -10,6 +10,7 @@ const DEFAULT_FLAGS: FeatureFlags = {
   unitScopedCompetency: false,
   staffGred: false,
   modulFungsi: false,
+  gapRatio: false,
 }
 
 export function useFeatureFlags() {

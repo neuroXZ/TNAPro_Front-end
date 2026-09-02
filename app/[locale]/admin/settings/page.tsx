@@ -17,6 +17,7 @@ import { Progress } from "@/components/ui/progress"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Badge } from "@/components/ui/badge"
 import { Checkbox } from "@/components/ui/checkbox"
+import { Switch } from "@/components/ui/switch"
 import {
   Table,
   TableHeader,
@@ -61,6 +62,7 @@ import { toast } from "sonner"
 import { hexToOklch, oklchToHex } from "@/lib/color-utils"
 import { applyThemeColors } from "@/lib/theme-loader"
 import { useTranslations } from "next-intl"
+import { useFeatureFlags } from "@/hooks/use-feature-flags"
 
 interface Setting {
   id: string
@@ -73,6 +75,7 @@ interface Setting {
   warningColor?: string
   dangerColor?: string
   infoColor?: string
+  gapRatioFloorNegative?: boolean
 }
 
 interface DashboardSummary {
@@ -88,7 +91,9 @@ interface DashboardSummary {
 
 export default function SettingsPage() {
   const t = useTranslations('AdminSettingsPage');
+  const { flags: featureFlags } = useFeatureFlags()
   const [settings, setSettings] = useState<Setting | null>(null)
+  const [gapRatioFloorNegative, setGapRatioFloorNegative] = useState(false)
   const [dashboardData, setDashboardData] = useState<DashboardSummary | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [isSaving, setIsSaving] = useState(false)
@@ -234,6 +239,7 @@ export default function SettingsPage() {
         setWarningColor(setting.warningColor ? oklchToHex(setting.warningColor) : "#F59E0B")
         setDangerColor(setting.dangerColor ? oklchToHex(setting.dangerColor) : "#EF4444")
         setInfoColor(setting.infoColor ? oklchToHex(setting.infoColor) : "#06B6D4")
+        setGapRatioFloorNegative(setting.gapRatioFloorNegative ?? false)
       }
     } catch (error) {
       toast.error(t('fetchError'))
@@ -299,6 +305,23 @@ export default function SettingsPage() {
       console.error(error)
     } finally {
       setIsSaving(false)
+    }
+  }
+
+  const handleToggleGapRatioFloorNegative = async (checked: boolean) => {
+    setGapRatioFloorNegative(checked)
+    try {
+      if (settings?.id) {
+        await settingAPI.update(settings.id, { gapRatioFloorNegative: checked })
+      } else {
+        await settingAPI.create({ gapRatioFloorNegative: checked })
+      }
+      toast.success(t('saveSuccess'))
+      await fetchSettings()
+    } catch (error) {
+      setGapRatioFloorNegative(!checked)
+      toast.error(t('saveError'))
+      console.error(error)
     }
   }
 
@@ -503,6 +526,22 @@ export default function SettingsPage() {
                     {t('logoPathNote')}
                   </p>
                 </div>
+
+                {featureFlags.gapRatio && (
+                  <div className="flex items-center justify-between rounded-md border p-4">
+                    <div className="space-y-0.5">
+                      <Label htmlFor="gapRatioFloorNegative">{t('labelGapRatioFloorNegative')}</Label>
+                      <p className="text-xs text-muted-foreground">
+                        {t('gapRatioFloorNegativeHint')}
+                      </p>
+                    </div>
+                    <Switch
+                      id="gapRatioFloorNegative"
+                      checked={gapRatioFloorNegative}
+                      onCheckedChange={handleToggleGapRatioFloorNegative}
+                    />
+                  </div>
+                )}
 
                 {logoPath && (
                   <div className="grid gap-2">

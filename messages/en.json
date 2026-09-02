@@ -1136,6 +1136,8 @@
     "labelLogoPath": "Logo Path (Read Only)",
     "logoPathHint": "Logo will be uploaded and path will appear here",
     "logoPathNote": "This path is automatically set after uploading a logo",
+    "labelGapRatioFloorNegative": "Floor negative Gap ÷ RCL to zero",
+    "gapRatioFloorNegativeHint": "When on, a competency that already exceeds its required level displays 0% instead of a negative percentage in Gap ÷ RCL reports.",
     "labelLogoPreview": "Logo Preview",
     "logoFileTypeError": "Please select an image file",
     "logoFileSizeError": "File size must be less than 5MB",

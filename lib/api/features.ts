@@ -9,6 +9,7 @@ export interface FeatureFlags {
   unitScopedCompetency: boolean;
   staffGred: boolean;
   modulFungsi: boolean;
+  gapRatio: boolean;
 }
 
 export const featuresAPI = {

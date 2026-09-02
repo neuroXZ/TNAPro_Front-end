@@ -38,10 +38,12 @@ import {
 } from "@tabler/icons-react";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
+import { useFeatureFlags } from "@/hooks/use-feature-flags";
 
 interface GapResult {
   Grade: string;
   AverageGap: string | number;
+  AverageGapRatioPercent?: string;
 }
 
 interface CompetencyGapData {
@@ -83,6 +85,7 @@ const getGapLabel = (gap: number): string => {
 
 export default function CompetencyGapByGradePage() {
   const t = useTranslations('AdminAnalyticsCompetencyGapPage');
+  const { flags: featureFlags } = useFeatureFlags();
   const [assessments, setAssessments] = useState<Assessment[]>([]);
   const [selectedAssessmentId, setSelectedAssessmentId] = useState<string>("");
   const [data, setData] = useState<CompetencyGapData[]>([]);
@@ -149,6 +152,14 @@ export default function CompetencyGapByGradePage() {
   ): number | null => {
     const result = competency.Results.find((r) => r.Grade === grade);
     return result ? parseFloat(result.AverageGap.toString()) : null;
+  };
+
+  const getGradeRatioPercent = (
+    competency: CompetencyGapData,
+    grade: string,
+  ): string | null => {
+    const result = competency.Results.find((r) => r.Grade === grade);
+    return result?.AverageGapRatioPercent ?? null;
   };
 
   const calculateAverageGap = (competency: CompetencyGapData): number => {
@@ -351,6 +362,7 @@ export default function CompetencyGapByGradePage() {
                           </TableCell>
                           {grades.map((grade) => {
                             const gapValue = getGradeValue(competency, grade);
+                            const ratioPercent = getGradeRatioPercent(competency, grade);
 
                             return (
                               <TableCell key={grade} className="text-center">
@@ -358,12 +370,19 @@ export default function CompetencyGapByGradePage() {
                                   (() => {
                                     const color = getGapColor(gapValue);
                                     return (
-                                      <Badge
-                                        variant="outline"
-                                        className={`${color.badge} ${color.text} border-0`}
-                                      >
-                                        {gapValue.toFixed(2)}
-                                      </Badge>
+                                      <div className="flex flex-col items-center gap-0.5">
+                                        <Badge
+                                          variant="outline"
+                                          className={`${color.badge} ${color.text} border-0`}
+                                        >
+                                          {gapValue.toFixed(2)}
+                                        </Badge>
+                                        {featureFlags.gapRatio && ratioPercent && (
+                                          <span className="text-xs text-muted-foreground">
+                                            {ratioPercent}
+                                          </span>
+                                        )}
+                                      </div>
                                     );
                                   })()
                                 ) : (
