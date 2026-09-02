@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import axios from "axios";
+import { useFeatureFlags } from "@/hooks/use-feature-flags";
 import {
   Card,
   CardContent,
@@ -111,6 +112,7 @@ interface CompetencyAnalysis {
   superiorScore: number;
   totalScore: number;
   gap: number;
+  gapRatioPercent?: string;
   clusterId?: string;
   clusterName?: string;
   developmentStrategies: DevelopmentStrategySummary[];
@@ -127,6 +129,7 @@ interface IdpResult {
 
 export default function AdminIdpPage() {
   const t = useTranslations('AdminIdpPage');
+  const { flags: featureFlags } = useFeatureFlags();
   const [staffList, setStaffList] = useState<Staff[]>([]);
   const [filteredStaffList, setFilteredStaffList] = useState<Staff[]>([]);
   const [unitList, setUnitList] = useState<Unit[]>([]);
@@ -817,7 +820,7 @@ export default function AdminIdpPage() {
                           {t('colRcl')}
                         </th>
                         <th
-                          colSpan={3}
+                          colSpan={featureFlags.gapRatio ? 4 : 3}
                           className="px-3 py-2 text-center text-sm font-medium border-r border-b"
                         >
                           {t('colAssessmentResult')}
@@ -839,6 +842,11 @@ export default function AdminIdpPage() {
                         <th className="px-3 py-2 text-center text-sm font-medium border-r">
                           {t('colGap')}
                         </th>
+                        {featureFlags.gapRatio && (
+                          <th className="px-3 py-2 text-center text-sm font-medium border-r">
+                            {t('colGapRatio')}
+                          </th>
+                        )}
                         {strategies.map((s) => (
                           <th
                             key={s.id}
@@ -897,6 +905,11 @@ export default function AdminIdpPage() {
                             >
                               {comp.gap.toFixed(1)}
                             </td>
+                            {featureFlags.gapRatio && (
+                              <td className="px-3 py-3 text-sm text-center border-r text-muted-foreground">
+                                {comp.gapRatioPercent || 'N/A'}
+                              </td>
+                            )}
                             {strategies.map((s) => {
                               const active = comp.developmentStrategies.some(
                                 (ds) => ds.id === s.id,
@@ -920,7 +933,7 @@ export default function AdminIdpPage() {
                       {filteredCompetencies.length === 0 && (
                         <tr>
                           <td
-                            colSpan={5 + strategies.length}
+                            colSpan={(featureFlags.gapRatio ? 6 : 5) + strategies.length}
                             className="px-4 py-8 text-center text-muted-foreground"
                           >
                             {t('noCompetenciesFound')}

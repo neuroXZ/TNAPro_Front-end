@@ -8,7 +8,9 @@ import {
   staffAPI,
   assessorAPI,
   positionCompetencyAPI,
+  settingAPI,
 } from "@/lib/api"
+import { formatGapRatioPercent } from "@/lib/gap-ratio"
 import type {
   Assessment,
   AssessmentResult,
@@ -28,6 +30,7 @@ export function useAssessmentData(assessmentId: string) {
   const [staff, setStaff] = useState<Staff[]>([])
   const [assessors, setAssessors] = useState<Assessor[]>([])
   const [positionCompetencies, setPositionCompetencies] = useState<any[]>([])
+  const [gapRatioFloorNegative, setGapRatioFloorNegative] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
@@ -45,6 +48,7 @@ export function useAssessmentData(assessmentId: string) {
         staffData,
         assessorsData,
         positionCompetenciesData,
+        settingsData,
       ] = await Promise.all([
         assessmentAPI.getById(assessmentId),
         assessmentResultAPI.getByAssessment(assessmentId),
@@ -53,6 +57,7 @@ export function useAssessmentData(assessmentId: string) {
         staffAPI.getAll(),
         assessorAPI.getAll(),
         positionCompetencyAPI.getAll(),
+        settingAPI.getAll(),
       ])
 
       setAssessment(assessmentData)
@@ -62,6 +67,7 @@ export function useAssessmentData(assessmentId: string) {
       setStaff(staffData)
       setPositionCompetencies(positionCompetenciesData)
       setAssessors(assessorsData)
+      setGapRatioFloorNegative(settingsData?.[0]?.gapRatioFloorNegative ?? false)
     } catch (error) {
       toast.error("Failed to fetch data")
       console.error(error)
@@ -139,6 +145,11 @@ export function useAssessmentData(assessmentId: string) {
 
         matrix[staffId].competencies[competencyId].finalScore = finalScore
         matrix[staffId].competencies[competencyId].gap = totalGap
+        matrix[staffId].competencies[competencyId].gapRatioPercent = formatGapRatioPercent(
+          totalGap,
+          requiredLevel || 0,
+          gapRatioFloorNegative,
+        )
       })
     })
 
@@ -171,6 +182,7 @@ export function useAssessmentData(assessmentId: string) {
     staff,
     assessors,
     positionCompetencies,
+    gapRatioFloorNegative,
     isLoading,
     buildMatrix,
     getAllStaffWithResults,

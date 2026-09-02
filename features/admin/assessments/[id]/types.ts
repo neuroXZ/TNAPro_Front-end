@@ -64,6 +64,7 @@ export interface CompetencyData {
   }
   finalScore?: number
   gap?: number
+  gapRatioPercent?: string
 }
 
 export interface StaffCompetencyMatrix {
@@ -94,4 +95,5 @@ export interface CompetencyAverage {
   averageRequiredLevel: number
   averageScore: number
   averageGap: number
+  averageGapRatioPercent: string
 }

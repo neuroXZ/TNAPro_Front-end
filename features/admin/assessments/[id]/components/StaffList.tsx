@@ -23,15 +23,16 @@ interface StaffListProps {
   positions: Position[]
   assessmentId: string
   onDataUpdate?: () => void
+  gapRatioFloorNegative?: boolean
 }
 
-export function StaffList({ allStaff, matrix, positions, assessmentId, onDataUpdate }: StaffListProps) {
+export function StaffList({ allStaff, matrix, positions, assessmentId, onDataUpdate, gapRatioFloorNegative }: StaffListProps) {
   const t = useTranslations('AdminAssessmentDetailPage')
   const [searchQuery, setSearchQuery] = useState("")
   const [selectedPosition, setSelectedPosition] = useState<string>("all")
 
   // Calculate averages for completed staff
-  const averages = calculateAverages(matrix)
+  const averages = calculateAverages(matrix, gapRatioFloorNegative)
 
   // Filter staff based on search and position
   const filteredStaff = allStaff.filter((staffMember) => {

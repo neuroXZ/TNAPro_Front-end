@@ -8,6 +8,7 @@ import {
 } from "@/components/ui/table"
 import { Badge } from "@/components/ui/badge"
 import { useTranslations } from "next-intl"
+import { useFeatureFlags } from "@/hooks/use-feature-flags"
 import { getScoreColor, getGapColor, type CompetencyAverage } from "../utils"
 
 interface AverageTableProps {
@@ -16,6 +17,7 @@ interface AverageTableProps {
 
 export function AverageTable({ averages }: AverageTableProps) {
   const t = useTranslations('AdminAssessmentDetailPage')
+  const { flags: featureFlags } = useFeatureFlags()
 
   if (averages.length === 0) {
     return (
@@ -76,7 +78,14 @@ export function AverageTable({ averages }: AverageTableProps) {
                       {avg.averageScore.toFixed(2)}
                     </TableCell>
                     <TableCell className={`text-center ${getGapColor(avg.averageGap)}`}>
-                      {avg.averageGap.toFixed(2)}
+                      <div className="flex flex-col items-center gap-0.5">
+                        <span>{avg.averageGap.toFixed(2)}</span>
+                        {featureFlags.gapRatio && avg.averageGapRatioPercent && (
+                          <span className="text-xs text-muted-foreground font-normal">
+                            {avg.averageGapRatioPercent}
+                          </span>
+                        )}
+                      </div>
                     </TableCell>
                   </TableRow>
                 ))}

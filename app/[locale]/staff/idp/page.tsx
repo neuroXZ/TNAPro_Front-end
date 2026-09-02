@@ -39,6 +39,7 @@ import {
 } from "@tabler/icons-react"
 import { format } from "date-fns"
 import { useTranslations } from "next-intl"
+import { useFeatureFlags } from "@/hooks/use-feature-flags"
 
 interface DevelopmentStrategySummary {
   id: string
@@ -56,6 +57,7 @@ interface CompetencyAnalysis {
   superiorScore: number
   totalScore: number
   gap: number
+  gapRatioPercent?: string
   developmentStrategies: DevelopmentStrategySummary[]
   requiresTraining: boolean
 }
@@ -84,6 +86,7 @@ export default function MyIdpPage() {
   const { user } = useAuth()
   const isMobile = useIsMobile()
   const t = useTranslations('StaffIdpPage')
+  const { flags: featureFlags } = useFeatureFlags()
   const [assessments, setAssessments] = useState<Assessment[]>([])
   const [selectedAssessmentId, setSelectedAssessmentId] = useState<string>("")
   const [idpResult, setIdpResult] = useState<IdpResult | null>(null)
@@ -548,12 +551,19 @@ export default function MyIdpPage() {
                         <h4 className="text-sm font-medium text-foreground leading-tight">
                           {comp.competencyName}
                         </h4>
-                        <Badge
-                          variant={comp.gap > 0 ? "destructive" : "secondary"}
-                          className="text-xs ml-2 shrink-0"
-                        >
-                          {t('gapValue', { gap: comp.gap.toFixed(1) })}
-                        </Badge>
+                        <div className="flex flex-col items-end gap-0.5 ml-2 shrink-0">
+                          <Badge
+                            variant={comp.gap > 0 ? "destructive" : "secondary"}
+                            className="text-xs"
+                          >
+                            {t('gapValue', { gap: comp.gap.toFixed(1) })}
+                          </Badge>
+                          {featureFlags.gapRatio && comp.gapRatioPercent && (
+                            <span className="text-[10px] text-muted-foreground">
+                              {comp.gapRatioPercent}
+                            </span>
+                          )}
+                        </div>
                       </div>
 
                       <div className="grid grid-cols-3 gap-2 mb-2 text-xs">
@@ -677,13 +687,16 @@ export default function MyIdpPage() {
                         <tr>
                           <th rowSpan={2} className="px-4 py-3 text-left text-sm font-medium border-r align-middle">{t('colCompetency')}</th>
                           <th rowSpan={2} className="px-3 py-3 text-center text-sm font-medium border-r align-middle">{t('colRcl')}</th>
-                          <th colSpan={3} className="px-3 py-2 text-center text-sm font-medium border-r border-b">{t('colAssessmentResult')}</th>
+                          <th colSpan={featureFlags.gapRatio ? 4 : 3} className="px-3 py-2 text-center text-sm font-medium border-r border-b">{t('colAssessmentResult')}</th>
                           <th colSpan={strategies.length} className="px-3 py-2 text-center text-sm font-medium">{t('colDevStrategy')}</th>
                         </tr>
                         <tr>
                           <th className="px-3 py-2 text-center text-sm font-medium">{t('colSelf')}</th>
                           <th className="px-3 py-2 text-center text-sm font-medium">{t('colSuperior')}</th>
                           <th className="px-3 py-2 text-center text-sm font-medium border-r">{t('colGap')}</th>
+                          {featureFlags.gapRatio && (
+                            <th className="px-3 py-2 text-center text-sm font-medium border-r">{t('colGapRatio')}</th>
+                          )}
                           {strategies.map((s) => (
                             <th key={s.id} className="px-3 py-2 text-center text-sm font-medium">{s.name}</th>
                           ))}
@@ -702,6 +715,11 @@ export default function MyIdpPage() {
                             >
                               {comp.gap.toFixed(1)}
                             </td>
+                            {featureFlags.gapRatio && (
+                              <td className="px-3 py-3 text-sm text-center border-r text-muted-foreground">
+                                {comp.gapRatioPercent || 'N/A'}
+                              </td>
+                            )}
                             {strategies.map((s) => {
                               const active = comp.developmentStrategies.some((ds) => ds.id === s.id)
                               return (

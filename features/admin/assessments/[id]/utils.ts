@@ -1,3 +1,5 @@
+import { formatGapRatioPercent } from "@/lib/gap-ratio"
+
 export const getScoreColor = (score?: number) => {
   if (!score) return "text-muted-foreground"
   if (score >= 4) return "text-green-600 font-semibold"
@@ -22,9 +24,10 @@ export interface CompetencyAverage {
   averageRequiredLevel: number
   averageScore: number
   averageGap: number
+  averageGapRatioPercent: string
 }
 
-export const calculateAverages = (matrix: any): CompetencyAverage[] => {
+export const calculateAverages = (matrix: any, floorNegative: boolean = false): CompetencyAverage[] => {
   const aggregatedData = new Map<string, {
     totalScore: number
     totalGap: number
@@ -86,6 +89,9 @@ export const calculateAverages = (matrix: any): CompetencyAverage[] => {
         averageRequiredLevel: parseFloat((agg.totalRequiredLevel / agg.staffCount).toFixed(2)),
         averageScore: parseFloat((agg.totalScore / agg.staffCount).toFixed(2)),
         averageGap: parseFloat((agg.totalGap / agg.staffCount).toFixed(2)),
+        // Weighted average (sum of gaps ÷ sum of RCLs), same reasoning as
+        // the backend's CgaOverall/CompetencyReport averageGapRatio.
+        averageGapRatioPercent: formatGapRatioPercent(agg.totalGap, agg.totalRequiredLevel, floorNegative),
       })
     }
   })

@@ -20,6 +20,7 @@ export default function AssessmentDetailPage() {
     assessment,
     results,
     positions,
+    gapRatioFloorNegative,
     isLoading,
     buildMatrix,
     getAllStaffWithResults,
@@ -74,12 +75,13 @@ export default function AssessmentDetailPage() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <StaffList 
-            allStaff={allStaff} 
-            matrix={matrix} 
+          <StaffList
+            allStaff={allStaff}
+            matrix={matrix}
             positions={positions}
             assessmentId={assessmentId}
             onDataUpdate={refreshData}
+            gapRatioFloorNegative={gapRatioFloorNegative}
           />
         </CardContent>
       </Card>

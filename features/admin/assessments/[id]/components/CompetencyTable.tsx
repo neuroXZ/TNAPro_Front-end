@@ -23,6 +23,7 @@ import { useState } from "react"
 import { toast } from "sonner"
 import { useTranslations } from "next-intl"
 import { assessmentResultAPI } from "@/lib/api"
+import { useFeatureFlags } from "@/hooks/use-feature-flags"
 import type { CompetencyData } from "../types"
 import { getScoreColor, getGapColor } from "../utils"
 
@@ -37,6 +38,7 @@ interface CompetencyTableProps {
 export function CompetencyTable({ competencies, clusterName, onDataUpdate, staffId, staffName }: CompetencyTableProps) {
   const t = useTranslations('AdminAssessmentDetailPage')
   const tc = useTranslations('Common')
+  const { flags: featureFlags } = useFeatureFlags()
   const typeLabel = (type: 'self' | 'superior' | null) => type === 'self' ? t('selfWord') : type === 'superior' ? t('superiorWord') : ''
   const [deleteDialog, setDeleteDialog] = useState<{
     open: boolean
@@ -167,7 +169,7 @@ export function CompetencyTable({ competencies, clusterName, onDataUpdate, staff
         </TableHeader>
           <TableBody>
             {filteredEntries.map(
-              ([competencyId, { competency, requiredLevel, scores, resultIds, finalScore, gap }]) => (
+              ([competencyId, { competency, requiredLevel, scores, resultIds, finalScore, gap, gapRatioPercent }]) => (
                 <TableRow key={competencyId}>
                   <TableCell className="font-medium">
                     <div className="flex items-center gap-2">
@@ -193,11 +195,16 @@ export function CompetencyTable({ competencies, clusterName, onDataUpdate, staff
                     
                   </TableCell>
                   <TableCell className={`text-center`}>
-                    <Badge
-                      variant="outline" className= {`${getGapColor(gap)}`}
-                    >
-                    {gap !== undefined ? gap.toFixed(2) : "-"}
-                    </Badge>
+                    <div className="flex flex-col items-center gap-0.5">
+                      <Badge
+                        variant="outline" className= {`${getGapColor(gap)}`}
+                      >
+                      {gap !== undefined ? gap.toFixed(2) : "-"}
+                      </Badge>
+                      {featureFlags.gapRatio && gapRatioPercent && (
+                        <span className="text-xs text-muted-foreground">{gapRatioPercent}</span>
+                      )}
+                    </div>
                   </TableCell>
                   <TableCell className="text-center">
                     
