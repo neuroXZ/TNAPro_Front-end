@@ -1425,6 +1425,7 @@
     "dimensionGrade": "By Grade",
     "dimensionNegeri": "By State",
     "dimensionUnit": "By Unit",
+    "dimensionCategory": "By Position Category",
     "dimensionCluster": "By Cluster",
     "gapInterpTitle": "Gap Interpretation",
     "gapMinimal": "Minimal Gap",

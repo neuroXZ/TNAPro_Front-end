@@ -42,9 +42,9 @@ import { useTranslations } from "next-intl";
 import { useFeatureFlags } from "@/hooks/use-feature-flags";
 
 // Breakdown dimension — item 11, NIISe JAP requirements (see
-// DEVELOPER_NOTES.md). Grade/Negeri/Unit share one response shape
+// DEVELOPER_NOTES.md). Grade/Negeri/Unit/Category share one response shape
 // (Competency × group), Cluster is a flat aggregate (see below).
-type Dimension = "grade" | "negeri" | "unit" | "cluster";
+type Dimension = "grade" | "negeri" | "unit" | "category" | "cluster";
 
 interface GroupedResult {
   groupLabel: string;
@@ -145,7 +145,9 @@ export default function CompetencyGapByGradePage() {
             ? await competencyReportAPI.getGapByGrade(selectedAssessmentId)
             : dimension === "negeri"
               ? await competencyReportAPI.getGapByNegeri(selectedAssessmentId)
-              : await competencyReportAPI.getGapByUnit(selectedAssessmentId);
+              : dimension === "category"
+                ? await competencyReportAPI.getGapByCategory(selectedAssessmentId)
+                : await competencyReportAPI.getGapByUnit(selectedAssessmentId);
 
         // Normalize: the by-Grade endpoint uses a `Grade` field (kept for
         // backward compat), by-Negeri/Unit use a generic `GroupLabel` — map
@@ -325,6 +327,7 @@ export default function CompetencyGapByGradePage() {
             <TabsTrigger value="negeri">{t('dimensionNegeri')}</TabsTrigger>
           )}
           <TabsTrigger value="unit">{t('dimensionUnit')}</TabsTrigger>
+          <TabsTrigger value="category">{t('dimensionCategory')}</TabsTrigger>
           <TabsTrigger value="cluster">{t('dimensionCluster')}</TabsTrigger>
         </TabsList>
       </Tabs>
