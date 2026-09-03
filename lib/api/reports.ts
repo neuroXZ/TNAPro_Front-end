@@ -113,9 +113,13 @@ export const competencyReportAPI = {
     return cachedGet('/competencyreport/competency-gap-by-category', { assessmentId });
   },
 
-  exportCsv: async (data: { assessmentId: string }) => {
+  // `dimension` mirrors the report page's tabs (grade/negeri/unit/category/
+  // cluster) — omitted defaults to 'grade' on the backend for backward
+  // compat with any other caller of this API.
+  exportCsv: async (data: { assessmentId: string; dimension?: string }) => {
     const params = new URLSearchParams();
     params.append('assessmentId', data.assessmentId);
+    if (data.dimension) params.append('dimension', data.dimension);
 
     const response = await api.get(`/competencyreport/export-csv?${params.toString()}`, {
       responseType: 'blob'
@@ -123,9 +127,10 @@ export const competencyReportAPI = {
     return response;
   },
 
-  exportPdf: async (data: { assessmentId: string }) => {
+  exportPdf: async (data: { assessmentId: string; dimension?: string }) => {
     const params = new URLSearchParams();
     params.append('assessmentId', data.assessmentId);
+    if (data.dimension) params.append('dimension', data.dimension);
 
     const response = await api.get(`/competencyreport/export-pdf/?${params.toString()}`, {
       responseType: 'blob'

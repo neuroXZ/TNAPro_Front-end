@@ -211,6 +211,7 @@ export default function CompetencyGapByGradePage() {
     try {
       const response = await competencyReportAPI.exportCsv({
         assessmentId: selectedAssessmentId,
+        dimension,
       });
 
       // response.data is already a Blob when using responseType: 'blob'
@@ -219,7 +220,7 @@ export default function CompetencyGapByGradePage() {
       link.href = url;
       link.setAttribute(
         "download",
-        `CompetencyGap_${selectedAssessmentId}_${new Date().toISOString().slice(0, 10)}.csv`,
+        `CompetencyGap_${dimension}_${selectedAssessmentId}_${new Date().toISOString().slice(0, 10)}.csv`,
       );
       document.body.appendChild(link);
       link.click();
@@ -238,6 +239,7 @@ export default function CompetencyGapByGradePage() {
     try {
       const response = await competencyReportAPI.exportPdf({
         assessmentId: selectedAssessmentId,
+        dimension,
       });
 
       // response.data is already a Blob when using responseType: 'blob'
@@ -246,7 +248,7 @@ export default function CompetencyGapByGradePage() {
       link.href = url;
       link.setAttribute(
         "download",
-        `CompetencyGap_${selectedAssessmentId}_${new Date().toISOString().slice(0, 10)}.pdf`,
+        `CompetencyGap_${dimension}_${selectedAssessmentId}_${new Date().toISOString().slice(0, 10)}.pdf`,
       );
       document.body.appendChild(link);
       link.click();
@@ -349,19 +351,17 @@ export default function CompetencyGapByGradePage() {
               {t('gapAnalysisSubtitle')}
             </span>
 
-            {dimension === "grade" && (
-              <div className="flex gap-2">
-                <Button variant="default" size="sm" onClick={handleExportCSV}>
-                  <IconDownload className="size-4 mr-2" />
-                  {t('exportCsv')}
-                </Button>
+            <div className="flex gap-2">
+              <Button variant="default" size="sm" onClick={handleExportCSV}>
+                <IconDownload className="size-4 mr-2" />
+                {t('exportCsv')}
+              </Button>
 
-                <Button variant="default" size="sm" onClick={handleExportPDF}>
-                  <IconDownload className="size-4 mr-2" />
-                  {t('exportPdf')}
-                </Button>
-              </div>
-            )}
+              <Button variant="default" size="sm" onClick={handleExportPDF}>
+                <IconDownload className="size-4 mr-2" />
+                {t('exportPdf')}
+              </Button>
+            </div>
           </CardDescription>
         </CardHeader>
         <CardContent>
