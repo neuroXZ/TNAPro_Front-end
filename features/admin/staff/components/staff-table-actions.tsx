@@ -12,6 +12,7 @@ interface StaffTableActionsProps {
   selectedCount: number
   onAdd: () => void
   onBulkDelete: () => void
+  onSendEmailNotification: () => void
   onDownloadTemplate?: () => void
   onImport?: () => void
 }
@@ -20,6 +21,7 @@ export function StaffTableActions({
   selectedCount,
   onAdd,
   onBulkDelete,
+  onSendEmailNotification,
   onDownloadTemplate,
   onImport,
 }: StaffTableActionsProps) {
@@ -51,7 +53,7 @@ export function StaffTableActions({
         </Button>
       )}
       {selectedCount > 0 && (
-        <Button variant="default" size="sm" onClick={onBulkDelete}>
+        <Button variant="default" size="sm" onClick={onSendEmailNotification}>
           <IconMail className="mr-2 size-4" />
           {t('sendEmailNotification', { count: selectedCount })}
         </Button>

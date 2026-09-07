@@ -64,6 +64,7 @@ import { StaffDataTable } from "@/features/admin/staff/components/staff-data-tab
 import { StaffTableActions } from "@/features/admin/staff/components/staff-table-actions"
 import { StaffViewDialog } from "@/features/admin/staff/components/staff-view-dialog"
 import { StaffImportDialog } from "@/features/admin/staff/components/staff-import-dialog"
+import { StaffNotifyDialog } from "@/features/admin/staff/components/staff-notify-dialog"
 import { useTranslations, useLocale } from "next-intl"
 
 function formatPositionLabel(position: { name: string; grade?: { name: string | null } | null }) {
@@ -87,6 +88,7 @@ export default function StaffManagementPage() {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
   const [isViewDialogOpen, setIsViewDialogOpen] = useState(false)
   const [isImportDialogOpen, setIsImportDialogOpen] = useState(false)
+  const [isNotifyDialogOpen, setIsNotifyDialogOpen] = useState(false)
   const [editingStaff, setEditingStaff] = useState<Staff | null>(null)
   const [deletingStaff, setDeletingStaff] = useState<Staff | null>(null)
   const [viewingStaff, setViewingStaff] = useState<Staff | null>(null)
@@ -324,6 +326,15 @@ export default function StaffManagementPage() {
     setIsImportDialogOpen(true)
   }
 
+  const handleSendEmailNotification = () => {
+    const selectedRows = table.getFilteredSelectedRowModel().rows
+    if (selectedRows.length === 0) {
+      toast.error(t('notifySelectError'))
+      return
+    }
+    setIsNotifyDialogOpen(true)
+  }
+
   // ==================== RENDER ====================
   return (
     <div className="space-y-4">
@@ -338,6 +349,7 @@ export default function StaffManagementPage() {
           selectedCount={table.getFilteredSelectedRowModel().rows.length}
           onAdd={() => handleOpenDialog()}
           onBulkDelete={handleBulkDelete}
+          onSendEmailNotification={handleSendEmailNotification}
           onDownloadTemplate={handleDownloadTemplate}
           onImport={handleImport}
         />
@@ -505,6 +517,12 @@ export default function StaffManagementPage() {
         open={isImportDialogOpen}
         onOpenChange={setIsImportDialogOpen}
         onImportSuccess={fetchStaff}
+      />
+
+      <StaffNotifyDialog
+        open={isNotifyDialogOpen}
+        onOpenChange={setIsNotifyDialogOpen}
+        staffIds={table.getFilteredSelectedRowModel().rows.map((row) => row.original.id)}
       />
     </div>
   )

@@ -25,6 +25,11 @@ export const staffAPI = {
     return response.data;
   },
 
+  sendNotification: async (staffIds: string[], title: string, appBaseUrl?: string) => {
+    const response = await api.post('/staff/notify', { staffIds, title, appBaseUrl });
+    return response.data;
+  },
+
   uploadPhoto: async (file: File) => {
     const formData = new FormData();
     formData.append('photo', file);
