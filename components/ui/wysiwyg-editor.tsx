@@ -7,7 +7,7 @@ import { TextStyle } from '@tiptap/extension-text-style'
 import { Color } from '@tiptap/extension-color'
 import { Link } from '@tiptap/extension-link'
 import { Image } from '@tiptap/extension-image'
-import { useEffect, useState } from 'react'
+import { useEffect, useImperativeHandle, useState, forwardRef } from 'react'
 import { Button } from '@/components/ui/button'
 import {
   Bold,
@@ -34,14 +34,21 @@ interface WysiwygEditorProps {
   onChange: (value: string) => void
   placeholder?: string
   className?: string
+  onFocus?: () => void
 }
 
-export function WysiwygEditor({
+export interface WysiwygEditorHandle {
+  /** Inserts plain text at the current cursor position (or replaces the selection). */
+  insertText: (text: string) => void
+}
+
+export const WysiwygEditor = forwardRef<WysiwygEditorHandle, WysiwygEditorProps>(function WysiwygEditor({
   value,
   onChange,
   placeholder = "Enter content...",
   className = "",
-}: WysiwygEditorProps) {
+  onFocus,
+}, ref) {
   const [isMounted, setIsMounted] = useState(false)
   const [showColorPicker, setShowColorPicker] = useState(false)
   const [showLinkDialog, setShowLinkDialog] = useState(false)
@@ -66,6 +73,9 @@ export function WysiwygEditor({
     onUpdate: ({ editor }) => {
       onChange(editor.getHTML())
     },
+    onFocus: () => {
+      onFocus?.()
+    },
     editorProps: {
       attributes: {
         class: 'prose prose-sm sm:prose-base lg:prose-lg xl:prose-xl mx-auto focus:outline-none min-h-[150px] p-3',
@@ -78,6 +88,12 @@ export function WysiwygEditor({
   useEffect(() => {
     setIsMounted(true)
   }, [])
+
+  useImperativeHandle(ref, () => ({
+    insertText: (text: string) => {
+      editor?.chain().focus().insertContent(text).run()
+    },
+  }), [editor])
 
   useEffect(() => {
     if (editor && value !== editor.getHTML()) {
@@ -333,4 +349,4 @@ export function WysiwygEditor({
       </div>
     </div>
   )
-}
+})

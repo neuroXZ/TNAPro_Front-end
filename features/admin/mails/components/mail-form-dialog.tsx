@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import {
   Dialog,
   DialogContent,
@@ -18,7 +18,13 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { Switch } from "@/components/ui/switch"
-import { WysiwygEditor } from "@/components/ui/wysiwyg-editor"
+import { WysiwygEditor, type WysiwygEditorHandle } from "@/components/ui/wysiwyg-editor"
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip"
+import { mailAPI } from "@/lib/api"
 import { Mail } from "./columns"
 
 interface MailFormData {
@@ -46,6 +52,10 @@ export function MailFormDialog({
   onSubmit,
 }: MailFormDialogProps) {
   const [isSaving, setIsSaving] = useState(false)
+  const [variables, setVariables] = useState<Array<{ key: string; description: string }>>([])
+  const [activeField, setActiveField] = useState<'subject' | 'body'>('body')
+  const subjectInputRef = useRef<HTMLInputElement>(null)
+  const bodyEditorRef = useRef<WysiwygEditorHandle>(null)
   const [formData, setFormData] = useState<MailFormData>({
     name: editingMail?.name || "",
     subject: editingMail?.subject || "",
@@ -83,6 +93,46 @@ export function MailFormDialog({
       })
     }
   }, [editingMail, open])
+
+  // Refresh the available placeholder list whenever the selected mail type
+  // changes — each MailType has its own variable set (see Mail.service.ts).
+  useEffect(() => {
+    if (!open || !formData.mailType) {
+      return
+    }
+    let cancelled = false
+    mailAPI.getTemplateVariables(formData.mailType)
+      .then((response) => {
+        if (!cancelled) {
+          setVariables(response.variables)
+        }
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setVariables([])
+        }
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [formData.mailType, open])
+
+  const handleInsertVariable = (key: string) => {
+    if (activeField === 'subject' && subjectInputRef.current) {
+      const input = subjectInputRef.current
+      const start = input.selectionStart ?? formData.subject.length
+      const end = input.selectionEnd ?? formData.subject.length
+      const newSubject = formData.subject.slice(0, start) + key + formData.subject.slice(end)
+      setFormData((prev) => ({ ...prev, subject: newSubject }))
+      requestAnimationFrame(() => {
+        input.focus()
+        const cursor = start + key.length
+        input.setSelectionRange(cursor, cursor)
+      })
+    } else {
+      bodyEditorRef.current?.insertText(key)
+    }
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -165,21 +215,53 @@ export function MailFormDialog({
               <Label htmlFor="subject">Subject *</Label>
               <Input
                 id="subject"
+                ref={subjectInputRef}
                 value={formData.subject}
                 onChange={(e) =>
                   setFormData({ ...formData, subject: e.target.value })
                 }
+                onFocus={() => setActiveField('subject')}
                 placeholder="Enter email subject"
                 required
               />
             </div>
+
+            {variables.length > 0 && (
+              <div className="grid gap-2">
+                <Label>Insert Placeholder</Label>
+                <div className="flex flex-wrap gap-1.5">
+                  {variables.map((variable) => (
+                    <Tooltip key={variable.key}>
+                      <TooltipTrigger asChild>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          className="h-7 font-mono text-xs"
+                          onClick={() => handleInsertVariable(variable.key)}
+                        >
+                          {variable.key}
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>{variable.description}</TooltipContent>
+                    </Tooltip>
+                  ))}
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  Click to insert into the {activeField === 'subject' ? 'Subject' : 'Body'} field at the cursor.
+                </p>
+              </div>
+            )}
+
             <div className="grid gap-2">
               <Label htmlFor="body">Body *</Label>
               <WysiwygEditor
+                ref={bodyEditorRef}
                 value={formData.body || ""}
                 onChange={(value) =>
                   setFormData({ ...formData, body: value || "" })
                 }
+                onFocus={() => setActiveField('body')}
                 placeholder="Enter email body content..."
               />
             </div>
