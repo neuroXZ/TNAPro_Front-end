@@ -18,6 +18,7 @@ import { useAuth } from "@/providers/auth-provider"
 import { settingAPI } from "@/lib/api"
 import { useIsMobile } from "@/hooks/use-mobile"
 import { useFeatureFlags } from "@/hooks/use-feature-flags"
+import { useSettings } from "@/hooks/use-settings"
 import { useTranslations } from "next-intl"
 import {
   Sidebar,
@@ -36,6 +37,7 @@ export function StaffSidebar({ ...props }: React.ComponentProps<typeof Sidebar>)
   const [logoPath, setLogoPath] = React.useState<string | null>(null)
   const isMobile = useIsMobile()
   const { flags: featureFlags } = useFeatureFlags()
+  const { settings } = useSettings()
 
   const navMainItems = [
     { title: t('dashboard'), url: "/staff/dashboard", icon: IconDashboard },
@@ -44,7 +46,9 @@ export function StaffSidebar({ ...props }: React.ComponentProps<typeof Sidebar>)
     ]),
     { title: t('superiorAssessment'), url: "/staff/superior-assessments", icon: IconUserCheck },
     { title: t('myCompetencies'), url: "/staff/competencies", icon: IconCertificate },
-    { title: t('myIdp'), url: "/staff/idp", icon: IconFileText },
+    ...(settings.hideIdpFromStaff ? [] : [
+      { title: t('myIdp'), url: "/staff/idp", icon: IconFileText },
+    ]),
     { title: t('myTraining'), url: "/staff/training", icon: IconSchool },
   ]
 

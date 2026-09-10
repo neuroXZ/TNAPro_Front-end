@@ -36,10 +36,12 @@ import {
   IconDownload,
   IconUserCheck,
   IconTrendingUp,
+  IconLock,
 } from "@tabler/icons-react"
 import { format } from "date-fns"
 import { useTranslations } from "next-intl"
 import { useFeatureFlags } from "@/hooks/use-feature-flags"
+import { useSettings } from "@/hooks/use-settings"
 
 interface DevelopmentStrategySummary {
   id: string
@@ -87,6 +89,7 @@ export default function MyIdpPage() {
   const isMobile = useIsMobile()
   const t = useTranslations('StaffIdpPage')
   const { flags: featureFlags } = useFeatureFlags()
+  const { settings, isLoading: isLoadingSettings } = useSettings()
   const [assessments, setAssessments] = useState<Assessment[]>([])
   const [selectedAssessmentId, setSelectedAssessmentId] = useState<string>("")
   const [idpResult, setIdpResult] = useState<IdpResult | null>(null)
@@ -102,11 +105,12 @@ export default function MyIdpPage() {
 
 
   useEffect(() => {
+    if (isLoadingSettings || settings.hideIdpFromStaff) return
     fetchAssessments()
     fetchClusters()
     fetchCompetencies()
     fetchStrategies()
-  }, [])
+  }, [isLoadingSettings, settings.hideIdpFromStaff])
 
   const fetchStrategies = async () => {
     try {
@@ -316,6 +320,22 @@ export default function MyIdpPage() {
     const applicable = strategies.filter((s) => gap >= s.minGap)
     if (applicable.length === 0) return NO_GAP_COLOR
     return applicable[applicable.length - 1].color
+  }
+
+  if (!isLoadingSettings && settings.hideIdpFromStaff) {
+    return (
+      <div className={`space-y-4 ${isMobile ? 'space-y-3' : 'space-y-4'}`}>
+        <Card>
+          <CardContent className="flex flex-col items-center gap-3 py-12 text-center">
+            <IconLock className="size-10 text-muted-foreground" />
+            <div>
+              <p className="font-medium">{t('disabledTitle')}</p>
+              <p className="text-sm text-muted-foreground mt-1">{t('disabledDesc')}</p>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    )
   }
 
   return (

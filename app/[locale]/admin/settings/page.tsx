@@ -76,6 +76,7 @@ interface Setting {
   dangerColor?: string
   infoColor?: string
   gapRatioFloorNegative?: boolean
+  hideIdpFromStaff?: boolean
 }
 
 interface DashboardSummary {
@@ -94,6 +95,7 @@ export default function SettingsPage() {
   const { flags: featureFlags } = useFeatureFlags()
   const [settings, setSettings] = useState<Setting | null>(null)
   const [gapRatioFloorNegative, setGapRatioFloorNegative] = useState(false)
+  const [hideIdpFromStaff, setHideIdpFromStaff] = useState(false)
   const [dashboardData, setDashboardData] = useState<DashboardSummary | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [isSaving, setIsSaving] = useState(false)
@@ -240,6 +242,7 @@ export default function SettingsPage() {
         setDangerColor(setting.dangerColor ? oklchToHex(setting.dangerColor) : "#EF4444")
         setInfoColor(setting.infoColor ? oklchToHex(setting.infoColor) : "#06B6D4")
         setGapRatioFloorNegative(setting.gapRatioFloorNegative ?? false)
+        setHideIdpFromStaff(setting.hideIdpFromStaff ?? false)
       }
     } catch (error) {
       toast.error(t('fetchError'))
@@ -320,6 +323,23 @@ export default function SettingsPage() {
       await fetchSettings()
     } catch (error) {
       setGapRatioFloorNegative(!checked)
+      toast.error(t('saveError'))
+      console.error(error)
+    }
+  }
+
+  const handleToggleHideIdpFromStaff = async (checked: boolean) => {
+    setHideIdpFromStaff(checked)
+    try {
+      if (settings?.id) {
+        await settingAPI.update(settings.id, { hideIdpFromStaff: checked })
+      } else {
+        await settingAPI.create({ hideIdpFromStaff: checked })
+      }
+      toast.success(t('saveSuccess'))
+      await fetchSettings()
+    } catch (error) {
+      setHideIdpFromStaff(!checked)
       toast.error(t('saveError'))
       console.error(error)
     }
@@ -527,22 +547,6 @@ export default function SettingsPage() {
                   </p>
                 </div>
 
-                {featureFlags.gapRatio && (
-                  <div className="flex items-center justify-between rounded-md border p-4">
-                    <div className="space-y-0.5">
-                      <Label htmlFor="gapRatioFloorNegative">{t('labelGapRatioFloorNegative')}</Label>
-                      <p className="text-xs text-muted-foreground">
-                        {t('gapRatioFloorNegativeHint')}
-                      </p>
-                    </div>
-                    <Switch
-                      id="gapRatioFloorNegative"
-                      checked={gapRatioFloorNegative}
-                      onCheckedChange={handleToggleGapRatioFloorNegative}
-                    />
-                  </div>
-                )}
-
                 {logoPath && (
                   <div className="grid gap-2">
                     <Label>{t('labelLogoPreview')}</Label>
@@ -575,6 +579,46 @@ export default function SettingsPage() {
                   <IconDeviceFloppy className="mr-2 size-4" />
                   {isSaving ? t('saving') : t('saveButton')}
                 </Button>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="mt-4">
+            <CardHeader>
+              <CardTitle>{t('preferencesCardTitle')}</CardTitle>
+              <CardDescription>
+                {t('preferencesCardDesc')}
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {featureFlags.gapRatio && (
+                <div className="flex items-center justify-between rounded-md border p-4">
+                  <div className="space-y-0.5">
+                    <Label htmlFor="gapRatioFloorNegative">{t('labelGapRatioFloorNegative')}</Label>
+                    <p className="text-xs text-muted-foreground">
+                      {t('gapRatioFloorNegativeHint')}
+                    </p>
+                  </div>
+                  <Switch
+                    id="gapRatioFloorNegative"
+                    checked={gapRatioFloorNegative}
+                    onCheckedChange={handleToggleGapRatioFloorNegative}
+                  />
+                </div>
+              )}
+
+              <div className="flex items-center justify-between rounded-md border p-4">
+                <div className="space-y-0.5">
+                  <Label htmlFor="hideIdpFromStaff">{t('labelHideIdpFromStaff')}</Label>
+                  <p className="text-xs text-muted-foreground">
+                    {t('hideIdpFromStaffHint')}
+                  </p>
+                </div>
+                <Switch
+                  id="hideIdpFromStaff"
+                  checked={hideIdpFromStaff}
+                  onCheckedChange={handleToggleHideIdpFromStaff}
+                />
               </div>
             </CardContent>
           </Card>

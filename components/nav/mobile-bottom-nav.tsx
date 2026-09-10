@@ -18,6 +18,7 @@ import { cn } from "@/lib/utils"
 import { useIsMobile } from "@/hooks/use-mobile"
 import { useAuth } from "@/providers/auth-provider"
 import { useFeatureFlags } from "@/hooks/use-feature-flags"
+import { useSettings } from "@/hooks/use-settings"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -36,6 +37,7 @@ export function MobileBottomNav({ className }: MobileBottomNavProps) {
   const isMobile = useIsMobile()
   const { user } = useAuth()
   const { flags: featureFlags } = useFeatureFlags()
+  const { settings } = useSettings()
 
   const navItems = React.useMemo(() => {
     const assessmentDropdownItems = [
@@ -69,18 +71,18 @@ export function MobileBottomNav({ className }: MobileBottomNavProps) {
         url: "/staff/training",
         icon: IconSchool,
       },
-      {
+      ...(settings.hideIdpFromStaff ? [] : [{
         title: t('idp'),
         url: "/staff/idp",
         icon: IconFileText,
-      },
+      }]),
       {
         title: t('profile'),
         url: "/staff/profile",
         icon: IconCertificate,
       },
     ]
-  }, [t, featureFlags.superiorOnlyAssessment])
+  }, [t, featureFlags.superiorOnlyAssessment, settings.hideIdpFromStaff])
 
   // Get user avatar image
   const getAvatarImage = () => {
