@@ -700,6 +700,7 @@
     "notifySendButton": "Send",
     "notifySuccess": "Notification sent to {count} staff.",
     "notifyPartial": "Sent to {sent}, failed for {failed}.",
+    "notifyQuotaExceeded": "Email sending limit reached on the Resend account. The remaining staff below could not be notified because of this, not because of anything wrong with their records - try again later or ask your administrator to raise the account's sending plan.",
     "notifyError": "Failed to send notification.",
     "detailsTitle": "Staff Details",
     "fieldStaffId": "Staff ID",

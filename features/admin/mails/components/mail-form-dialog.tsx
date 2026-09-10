@@ -160,7 +160,33 @@ export function MailFormDialog({
     if (!bodyText) {
       alert('Body content is required')
       return
-    }    setIsSaving(true)
+    }
+
+    // Sending only ever substitutes the placeholders this mail type
+    // declares (see TEMPLATE_VARIABLES in Mail.service.ts) - anything else
+    // typed in (e.g. copy-pasted {{assessment.name}} into a General
+    // Announcement template) is left as literal, unreplaced text in the
+    // sent email. Catch that here instead of finding out from a client.
+    const extractPlaceholders = (text: string): string[] => {
+      const matches = text.match(/\{\{\s*[\w.]+\s*\}\}/g) || []
+      return matches.map((m) => `{{${m.replace(/[{}\s]/g, '')}}}`)
+    }
+    const supportedKeys = new Set(variables.map((v) => v.key))
+    const usedPlaceholders = new Set([
+      ...extractPlaceholders(formData.subject),
+      ...extractPlaceholders(bodyText),
+    ])
+    const unsupported = Array.from(usedPlaceholders).filter((p) => !supportedKeys.has(p))
+    if (unsupported.length > 0) {
+      alert(
+        `This template uses placeholder(s) not supported by mail type "${formData.mailType}": ${unsupported.join(', ')}.\n\n` +
+        `They will NOT be replaced when sent - recipients will see the literal "{{...}}" text.\n\n` +
+        `Supported placeholders for this mail type: ${variables.map((v) => v.key).join(', ') || '(none)'}.`
+      )
+      return
+    }
+
+    setIsSaving(true)
 
     try {
       // Ensure we send proper data structure with fallbacks

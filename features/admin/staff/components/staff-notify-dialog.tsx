@@ -26,6 +26,7 @@ interface StaffNotifyDialogProps {
 interface NotifyResult {
   sent: number
   failed: Array<{ staffId: string; name: string | null; reason: string }>
+  quotaExceeded?: boolean
 }
 
 export function StaffNotifyDialog({
@@ -116,6 +117,13 @@ export function StaffNotifyDialog({
                   <div className="text-xs text-red-600">{tc('failedCount')}</div>
                 </div>
               </div>
+
+              {result.quotaExceeded && (
+                <Alert variant="destructive">
+                  <IconAlertCircle className="size-4" />
+                  <AlertDescription>{t('notifyQuotaExceeded')}</AlertDescription>
+                </Alert>
+              )}
 
               {result.failed.length > 0 && (
                 <Alert variant="destructive">

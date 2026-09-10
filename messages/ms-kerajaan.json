@@ -700,6 +700,7 @@
     "notifySendButton": "Hantar",
     "notifySuccess": "Notifikasi dihantar kepada {count} pegawai.",
     "notifyPartial": "Berjaya dihantar {sent}, gagal {failed}.",
+    "notifyQuotaExceeded": "Had penghantaran emel akaun Resend telah dicapai. Staf yang tersenarai di bawah gagal dihantar disebabkan ini, bukan disebabkan rekod mereka bermasalah — cuba lagi kemudian atau minta pentadbir menaikkan pelan penghantaran akaun.",
     "notifyError": "Gagal menghantar notifikasi.",
     "detailsTitle": "Butiran Pegawai",
     "fieldStaffId": "ID Pegawai",
