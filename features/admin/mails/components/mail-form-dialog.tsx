@@ -19,11 +19,8 @@ import {
 } from "@/components/ui/select"
 import { Switch } from "@/components/ui/switch"
 import { WysiwygEditor, type WysiwygEditorHandle } from "@/components/ui/wysiwyg-editor"
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip"
+import { Alert, AlertDescription } from "@/components/ui/alert"
+import { IconInfoCircle } from "@tabler/icons-react"
 import { mailAPI } from "@/lib/api"
 import { Mail } from "./columns"
 
@@ -53,6 +50,7 @@ export function MailFormDialog({
 }: MailFormDialogProps) {
   const [isSaving, setIsSaving] = useState(false)
   const [variables, setVariables] = useState<Array<{ key: string; description: string }>>([])
+  const [templateNote, setTemplateNote] = useState("")
   const [activeField, setActiveField] = useState<'subject' | 'body'>('body')
   const subjectInputRef = useRef<HTMLInputElement>(null)
   const bodyEditorRef = useRef<WysiwygEditorHandle>(null)
@@ -105,11 +103,13 @@ export function MailFormDialog({
       .then((response) => {
         if (!cancelled) {
           setVariables(response.variables)
+          setTemplateNote(response.note || "")
         }
       })
       .catch(() => {
         if (!cancelled) {
           setVariables([])
+          setTemplateNote("")
         }
       })
     return () => {
@@ -252,29 +252,39 @@ export function MailFormDialog({
               />
             </div>
 
+            {templateNote && (
+              <Alert>
+                <IconInfoCircle className="size-4" />
+                <AlertDescription>{templateNote}</AlertDescription>
+              </Alert>
+            )}
+
             {variables.length > 0 && (
               <div className="grid gap-2">
-                <Label>Insert Placeholder</Label>
-                <div className="flex flex-wrap gap-1.5">
+                <Label>Available Placeholders</Label>
+                <div className="rounded-md border divide-y">
                   {variables.map((variable) => (
-                    <Tooltip key={variable.key}>
-                      <TooltipTrigger asChild>
-                        <Button
-                          type="button"
-                          variant="outline"
-                          size="sm"
-                          className="h-7 font-mono text-xs"
-                          onClick={() => handleInsertVariable(variable.key)}
-                        >
-                          {variable.key}
-                        </Button>
-                      </TooltipTrigger>
-                      <TooltipContent>{variable.description}</TooltipContent>
-                    </Tooltip>
+                    <div
+                      key={variable.key}
+                      className="flex items-start gap-3 p-2.5"
+                    >
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        className="h-7 shrink-0 font-mono text-xs"
+                        onClick={() => handleInsertVariable(variable.key)}
+                      >
+                        {variable.key}
+                      </Button>
+                      <p className="text-xs text-muted-foreground pt-1">
+                        {variable.description}
+                      </p>
+                    </div>
                   ))}
                 </div>
                 <p className="text-xs text-muted-foreground">
-                  Click to insert into the {activeField === 'subject' ? 'Subject' : 'Body'} field at the cursor.
+                  Click a placeholder to insert it into the {activeField === 'subject' ? 'Subject' : 'Body'} field at the cursor.
                 </p>
               </div>
             )}

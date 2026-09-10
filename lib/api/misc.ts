@@ -5,7 +5,7 @@ import { createCrudApi } from './crud-factory';
 export const mailAPI = {
   ...createCrudApi('/mail'),
 
-  getTemplateVariables: async (mailType: string): Promise<{ mailType: string; variables: Array<{ key: string; description: string }> }> => {
+  getTemplateVariables: async (mailType: string): Promise<{ mailType: string; variables: Array<{ key: string; description: string }>; note?: string }> => {
     const response = await api.get('/mail/template-variables', { params: { mailType } });
     return response.data;
   },
