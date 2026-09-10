@@ -13,7 +13,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { IconUser, IconMail, IconBriefcase, IconBuilding, IconEdit, IconUsers } from "@tabler/icons-react"
+import { IconUser, IconMail, IconBriefcase, IconBuilding, IconEdit, IconUsers, IconLock } from "@tabler/icons-react"
 import { authAPI, staffAPI, assessorAPI } from "@/lib/api"
 import { toast } from "sonner"
 import { Skeleton } from "@/components/ui/skeleton"
@@ -59,6 +59,12 @@ export default function MyProfile() {
     email: "",
     gender: "",
   })
+  const [passwordForm, setPasswordForm] = useState({
+    currentPassword: "",
+    newPassword: "",
+    confirmPassword: "",
+  })
+  const [isChangingPassword, setIsChangingPassword] = useState(false)
 
   useEffect(() => {
     fetchProfile()
@@ -218,6 +224,36 @@ export default function MyProfile() {
     } catch (error) {
       toast.error("Failed to update profile")
       console.error(error)
+    }
+  }
+
+  const handleChangePassword = async () => {
+    if (!passwordForm.currentPassword || !passwordForm.newPassword || !passwordForm.confirmPassword) {
+      toast.error(t('passwordFieldsRequired'))
+      return
+    }
+    if (passwordForm.newPassword.length < 8) {
+      toast.error(t('passwordTooShort'))
+      return
+    }
+    if (passwordForm.newPassword !== passwordForm.confirmPassword) {
+      toast.error(t('passwordMismatch'))
+      return
+    }
+
+    try {
+      setIsChangingPassword(true)
+      await authAPI.changePassword({
+        currentPassword: passwordForm.currentPassword,
+        newPassword: passwordForm.newPassword,
+      })
+      toast.success(t('passwordChangeSuccess'))
+      setPasswordForm({ currentPassword: "", newPassword: "", confirmPassword: "" })
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : ""
+      toast.error(message || t('passwordChangeError'))
+    } finally {
+      setIsChangingPassword(false)
     }
   }
 
@@ -461,6 +497,66 @@ export default function MyProfile() {
           </CardContent>
         </Card>
       </div>
+      <Card>
+        <CardHeader>
+          <CardTitle>{t('changePasswordTitle')}</CardTitle>
+          <CardDescription>
+            {t('changePasswordDesc')}
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="grid gap-4 md:grid-cols-3">
+            <div className="grid gap-2">
+              <Label htmlFor="currentPassword">{t('labelCurrentPassword')}</Label>
+              <div className="flex items-center gap-2">
+                <IconLock className="size-4 text-muted-foreground" />
+                <Input
+                  id="currentPassword"
+                  type="password"
+                  value={passwordForm.currentPassword}
+                  onChange={(e) => setPasswordForm({ ...passwordForm, currentPassword: e.target.value })}
+                  disabled={isChangingPassword}
+                  autoComplete="current-password"
+                />
+              </div>
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="newPassword">{t('labelNewPassword')}</Label>
+              <div className="flex items-center gap-2">
+                <IconLock className="size-4 text-muted-foreground" />
+                <Input
+                  id="newPassword"
+                  type="password"
+                  value={passwordForm.newPassword}
+                  onChange={(e) => setPasswordForm({ ...passwordForm, newPassword: e.target.value })}
+                  disabled={isChangingPassword}
+                  autoComplete="new-password"
+                />
+              </div>
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="confirmPassword">{t('labelConfirmPassword')}</Label>
+              <div className="flex items-center gap-2">
+                <IconLock className="size-4 text-muted-foreground" />
+                <Input
+                  id="confirmPassword"
+                  type="password"
+                  value={passwordForm.confirmPassword}
+                  onChange={(e) => setPasswordForm({ ...passwordForm, confirmPassword: e.target.value })}
+                  disabled={isChangingPassword}
+                  autoComplete="new-password"
+                />
+              </div>
+            </div>
+          </div>
+          <div className="flex justify-end">
+            <Button onClick={handleChangePassword} disabled={isChangingPassword}>
+              {isChangingPassword ? t('changingPassword') : t('changePasswordBtn')}
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+
       <Card>
         <CardHeader>
           <CardTitle>{t('supervisorTitle')}</CardTitle>

@@ -113,4 +113,15 @@ export const authAPI = {
       throw error;
     }
   },
+
+  changePassword: async (data: { currentPassword: string; newPassword: string }) => {
+    try {
+      const response = await api.post('/auth/change-password', data);
+      return response.data;
+    } catch (error: unknown) {
+      const isAxios = axios.isAxiosError(error);
+      const responseData = isAxios ? (error.response?.data as { error?: string } | undefined) : undefined;
+      throw new Error(responseData?.error || (error instanceof Error ? error.message : 'Failed to change password.'));
+    }
+  },
 };
