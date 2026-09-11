@@ -40,6 +40,8 @@ interface WysiwygEditorProps {
 export interface WysiwygEditorHandle {
   /** Inserts plain text at the current cursor position (or replaces the selection). */
   insertText: (text: string) => void
+  /** Inserts `text` as a clickable link pointing at `url`, at the current cursor position. */
+  insertLink: (url: string, text: string) => void
 }
 
 export const WysiwygEditor = forwardRef<WysiwygEditorHandle, WysiwygEditorProps>(function WysiwygEditor({
@@ -92,6 +94,13 @@ export const WysiwygEditor = forwardRef<WysiwygEditorHandle, WysiwygEditorProps>
   useImperativeHandle(ref, () => ({
     insertText: (text: string) => {
       editor?.chain().focus().insertContent(text).run()
+    },
+    insertLink: (url: string, text: string) => {
+      // Escape so a URL/text containing HTML-sensitive characters (e.g. a
+      // placeholder key with no special chars today, but defensively) can't
+      // break out of the inserted markup.
+      const escape = (s: string) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')
+      editor?.chain().focus().insertContent(`<a href="${escape(url)}">${escape(text)}</a>`).run()
     },
   }), [editor])
 

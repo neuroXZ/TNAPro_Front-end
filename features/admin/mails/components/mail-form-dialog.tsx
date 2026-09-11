@@ -35,6 +35,13 @@ interface MailFormData {
   isActive?: boolean
 }
 
+// A placeholder whose key ends in .url/.link (e.g. {{app.url}},
+// {{reset.link}}) is meant to be clicked, not read - inserting it as plain
+// text into the body is the exact mistake that made Felcra's announcement
+// link unclickable (see Mail.service.ts's variable descriptions for which
+// keys these are).
+const isUrlPlaceholder = (key: string): boolean => /\.(url|link)\}\}$/i.test(key)
+
 interface MailFormDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
@@ -129,6 +136,11 @@ export function MailFormDialog({
         const cursor = start + key.length
         input.setSelectionRange(cursor, cursor)
       })
+    } else if (isUrlPlaceholder(key)) {
+      // Insert as an actual <a href> so recipients get a clickable link
+      // instead of raw placeholder text that only some email clients
+      // auto-linkify.
+      bodyEditorRef.current?.insertLink(key, key)
     } else {
       bodyEditorRef.current?.insertText(key)
     }
@@ -184,6 +196,27 @@ export function MailFormDialog({
         `Supported placeholders for this mail type: ${variables.map((v) => v.key).join(', ') || '(none)'}.`
       )
       return
+    }
+
+    // A URL-type placeholder (ends in .url/.link) that isn't inside an
+    // href= attribute anywhere in the body will render as plain text in
+    // the sent email - only some email clients auto-linkify a bare-looking
+    // URL, which is exactly the bug a Felcra staff member hit. The
+    // placeholder picker now inserts these as real links automatically,
+    // but this still catches a manually-typed/pasted body that bypassed it.
+    const usedUrlPlaceholders = Array.from(usedPlaceholders).filter(isUrlPlaceholder)
+    const notClickable = usedUrlPlaceholders.filter((p) => {
+      const bareKey = p.replace(/[{}]/g, '').replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+      const hrefPattern = new RegExp(`href\\s*=\\s*["']\\s*\\{\\{\\s*${bareKey}\\s*\\}\\}`, 'i')
+      return !hrefPattern.test(formData.body)
+    })
+    if (notClickable.length > 0) {
+      const proceed = confirm(
+        `The placeholder(s) ${notClickable.join(', ')} look like a link but aren't wrapped in a clickable link in the body - recipients may just see plain, unclickable text.\n\n` +
+        `Select the placeholder in the body and use the editor's link button to fix this, or re-insert it from the placeholder list above (it's added as a link automatically).\n\n` +
+        `Save anyway?`
+      )
+      if (!proceed) return
     }
 
     setIsSaving(true)
