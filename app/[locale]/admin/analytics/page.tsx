@@ -48,6 +48,11 @@ import {
   IconTrendingUp,
   IconCalendar,
   IconBook,
+  IconFileAnalytics,
+  IconUsersGroup,
+  IconBuildingCommunity,
+  IconClipboardCheck,
+  IconDownload,
 } from "@tabler/icons-react";
 import { useTranslations } from "next-intl";
 
@@ -566,6 +571,27 @@ export default function AdminAnalytics() {
         </div>
       </section>
 
+      {/* Executive Summary — flagship one-page report, promoted above everything else */}
+      <Card className="overflow-hidden rounded-3xl border-indigo-100/80 bg-linear-to-br from-indigo-50 to-sky-50 dark:border-indigo-900/40 dark:from-indigo-950/30 dark:to-sky-950/30 shadow-sm">
+        <CardContent className="flex flex-col gap-4 p-6 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex items-center gap-4">
+            <div className="rounded-2xl bg-indigo-100 dark:bg-indigo-500/20 p-3 text-indigo-700 dark:text-indigo-300">
+              <IconFileAnalytics className="h-7 w-7" />
+            </div>
+            <div>
+              <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-50">{t('executiveSummaryTitle')}</h3>
+              <p className="text-sm text-muted-foreground max-w-lg">{t('executiveSummaryDesc')}</p>
+            </div>
+          </div>
+          <Link href="/admin/analytics/executive-summary">
+            <Button size="lg" className="gap-2 rounded-full px-6">
+              <IconDownload className="h-5 w-5" />
+              {t('executiveSummaryCta')}
+            </Button>
+          </Link>
+        </CardContent>
+      </Card>
+
       {error && (
         <Alert variant="destructive">
           <IconAlertTriangle className="h-4 w-4" />
@@ -986,6 +1012,62 @@ export default function AdminAnalytics() {
             </CardFooter>
           </Card>
 
+          {/* Additional composite reports */}
+          <div className="grid gap-4 md:grid-cols-3">
+            <Card className="rounded-3xl border-white/60 dark:border-white/10 bg-white/90 dark:bg-slate-900/60 shadow-sm backdrop-blur">
+              <CardHeader>
+                <div className="mb-2 inline-flex rounded-2xl bg-rose-100 dark:bg-rose-500/20 p-2 text-rose-700 dark:text-rose-300">
+                  <IconUsersGroup className="h-5 w-5" />
+                </div>
+                <CardTitle className="text-base">{t('cgaOverallTitle')}</CardTitle>
+                <CardDescription className="text-sm">{t('cgaOverallDesc')}</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <Link href="/admin/analytics/cga-overall">
+                  <Button variant="outline" size="sm" className="rounded-full px-5 w-full">
+                    <IconChartBar className="mr-2 h-4 w-4" />
+                    {t('viewDetail')}
+                  </Button>
+                </Link>
+              </CardContent>
+            </Card>
+
+            <Card className="rounded-3xl border-white/60 dark:border-white/10 bg-white/90 dark:bg-slate-900/60 shadow-sm backdrop-blur">
+              <CardHeader>
+                <div className="mb-2 inline-flex rounded-2xl bg-teal-100 dark:bg-teal-500/20 p-2 text-teal-700 dark:text-teal-300">
+                  <IconBuildingCommunity className="h-5 w-5" />
+                </div>
+                <CardTitle className="text-base">{t('unitCompetencyReportTitle')}</CardTitle>
+                <CardDescription className="text-sm">{t('unitCompetencyReportDesc')}</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <Link href="/admin/analytics/unit-competency-report">
+                  <Button variant="outline" size="sm" className="rounded-full px-5 w-full">
+                    <IconChartBar className="mr-2 h-4 w-4" />
+                    {t('viewDetail')}
+                  </Button>
+                </Link>
+              </CardContent>
+            </Card>
+
+            <Card className="rounded-3xl border-white/60 dark:border-white/10 bg-white/90 dark:bg-slate-900/60 shadow-sm backdrop-blur">
+              <CardHeader>
+                <div className="mb-2 inline-flex rounded-2xl bg-cyan-100 dark:bg-cyan-500/20 p-2 text-cyan-700 dark:text-cyan-300">
+                  <IconClipboardCheck className="h-5 w-5" />
+                </div>
+                <CardTitle className="text-base">{t('submissionTrackingTitle')}</CardTitle>
+                <CardDescription className="text-sm">{t('submissionTrackingDesc')}</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <Link href="/admin/analytics/submission-tracking">
+                  <Button variant="outline" size="sm" className="rounded-full px-5 w-full">
+                    <IconChartBar className="mr-2 h-4 w-4" />
+                    {t('viewDetail')}
+                  </Button>
+                </Link>
+              </CardContent>
+            </Card>
+          </div>
 
         </>
       )}

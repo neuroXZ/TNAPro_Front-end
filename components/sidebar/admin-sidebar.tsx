@@ -103,6 +103,7 @@ export function AdminSidebar({ ...props }: React.ComponentProps<typeof Sidebar>)
       url: "#",
       icon: IconChartBar,
       items: [
+        { title: t('executiveSummary'), url: "/admin/analytics/executive-summary" },
         { title: t('idp'), url: "/admin/idp" },
         { title: t('reportAnalytics'), url: "/admin/analytics" },
         { title: t('competencyGapByGrade'), url: "/admin/analytics/competency-gap-by-grade" },

@@ -152,6 +152,85 @@ export const comparisonAPI = {
   compareByOrganisation: async (params: { assessmentId1: string; assessmentId2: string }) => {
     return cachedGet('/comparison/organisation', params, 0);
   },
+
+  exportStaffCsv: async (params: { staffId: string; assessmentId1: string; assessmentId2: string }) => {
+    return api.get(`/comparison/staff/export-csv?${new URLSearchParams(params).toString()}`, { responseType: 'blob' });
+  },
+
+  exportStaffPdf: async (params: { staffId: string; assessmentId1: string; assessmentId2: string }) => {
+    return api.get(`/comparison/staff/export-pdf?${new URLSearchParams(params).toString()}`, { responseType: 'blob' });
+  },
+
+  exportUnitCsv: async (params: { unitId: string; assessmentId1: string; assessmentId2: string }) => {
+    return api.get(`/comparison/unit/export-csv?${new URLSearchParams(params).toString()}`, { responseType: 'blob' });
+  },
+
+  exportUnitPdf: async (params: { unitId: string; assessmentId1: string; assessmentId2: string }) => {
+    return api.get(`/comparison/unit/export-pdf?${new URLSearchParams(params).toString()}`, { responseType: 'blob' });
+  },
+
+  exportOrganisationCsv: async (params: { assessmentId1: string; assessmentId2: string }) => {
+    return api.get(`/comparison/organisation/export-csv?${new URLSearchParams(params).toString()}`, { responseType: 'blob' });
+  },
+
+  exportOrganisationPdf: async (params: { assessmentId1: string; assessmentId2: string }) => {
+    return api.get(`/comparison/organisation/export-pdf?${new URLSearchParams(params).toString()}`, { responseType: 'blob' });
+  },
+};
+
+// CGA Overall API (composite gap report for a group of staff — unit/category/grade filters)
+export interface CgaOverallFilter {
+  assessmentId: string;
+  unitId?: string;
+  includeSubUnits?: boolean;
+  categoryId?: string;
+  gradeId?: string;
+}
+
+export const cgaOverallAPI = {
+  getReport: async (filter: CgaOverallFilter) => {
+    const response = await api.post('/cga/overall/report', filter);
+    return response.data;
+  },
+
+  exportCsv: async (filter: CgaOverallFilter) => {
+    return api.post('/cga/overall/export/csv', filter, { responseType: 'blob' });
+  },
+};
+
+// Unit Competency Report API
+export const unitCompetencyReportAPI = {
+  getReport: async (params: { unitId: string; assessmentId: string; clusterId?: string }) => {
+    const response = await api.get('/unitcompetencyreport', { params });
+    return response.data.data;
+  },
+
+  exportCsv: async (params: { unitId: string; assessmentId: string; clusterId?: string }) => {
+    return api.get('/unitcompetencyreport/export', { params, responseType: 'blob' });
+  },
+};
+
+// Submission Tracking API
+export const submissionAPI = {
+  getReport: async (assessmentId: string) => {
+    const response = await api.get('/submission', { params: { assessmentId } });
+    return response.data.data;
+  },
+
+  exportCsv: async (assessmentId: string) => {
+    return api.get('/submission/export', { params: { assessmentId }, responseType: 'blob' });
+  },
+};
+
+// Executive Summary API (flagship one-page report)
+export const executiveSummaryAPI = {
+  getSummary: async (assessmentId: string) => {
+    return cachedGet('/executivesummary/summary', { assessmentId }, 0);
+  },
+
+  exportPdf: async (assessmentId: string) => {
+    return api.get('/executivesummary/export-pdf', { params: { assessmentId }, responseType: 'blob' });
+  },
 };
 
 // Training Demand API

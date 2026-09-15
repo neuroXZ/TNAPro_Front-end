@@ -36,6 +36,7 @@ import {
   IconArrowDown,
   IconMinus,
   IconSparkles,
+  IconDownload,
 } from "@tabler/icons-react";
 import { useTranslations } from "next-intl";
 
@@ -119,6 +120,37 @@ export default function StaffComparisonPage() {
   }, []);
 
   const canCompare = selectedStaff && assessment1 && assessment2 && assessment1 !== assessment2;
+
+  const downloadBlob = (blob: Blob, fileName: string) => {
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.setAttribute("download", fileName);
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    window.URL.revokeObjectURL(url);
+  };
+
+  const handleExportCsv = async () => {
+    if (!canCompare) return;
+    try {
+      const response = await comparisonAPI.exportStaffCsv({ staffId: selectedStaff, assessmentId1: assessment1, assessmentId2: assessment2 });
+      downloadBlob(response.data, `Comparison_Staff_${selectedStaff}_${new Date().toISOString().slice(0, 10)}.csv`);
+    } catch (err) {
+      console.error("CSV export error:", err);
+    }
+  };
+
+  const handleExportPdf = async () => {
+    if (!canCompare) return;
+    try {
+      const response = await comparisonAPI.exportStaffPdf({ staffId: selectedStaff, assessmentId1: assessment1, assessmentId2: assessment2 });
+      downloadBlob(response.data, `Comparison_Staff_${selectedStaff}_${new Date().toISOString().slice(0, 10)}.pdf`);
+    } catch (err) {
+      console.error("PDF export error:", err);
+    }
+  };
 
   const handleCompare = async () => {
     if (!canCompare) return;
@@ -261,8 +293,20 @@ export default function StaffComparisonPage() {
           <Card>
             <CardHeader className="pb-3">
               <CardTitle className="text-base">{t("competencyTableTitle")}</CardTitle>
-              <CardDescription>
-                {t('comparisonSubtitle', { name1: result.assessment1.name || result.assessment1.id, name2: result.assessment2.name || result.assessment2.id })}
+              <CardDescription className="flex items-center justify-between gap-4">
+                <span>
+                  {t('comparisonSubtitle', { name1: result.assessment1.name || result.assessment1.id, name2: result.assessment2.name || result.assessment2.id })}
+                </span>
+                <div className="flex gap-2 shrink-0">
+                  <Button variant="outline" size="sm" onClick={handleExportCsv}>
+                    <IconDownload className="size-4 mr-2" />
+                    {t('exportCsv')}
+                  </Button>
+                  <Button variant="outline" size="sm" onClick={handleExportPdf}>
+                    <IconDownload className="size-4 mr-2" />
+                    {t('exportPdf')}
+                  </Button>
+                </div>
               </CardDescription>
             </CardHeader>
             <CardContent className="p-0">

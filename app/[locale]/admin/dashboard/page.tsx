@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react"
 import { useTranslations } from "next-intl"
+import Link from "next/link"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { 
@@ -430,9 +431,9 @@ export default function AdminDashboard() {
             <button className="w-full text-left p-2 rounded hover:bg-muted text-sm">
               {t('importStaff')}
             </button>
-            <button className="w-full text-left p-2 rounded hover:bg-muted text-sm">
+            <Link href="/admin/analytics/executive-summary" className="block w-full text-left p-2 rounded hover:bg-muted text-sm">
               {t('generateReports')}
-            </button>
+            </Link>
             <button className="w-full text-left p-2 rounded hover:bg-muted text-sm">
               {t('systemSettings')}
             </button>
