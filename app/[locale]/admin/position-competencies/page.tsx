@@ -56,15 +56,24 @@ export default function PositionCompetencyManagementPage() {
         positionCompetencyAPI.getAll(),
       ])
       
-      // Add count to positions
-      const positionsWithCount = positionsData.map((position: any) => ({
-        ...position,
-        _count: {
-          positionCompetencies: positionCompetenciesData.filter(
-            (pc: any) => pc.positionId === position.id
-          ).length,
-        },
-      }))
+      // Distinct competencies mapped to this position across every scope
+      // (Global + any unit) — not a raw row count, so a competency mapped at
+      // both Global and a unit only counts once, and this stays in sync with
+      // the detail page's "All Scopes" total. Orphaned rows (competencyId
+      // null, pointing at a deleted competency) are excluded, matching how
+      // the detail page treats them separately rather than inflating this.
+      const positionsWithCount = positionsData.map((position: any) => {
+        const rowsForPosition = positionCompetenciesData.filter(
+          (pc: any) => pc.positionId === position.id && pc.competencyId
+        )
+        const distinctCompetencyIds = new Set(rowsForPosition.map((pc: any) => pc.competencyId))
+        return {
+          ...position,
+          _count: {
+            positionCompetencies: distinctCompetencyIds.size,
+          },
+        }
+      })
       
       setPositions(positionsWithCount)
       setPositionCompetencies(positionCompetenciesData)

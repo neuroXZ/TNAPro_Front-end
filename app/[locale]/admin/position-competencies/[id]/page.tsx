@@ -83,6 +83,13 @@ interface GroupedCompetencies {
   }
 }
 
+// Sentinel for the unit-scope selector's "All Scopes" option — an aggregate,
+// read-only view across Global + every unit, matching the raw count the
+// listing page shows. Never sent to the API as a real unitId (Add/bulk-add
+// are disabled while this is selected — a new mapping needs one concrete
+// target scope, either Global or a specific unit).
+const ALL_SCOPES = "__all__"
+
 export default function PositionCompetencyDetailPage() {
   const t = useTranslations('AdminPositionCompetenciesDetailPage')
   const params = useParams()
@@ -129,6 +136,11 @@ export default function PositionCompetencyDetailPage() {
       // Scope selector just shows no options - non-fatal, matches how
       // unit-form-dialog.tsx treats a failed negeriAPI.getAll().
     })
+    // Default to the aggregate view once we know unit scoping is in play,
+    // so the count here matches the listing page's raw total instead of
+    // silently only showing Global. Guarded so it only applies the untouched
+    // initial value, never overriding a scope the admin already picked.
+    setSelectedUnitId((current) => (current === null ? ALL_SCOPES : current))
   }, [featureFlags.unitScopedCompetency])
 
   // Set initial active tab after data loads
@@ -149,7 +161,9 @@ export default function PositionCompetencyDetailPage() {
       const [positionData, competenciesData, positionCompetenciesData] = await Promise.all([
         positionAPI.getById(positionId),
         competencyAPI.getAll(),
-        positionCompetencyAPI.getByPositionAndUnit(positionId, selectedUnitId),
+        selectedUnitId === ALL_SCOPES
+          ? positionCompetencyAPI.getByPosition(positionId)
+          : positionCompetencyAPI.getByPositionAndUnit(positionId, selectedUnitId),
       ])
       setPosition(positionData)
       setAllCompetencies(competenciesData)
@@ -175,9 +189,16 @@ export default function PositionCompetencyDetailPage() {
         }
       }
 
-      const positionComp = positionCompetencies.find(
+      // In "All Scopes" mode more than one row can match the same
+      // competency (Global + one or more units) — prefer the unit-scoped
+      // one, matching how the effective-mapping resolver treats a unit
+      // override as taking precedence over the org-wide default. Outside
+      // "All Scopes" the fetch already only contains the one selected
+      // scope's rows, so this is equivalent to the old exact-match find.
+      const matches = positionCompetencies.filter(
         (pc) => pc.competencyId === competency.id
       )
+      const positionComp = matches.find((pc) => pc.unitId) || matches[0]
 
       // Filter by search query
       const matchesSearch = !searchQuery || 
@@ -202,6 +223,10 @@ export default function PositionCompetencyDetailPage() {
   }
 
   const handleAdd = (competency: Competency) => {
+    if (selectedUnitId === ALL_SCOPES) {
+      toast.error(t('selectScopeToAddError'))
+      return
+    }
     setSelectedCompetency(competency)
     setSelectedPositionCompetency(null)
     setEditMode(false)
@@ -327,6 +352,10 @@ export default function PositionCompetencyDetailPage() {
       toast.error(t('noCompetenciesSelected'))
       return
     }
+    if (selectedUnitId === ALL_SCOPES) {
+      toast.error(t('selectScopeToAddError'))
+      return
+    }
 
     setIsBulkLevelDialogOpen(true)
   }
@@ -363,7 +392,12 @@ export default function PositionCompetencyDetailPage() {
   // instead of letting it inflate the "assigned" count silently.
   const orphanedPositionCompetencies = positionCompetencies.filter((pc) => !pc.competencyId)
   const orphanedPositionCompetencyCount = orphanedPositionCompetencies.length
-  const validPositionCompetencyCount = positionCompetencies.length - orphanedPositionCompetencyCount
+  // Distinct competencies, not raw rows — matches the listing page's count
+  // (also deduped by competencyId) even in "All Scopes" mode, where the same
+  // competency could in principle have both a Global and a unit-scoped row.
+  const validPositionCompetencyCount = new Set(
+    positionCompetencies.filter((pc) => pc.competencyId).map((pc) => pc.competencyId)
+  ).size
 
   const handleRemoveOrphaned = async () => {
     if (orphanedPositionCompetencies.length === 0) return
@@ -436,7 +470,9 @@ export default function PositionCompetencyDetailPage() {
                   >
                     <span className="flex items-center gap-2 truncate">
                       <IconBuilding className="size-4 shrink-0 opacity-50" />
-                      {selectedUnitId
+                      {selectedUnitId === ALL_SCOPES
+                        ? t('unitScopeAll')
+                        : selectedUnitId
                         ? units.find((u) => u.id === selectedUnitId)?.name ?? t('unitScopeGlobal')
                         : t('unitScopeGlobal')}
                     </span>
@@ -448,6 +484,16 @@ export default function PositionCompetencyDetailPage() {
                     <CommandList className="max-h-[260px] overflow-y-auto">
                       <CommandEmpty>{t('unitScopeEmptyText')}</CommandEmpty>
                       <CommandGroup>
+                        <CommandItem
+                          key="all"
+                          value={t('unitScopeAll')}
+                          onSelect={() => {
+                            setSelectedUnitId(ALL_SCOPES)
+                            setUnitScopePopoverOpen(false)
+                          }}
+                        >
+                          {t('unitScopeAll')}
+                        </CommandItem>
                         <CommandItem
                           key="global"
                           value={t('unitScopeGlobal')}
@@ -477,7 +523,7 @@ export default function PositionCompetencyDetailPage() {
               </Popover>
             </div>
             <p className="max-w-[260px] text-right text-xs text-muted-foreground">
-              {t('unitScopeHelperText')}
+              {selectedUnitId === ALL_SCOPES ? t('unitScopeAllHelperText') : t('unitScopeHelperText')}
             </p>
           </div>
         )}
@@ -563,7 +609,8 @@ export default function PositionCompetencyDetailPage() {
                         variant="default"
                         size="sm"
                         onClick={handleBulkAdd}
-                        disabled={isBulkAdding}
+                        disabled={isBulkAdding || selectedUnitId === ALL_SCOPES}
+                        title={selectedUnitId === ALL_SCOPES ? t('selectScopeToAddTooltip') : undefined}
                       >
                         <IconPlus className="mr-2 size-4" />
                         {t('addSelected', { count: selectedCompetencyIds.length })}
@@ -643,7 +690,16 @@ export default function PositionCompetencyDetailPage() {
                           <Badge variant="outline">{t('badgeNotAdded')}</Badge>
                         )}
                         <div>
-                          <p className="font-medium">{competency.name}</p>
+                          <div className="flex items-center gap-2">
+                            <p className="font-medium">{competency.name}</p>
+                            {selectedUnitId === ALL_SCOPES && positionCompetency && (
+                              <Badge variant="outline" className="text-xs">
+                                {positionCompetency.unitId
+                                  ? positionCompetency.unit?.name ?? t('unitScopeGlobal')
+                                  : t('unitScopeBadgeGlobal')}
+                              </Badge>
+                            )}
+                          </div>
                           {positionCompetency && (
                             <p className="text-sm text-muted-foreground">
                               {t('requiredLevel', { level: positionCompetency.level })}
@@ -674,6 +730,8 @@ export default function PositionCompetencyDetailPage() {
                             variant="outline"
                             size="sm"
                             onClick={() => handleAdd(competency)}
+                            disabled={selectedUnitId === ALL_SCOPES}
+                            title={selectedUnitId === ALL_SCOPES ? t('selectScopeToAddTooltip') : undefined}
                           >
                             <IconPlus className="mr-2 size-4" />
                             {t('actionAdd')}

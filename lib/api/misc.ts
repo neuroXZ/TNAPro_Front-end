@@ -44,3 +44,28 @@ export const importAPI = {
     return response.data;
   },
 };
+
+// Bulk "Master Import": one multi-sheet .xlsx template covering every entity
+// (units, staff, positions, competencies, mappings, ...), imported together
+// in a single all-or-nothing transaction — see backend's MasterImport.orchestrator.
+export const masterImportAPI = {
+  downloadTemplate: async () => {
+    const response = await api.get('/import/master/template', {
+      responseType: 'blob',
+    });
+    return response.data;
+  },
+
+  import: async (file: File) => {
+    const formData = new FormData();
+    formData.append('file', file);
+
+    const response = await api.post('/import/master', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+    invalidateApiCache();
+    return response.data;
+  },
+};

@@ -84,7 +84,8 @@
     "trainingDemand": "Keperluan Latihan",
     "comparisons": "Perbandingan",
     "system": "Sistem",
-    "auditLog": "Log Audit"
+    "auditLog": "Log Audit",
+    "masterImport": "Import Data Induk"
   },
   "AdminAssessorOrgChartPage": {
     "title": "Carta Organisasi",
@@ -872,12 +873,16 @@
     "removeDeletedMappingSingle": "Buang pemetaan yang dipadam",
     "removeDeletedMappingMultiple": "Buang pemetaan yang dipadam",
     "unitScopeLabel": "Skop",
+    "unitScopeAll": "Semua Skop",
     "unitScopeGlobal": "Global (semua organisasi)",
     "unitScopePlaceholder": "Pilih unit...",
     "unitScopeSearchPlaceholder": "Cari unit...",
     "unitScopeEmptyText": "Tiada unit dijumpai.",
     "unitScopeBadgeGlobal": "Global",
-    "unitScopeHelperText": "Pemetaan yang ditambah atau dilihat di sini hanya terpakai dalam unit yang dipilih dan sub-unitnya."
+    "unitScopeHelperText": "Pemetaan yang ditambah atau dilihat di sini hanya terpakai dalam unit yang dipilih dan sub-unitnya.",
+    "unitScopeAllHelperText": "Menunjukkan semua pemetaan merentasi Global dan setiap unit, sepadan dengan jumlah di halaman senarai. Tukar ke Global atau unit tertentu untuk tambah pemetaan baharu.",
+    "selectScopeToAddError": "Pilih Global atau unit tertentu di atas sebelum menambah pemetaan baharu — \"Semua Skop\" adalah paparan gabungan baca-sahaja.",
+    "selectScopeToAddTooltip": "Tukar ke Global atau unit tertentu untuk menambah pemetaan baharu"
   },
   "AdminTrainingCompetenciesPage": {
     "entityNameSingular": "latihan",
@@ -1114,14 +1119,33 @@
     "idpTitle": "Pelan Pembangunan Kompetensi (PPK)",
     "idpDesc": "Lihat metrik utama dan aktiviti projek terkini anda. Jejak kemajuan merentasi semua projek aktif anda.",
     "dataManagementTitle": "Pengurusan Data",
-    "dataManagementDesc": "Jejak prestasi dan metrik penglibatan pengguna. Pantau arah aliran dan kenal pasti peluang pertumbuhan.",
-    "dataManagementContent": "Paparan halaman meningkat 25% berbanding bulan lepas.",
+    "dataManagementDesc": "Import data induk klien secara pukal — unit, staf, jawatan, kompetensi dan pemetaannya — dalam satu fail, tanpa perlu tambah satu-satu.",
     "reportsTitle": "Laporan",
     "reportsDesc": "Jana dan muat turun laporan terperinci anda. Eksport data dalam pelbagai format untuk analisis.",
     "reportsContent": "Anda mempunyai 5 laporan yang sedia untuk dieksport.",
     "settingsTitle": "Tetapan",
     "settingsDesc": "Urus keutamaan dan pilihan akaun anda. Sesuaikan pengalaman anda mengikut keperluan.",
     "settingsContent": "Konfigurasi pemberitahuan, keselamatan, dan tema."
+  },
+  "AdminMasterImport": {
+    "flowDescription": "Import keseluruhan data induk klien sekali gus — satu fail merangkumi semua unit, staf, jawatan, kompetensi dan pemetaannya.",
+    "flowStep1": "Muat turun templat di bawah.",
+    "flowStep2": "Isi setiap helaian dengan data organisasi anda, bermula dari baris 3 (baris 1 ialah tajuk lajur, baris 2 ialah arahan — kekalkan kedua-duanya).",
+    "flowStep3": "Muat naik fail yang telah diisi. Semua data diimport bersama — jika mana-mana baris gagal, tiada apa yang disimpan, jadi anda boleh betulkan dan muat naik semula.",
+    "downloadTemplateBtn": "Muat Turun Templat Induk",
+    "uploadImportBtn": "Muat Naik & Import",
+    "downloadTemplateError": "Gagal memuat turun templat import induk",
+    "dialogTitle": "Import Data Induk",
+    "dialogDesc": "Muat naik templat Master Import yang telah diisi (.xlsx). Semua helaian diimport bersama sebagai satu transaksi.",
+    "fieldLabel": "Fail Master Import",
+    "selectedFile": "Dipilih: {name}",
+    "selectXlsxFile": "Sila pilih fail .xlsx",
+    "noFileSelected": "Sila pilih fail untuk diimport",
+    "importSuccessToast": "Master import berjaya — semua data telah dicipta.",
+    "importFailedToast": "Master import gagal dan telah dibatalkan — tiada apa yang disimpan.",
+    "resultsCreatedTitle": "Berjaya dicipta:",
+    "resultsFailedTitle": "Import gagal dan telah dibatalkan — tiada apa yang disimpan.",
+    "resultsFailedDetail": "Helaian \"{entity}\", baris {row}: {message}"
   },
   "AdminSettingsPage": {
     "title": "Tetapan",

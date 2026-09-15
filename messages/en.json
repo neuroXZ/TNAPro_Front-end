@@ -84,7 +84,8 @@
     "trainingDemand": "Training Demand",
     "comparisons": "Comparisons",
     "system": "System",
-    "auditLog": "Audit Log"
+    "auditLog": "Audit Log",
+    "masterImport": "Master Import"
   },
   "AdminAssessorOrgChartPage": {
     "title": "Organization Chart",
@@ -872,12 +873,16 @@
     "removeDeletedMappingSingle": "Remove deleted mapping",
     "removeDeletedMappingMultiple": "Remove deleted mappings",
     "unitScopeLabel": "Scope",
+    "unitScopeAll": "All Scopes",
     "unitScopeGlobal": "Global (org-wide)",
     "unitScopePlaceholder": "Select a unit...",
     "unitScopeSearchPlaceholder": "Search units...",
     "unitScopeEmptyText": "No unit found.",
     "unitScopeBadgeGlobal": "Global",
-    "unitScopeHelperText": "Mappings you add or view here apply only within the selected unit and its sub-units."
+    "unitScopeHelperText": "Mappings you add or view here apply only within the selected unit and its sub-units.",
+    "unitScopeAllHelperText": "Showing every mapping across Global and every unit, matching the count on the listing page. Switch to Global or a specific unit to add new mappings.",
+    "selectScopeToAddError": "Select Global or a specific unit above before adding a new mapping — \"All Scopes\" is a read-only combined view.",
+    "selectScopeToAddTooltip": "Switch to Global or a specific unit to add a new mapping"
   },
   "AdminTrainingCompetenciesPage": {
     "entityNameSingular": "training",
@@ -1114,14 +1119,33 @@
     "idpTitle": "Individual Development Plan (IDP)",
     "idpDesc": "View your key metrics and recent project activity. Track progress across all your active projects.",
     "dataManagementTitle": "Data Management",
-    "dataManagementDesc": "Track performance and user engagement metrics. Monitor trends and identify growth opportunities.",
-    "dataManagementContent": "Page views are up 25% compared to last month.",
+    "dataManagementDesc": "Bulk-import a client's master data — units, staff, positions, competencies and their mappings — in one file instead of adding each one by one.",
     "reportsTitle": "Reports",
     "reportsDesc": "Generate and download your detailed reports. Export data in multiple formats for analysis.",
     "reportsContent": "You have 5 reports ready and available to export.",
     "settingsTitle": "Settings",
     "settingsDesc": "Manage your account preferences and options. Customize your experience to fit your needs.",
     "settingsContent": "Configure notifications, security, and themes."
+  },
+  "AdminMasterImport": {
+    "flowDescription": "Import a whole client's master data in one go — one file covering every unit, staff member, position, competency and their mappings.",
+    "flowStep1": "Download the template below.",
+    "flowStep2": "Fill in each sheet with your organisation's data, starting from row 3 (row 1 is the column headers, row 2 is instructions — leave both as-is).",
+    "flowStep3": "Upload the filled-in file. Everything is imported together — if any row fails, nothing is saved, so you can fix it and re-upload.",
+    "downloadTemplateBtn": "Download Master Template",
+    "uploadImportBtn": "Upload & Import",
+    "downloadTemplateError": "Failed to download the master import template",
+    "dialogTitle": "Import Master Data",
+    "dialogDesc": "Upload the filled-in Master Import template (.xlsx). All sheets are imported together as one transaction.",
+    "fieldLabel": "Master Import File",
+    "selectedFile": "Selected: {name}",
+    "selectXlsxFile": "Please select an .xlsx file",
+    "noFileSelected": "Please select a file to import",
+    "importSuccessToast": "Master import successful — all data created.",
+    "importFailedToast": "Master import failed and was rolled back — nothing was saved.",
+    "resultsCreatedTitle": "Created:",
+    "resultsFailedTitle": "Import failed and was rolled back — nothing was saved.",
+    "resultsFailedDetail": "Sheet \"{entity}\", row {row}: {message}"
   },
   "AdminSettingsPage": {
     "title": "Settings",

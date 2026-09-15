@@ -1,6 +1,7 @@
 ﻿"use client";
 
-import React from 'react'
+import React, { Suspense } from 'react'
+import { useSearchParams } from "next/navigation"
 import {
   Card,
   CardContent,
@@ -15,13 +16,19 @@ import {
   TabsTrigger,
 } from "@/components/ui/tabs"
 import AdminIdpDownloadPage from "@/features/admin/download/components/idpdownload"
+import AdminMasterImportDownloadPage from "@/features/admin/download/components/masterimportdownload"
 import { useTranslations } from "next-intl"
 
+const VALID_TABS = ["idp", "dataManagement", "reports", "settings"]
 
-const page = () => {
+function DownloadPageContent() {
   const t = useTranslations('AdminDownloadPage');
+  const searchParams = useSearchParams()
+  const requestedTab = searchParams.get("tab")
+  const defaultTab = VALID_TABS.includes(requestedTab || "") ? requestedTab! : "idp"
+
   return (
-    <Tabs defaultValue="idp" className="w-full">
+    <Tabs defaultValue={defaultTab} className="w-full">
       <TabsList>
         <TabsTrigger value="idp">{t('tabIdp')}</TabsTrigger>
         <TabsTrigger value="dataManagement">{t('tabDataManagement')}</TabsTrigger>
@@ -50,7 +57,7 @@ const page = () => {
             </CardDescription>
           </CardHeader>
           <CardContent className="text-muted-foreground text-sm">
-            {t('dataManagementContent')}
+            <AdminMasterImportDownloadPage />
           </CardContent>
         </Card>
       </TabsContent>
@@ -84,4 +91,10 @@ const page = () => {
   )
 }
 
-export default page
+export default function DownloadPage() {
+  return (
+    <Suspense fallback={null}>
+      <DownloadPageContent />
+    </Suspense>
+  )
+}
