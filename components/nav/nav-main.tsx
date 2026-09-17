@@ -2,8 +2,9 @@
 
 import { IconCirclePlusFilled, IconMessages, IconChevronRight, IconBooks, type Icon } from "@tabler/icons-react"
 import Link from "next/link"
-import { usePathname, useRouter } from "next/navigation"
-import { useEffect, useMemo, useState } from "react"
+import { useRouter } from "next/navigation"
+import { usePathname } from "@/navigation"
+import { useEffect, useState } from "react"
 import { useTranslations } from "next-intl"
 
 import { Button } from "@/components/ui/button"
@@ -40,10 +41,7 @@ export function NavMain({
   const router = useRouter()
   const [userRole, setUserRole] = useState<string | null>(null)
 
-  const normalizedPath = useMemo(() => {
-    if (!pathname) return ""
-    return pathname.replace(/^\/(en|ms)(?=\/|$)/, "")
-  }, [pathname])
+  const normalizedPath = pathname || ""
 
   const isRouteActive = (url: string) => {
     if (!url || url === "#") return false
