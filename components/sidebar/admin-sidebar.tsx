@@ -117,6 +117,7 @@ export function AdminSidebar({ ...props }: React.ComponentProps<typeof Sidebar>)
       icon: IconHistory,
       items: [
         { title: t('auditLog'), url: "/admin/audit-log" },
+        { title: t('mailQueue'), url: "/admin/mail-queue" },
         { title: t('masterImport'), url: "/admin/download?tab=dataManagement" },
       ],
     },

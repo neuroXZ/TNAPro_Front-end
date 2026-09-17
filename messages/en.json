@@ -86,6 +86,7 @@
     "comparisons": "Comparisons",
     "system": "System",
     "auditLog": "Audit Log",
+    "mailQueue": "Mail Queue",
     "masterImport": "Master Import"
   },
   "AdminAssessorOrgChartPage": {
@@ -702,7 +703,9 @@
     "notifySendButton": "Send",
     "notifySuccess": "Notification sent to {count} staff.",
     "notifyPartial": "Sent to {sent}, failed for {failed}.",
-    "notifyQuotaExceeded": "Email sending limit reached on the Resend account. The remaining staff below could not be notified because of this, not because of anything wrong with their records - try again later or ask your administrator to raise the account's sending plan.",
+    "notifyQueued": "{count} queued",
+    "notifyQueuedNote": "{count} email(s) are queued and will be sent automatically in the background, at the rate the email provider allows. You do not need to click Send again — re-sending the same announcement today will not email anyone twice.",
+    "notifyQuotaExceeded": "The email account's sending limit for today has been reached. Nothing is lost: the remaining staff stay queued and will be emailed automatically once the limit resets. Ask your administrator to raise the account's sending plan if this needs to go out faster.",
     "notifyError": "Failed to send notification.",
     "detailsTitle": "Staff Details",
     "fieldStaffId": "Staff ID",
@@ -2446,6 +2449,7 @@
     "totalRows": "Total Rows",
     "successful": "Successful",
     "failedCount": "Failed",
+    "queued": "Queued",
     "importErrors": "Import Errors:",
     "notApplicable": "N/A",
     "unknown": "Unknown"

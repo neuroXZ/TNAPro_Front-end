@@ -86,6 +86,7 @@
     "comparisons": "Perbandingan",
     "system": "Sistem",
     "auditLog": "Log Audit",
+    "mailQueue": "Baris Gilir E-mel",
     "masterImport": "Import Data Induk"
   },
   "AdminAssessorOrgChartPage": {
@@ -702,7 +703,9 @@
     "notifySendButton": "Hantar",
     "notifySuccess": "Notifikasi dihantar kepada {count} kakitangan.",
     "notifyPartial": "Berjaya dihantar {sent}, gagal {failed}.",
-    "notifyQuotaExceeded": "Had penghantaran emel akaun Resend telah dicapai. Staf yang tersenarai di bawah gagal dihantar disebabkan ini, bukan disebabkan rekod mereka bermasalah — cuba lagi kemudian atau minta pentadbir menaikkan pelan penghantaran akaun.",
+    "notifyQueued": "{count} dalam baris gilir",
+    "notifyQueuedNote": "{count} e-mel berada dalam baris gilir dan akan dihantar secara automatik di latar belakang, mengikut kadar yang dibenarkan penyedia e-mel. Anda tidak perlu klik Hantar sekali lagi — menghantar semula pengumuman yang sama hari ini tidak akan menghantar e-mel dua kali kepada sesiapa.",
+    "notifyQuotaExceeded": "Had penghantaran e-mel akaun untuk hari ini telah dicapai. Tiada apa yang hilang: kakitangan yang selebihnya kekal dalam baris gilir dan akan dihantar secara automatik selepas had tersebut ditetapkan semula. Minta pentadbir menaikkan pelan penghantaran akaun jika ia perlu keluar dengan lebih cepat.",
     "notifyError": "Gagal menghantar notifikasi.",
     "detailsTitle": "Butiran Kakitangan",
     "fieldStaffId": "ID Kakitangan",
@@ -2446,6 +2449,7 @@
     "totalRows": "Jumlah Baris",
     "successful": "Berjaya",
     "failedCount": "Gagal",
+    "queued": "Baris gilir",
     "importErrors": "Ralat Import:",
     "notApplicable": "T/B",
     "unknown": "Tidak Diketahui"

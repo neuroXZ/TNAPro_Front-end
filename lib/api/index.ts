@@ -14,6 +14,7 @@
 //   settings.ts       - system settings + logo upload
 //   reports.ts        - IDP, CGA, RTN, dashboard, comparisons, training demand
 //   misc.ts           - mail, contact email, bulk import
+//   mailQueue.ts      - bulk-email outbox: batch progress, retry/cancel, drain
 //   developmentStrategy.ts - client-configurable IDP development strategies
 //   auditLog.ts       - read-only audit trail browsing (who changed what, when)
 //   features.ts       - per-deployment feature flags (see hooks/use-feature-flags.ts)
@@ -29,6 +30,7 @@ export * from './assessment';
 export * from './settings';
 export * from './reports';
 export * from './misc';
+export * from './mailQueue';
 export * from './developmentStrategy';
 export * from './auditLog';
 export * from './features';

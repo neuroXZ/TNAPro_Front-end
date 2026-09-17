@@ -12,7 +12,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Alert, AlertDescription } from "@/components/ui/alert"
-import { IconMail, IconAlertCircle, IconCheck } from "@tabler/icons-react"
+import { IconMail, IconAlertCircle, IconCheck, IconClock } from "@tabler/icons-react"
 import { toast } from "sonner"
 import { staffAPI } from "@/lib/api"
 import { useTranslations } from "next-intl"
@@ -27,6 +27,11 @@ interface NotifyResult {
   sent: number
   failed: Array<{ staffId: string; name: string | null; reason: string }>
   quotaExceeded?: boolean
+  // Emails are queued and drained in the background at the rate the mail
+  // provider allows, so on a large blast most recipients come back as
+  // pending rather than sent. Optional so this keeps working against a
+  // backend that predates the mail queue.
+  pending?: number
 }
 
 export function StaffNotifyDialog({
@@ -51,7 +56,14 @@ export function StaffNotifyDialog({
       const response = await staffAPI.sendNotification(staffIds, title.trim(), window.location.origin)
       setResult(response.data)
 
-      if (response.data.failed.length === 0) {
+      const pending = response.data.pending ?? 0
+
+      if (response.data.failed.length === 0 && pending > 0) {
+        // Nothing failed, but the send isn't finished either — keep the
+        // dialog open so the admin reads why, instead of closing on a
+        // "success" that hid several hundred unsent emails.
+        toast.success(t('notifyQueued', { count: pending }))
+      } else if (response.data.failed.length === 0) {
         toast.success(t('notifySuccess', { count: response.data.sent }))
         setTimeout(() => {
           handleClose()
@@ -101,7 +113,7 @@ export function StaffNotifyDialog({
 
           {result && (
             <div className="space-y-3">
-              <div className="grid grid-cols-2 gap-3">
+              <div className={(result.pending ?? 0) > 0 ? "grid grid-cols-3 gap-3" : "grid grid-cols-2 gap-3"}>
                 <div className="rounded-lg border border-green-200 bg-green-50 p-3 text-center">
                   <div className="flex items-center justify-center gap-1 text-2xl font-bold text-green-600">
                     <IconCheck className="size-5" />
@@ -109,6 +121,15 @@ export function StaffNotifyDialog({
                   </div>
                   <div className="text-xs text-green-600">{tc('successful')}</div>
                 </div>
+                {(result.pending ?? 0) > 0 && (
+                  <div className="rounded-lg border border-blue-200 bg-blue-50 p-3 text-center">
+                    <div className="flex items-center justify-center gap-1 text-2xl font-bold text-blue-600">
+                      <IconClock className="size-5" />
+                      {result.pending}
+                    </div>
+                    <div className="text-xs text-blue-600">{tc('queued')}</div>
+                  </div>
+                )}
                 <div className="rounded-lg border border-red-200 bg-red-50 p-3 text-center">
                   <div className="flex items-center justify-center gap-1 text-2xl font-bold text-red-600">
                     <IconAlertCircle className="size-5" />
@@ -117,6 +138,15 @@ export function StaffNotifyDialog({
                   <div className="text-xs text-red-600">{tc('failedCount')}</div>
                 </div>
               </div>
+
+              {(result.pending ?? 0) > 0 && (
+                <Alert>
+                  <IconClock className="size-4" />
+                  <AlertDescription>
+                    {t('notifyQueuedNote', { count: result.pending ?? 0 })}
+                  </AlertDescription>
+                </Alert>
+              )}
 
               {result.quotaExceeded && (
                 <Alert variant="destructive">
