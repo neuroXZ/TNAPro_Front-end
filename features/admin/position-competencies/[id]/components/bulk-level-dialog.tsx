@@ -26,6 +26,8 @@ interface BulkLevelDialogProps {
   count: number
   isLoading: boolean
   onSubmit: (level: number) => Promise<void>
+  // Base mapping template's level when every selected competency shares one.
+  suggestedLevel?: number | null
 }
 
 export function BulkLevelDialog({
@@ -34,6 +36,7 @@ export function BulkLevelDialog({
   count,
   isLoading,
   onSubmit,
+  suggestedLevel,
 }: BulkLevelDialogProps) {
   const t = useTranslations('AdminPositionCompetenciesDetailPage')
   const tc = useTranslations('Common')
@@ -43,10 +46,10 @@ export function BulkLevelDialog({
 
   useEffect(() => {
     if (open) {
-      setSelectedLevel(null)
+      setSelectedLevel(suggestedLevel ?? null)
       fetchLevels()
     }
-  }, [open])
+  }, [open, suggestedLevel])
 
   const fetchLevels = async () => {
     try {
@@ -76,7 +79,7 @@ export function BulkLevelDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[500px]">
+      <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-[500px]">
         <form onSubmit={handleSubmit}>
           <DialogHeader>
             <DialogTitle>{t('setLevelMultipleTitle')}</DialogTitle>
@@ -89,6 +92,9 @@ export function BulkLevelDialog({
           <div className="grid gap-4 py-4">
             <div className="grid gap-2">
               <Label>{t('requiredLevelFieldLabel')}</Label>
+              {suggestedLevel != null && (
+                <p className="text-xs text-muted-foreground">{t('templateSuggestedLevel', { level: suggestedLevel })}</p>
+              )}
               {isFetching ? (
                 <div className="text-sm text-muted-foreground py-4 text-center">
                   {t('loadingLevels')}

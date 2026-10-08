@@ -79,6 +79,7 @@ export function AdminSidebar({ ...props }: React.ComponentProps<typeof Sidebar>)
         { title: t('clusters'), url: "/admin/clusters" },
         { title: t('competencies'), url: "/admin/competencies" },
         { title: t('competencyMapping'), url: "/admin/position-competencies" },
+        { title: t('mappingTemplate'), url: "/admin/mapping-template" },
       ],
     },
     {

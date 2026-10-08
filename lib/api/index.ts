@@ -18,6 +18,7 @@
 //   developmentStrategy.ts - client-configurable IDP development strategies
 //   auditLog.ts       - read-only audit trail browsing (who changed what, when)
 //   features.ts       - per-deployment feature flags (see hooks/use-feature-flags.ts)
+//   mapping-template.ts - base competency mapping template (admin)
 export { api, default } from './client';
 export { invalidateApiCache } from './cache';
 export { createCrudApi } from './crud-factory';
@@ -34,3 +35,4 @@ export * from './mailQueue';
 export * from './developmentStrategy';
 export * from './auditLog';
 export * from './features';
+export * from './mapping-template';

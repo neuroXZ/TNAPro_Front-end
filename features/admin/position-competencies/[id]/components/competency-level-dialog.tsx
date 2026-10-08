@@ -33,6 +33,11 @@ interface CompetencyLevelDialogProps {
   currentLevel?: number
   isEdit: boolean
   onSubmit: (level: number) => Promise<void>
+  // Base mapping template: level pre-filled when adding (from the cluster's
+  // matrix for this position's category), and an optional note (e.g. "this
+  // mapping comes from the template; changing it detaches it").
+  suggestedLevel?: number | null
+  notice?: string | null
 }
 
 export function CompetencyLevelDialog({
@@ -42,6 +47,8 @@ export function CompetencyLevelDialog({
   currentLevel,
   isEdit,
   onSubmit,
+  suggestedLevel,
+  notice,
 }: CompetencyLevelDialogProps) {
   const t = useTranslations('AdminPositionCompetenciesDetailPage')
   const tc = useTranslations('Common')
@@ -52,10 +59,10 @@ export function CompetencyLevelDialog({
 
   useEffect(() => {
     if (open) {
-      setSelectedLevel(currentLevel || null)
+      setSelectedLevel(currentLevel || (!isEdit ? suggestedLevel ?? null : null))
       fetchLevels()
     }
-  }, [open, currentLevel])
+  }, [open, currentLevel, suggestedLevel, isEdit])
 
   const fetchLevels = async () => {
     try {
@@ -95,7 +102,7 @@ export function CompetencyLevelDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[500px]">
+      <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-[500px]">
         <form onSubmit={handleSubmit}>
           <DialogHeader>
             <DialogTitle>
@@ -117,8 +124,14 @@ export function CompetencyLevelDialog({
                 </p>
               )}
             </div>
+            {notice && (
+              <p className="rounded-md border border-dashed p-3 text-sm text-muted-foreground">{notice}</p>
+            )}
             <div className="grid gap-2">
               <Label>{t('requiredLevelFieldLabel')}</Label>
+              {!isEdit && suggestedLevel != null && (
+                <p className="text-xs text-muted-foreground">{t('templateSuggestedLevel', { level: suggestedLevel })}</p>
+              )}
               {isLoading ? (
                 <div className="text-sm text-muted-foreground py-4 text-center">
                   {t('loadingLevels')}

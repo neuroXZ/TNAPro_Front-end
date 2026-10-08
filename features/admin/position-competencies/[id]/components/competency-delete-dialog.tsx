@@ -20,6 +20,8 @@ interface CompetencyDeleteDialogProps {
   onOpenChange: (open: boolean) => void
   competency: Competency | null
   onConfirm: () => Promise<void>
+  // Base mapping template: explains that removing a template mapping excludes it.
+  notice?: string | null
 }
 
 export function CompetencyDeleteDialog({
@@ -27,6 +29,7 @@ export function CompetencyDeleteDialog({
   onOpenChange,
   competency,
   onConfirm,
+  notice,
 }: CompetencyDeleteDialogProps) {
   const t = useTranslations('AdminPositionCompetenciesDetailPage')
   const tc = useTranslations('Common')
@@ -39,6 +42,7 @@ export function CompetencyDeleteDialog({
           <AlertDialogDescription>
             {t('removeCompetencyWarning', { name: competency?.name ?? '' })}
           </AlertDialogDescription>
+          {notice && <p className="rounded-md border border-dashed p-3 text-sm text-muted-foreground">{notice}</p>}
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogCancel>{tc('cancel')}</AlertDialogCancel>
