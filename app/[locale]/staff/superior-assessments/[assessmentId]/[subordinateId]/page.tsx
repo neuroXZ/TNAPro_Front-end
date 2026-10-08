@@ -16,8 +16,10 @@ import {
   levelAPI,
   competencyAPI,
   clusterAPI,
-  staffAPI
+  staffAPI,
+  type SubordinateSelfResults
 } from "@/lib/api"
+import { useSettings } from "@/hooks/use-settings"
 import { toast } from "sonner"
 import { 
   IconArrowLeft, 
@@ -116,7 +118,28 @@ export default function SuperiorAssessmentDetailPage() {
   const [isLoading, setIsLoading] = useState(true)
   const [isSaving, setIsSaving] = useState(false)
   const [userId, setUserId] = useState<string | null>(null)
+  const [selfInfo, setSelfInfo] = useState<SubordinateSelfResults | null>(null)
+  const { settings, isLoading: settingsLoading } = useSettings()
   const t = useTranslations('StaffAssessmentFormPage')
+
+  // Subordinate's submitted self scores, shown read-only when the admin has
+  // enabled Setting.selfResultVisibility. The backend decides availability
+  // (incl. "only after you submit"), this just renders what it returns.
+  useEffect(() => {
+    if (settingsLoading || settings.selfResultVisibility === 'OFF' || !superiorAssessorId) {
+      setSelfInfo(null)
+      return
+    }
+    let cancelled = false
+    assessmentResultAPI
+      .getSubordinateSelf(subordinateId, assessmentId)
+      .then((data) => { if (!cancelled) setSelfInfo(data) })
+      .catch((error) => {
+        console.error("Failed to fetch subordinate self results:", error)
+        if (!cancelled) setSelfInfo(null)
+      })
+    return () => { cancelled = true }
+  }, [settingsLoading, settings.selfResultVisibility, superiorAssessorId, subordinateId, assessmentId])
 
   useEffect(() => {
     const storedUser = localStorage.getItem('user')
@@ -445,6 +468,20 @@ export default function SuperiorAssessmentDetailPage() {
   const totalCount = competencies.length
   const withinPeriod = isWithinPeriod()
   const isSubmitted = isAssessmentSubmitted()
+  const selfScores: Record<string, number | null> | null = selfInfo?.available
+    ? Object.fromEntries(
+        selfInfo.results
+          .filter((r) => r.competencyId)
+          .map((r) => [r.competencyId as string, r.score])
+      )
+    : null
+  const selfNotice = selfInfo
+    ? selfInfo.available
+      ? t('selfScoresShownNotice', { name: subordinate.name })
+      : selfInfo.reason === 'PENDING_SUPERIOR_SUBMIT'
+        ? t('selfScoresPendingNotice', { name: subordinate.name })
+        : t('selfScoresNotSubmittedNotice', { name: subordinate.name })
+    : null
 
   return (
     <div className="space-y-4">
@@ -571,6 +608,12 @@ export default function SuperiorAssessmentDetailPage() {
           <CardDescription>
             {t('rateSubordinateCompetenciesDesc')}
           </CardDescription>
+          {selfNotice && (
+            <div className="mt-2 flex items-start gap-2 rounded-md border border-dashed p-3 text-sm text-muted-foreground">
+              <IconInfoCircle className="size-4 mt-0.5 shrink-0" />
+              <span>{selfNotice}</span>
+            </div>
+          )}
         </CardHeader>
         <CardContent>
           {competencies.length === 0 ? (
@@ -585,6 +628,7 @@ export default function SuperiorAssessmentDetailPage() {
               onScoreChange={handleScoreChange}
               onRemarkChange={handleRemarkChange}
               disabled={!withinPeriod}
+              selfScores={selfScores}
             />
           )}
         </CardContent>
@@ -626,6 +670,8 @@ interface CompetencyAssessmentTableProps {
   onScoreChange: (competencyId: string, score: number) => void
   onRemarkChange: (competencyId: string, remark: string) => void
   disabled?: boolean
+  // Subordinate's submitted self scores by competencyId; null hides the column.
+  selfScores?: Record<string, number | null> | null
 }
 
 function CompetencyAssessmentTable({
@@ -634,7 +680,8 @@ function CompetencyAssessmentTable({
   levels,
   onScoreChange,
   onRemarkChange,
-  disabled
+  disabled,
+  selfScores
 }: CompetencyAssessmentTableProps) {
   const t = useTranslations('StaffAssessmentFormPage')
   const [currentTabIndex, setCurrentTabIndex] = useState(0)
@@ -767,6 +814,16 @@ function CompetencyAssessmentTable({
                             </Dialog>
                           </div>
                         </th>
+                        {selfScores && (
+                          <th className="px-3 py-2 text-center text-sm font-medium w-16">
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <span className="cursor-default">{t('colSelfScore')}</span>
+                              </TooltipTrigger>
+                              <TooltipContent>{t('selfScoreTooltip')}</TooltipContent>
+                            </Tooltip>
+                          </th>
+                        )}
                         {sortedLevels.map((level) => (
                           <th key={level.id} className="px-3 py-2 text-center text-sm font-medium w-12">
                             {level.value}
@@ -792,6 +849,17 @@ function CompetencyAssessmentTable({
                               )}
                             </td>
                             <td className="px-3 py-3 text-center text-sm font-medium">{rcl}</td>
+                            {selfScores && (
+                              <td className="px-3 py-3 text-center">
+                                {selfScores[pc.competency.id] != null ? (
+                                  <Badge variant="secondary" className="font-semibold">
+                                    {selfScores[pc.competency.id]}
+                                  </Badge>
+                                ) : (
+                                  <span className="text-sm text-muted-foreground">–</span>
+                                )}
+                              </td>
+                            )}
                             {sortedLevels.map((level) => (
                               <td key={level.id} className="px-3 py-3 text-center">
                                 <button
@@ -902,6 +970,14 @@ function CompetencyAssessmentTable({
                           <div className="flex items-center justify-between">
                             <Label className="text-sm font-medium">{t('selectLevel')}</Label>
                             <div className="flex items-center gap-2">
+                              {selfScores && (
+                                <>
+                                  <span className="text-xs text-muted-foreground">{t('selfScoreLabel')}</span>
+                                  <div className="flex items-center justify-center w-6 h-6 rounded-full bg-secondary border text-xs font-semibold">
+                                    {selfScores[pc.competency.id] ?? '–'}
+                                  </div>
+                                </>
+                              )}
                               <span className="text-xs text-muted-foreground">{t('rclLabel')}</span>
                               <div className="flex items-center justify-center w-6 h-6 rounded-full bg-muted border text-xs font-semibold">
                                 {rcl}

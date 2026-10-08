@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { settingAPI, dashboardAPI, developmentStrategyAPI, type DevelopmentStrategy } from "@/lib/api"
+import { settingAPI, dashboardAPI, developmentStrategyAPI, type DevelopmentStrategy, type SelfResultVisibility } from "@/lib/api"
 import {
   Card,
   CardContent,
@@ -18,6 +18,7 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { Badge } from "@/components/ui/badge"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Switch } from "@/components/ui/switch"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import {
   Table,
   TableHeader,
@@ -77,6 +78,7 @@ interface Setting {
   infoColor?: string
   gapRatioFloorNegative?: boolean
   hideIdpFromStaff?: boolean
+  selfResultVisibility?: SelfResultVisibility
 }
 
 interface DashboardSummary {
@@ -96,6 +98,7 @@ export default function SettingsPage() {
   const [settings, setSettings] = useState<Setting | null>(null)
   const [gapRatioFloorNegative, setGapRatioFloorNegative] = useState(false)
   const [hideIdpFromStaff, setHideIdpFromStaff] = useState(false)
+  const [selfResultVisibility, setSelfResultVisibility] = useState<SelfResultVisibility>('OFF')
   const [dashboardData, setDashboardData] = useState<DashboardSummary | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [isSaving, setIsSaving] = useState(false)
@@ -243,6 +246,7 @@ export default function SettingsPage() {
         setInfoColor(setting.infoColor ? oklchToHex(setting.infoColor) : "#06B6D4")
         setGapRatioFloorNegative(setting.gapRatioFloorNegative ?? false)
         setHideIdpFromStaff(setting.hideIdpFromStaff ?? false)
+        setSelfResultVisibility(setting.selfResultVisibility ?? 'OFF')
       }
     } catch (error) {
       toast.error(t('fetchError'))
@@ -340,6 +344,24 @@ export default function SettingsPage() {
       await fetchSettings()
     } catch (error) {
       setHideIdpFromStaff(!checked)
+      toast.error(t('saveError'))
+      console.error(error)
+    }
+  }
+
+  const handleChangeSelfResultVisibility = async (value: SelfResultVisibility) => {
+    const previous = selfResultVisibility
+    setSelfResultVisibility(value)
+    try {
+      if (settings?.id) {
+        await settingAPI.update(settings.id, { selfResultVisibility: value })
+      } else {
+        await settingAPI.create({ selfResultVisibility: value })
+      }
+      toast.success(t('saveSuccess'))
+      await fetchSettings()
+    } catch (error) {
+      setSelfResultVisibility(previous)
       toast.error(t('saveError'))
       console.error(error)
     }
@@ -619,6 +641,28 @@ export default function SettingsPage() {
                   checked={hideIdpFromStaff}
                   onCheckedChange={handleToggleHideIdpFromStaff}
                 />
+              </div>
+
+              <div className="flex flex-col gap-3 rounded-md border p-4 sm:flex-row sm:items-center sm:justify-between">
+                <div className="space-y-0.5">
+                  <Label htmlFor="selfResultVisibility">{t('labelSelfResultVisibility')}</Label>
+                  <p className="text-xs text-muted-foreground">
+                    {t('selfResultVisibilityHint')}
+                  </p>
+                </div>
+                <Select
+                  value={selfResultVisibility}
+                  onValueChange={(value) => handleChangeSelfResultVisibility(value as SelfResultVisibility)}
+                >
+                  <SelectTrigger id="selfResultVisibility" className="w-full sm:w-[240px] shrink-0">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="OFF">{t('selfResultVisibilityOff')}</SelectItem>
+                    <SelectItem value="AFTER_SUPERIOR_SUBMIT">{t('selfResultVisibilityAfterSubmit')}</SelectItem>
+                    <SelectItem value="ALWAYS">{t('selfResultVisibilityAlways')}</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
             </CardContent>
           </Card>

@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { settingAPI } from "@/lib/api"
+import { settingAPI, type SelfResultVisibility } from "@/lib/api"
 
 // DB-backed, per-client settings that any authenticated role may need to
 // read (admin controls them via the Settings page; staff only reads them to
@@ -9,10 +9,12 @@ import { settingAPI } from "@/lib/api"
 // per-deployment env vars — these can change at runtime without a redeploy.
 export interface AppSettings {
   hideIdpFromStaff: boolean
+  selfResultVisibility: SelfResultVisibility
 }
 
 const DEFAULT_SETTINGS: AppSettings = {
   hideIdpFromStaff: false,
+  selfResultVisibility: 'OFF',
 }
 
 export function useSettings() {
@@ -28,6 +30,7 @@ export function useSettings() {
         const row = data?.[0]
         setSettings({
           hideIdpFromStaff: row?.hideIdpFromStaff ?? false,
+          selfResultVisibility: row?.selfResultVisibility ?? 'OFF',
         })
       })
       .catch(() => {
