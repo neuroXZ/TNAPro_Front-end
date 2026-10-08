@@ -27,6 +27,7 @@ export interface Staff {
   name: string
   orgId?: string
   positionId?: string
+  unitId?: string | null
 }
 
 export interface Assessor {

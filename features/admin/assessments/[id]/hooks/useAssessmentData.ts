@@ -9,8 +9,10 @@ import {
   assessorAPI,
   positionCompetencyAPI,
   settingAPI,
+  unitAPI,
 } from "@/lib/api"
 import { formatGapRatioPercent } from "@/lib/gap-ratio"
+import { buildAncestorLookup, resolveForStaffUnit } from "@/lib/position-competency-resolution"
 import type {
   Assessment,
   AssessmentResult,
@@ -30,6 +32,7 @@ export function useAssessmentData(assessmentId: string) {
   const [staff, setStaff] = useState<Staff[]>([])
   const [assessors, setAssessors] = useState<Assessor[]>([])
   const [positionCompetencies, setPositionCompetencies] = useState<any[]>([])
+  const [units, setUnits] = useState<{ id: string; parentId?: string | null }[]>([])
   const [gapRatioFloorNegative, setGapRatioFloorNegative] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
 
@@ -49,6 +52,7 @@ export function useAssessmentData(assessmentId: string) {
         assessorsData,
         positionCompetenciesData,
         settingsData,
+        unitsData,
       ] = await Promise.all([
         assessmentAPI.getById(assessmentId),
         assessmentResultAPI.getByAssessment(assessmentId),
@@ -58,6 +62,7 @@ export function useAssessmentData(assessmentId: string) {
         assessorAPI.getAll(),
         positionCompetencyAPI.getAll(),
         settingAPI.getAll(),
+        unitAPI.getAll(),
       ])
 
       setAssessment(assessmentData)
@@ -67,6 +72,7 @@ export function useAssessmentData(assessmentId: string) {
       setStaff(staffData)
       setPositionCompetencies(positionCompetenciesData)
       setAssessors(assessorsData)
+      setUnits(unitsData)
       setGapRatioFloorNegative(settingsData?.[0]?.gapRatioFloorNegative ?? false)
     } catch (error) {
       toast.error("Failed to fetch data")
@@ -78,6 +84,7 @@ export function useAssessmentData(assessmentId: string) {
 
   const buildMatrix = (): StaffCompetencyMatrix => {
     const matrix: StaffCompetencyMatrix = {}
+    const ancestorsOf = buildAncestorLookup(units)
 
     results.forEach((result) => {
       const assessor = assessors.find((a) => a.id === result.assessorId)
@@ -104,8 +111,13 @@ export function useAssessmentData(assessmentId: string) {
         const competency = competencies.find((c) => c.id === competencyId)
         if (!competency) return
 
-        const positionComp = positionCompetencies.find(
-          (pc) => pc.positionId === result.positionId && pc.competencyId === competencyId
+        // A position can have an org-wide row plus unit-scoped rows for the
+        // same competency: pick the one for this staff member's unit.
+        const positionComp = resolveForStaffUnit(
+          positionCompetencies,
+          result.positionId,
+          competencyId,
+          ancestorsOf(matrix[staffId].staff.unitId),
         )
         const requiredLevel = positionComp?.level || 0
 
