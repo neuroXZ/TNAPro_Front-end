@@ -51,6 +51,7 @@ import { useTranslations, useLocale } from "next-intl"
 export default function CompetencyManagementPage() {
   const t = useTranslations('AdminCompetenciesPage')
   const tc = useTranslations('Common')
+  const td = useTranslations('CompetencyDictionary')
   const locale = useLocale()
   const [competencies, setCompetencies] = useState<Competency[]>([])
   const [clusters, setClusters] = useState<Array<{ id: string; name: string }>>([])
@@ -146,7 +147,8 @@ export default function CompetencyManagementPage() {
           onDelete: handleOpenDeleteDialog,
         },
         t,
-        tc
+        tc,
+        td
       ),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [locale]
@@ -366,6 +368,10 @@ export default function CompetencyManagementPage() {
         open={isViewDialogOpen}
         onOpenChange={setIsViewDialogOpen}
         competency={viewingCompetency}
+        onEdit={(competency) => {
+          setIsViewDialogOpen(false)
+          handleOpenDialog(competency)
+        }}
       />
 
       <CompetencyImportDialog

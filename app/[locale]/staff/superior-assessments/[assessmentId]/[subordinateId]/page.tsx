@@ -32,6 +32,7 @@ import {
   IconInfoCircle
 } from "@tabler/icons-react"
 import { format } from "date-fns"
+import { CompetencyIndicatorsButton } from "@/features/competency-dictionary/competency-indicators-button"
 import { useTranslations } from "next-intl"
 import { Textarea } from "@/components/ui/textarea"
 import {
@@ -73,6 +74,7 @@ interface Competency {
       id: string
       name: string
     }
+    _count?: { levelIndicators: number }
   }
 }
 
@@ -847,6 +849,13 @@ function CompetencyAssessmentTable({
                                   {pc.competency.description}
                                 </div>
                               )}
+                              <CompetencyIndicatorsButton
+                                competencyId={pc.competency?.id}
+                                competencyName={pc.competency?.name}
+                                indicatorCount={pc.competency?._count?.levelIndicators}
+                                requiredLevel={pc.level}
+                                className="mt-1"
+                              />
                             </td>
                             <td className="px-3 py-3 text-center text-sm font-medium">{rcl}</td>
                             {selfScores && (
@@ -911,6 +920,13 @@ function CompetencyAssessmentTable({
                         <div className="flex items-start gap-2">
                           <div className="flex-1">
                             <h3 className="font-semibold text-base leading-tight">{pc.competency?.name}</h3>
+                            <CompetencyIndicatorsButton
+                              competencyId={pc.competency?.id}
+                              competencyName={pc.competency?.name}
+                              indicatorCount={pc.competency?._count?.levelIndicators}
+                              requiredLevel={pc.level}
+                              className="mt-1.5"
+                            />
                           </div>
                           <Dialog>
                             <DialogTrigger asChild>

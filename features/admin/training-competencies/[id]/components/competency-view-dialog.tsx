@@ -1,13 +1,6 @@
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog"
-import { Label } from "@/components/ui/label"
 import { Badge } from "@/components/ui/badge"
 import { useTranslations } from "next-intl"
+import { CompetencyDetailsDialog } from "@/features/competency-dictionary/competency-details-dialog"
 
 interface Competency {
   id: string
@@ -30,6 +23,7 @@ interface CompetencyViewDialogProps {
   trainingCompetency?: TrainingCompetency | null
 }
 
+/** Competency details (full dictionary) plus whether it's linked to this training. */
 export function CompetencyViewDialog({
   open,
   onOpenChange,
@@ -37,64 +31,30 @@ export function CompetencyViewDialog({
   trainingCompetency,
 }: CompetencyViewDialogProps) {
   const t = useTranslations('AdminTrainingCompetenciesDetailPage')
-  const tc = useTranslations('Common')
-  const tComp = useTranslations('AdminCompetenciesPage')
-
-  if (!competency) return null
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[425px]">
-        <DialogHeader>
-          <DialogTitle>{tc('entityDetails', { entity: tComp('entityNameSingularCap') })}</DialogTitle>
-          <DialogDescription>
-            {tc('viewDetailedInfo', { name: competency.name })}
-          </DialogDescription>
-        </DialogHeader>
-        <div className="grid gap-4 py-4">
-          <div className="grid gap-2">
-            <Label className="text-muted-foreground">{t('competencyNameLabel')}</Label>
-            <p className="text-sm font-medium">{competency.name}</p>
+    <CompetencyDetailsDialog
+      open={open}
+      onOpenChange={onOpenChange}
+      competencyId={competency?.id}
+      fallbackName={competency?.name}
+      extra={
+        <div className="space-y-3">
+          <div className="flex items-center gap-2 text-sm">
+            <span className="text-muted-foreground">{t('statusLabel')}</span>
+            {trainingCompetency ? (
+              <Badge variant="default">{t('addedToTraining')}</Badge>
+            ) : (
+              <Badge variant="outline">{t('badgeNotAdded')}</Badge>
+            )}
           </div>
-          {competency.cluster && (
-            <div className="grid gap-2">
-              <Label className="text-muted-foreground">{t('clusterLabel')}</Label>
-              <div className="flex items-center gap-2">
-                {competency.cluster.color && (
-                  <div
-                    className="size-4 rounded"
-                    style={{ backgroundColor: competency.cluster.color }}
-                  />
-                )}
-                <p className="text-sm font-medium">{competency.cluster.name}</p>
-              </div>
-            </div>
-          )}
-          <div className="grid gap-2">
-            <Label className="text-muted-foreground">{t('statusLabel')}</Label>
-            <div className="flex items-center gap-2">
-              {trainingCompetency ? (
-                <Badge variant="default">{t('addedToTraining')}</Badge>
-              ) : (
-                <Badge variant="outline">{t('badgeNotAdded')}</Badge>
-              )}
-            </div>
-          </div>
-          {competency.description && (
-            <div className="grid gap-2">
-              <Label className="text-muted-foreground">{tc('description')}</Label>
-              <p className="text-sm">{competency.description}</p>
-            </div>
-          )}
           {!trainingCompetency && (
             <div className="rounded-md bg-muted p-3">
-              <p className="text-sm text-muted-foreground">
-                {t('notAddedYet')}
-              </p>
+              <p className="text-sm text-muted-foreground">{t('notAddedYet')}</p>
             </div>
           )}
         </div>
-      </DialogContent>
-    </Dialog>
+      }
+    />
   )
 }

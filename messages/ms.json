@@ -576,7 +576,32 @@
     "importSuccessMessage": "Berjaya import {count} kompetensi",
     "importPartialMessage": "Import selesai dengan {successCount} berjaya dan {failureCount} gagal",
     "importFailedMessage": "Gagal import kompetensi",
-    "importErrorRow": "Baris {rowIndex}: {message}"
+    "importErrorRow": "Baris {rowIndex}: {message}",
+    "codeLabel": "Kod",
+    "codePlaceholder": "cth. SKL_BM001 (pilihan)"
+  },
+  "CompetencyDictionary": {
+    "definition": "Definisi",
+    "noDefinition": "Tiada definisi diberikan.",
+    "proficiencyLevels": "Tahap penguasaan & indikator tingkah laku",
+    "levelLabel": "Tahap {value}",
+    "requiredLevel": "Tahap diperlukan",
+    "noIndicators": "Tiada indikator untuk tahap ini.",
+    "indicatorCount": "{count, plural, =0 {Tiada indikator} other {# indikator}}",
+    "referenceNote": "Indikator adalah bahan rujukan sahaja. Penilaian masih diskor menggunakan skala tahap umum dalam borang penilaian, dan pengiraan skor, jurang serta laporan tidak berubah.",
+    "editHint": "Tambah, susun semula atau buang indikator bagi setiap tahap. Tahap boleh dibiarkan kosong. Tampal beberapa baris (cth. disalin daripada PDF) akan menghasilkan satu indikator bagi setiap butiran.",
+    "addIndicator": "Tambah indikator",
+    "removeIndicator": "Buang indikator",
+    "moveUp": "Naik",
+    "moveDown": "Turun",
+    "indicatorPlaceholder": "Huraikan tingkah laku yang boleh diperhatikan pada tahap ini",
+    "saveError": "Gagal menyimpan indikator",
+    "loadError": "Gagal memuatkan kamus kompetensi.",
+    "viewIndicators": "Lihat indikator",
+    "referenceShort": "Rujukan sahaja. Beri penilaian menggunakan skala tahap dalam borang penilaian.",
+    "detailsSection": "Maklumat kompetensi",
+    "indicatorsLoadError": "Indikator sedia ada gagal dimuatkan, jadi ia tidak akan diubah semasa anda simpan.",
+    "levelNotInMaster": "Tiada dalam senarai Tahap. Indikator sedia ada dikekalkan; buang atau tambah tahap ini."
   },
   "AdminTrainingsPage": {
     "entityNameSingular": "latihan",

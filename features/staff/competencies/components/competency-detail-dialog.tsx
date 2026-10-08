@@ -10,13 +10,18 @@ import {
 import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
 import { IconTarget, IconBuilding } from "@tabler/icons-react"
+import { Skeleton } from "@/components/ui/skeleton"
+import { CompetencyDictionaryView } from "@/features/competency-dictionary/competency-dictionary-view"
+import { useCompetencyDictionary } from "@/features/competency-dictionary/use-competency-dictionary"
 
 interface PositionCompetency {
   id: string
   positionId: string
   competencyId: string
   level?: number  // RCL (Required Competency Level)
-  position: {
+  // Not included by /positioncompetency/effective (it returns competency +
+  // unit only), so it can be missing here.
+  position?: {
     id: string
     name: string
   }
@@ -30,6 +35,7 @@ interface PositionCompetency {
       name: string
       color?: string
     }
+    _count?: { levelIndicators: number }
   }
 }
 
@@ -48,7 +54,7 @@ export function CompetencyDetailDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl">
+      <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-2xl">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <IconTarget className="size-5 text-primary" />
@@ -112,41 +118,61 @@ export function CompetencyDetailDialog({
               <h4 className="text-sm font-medium text-muted-foreground">Position Requirement</h4>
               <div className="flex items-center gap-2">
                 <IconBuilding className="size-4 text-muted-foreground" />
-                <span className="text-sm">{competency.position.name}</span>
+                <span className="text-sm">{competency.position?.name ?? "-"}</span>
               </div>
             </div>
           </div>
 
           <Separator />
 
-          {/* Competency Level Guide */}
-          <div className="space-y-3">
-            <h4 className="text-sm font-medium text-muted-foreground">Competency Level Guide</h4>
-            <div className="grid gap-2">
-              <div className="flex items-center justify-between text-xs p-2 rounded bg-muted/30">
-                <span>Level 1</span>
-                <span className="text-muted-foreground">Basic / Awareness</span>
-              </div>
-              <div className="flex items-center justify-between text-xs p-2 rounded bg-muted/30">
-                <span>Level 2</span>
-                <span className="text-muted-foreground">Limited / Working Knowledge</span>
-              </div>
-              <div className="flex items-center justify-between text-xs p-2 rounded bg-muted/30">
-                <span>Level 3</span>
-                <span className="text-muted-foreground">Proficient / Skilled</span>
-              </div>
-              <div className="flex items-center justify-between text-xs p-2 rounded bg-muted/30">
-                <span>Level 4</span>
-                <span className="text-muted-foreground">Advanced / Expert</span>
-              </div>
-              <div className="flex items-center justify-between text-xs p-2 rounded bg-muted/30">
-                <span>Level 5</span>
-                <span className="text-muted-foreground">Mastery / Authority</span>
+          {/* Competency dictionary (per-level indicators) when the competency
+              has one; otherwise the generic level guide below. */}
+          {(competency.competency._count?.levelIndicators ?? 0) > 0 ? (
+            <DictionaryLevels competencyId={competency.competency.id} requiredLevel={competency.level} />
+          ) : (
+            <div className="space-y-3">
+              <h4 className="text-sm font-medium text-muted-foreground">Competency Level Guide</h4>
+              <div className="grid gap-2">
+                <div className="flex items-center justify-between text-xs p-2 rounded bg-muted/30">
+                  <span>Level 1</span>
+                  <span className="text-muted-foreground">Basic / Awareness</span>
+                </div>
+                <div className="flex items-center justify-between text-xs p-2 rounded bg-muted/30">
+                  <span>Level 2</span>
+                  <span className="text-muted-foreground">Limited / Working Knowledge</span>
+                </div>
+                <div className="flex items-center justify-between text-xs p-2 rounded bg-muted/30">
+                  <span>Level 3</span>
+                  <span className="text-muted-foreground">Proficient / Skilled</span>
+                </div>
+                <div className="flex items-center justify-between text-xs p-2 rounded bg-muted/30">
+                  <span>Level 4</span>
+                  <span className="text-muted-foreground">Advanced / Expert</span>
+                </div>
+                <div className="flex items-center justify-between text-xs p-2 rounded bg-muted/30">
+                  <span>Level 5</span>
+                  <span className="text-muted-foreground">Mastery / Authority</span>
+                </div>
               </div>
             </div>
-          </div>
+          )}
         </div>
       </DialogContent>
     </Dialog>
+  )
+}
+
+function DictionaryLevels({ competencyId, requiredLevel }: { competencyId: string; requiredLevel?: number }) {
+  const { competency, levels, isLoading, error } = useCompetencyDictionary(competencyId)
+  if (error) return null
+  if (isLoading || !competency) return <Skeleton className="h-64 w-full" />
+  return (
+    <CompetencyDictionaryView
+      competency={competency}
+      levels={levels}
+      requiredLevel={requiredLevel}
+      hideHeader
+      hideDefinition
+    />
   )
 }

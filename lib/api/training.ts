@@ -1,8 +1,23 @@
-import { cachedGet } from './cache';
+import { api } from './client';
+import { cachedGet, invalidateApiCache } from './cache';
 import { createCrudApi } from './crud-factory';
 
 export const trainingAPI = createCrudApi('/training');
-export const competencyAPI = createCrudApi('/competency');
+
+export const competencyAPI = {
+  ...createCrudApi('/competency'),
+
+  // Competency dictionary: the competency (with cluster) plus its per-level
+  // indicators, ordered by level then sortOrder. Reference only.
+  getDictionary: <T = unknown>(id: string) => cachedGet<T>(`/competency/${id}/dictionary`),
+
+  // Replaces the full indicator set; array order within a level is kept.
+  replaceIndicators: async (id: string, indicators: { level: number; text: string }[]) => {
+    const response = await api.put(`/competency/${id}/indicators`, { indicators });
+    invalidateApiCache('/competency');
+    return response.data;
+  },
+};
 
 export const positionCompetencyAPI = {
   ...createCrudApi('/positioncompetency'),

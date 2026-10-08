@@ -1,58 +1,52 @@
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog"
-import { Label } from "@/components/ui/label"
-import { Competency } from "./columns"
+import { Button } from "@/components/ui/button"
+import { IconEdit, IconInfoCircle } from "@tabler/icons-react"
 import { useTranslations } from "next-intl"
+import { CompetencyDetailsDialog } from "@/features/competency-dictionary/competency-details-dialog"
+import { Competency } from "./columns"
 
 interface CompetencyViewDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
   competency: Competency | null
+  onEdit?: (competency: Competency) => void
 }
 
+/** Competency details = its full dictionary entry (details + every level's indicators). */
 export function CompetencyViewDialog({
   open,
   onOpenChange,
   competency,
+  onEdit,
 }: CompetencyViewDialogProps) {
   const t = useTranslations('AdminCompetenciesPage')
   const tc = useTranslations('Common')
-
-  if (!competency) return null
+  const td = useTranslations('CompetencyDictionary')
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[425px]">
-        <DialogHeader>
-          <DialogTitle>{tc('entityDetails', { entity: t('entityNameSingularCap') })}</DialogTitle>
-          <DialogDescription>
-            {tc('viewDetailedInfo', { name: competency.name })}
-          </DialogDescription>
-        </DialogHeader>
-        <div className="grid gap-4 py-4">
-          <div className="grid gap-2">
-            <Label className="text-muted-foreground">{t('nameLabel')}</Label>
-            <p className="text-sm font-medium">{competency.name}</p>
-          </div>
-          {competency.cluster && (
-            <div className="grid gap-2">
-              <Label className="text-muted-foreground">{t('clusterLabel')}</Label>
-              <p className="text-sm font-medium">{competency.cluster.name}</p>
-            </div>
+    <CompetencyDetailsDialog
+      open={open}
+      onOpenChange={onOpenChange}
+      competencyId={competency?.id}
+      fallbackName={competency?.name}
+      note={
+        <>
+          <IconInfoCircle className="mt-0.5 size-4 shrink-0" />
+          {td('referenceNote')}
+        </>
+      }
+      footer={
+        <>
+          <Button variant="outline" onClick={() => onOpenChange(false)}>
+            {tc('close')}
+          </Button>
+          {onEdit && competency && (
+            <Button onClick={() => onEdit(competency)}>
+              <IconEdit className="mr-2 size-4" />
+              {tc('editEntity', { entity: t('entityNameSingularCap') })}
+            </Button>
           )}
-          {competency.description && (
-            <div className="grid gap-2">
-              <Label className="text-muted-foreground">{tc('description')}</Label>
-              <p className="text-sm">{competency.description}</p>
-            </div>
-          )}
-        </div>
-      </DialogContent>
-    </Dialog>
+        </>
+      }
+    />
   )
 }

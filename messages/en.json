@@ -576,7 +576,32 @@
     "importSuccessMessage": "Successfully imported {count} competencies",
     "importPartialMessage": "Import completed with {successCount} successes and {failureCount} failures",
     "importFailedMessage": "Failed to import competencies",
-    "importErrorRow": "Row {rowIndex}: {message}"
+    "importErrorRow": "Row {rowIndex}: {message}",
+    "codeLabel": "Code",
+    "codePlaceholder": "e.g. SKL_BM001 (optional)"
+  },
+  "CompetencyDictionary": {
+    "definition": "Definition",
+    "noDefinition": "No definition provided.",
+    "proficiencyLevels": "Proficiency levels & behavioural indicators",
+    "levelLabel": "Level {value}",
+    "requiredLevel": "Required level",
+    "noIndicators": "No indicators defined for this level.",
+    "indicatorCount": "{count, plural, =0 {No indicators} one {# indicator} other {# indicators}}",
+    "referenceNote": "Indicators are reference material only. Assessments are still scored using the general level scale in the assessment form, and score, gap and report calculations are unchanged.",
+    "editHint": "Add, reorder or remove indicators per level. A level can be left empty. Pasting several lines (e.g. copied from a PDF) creates one indicator per bullet.",
+    "addIndicator": "Add indicator",
+    "removeIndicator": "Remove indicator",
+    "moveUp": "Move up",
+    "moveDown": "Move down",
+    "indicatorPlaceholder": "Describe an observable behaviour at this level",
+    "saveError": "Failed to save indicators",
+    "loadError": "Failed to load the competency dictionary.",
+    "viewIndicators": "View indicators",
+    "referenceShort": "Reference only. Rate using the level scale in the assessment form.",
+    "detailsSection": "Competency details",
+    "indicatorsLoadError": "Existing indicators could not be loaded, so they will be left unchanged when you save.",
+    "levelNotInMaster": "Not in the Level list. Existing indicators are kept; remove them or add this level."
   },
   "AdminTrainingsPage": {
     "entityNameSingular": "training",

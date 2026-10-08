@@ -9,12 +9,14 @@ import { useTranslations } from "next-intl"
 export interface Competency {
   id: string
   name: string
+  code?: string
   description?: string
   clusterId?: string
   cluster?: {
     id: string
     name: string
   }
+  _count?: { levelIndicators: number }
 }
 
 interface ColumnActions {
@@ -25,7 +27,8 @@ interface ColumnActions {
 export const getColumns = (
   actions: ColumnActions,
   t: ReturnType<typeof useTranslations>,
-  tc: ReturnType<typeof useTranslations>
+  tc: ReturnType<typeof useTranslations>,
+  td: ReturnType<typeof useTranslations>
 ): ColumnDef<Competency>[] => {
   return [
   {
@@ -70,6 +73,21 @@ export const getColumns = (
             <IconArrowsSort className="ml-2 size-4" />
           )}
         </Button>
+      )
+    },
+    cell: ({ row }) => {
+      const indicatorCount = row.original._count?.levelIndicators ?? 0
+      return (
+        <div>
+          <div>{row.original.name}</div>
+          {(row.original.code || indicatorCount > 0) && (
+            <div className="text-xs text-muted-foreground">
+              {row.original.code && <span className="font-mono">{row.original.code}</span>}
+              {row.original.code && indicatorCount > 0 && " · "}
+              {indicatorCount > 0 && td('indicatorCount', { count: indicatorCount })}
+            </div>
+          )}
+        </div>
       )
     },
   },
