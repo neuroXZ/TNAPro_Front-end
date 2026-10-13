@@ -39,6 +39,7 @@ import {
 } from "@tabler/icons-react";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
+import { toast } from "sonner";
 import { useFeatureFlags } from "@/hooks/use-feature-flags";
 
 // Breakdown dimension — item 11, NIISe JAP requirements (see
@@ -91,6 +92,7 @@ const getGapColor = (
 
 export default function CompetencyGapByGradePage() {
   const t = useTranslations('AdminAnalyticsCompetencyGapPage');
+  const tc = useTranslations('Common');
   const { flags: featureFlags } = useFeatureFlags();
   const [assessments, setAssessments] = useState<Assessment[]>([]);
   const [selectedAssessmentId, setSelectedAssessmentId] = useState<string>("");
@@ -228,6 +230,7 @@ export default function CompetencyGapByGradePage() {
       window.URL.revokeObjectURL(url);
     } catch (error) {
       console.error("CSV Export Error:", error);
+      toast.error(tc('exportFailed'));
     }
   };
 
@@ -256,6 +259,7 @@ export default function CompetencyGapByGradePage() {
       window.URL.revokeObjectURL(url);
     } catch (error) {
       console.error("PDF Export Error:", error);
+      toast.error(tc('exportFailed'));
     }
   };
 

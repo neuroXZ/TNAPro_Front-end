@@ -33,6 +33,7 @@ import {
   IconBook,
 } from "@tabler/icons-react";
 import { useTranslations } from "next-intl";
+import { toast } from "sonner";
 
 interface Assessment {
   id: string;
@@ -72,6 +73,7 @@ interface ExecutiveSummaryResponse {
 
 export default function ExecutiveSummaryPage() {
   const t = useTranslations("AdminAnalyticsExecutiveSummaryPage");
+  const tc = useTranslations("Common");
 
   const [assessments, setAssessments] = useState<Assessment[]>([]);
   const [assessmentId, setAssessmentId] = useState("");
@@ -125,6 +127,7 @@ export default function ExecutiveSummaryPage() {
       window.URL.revokeObjectURL(url);
     } catch (err) {
       console.error("PDF export error:", err);
+      toast.error(tc("exportFailed"));
     } finally {
       setExporting(false);
     }

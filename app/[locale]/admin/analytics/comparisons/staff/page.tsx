@@ -39,6 +39,7 @@ import {
   IconDownload,
 } from "@tabler/icons-react";
 import { useTranslations } from "next-intl";
+import { toast } from "sonner";
 
 type Trend = "improved" | "declined" | "no_change" | "new" | "not_assessed" | "first_assessment" | "not_applicable";
 
@@ -100,6 +101,7 @@ function changeCell(val: number | null | undefined) {
 
 export default function StaffComparisonPage() {
   const t = useTranslations("AdminAnalyticsStaffComparisonPage");
+  const tc = useTranslations("Common");
 
   const [assessments, setAssessments] = useState<{ id: string; name: string }[]>([]);
   const [staffList, setStaffList] = useState<{ id: string; name: string }[]>([]);
@@ -139,6 +141,7 @@ export default function StaffComparisonPage() {
       downloadBlob(response.data, `Comparison_Staff_${selectedStaff}_${new Date().toISOString().slice(0, 10)}.csv`);
     } catch (err) {
       console.error("CSV export error:", err);
+      toast.error(tc("exportFailed"));
     }
   };
 
@@ -149,6 +152,7 @@ export default function StaffComparisonPage() {
       downloadBlob(response.data, `Comparison_Staff_${selectedStaff}_${new Date().toISOString().slice(0, 10)}.pdf`);
     } catch (err) {
       console.error("PDF export error:", err);
+      toast.error(tc("exportFailed"));
     }
   };
 

@@ -2474,6 +2474,7 @@
     "noResults": "No results found."
   },
   "Common": {
+    "exportFailed": "Export failed. Please try again, or contact your system administrator if it keeps happening.",
     "actions": "Actions",
     "cancel": "Cancel",
     "delete": "Delete",

@@ -2474,6 +2474,7 @@
     "noResults": "Tiada hasil ditemui."
   },
   "Common": {
+    "exportFailed": "Eksport tidak berjaya. Sila cuba semula atau hubungi pentadbir sistem sekiranya masalah berterusan.",
     "actions": "Tindakan",
     "cancel": "Batal",
     "delete": "Padam",

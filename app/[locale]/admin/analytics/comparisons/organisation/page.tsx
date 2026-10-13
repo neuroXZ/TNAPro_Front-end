@@ -44,6 +44,7 @@ import {
   IconDownload,
 } from "@tabler/icons-react";
 import { useTranslations } from "next-intl";
+import { toast } from "sonner";
 
 type Trend = "improved" | "declined" | "no_change" | "new" | "not_assessed" | "first_assessment" | "not_applicable";
 type UnitStatus = "compared" | "new_in_assessment2" | "dissolved" | "no_participation";
@@ -127,6 +128,7 @@ function changeCell(val: number | null | undefined) {
 
 export default function OrganisationComparisonPage() {
   const t = useTranslations("AdminAnalyticsOrgComparisonPage");
+  const tc = useTranslations("Common");
 
   const [assessments, setAssessments] = useState<{ id: string; name: string }[]>([]);
   const [assessment1, setAssessment1] = useState("");
@@ -162,6 +164,7 @@ export default function OrganisationComparisonPage() {
       downloadBlob(response.data, `Comparison_Organisation_${new Date().toISOString().slice(0, 10)}.csv`);
     } catch (err) {
       console.error("CSV export error:", err);
+      toast.error(tc("exportFailed"));
     }
   };
 
@@ -172,6 +175,7 @@ export default function OrganisationComparisonPage() {
       downloadBlob(response.data, `Comparison_Organisation_${new Date().toISOString().slice(0, 10)}.pdf`);
     } catch (err) {
       console.error("PDF export error:", err);
+      toast.error(tc("exportFailed"));
     }
   };
 
