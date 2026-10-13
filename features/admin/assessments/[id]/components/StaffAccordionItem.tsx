@@ -59,6 +59,30 @@ export function StaffAccordionItem({ staffMember, staffData, assessmentId, onDat
     }
   };
 
+  const handleExportPDF = async () => {
+    const toastId = toast.loading(t('exportingPdf'));
+    try {
+      const response = await cgaAPI.exportPdf({
+        staffId: staffMember.id,
+        assessmentId: assessmentId
+      });
+
+      const url = window.URL.createObjectURL(response.data);
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `CGA_Report_${staffMember.name.replace(/\s/g, '_')}_${new Date().toISOString().slice(0, 10)}.pdf`);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+
+      toast.success(t('exportPdfSuccess'), { id: toastId });
+    } catch (error) {
+      console.error('Export PDF error:', error);
+      toast.error(t('exportPdfFailed'), { id: toastId });
+    }
+  };
+
   return (
     <AccordionItem
       key={staffMember.id}
@@ -91,7 +115,7 @@ export function StaffAccordionItem({ staffMember, staffData, assessmentId, onDat
                   className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-7 px-3 gap-1.5 cursor-pointer"
                   onClick={(e) => {
                     e.stopPropagation()
-                    toast.info(t('pdfComingSoon'))
+                    handleExportPDF()
                   }}
                 >
                   <IconFileTypePdf className="size-4" />

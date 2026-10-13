@@ -48,6 +48,17 @@ export const cgaAPI = {
     });
     return response;
   },
+
+  exportPdf: async (data: { staffId: string; assessmentId: string }) => {
+    const params = new URLSearchParams();
+    params.append('staffId', data.staffId);
+    params.append('assessmentId', data.assessmentId);
+
+    const response = await api.get(`/cga/export-pdf?${params.toString()}`, {
+      responseType: 'blob'
+    });
+    return response;
+  },
 };
 
 // Recommended Training (RTN) API
