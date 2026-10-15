@@ -131,10 +131,6 @@ function MyAssessmentsContent() {
           const assessor = allAssessors.find((a: any) => a.id === result.assessorId)
           const type = assessor?.type?.toLowerCase()
 
-          if (!competencyScores[competencyId]) {
-            competencyScores[competencyId] = {}
-          }
-
           // Check for draft or submitted status
           if (type === 'self' && result.score !== null && result.score !== undefined) {
             if (result.status === 'DRAFT') {
@@ -146,8 +142,14 @@ function MyAssessmentsContent() {
             }
           }
 
-          // Only use scores if status is SUBMITTED
+          // Only use scores if status is SUBMITTED. Drafts must not create an
+          // entry either: completedCompetencies counts these keys, and a fully
+          // drafted (never submitted) assessment used to show "26 / 26" and
+          // "Completed" (KOOP UAT 1, 2026-10-12).
           if (type && result.score !== null && result.score !== undefined && result.status === 'SUBMITTED') {
+            if (!competencyScores[competencyId]) {
+              competencyScores[competencyId] = {}
+            }
             competencyScores[competencyId][type as 'self' | 'superior' | 'peer'] = result.score
           }
         })

@@ -3,7 +3,7 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import axios from 'axios';
-import { authAPI } from '@/lib/api';
+import { authAPI, invalidateApiCache } from '@/lib/api';
 
 interface User {
   id: string;
@@ -48,7 +48,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       
       // Save token and user data
       const { token: authToken, user: userData } = response;
-      
+
+      // GET responses are now scoped to the caller (e.g. /assessmentresult),
+      // so never let one user's cached data be served to the next login.
+      invalidateApiCache();
       localStorage.setItem('token', authToken);
 
       // If staff, fetch full data to get positionId and unitId
@@ -105,6 +108,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const logout = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
+    invalidateApiCache();
     setToken(null);
     setUser(null);
     router.push('/login');

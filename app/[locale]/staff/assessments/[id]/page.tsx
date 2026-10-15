@@ -1,6 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
+import axios from "axios"
 import { useParams, useRouter } from "next/navigation"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -374,7 +375,11 @@ function AssessmentDetailPageContent() {
       }, 1500)
     } catch (error) {
       console.error("Failed to submit assessment:", error)
-      toast.error(t('submitFailedToast'))
+      // Show the server's reason (e.g. "Cannot edit a submitted assessment
+      // result") instead of only the generic message, so a stuck submit can be
+      // diagnosed from the user's screenshot.
+      const detail = axios.isAxiosError(error) ? error.response?.data?.error : undefined
+      toast.error(detail ? `${t('submitFailedToast')}: ${detail}` : t('submitFailedToast'))
     } finally {
       setIsSaving(false)
     }

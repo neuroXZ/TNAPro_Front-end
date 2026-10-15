@@ -1565,7 +1565,7 @@
     "statusExpired": "Expired",
     "btnClose": "Close",
     "btnSubmitted": "Submitted",
-    "btnSaveDraft": "Save Draft",
+    "btnSaveDraft": "Draft - Not Submitted",
     "btnStart": "Start",
     "scoreAverage": "Average",
     "scoreSelf": "Self",

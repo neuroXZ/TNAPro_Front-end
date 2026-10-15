@@ -353,7 +353,11 @@ export default function SuperiorAssessmentsPage() {
                             r.score !== null
                         )
                         
+                        // Completed only once submitted. Any saved row used to count, so a
+                        // superior who only pressed "Save Draft" saw "Completed" and never
+                        // submitted (KOOP UAT 1, 2026-10-12).
                         const isCompleted = subordinate.position?.id && subordinateResults.length > 0
+                          && subordinateResults.every((r: any) => r.status === 'SUBMITTED')
                         
                         return (
                           <Button
