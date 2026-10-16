@@ -1232,6 +1232,8 @@
     "selfResultVisibilityOff": "Tidak aktif",
     "selfResultVisibilityAfterSubmit": "Selepas ketua hantar",
     "selfResultVisibilityAlways": "Sentiasa",
+    "labelSuperiorCanViewSubordinateIdp": "Benarkan ketua melihat IDP staf",
+    "superiorCanViewSubordinateIdpHint": "Apabila diaktifkan, ketua boleh membuka IDP / pecahan keputusan (RCL, kendiri, ketua, jurang) staf yang dinilainya, baca sahaja, selepas semua penilai menghantar. Berfungsi walaupun IDP disorokkan daripada staf. Default: tidak aktif.",
     "labelLogoPreview": "Pratonton Logo",
     "logoFileTypeError": "Sila pilih fail imej",
     "logoFileSizeError": "Saiz fail mestilah kurang daripada 5MB",
@@ -1580,6 +1582,15 @@
     "competenciesBadge": "{count} Kompetensi",
     "rclLabel": "TKD"
   },
+  "StaffSubordinateIdpPage": {
+    "back": "Kembali ke Penilaian Ketua",
+    "title": "IDP Staf",
+    "titleWithName": "IDP: {name}",
+    "description": "Paparan baca sahaja pelan pembangunan staf anda, berdasarkan skor penilaian yang telah dihantar",
+    "disabledTitle": "Paparan IDP staf tidak tersedia",
+    "disabledDesc": "Admin anda belum membenarkan ketua melihat Pelan Pembangunan Individu (IDP) staf.",
+    "generateCardDesc": "Pilih penilaian untuk menjana IDP staf ini"
+  },
   "StaffIdpPage": {
     "title": "Pelan Pembangunan Individu (IDP) Saya",
     "description": "Lihat pelan pembangunan peribadi anda berdasarkan keputusan penilaian kompetensi",
@@ -1730,7 +1741,8 @@
     "weightageSuperiorBadge": "Penyelia: {value}%",
     "authErrorToast": "Ralat pengesahan",
     "loginRequiredToast": "Sila log masuk untuk meneruskan",
-    "loadDataFailedToast": "Gagal memuatkan data"
+    "loadDataFailedToast": "Gagal memuatkan data",
+    "viewIdp": "Lihat IDP"
   },
   "StaffAssessmentFormPage": {
     "loading": "Memuatkan...",

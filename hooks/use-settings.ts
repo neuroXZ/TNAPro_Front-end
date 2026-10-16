@@ -10,11 +10,13 @@ import { settingAPI, type SelfResultVisibility } from "@/lib/api"
 export interface AppSettings {
   hideIdpFromStaff: boolean
   selfResultVisibility: SelfResultVisibility
+  superiorCanViewSubordinateIdp: boolean
 }
 
 const DEFAULT_SETTINGS: AppSettings = {
   hideIdpFromStaff: false,
   selfResultVisibility: 'OFF',
+  superiorCanViewSubordinateIdp: false,
 }
 
 export function useSettings() {
@@ -31,6 +33,7 @@ export function useSettings() {
         setSettings({
           hideIdpFromStaff: row?.hideIdpFromStaff ?? false,
           selfResultVisibility: row?.selfResultVisibility ?? 'OFF',
+          superiorCanViewSubordinateIdp: row?.superiorCanViewSubordinateIdp ?? false,
         })
       })
       .catch(() => {

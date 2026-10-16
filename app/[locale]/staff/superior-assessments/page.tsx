@@ -8,9 +8,10 @@ import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { assessmentAPI, assessorAPI, staffAPI, assessmentResultAPI, positionCompetencyAPI } from "@/lib/api"
 import { toast } from "sonner"
-import { IconUsers, IconClipboardCheck, IconAlertCircle, IconCheck } from "@tabler/icons-react"
+import { IconUsers, IconClipboardCheck, IconAlertCircle, IconCheck, IconFileText } from "@tabler/icons-react"
 import { format } from "date-fns"
 import { useTranslations } from "next-intl"
+import { useSettings } from "@/hooks/use-settings"
 
 interface Assessment {
   id: string
@@ -37,6 +38,7 @@ interface Subordinate {
 export default function SuperiorAssessmentsPage() {
   const router = useRouter()
   const t = useTranslations('StaffSuperiorAssessmentsPage')
+  const { settings } = useSettings()
   const [assessments, setAssessments] = useState<Assessment[]>([])
   const [subordinates, setSubordinates] = useState<Subordinate[]>([])
   const [selectedAssessmentId, setSelectedAssessmentId] = useState<string>("")
@@ -359,16 +361,22 @@ export default function SuperiorAssessmentsPage() {
                         const isCompleted = subordinate.position?.id && subordinateResults.length > 0
                           && subordinateResults.every((r: any) => r.status === 'SUBMITTED')
                         
+                        // The IDP link stays available after the assessment
+                        // period closes; that is when it is most useful. The
+                        // backend still refuses it until every rater has
+                        // submitted (the IDP page then shows why).
+                        const canViewIdp = settings.superiorCanViewSubordinateIdp && isCompleted
+
                         return (
+                          <div key={subordinate.id} className="flex items-stretch gap-2">
                           <Button
-                            key={subordinate.id}
                             variant="outline"
-                            className="justify-start h-auto py-3"
+                            className="flex-1 min-w-0 justify-start h-auto py-3 whitespace-normal"
                             onClick={() => router.push(`/staff/superior-assessments/${selectedAssessment.id}/${subordinate.id}`)}
                             disabled={!withinPeriod}
                           >
-                            <div className="flex items-center justify-between w-full">
-                              <div className="text-left">
+                            <div className="flex items-center justify-between gap-2 w-full min-w-0">
+                              <div className="text-left min-w-0">
                                 <div className="font-semibold">{subordinate.name}</div>
                                 <div className="text-xs text-muted-foreground">
                                   {subordinate.staffOrgId} • {subordinate.position?.name || 'No Position'}
@@ -385,6 +393,18 @@ export default function SuperiorAssessmentsPage() {
                               )}
                             </div>
                           </Button>
+                          {canViewIdp && (
+                            <Button
+                              variant="outline"
+                              className="h-auto shrink-0"
+                              onClick={() => router.push(`/staff/superior-assessments/${selectedAssessment.id}/${subordinate.id}/idp`)}
+                              title={t('viewIdp')}
+                            >
+                              <IconFileText className="size-4 sm:mr-2" />
+                              <span className="hidden sm:inline">{t('viewIdp')}</span>
+                            </Button>
+                          )}
+                          </div>
                         )
                       })}
                     </div>

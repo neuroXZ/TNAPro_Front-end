@@ -1232,6 +1232,8 @@
     "selfResultVisibilityOff": "Off",
     "selfResultVisibilityAfterSubmit": "After superior submits",
     "selfResultVisibilityAlways": "Always",
+    "labelSuperiorCanViewSubordinateIdp": "Let superiors view their staff's IDP",
+    "superiorCanViewSubordinateIdpHint": "When on, a superior can open the IDP / result breakdown (RCL, self, superior, gap) of the staff they are the assigned superior for, read-only, once every rater has submitted. Works even when the IDP is hidden from staff. Off by default.",
     "labelLogoPreview": "Logo Preview",
     "logoFileTypeError": "Please select an image file",
     "logoFileSizeError": "File size must be less than 5MB",
@@ -1580,6 +1582,15 @@
     "competenciesBadge": "{count} Competencies",
     "rclLabel": "RCL"
   },
+  "StaffSubordinateIdpPage": {
+    "back": "Back to Superior Assessments",
+    "title": "Staff IDP",
+    "titleWithName": "IDP: {name}",
+    "description": "Read-only view of your staff member's development plan, based on submitted assessment scores",
+    "disabledTitle": "Viewing staff IDPs is not available",
+    "disabledDesc": "Your administrator has not enabled superior access to staff Individual Development Plans.",
+    "generateCardDesc": "Choose an assessment to generate this staff member's IDP"
+  },
   "StaffIdpPage": {
     "title": "My Individual Development Plan (IDP)",
     "description": "View your personalized development plan based on competency assessment results",
@@ -1730,7 +1741,8 @@
     "weightageSuperiorBadge": "Superior: {value}%",
     "authErrorToast": "Authentication error",
     "loginRequiredToast": "Please login to continue",
-    "loadDataFailedToast": "Failed to load data"
+    "loadDataFailedToast": "Failed to load data",
+    "viewIdp": "View IDP"
   },
   "StaffAssessmentFormPage": {
     "loading": "Loading...",

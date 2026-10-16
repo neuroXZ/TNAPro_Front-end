@@ -1232,6 +1232,8 @@
     "selfResultVisibilityOff": "Tidak aktif",
     "selfResultVisibilityAfterSubmit": "Selepas penyelia hantar",
     "selfResultVisibilityAlways": "Sentiasa",
+    "labelSuperiorCanViewSubordinateIdp": "Benarkan penyelia melihat PPK staf",
+    "superiorCanViewSubordinateIdpHint": "Apabila diaktifkan, penyelia boleh membuka PPK / pecahan keputusan (RCL, kendiri, penyelia, jurang) staf yang dinilainya, baca sahaja, selepas semua penilai menghantar. Berfungsi walaupun PPK disorokkan daripada staf. Default: tidak aktif.",
     "labelLogoPreview": "Pratonton Logo",
     "logoFileTypeError": "Sila pilih fail imej",
     "logoFileSizeError": "Saiz fail mestilah kurang daripada 5MB",
@@ -1580,6 +1582,15 @@
     "competenciesBadge": "{count} Kompetensi",
     "rclLabel": "TKD"
   },
+  "StaffSubordinateIdpPage": {
+    "back": "Kembali ke Penilaian Penyelia",
+    "title": "PPK Staf",
+    "titleWithName": "PPK: {name}",
+    "description": "Paparan baca sahaja pelan pembangunan staf anda, berdasarkan skor penilaian yang telah dihantar",
+    "disabledTitle": "Paparan PPK staf tidak tersedia",
+    "disabledDesc": "Admin anda belum membenarkan penyelia melihat Pelan Pembangunan Kompetensi (PPK) staf.",
+    "generateCardDesc": "Pilih penilaian untuk menjana PPK staf ini"
+  },
   "StaffIdpPage": {
     "title": "Pelan Pembangunan Kompetensi (PPK) Saya",
     "description": "Lihat pelan pembangunan peribadi anda berdasarkan keputusan penilaian kompetensi",
@@ -1730,7 +1741,8 @@
     "weightageSuperiorBadge": "Penyelia: {value}%",
     "authErrorToast": "Ralat pengesahan",
     "loginRequiredToast": "Sila log masuk untuk meneruskan",
-    "loadDataFailedToast": "Gagal memuatkan data"
+    "loadDataFailedToast": "Gagal memuatkan data",
+    "viewIdp": "Lihat PPK"
   },
   "StaffAssessmentFormPage": {
     "loading": "Memuatkan...",

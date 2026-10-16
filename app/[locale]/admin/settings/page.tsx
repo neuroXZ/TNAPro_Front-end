@@ -79,6 +79,7 @@ interface Setting {
   gapRatioFloorNegative?: boolean
   hideIdpFromStaff?: boolean
   selfResultVisibility?: SelfResultVisibility
+  superiorCanViewSubordinateIdp?: boolean
 }
 
 interface DashboardSummary {
@@ -99,6 +100,7 @@ export default function SettingsPage() {
   const [gapRatioFloorNegative, setGapRatioFloorNegative] = useState(false)
   const [hideIdpFromStaff, setHideIdpFromStaff] = useState(false)
   const [selfResultVisibility, setSelfResultVisibility] = useState<SelfResultVisibility>('OFF')
+  const [superiorCanViewSubordinateIdp, setSuperiorCanViewSubordinateIdp] = useState(false)
   const [dashboardData, setDashboardData] = useState<DashboardSummary | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [isSaving, setIsSaving] = useState(false)
@@ -247,6 +249,7 @@ export default function SettingsPage() {
         setGapRatioFloorNegative(setting.gapRatioFloorNegative ?? false)
         setHideIdpFromStaff(setting.hideIdpFromStaff ?? false)
         setSelfResultVisibility(setting.selfResultVisibility ?? 'OFF')
+        setSuperiorCanViewSubordinateIdp(setting.superiorCanViewSubordinateIdp ?? false)
       }
     } catch (error) {
       toast.error(t('fetchError'))
@@ -362,6 +365,23 @@ export default function SettingsPage() {
       await fetchSettings()
     } catch (error) {
       setSelfResultVisibility(previous)
+      toast.error(t('saveError'))
+      console.error(error)
+    }
+  }
+
+  const handleToggleSuperiorCanViewSubordinateIdp = async (checked: boolean) => {
+    setSuperiorCanViewSubordinateIdp(checked)
+    try {
+      if (settings?.id) {
+        await settingAPI.update(settings.id, { superiorCanViewSubordinateIdp: checked })
+      } else {
+        await settingAPI.create({ superiorCanViewSubordinateIdp: checked })
+      }
+      toast.success(t('saveSuccess'))
+      await fetchSettings()
+    } catch (error) {
+      setSuperiorCanViewSubordinateIdp(!checked)
       toast.error(t('saveError'))
       console.error(error)
     }
@@ -663,6 +683,20 @@ export default function SettingsPage() {
                     <SelectItem value="ALWAYS">{t('selfResultVisibilityAlways')}</SelectItem>
                   </SelectContent>
                 </Select>
+              </div>
+
+              <div className="flex items-center justify-between rounded-md border p-4">
+                <div className="space-y-0.5">
+                  <Label htmlFor="superiorCanViewSubordinateIdp">{t('labelSuperiorCanViewSubordinateIdp')}</Label>
+                  <p className="text-xs text-muted-foreground">
+                    {t('superiorCanViewSubordinateIdpHint')}
+                  </p>
+                </div>
+                <Switch
+                  id="superiorCanViewSubordinateIdp"
+                  checked={superiorCanViewSubordinateIdp}
+                  onCheckedChange={handleToggleSuperiorCanViewSubordinateIdp}
+                />
               </div>
             </CardContent>
           </Card>
