@@ -5,6 +5,13 @@ import { useRouter } from 'next/navigation';
 import axios from 'axios';
 import { authAPI, invalidateApiCache } from '@/lib/api';
 
+export class LoginError extends Error {
+  constructor(message: string, public readonly status?: number) {
+    super(message);
+    this.name = 'LoginError';
+  }
+}
+
 interface User {
   id: string;
   email: string;
@@ -96,7 +103,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       console.error('Login error:', error);
       if (axios.isAxiosError(error)) {
         const data = error.response?.data as { error?: string; message?: string } | undefined;
-        throw new Error(data?.error || data?.message || 'Login failed');
+        // Keep the HTTP status (undefined = no response, i.e. server unreachable)
+        // so the login form can show a translated message for each case.
+        throw new LoginError(data?.error || data?.message || 'Login failed', error.response?.status);
       }
       if (error instanceof Error) {
         throw new Error(error.message || 'Login failed');

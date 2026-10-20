@@ -48,11 +48,15 @@ api.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
-// Force a re-login when the session is no longer valid
+// Force a re-login when the session is no longer valid. A 401 from the login
+// request itself is a wrong ID/password, not an expired session: redirecting
+// there reloaded the login page and swallowed the error, so the user saw no
+// message at all. Let the login form handle that one.
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response?.status === 401) {
+    const isLoginRequest = error.config?.url?.startsWith('/auth/login');
+    if (error.response?.status === 401 && !isLoginRequest) {
       localStorage.removeItem('token');
       localStorage.removeItem('user');
       window.location.href = '/login';

@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { useTranslations } from "next-intl"
-import { useAuth } from "@/providers/auth-provider"
+import { LoginError, useAuth } from "@/providers/auth-provider"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
@@ -71,11 +71,15 @@ export function LoginForm({
     try {
       await login(username, password, userType);
       toast.success(t('loginSuccess'));
-    } 
-    // catch (error: unknown) {
-    //   toast.error(error.message || "Login failed. Please check your credentials.");
-    // } 
-    finally {
+    } catch (error: unknown) {
+      // 401 covers both a wrong password and an ID that doesn't exist; the
+      // backend deliberately doesn't say which, so neither do we.
+      const status = error instanceof LoginError ? error.status : undefined;
+      if (status === 401) toast.error(t('invalidCredentials'));
+      else if (status === 429) toast.error(t('tooManyAttempts'));
+      else if (error instanceof LoginError && status === undefined) toast.error(t('cannotConnect'));
+      else toast.error(t('loginFailed'));
+    } finally {
       setIsLoading(false);
     }
   };
@@ -102,12 +106,8 @@ export function LoginForm({
       toast.success(t('resetLinkSent'));
       setShowForgotPassword(false);
       setForgotPasswordEmail("");
-    // } catch (error: unknown) {
-    //   console.error('ðŸ”¥ Forgot password error in component:', error);
-    //   const errorMessage = error.message?.includes('Cannot connect') 
-    //     ? "Cannot connect to server. Please check your network connection."
-    //     : error.response?.data?.error || error.message || "Failed to send password reset email.";
-    //   toast.error(errorMessage);
+    } catch {
+      toast.error(t('resetLinkFailed'));
     } finally {
       setIsForgotPasswordLoading(false);
     }
