@@ -13,6 +13,7 @@ import {
 } from "@/lib/api"
 import { formatGapRatioPercent } from "@/lib/gap-ratio"
 import { buildAncestorLookup, resolveForStaffUnit } from "@/lib/position-competency-resolution"
+import { describeSuperior } from "../utils"
 import type {
   Assessment,
   AssessmentResult,
@@ -169,10 +170,23 @@ export function useAssessmentData(assessmentId: string) {
   }
 
   const getAllStaffWithResults = (matrix: StaffCompetencyMatrix): StaffMemberWithResults[] => {
+    const ratedMappingIds = new Set(results.map((r) => r.assessorId))
+    const superiorMappingsByStaff = new Map<string, Assessor[]>()
+    assessors
+      .filter((a) => a.type?.toLowerCase() === "superior" && a.assessorId)
+      .forEach((a) => superiorMappingsByStaff.set(a.staffId, [...(superiorMappingsByStaff.get(a.staffId) ?? []), a]))
+
     return staff
       .map((staffMember) => {
         const hasResults = !!matrix[staffMember.id]
         const position = positions.find((p) => p.id === staffMember.positionId)
+        const superior = describeSuperior(
+          (superiorMappingsByStaff.get(staffMember.id) ?? []).map((a) => ({
+            person: { id: a.assessorId, name: a.assessor?.name ?? null },
+            ratedThisAssessment: ratedMappingIds.has(a.id),
+          })),
+          staffMember.supervisor ?? null
+        )
 
         return {
           id: staffMember.id,
@@ -181,6 +195,7 @@ export function useAssessmentData(assessmentId: string) {
           positionId: staffMember.positionId,
           positionName: position?.name || "No Position",
           hasResults,
+          superior,
         }
       })
       .sort((a, b) => (a.name ?? "").localeCompare(b.name ?? ""))

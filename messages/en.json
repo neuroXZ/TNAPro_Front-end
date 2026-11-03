@@ -782,7 +782,10 @@
     "importDialogDesc": "Upload a CSV file to bulk import staff. Download the template to see the required format.",
     "fieldCsvFile": "CSV File",
     "selectedFile": "Selected: {name}",
-    "importErrorRow": "Row {row}: {message}"
+    "importErrorRow": "Row {row}: {message}",
+    "fieldReportsTo": "Reports to (optional)",
+    "placeholderReportsTo": "Select who this staff member reports to",
+    "reportsToHelp": "For information only. Who assesses this staff member is set under Assessors."
   },
   "AdminAssessmentsPage": {
     "title": "Assessment Management",
@@ -1011,8 +1014,8 @@
     "assignPosition": "Assign Position",
     "reportingStructure": "Reporting Structure",
     "reportingStructureDesc": "View this staff member's superior and subordinates within the organization.",
-    "superior": "Superior",
-    "noSuperiorAssigned": "No superior assigned",
+    "superior": "Superior assessor",
+    "noSuperiorAssigned": "No superior assessor assigned",
     "subordinates": "Subordinates ({count})",
     "noSubordinatesAssigned": "No subordinates assigned",
     "loading": "Loading staff profile...",
@@ -1088,7 +1091,9 @@
     "colAvgScore": "Avg Score",
     "colAvgGap": "Avg Gap",
     "selfWord": "Self",
-    "superiorWord": "Superior"
+    "superiorWord": "Superior",
+    "assessedByLabel": "Assessed by",
+    "reportsToLabel": "Reports to"
   },
   "AdminIdpPage": {
     "title": "Individual Development Plan (IDP)",
@@ -1433,7 +1438,7 @@
     "colGrade": "Grade",
     "colEmail": "Email",
     "colPhone": "Phone",
-    "colSupervisor": "Supervisor",
+    "colSupervisor": "Reports To",
     "levelLabel": "Level {level}",
     "noUnitAssigned": "No Unit Assigned",
     "loadDataError": "Failed to load staff data",
@@ -1472,7 +1477,7 @@
     "colPosition": "Position",
     "colEmail": "Email",
     "colPhone": "Phone",
-    "colSupervisor": "Supervisor",
+    "colSupervisor": "Reports To",
     "levelLabel": "(Level {level})",
     "noGradeAssigned": "No Grade Assigned",
     "loadDataError": "Failed to load data",
@@ -1716,12 +1721,14 @@
     "passwordChangeSuccess": "Password changed successfully.",
     "passwordChangeError": "Failed to change password.",
     "supervisorTitle": "Supervisor",
-    "supervisorDesc": "Your reporting manager",
+    "supervisorDesc": "Who assesses you, and who you report to if that is someone else",
     "subordinatesTitle": "Subordinates",
-    "subordinatesDesc": "Staff members you supervise",
+    "subordinatesDesc": "Staff members you assess as their superior",
     "noSupervisor": "No supervisor assigned.",
     "noSubordinates": "You have no subordinates assigned.",
-    "imageError": "Failed to load profile image"
+    "imageError": "Failed to load profile image",
+    "assessorRole": "Assessor",
+    "reportsToRole": "Reports to"
   },
   "StaffSuperiorAssessmentsPage": {
     "title": "Superior Assessments",

@@ -295,7 +295,7 @@ export default function StaffProfilePage() {
                 password: formData.password,
                 positionId: formData.positionId || undefined,
                 unitId: formData.unitId || undefined,
-                supervisorId: formData.supervisorId || undefined,
+                supervisorId: formData.supervisorId || null, // null clears the reporting line
             }
 
             // Remove password if empty (for edit)

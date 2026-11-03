@@ -34,12 +34,18 @@ interface ProfileData {
     id: string
     name: string
   }
-  supervisor?: {
+  // Who rates this staff member as superior (Assessor mappings), and the profile supervisor
+  // as the reporting line only when that is someone else.
+  superiorAssessors?: Array<{
     id: string
     name: string
     position?: { name: string }
-    positionName?: string
-  }
+  }>
+  reportsTo?: {
+    id: string
+    name: string
+    position?: { name: string }
+  } | null
   subordinates?: Array<{
     id: string
     name: string
@@ -124,43 +130,44 @@ export default function MyProfile() {
             })
             .filter(Boolean)
 
-          // Find supervisor from assessor relationships if not in staff relation
-          let supervisorData = staffWithRelations?.supervisor
-          if (!supervisorData) {
-            const supervisorAssessor = allAssessors.find(
-              (a: any) => a.staffId === userData.id && a.type === 'superior'
-            )
-            if (supervisorAssessor && supervisorAssessor.assessor) {
-              // Get full supervisor data from staff list to include position
-              const supervisorStaffData = allStaff.find((s: any) => s.id === supervisorAssessor.assessor.id)
-              supervisorData = {
-                ...supervisorAssessor.assessor,
-                position: supervisorStaffData?.position || supervisorAssessor.assessor.position
+          // Superior assessors, one per person, with their position from the staff list
+          const superiorAssessors = allAssessors
+            .filter((a: any) => a.staffId === userData.id && a.type === 'superior' && a.assessorId)
+            .map((a: any) => allStaff.find((s: any) => s.id === a.assessorId))
+            .filter((s: any, i: number, list: any[]) => s && list.findIndex((o: any) => o?.id === s.id) === i)
+            .map((s: any) => ({ id: s.id, name: s.name, position: s.position }))
+
+          // The reporting line, only when it is not one of the assessors
+          const supervisor = staffWithRelations?.supervisor
+          const reportsTo = supervisor && !superiorAssessors.some((a: any) => a.id === supervisor.id)
+            ? {
+                id: supervisor.id,
+                name: supervisor.name,
+                position: allStaff.find((s: any) => s.id === supervisor.id)?.position,
               }
-            }
-          }
-          console.log('Supervisor from assessor relationship:', supervisorData) // Debug log
+            : null
 
           if (staffWithRelations) {
             const enrichedProfile = {
               ...fullProfile,
               position: staffWithRelations.position,
               unit: staffWithRelations.unit,
-              supervisor: supervisorData || staffWithRelations.supervisor,
+              superiorAssessors,
+              reportsTo,
               subordinates,
             }
             console.log('Final enriched profile:', enrichedProfile) // Debug log
-            console.log('Supervisor from enriched profile:', enrichedProfile.supervisor) // Debug log
             setProfile(enrichedProfile)
             updateFormData(enrichedProfile)
           } else {
-            // If staff relation not found, try to use fullProfile with found supervisor
+            // If staff relation not found, use fullProfile with the assessors found
             const basicProfile = {
               ...fullProfile,
-              supervisor: supervisorData,
+              superiorAssessors,
+              reportsTo,
               subordinates,
             }
-            console.log('Basic profile with supervisor:', basicProfile) // Debug log
+            console.log('Basic profile:', basicProfile) // Debug log
             setProfile(basicProfile)
             updateFormData(basicProfile)
           }
@@ -565,21 +572,23 @@ export default function MyProfile() {
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          {profile?.supervisor ? (
-            <div className="flex items-center justify-between rounded-md border px-3 py-2 text-sm">
-              <div className="flex items-center gap-2">
-                <IconUsers className="size-4 text-muted-foreground" />
-                <span className="font-medium">{profile.supervisor.name}</span>
-              </div>
-              <span className="text-muted-foreground">
-                {(() => {
-                  console.log('Supervisor data:', profile.supervisor);
-                  console.log('Position object:', profile.supervisor.position);
-                  console.log('Position name:', profile.supervisor.position?.name);
-                  console.log('Position name direct:', profile.supervisor.positionName);
-                  return profile.supervisor.position?.name || profile.supervisor.positionName || '-';
-                })()}
-              </span>
+          {profile?.superiorAssessors?.length || profile?.reportsTo ? (
+            <div className="space-y-2">
+              {[
+                ...(profile.superiorAssessors ?? []).map((person) => ({ person, role: t('assessorRole') })),
+                ...(profile.reportsTo ? [{ person: profile.reportsTo, role: t('reportsToRole') }] : []),
+              ].map(({ person, role }) => (
+                <div key={`${role}-${person.id}`} className="flex items-center justify-between gap-3 rounded-md border px-3 py-2 text-sm">
+                  <div className="flex items-center gap-2 min-w-0">
+                    <IconUsers className="size-4 shrink-0 text-muted-foreground" />
+                    <div className="min-w-0">
+                      <p className="font-medium break-words">{person.name}</p>
+                      <p className="text-xs text-muted-foreground">{role}</p>
+                    </div>
+                  </div>
+                  <span className="text-muted-foreground text-right">{person.position?.name || '-'}</span>
+                </div>
+              ))}
             </div>
           ) : (
             <p className="text-muted-foreground">{t('noSupervisor')}</p>

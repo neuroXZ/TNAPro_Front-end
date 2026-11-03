@@ -782,7 +782,10 @@
     "importDialogDesc": "Muat naik fail CSV untuk import pukal pegawai. Muat turun templat untuk lihat format yang diperlukan.",
     "fieldCsvFile": "Fail CSV",
     "selectedFile": "Dipilih: {name}",
-    "importErrorRow": "Baris {row}: {message}"
+    "importErrorRow": "Baris {row}: {message}",
+    "fieldReportsTo": "Melapor kepada (pilihan)",
+    "placeholderReportsTo": "Pilih orang yang pegawai ini melapor kepada",
+    "reportsToHelp": "Untuk maklumat sahaja. Penilai pegawai ini ditetapkan di menu Penilai."
   },
   "AdminAssessmentsPage": {
     "title": "Pengurusan Penilaian",
@@ -1011,8 +1014,8 @@
     "assignPosition": "Tetapkan Jawatan",
     "reportingStructure": "Struktur Pelaporan",
     "reportingStructureDesc": "Lihat penyelia dan orang bawahan ahli pegawai ini dalam organisasi.",
-    "superior": "Penyelia",
-    "noSuperiorAssigned": "Tiada penyelia ditetapkan",
+    "superior": "Penilai",
+    "noSuperiorAssigned": "Tiada penilai ditetapkan",
     "subordinates": "Orang Bawahan ({count})",
     "noSubordinatesAssigned": "Tiada orang bawahan ditetapkan",
     "loading": "Memuat profil pegawai...",
@@ -1088,7 +1091,9 @@
     "colAvgScore": "Purata Markah",
     "colAvgGap": "Purata Jurang",
     "selfWord": "Kendiri",
-    "superiorWord": "Penyelia"
+    "superiorWord": "Penyelia",
+    "assessedByLabel": "Dinilai oleh",
+    "reportsToLabel": "Melapor kepada"
   },
   "AdminIdpPage": {
     "title": "Pelan Pembangunan Kompetensi (PPK)",
@@ -1433,7 +1438,7 @@
     "colGrade": "Gred",
     "colEmail": "E-mel",
     "colPhone": "Telefon",
-    "colSupervisor": "Penyelia",
+    "colSupervisor": "Melapor Kepada",
     "levelLabel": "Tahap {level}",
     "noUnitAssigned": "Tiada Unit Ditetapkan",
     "loadDataError": "Gagal memuatkan data pegawai",
@@ -1472,7 +1477,7 @@
     "colPosition": "Jawatan",
     "colEmail": "E-mel",
     "colPhone": "Telefon",
-    "colSupervisor": "Penyelia",
+    "colSupervisor": "Melapor Kepada",
     "levelLabel": "(Tahap {level})",
     "noGradeAssigned": "Tiada Gred Ditetapkan",
     "loadDataError": "Gagal memuatkan data",
@@ -1716,12 +1721,14 @@
     "passwordChangeSuccess": "Kata laluan berjaya ditukar.",
     "passwordChangeError": "Gagal menukar kata laluan.",
     "supervisorTitle": "Penyelia",
-    "supervisorDesc": "Pengurus pelaporan anda",
+    "supervisorDesc": "Penilai anda, dan orang yang anda melapor kepada jika berbeza",
     "subordinatesTitle": "Bawahan",
-    "subordinatesDesc": "Pegawai yang anda seliakan",
+    "subordinatesDesc": "Pegawai yang anda nilai sebagai penyelia",
     "noSupervisor": "Tiada penyelia ditetapkan.",
     "noSubordinates": "Anda tiada bawahan yang ditetapkan.",
-    "imageError": "Gagal memuatkan gambar profil"
+    "imageError": "Gagal memuatkan gambar profil",
+    "assessorRole": "Penilai",
+    "reportsToRole": "Melapor kepada"
   },
   "StaffSuperiorAssessmentsPage": {
     "title": "Penilaian Penyelia",

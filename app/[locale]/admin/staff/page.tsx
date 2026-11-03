@@ -182,7 +182,8 @@ export default function StaffManagementPage() {
         password: formData.password,
         positionId: formData.positionId || undefined,
         unitId: formData.unitId || undefined,
-        supervisorId: formData.supervisorId || undefined,
+        // null clears the reporting line on edit
+        supervisorId: formData.supervisorId || (editingStaff ? null : undefined),
         gred: formData.gred || undefined,
       }
 

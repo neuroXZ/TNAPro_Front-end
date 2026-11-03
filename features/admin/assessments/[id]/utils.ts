@@ -1,4 +1,30 @@
 import { formatGapRatioPercent } from "@/lib/gap-ratio"
+import type { SuperiorLine } from "./types"
+
+type PersonRef = { id: string; name: string | null }
+
+const displayName = (person: PersonRef) => person.name?.trim() || "N/A"
+
+// Twin of the backend's utils/superiorAssessor.util.ts (used by the CGA exports); keep the
+// two in step. The superior assessor (Assessor mapping) gives the superior score; the
+// profile supervisor is only the reporting line, named when it is someone else.
+// Assessors are the superiors who rated in this assessment, or every assigned one before
+// anyone has. One name per person.
+export const describeSuperior = (
+  mappings: { person: PersonRef; ratedThisAssessment: boolean }[],
+  supervisor: PersonRef | null
+): SuperiorLine => {
+  const rated = mappings.filter((m) => m.ratedThisAssessment)
+  const seen = new Set<string>()
+  const assessors = (rated.length > 0 ? rated : mappings)
+    .map((m) => m.person)
+    .filter((person) => !seen.has(person.id) && seen.add(person.id))
+
+  return {
+    assessors: assessors.map(displayName),
+    reportsTo: supervisor && !seen.has(supervisor.id) ? displayName(supervisor) : null,
+  }
+}
 
 export const getScoreColor = (score?: number) => {
   if (!score) return "text-muted-foreground"

@@ -57,6 +57,12 @@ interface Unit {
   name: string
 }
 
+interface StaffOption {
+  id: string
+  name: string
+  staffOrgId?: string
+}
+
 export function StaffFormDialog({
   open,
   onOpenChange,
@@ -70,6 +76,7 @@ export function StaffFormDialog({
   const [showPassword, setShowPassword] = useState(false)
   const [positions, setPositions] = useState<Position[]>([])
   const [units, setUnits] = useState<Unit[]>([])
+  const [staffOptions, setStaffOptions] = useState<StaffOption[]>([])
   const [isUploading, setIsUploading] = useState(false)
   const [previewUrl, setPreviewUrl] = useState<string | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
@@ -90,12 +97,14 @@ export function StaffFormDialog({
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [positionsData, unitsData] = await Promise.all([
+        const [positionsData, unitsData, staffData] = await Promise.all([
           positionAPI.getAll(),
           unitAPI.getAll(),
+          staffAPI.getAll(),
         ])
         setPositions(positionsData)
         setUnits(unitsData)
+        setStaffOptions(staffData)
       } catch (error) {
         console.error("Failed to fetch form data:", error)
       }
@@ -392,6 +401,24 @@ export function StaffFormDialog({
                 emptyText={t('noUnitFound')}
               />
             </div>
+            {/* Reporting line only, for information; who assesses is set under Assessors. */}
+            {editingStaff && (
+              <div className="grid gap-2">
+                <Label htmlFor="supervisorId">{t('fieldReportsTo')}</Label>
+                <Combobox
+                  options={staffOptions
+                    .filter((s) => s.id !== editingStaff.id)
+                    .sort((a, b) => (a.name ?? "").localeCompare(b.name ?? ""))
+                    .map((s) => ({ value: s.id, label: s.staffOrgId ? `${s.name} (${s.staffOrgId})` : s.name }))}
+                  value={formData.supervisorId}
+                  onChange={(value) => setFormData({ ...formData, supervisorId: value })}
+                  placeholder={t('placeholderReportsTo')}
+                  searchPlaceholder={t('searchPlaceholder')}
+                  emptyText={t('noStaffFound')}
+                />
+                <p className="text-xs text-muted-foreground">{t('reportsToHelp')}</p>
+              </div>
+            )}
           </div>
           <DialogFooter>
             <Button

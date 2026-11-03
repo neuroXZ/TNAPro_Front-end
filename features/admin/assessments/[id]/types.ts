@@ -28,6 +28,7 @@ export interface Staff {
   orgId?: string
   positionId?: string
   unitId?: string | null
+  supervisor?: { id: string; name: string | null } | null
 }
 
 export interface Assessor {
@@ -37,6 +38,7 @@ export interface Assessor {
   assessorId: string
   type: string
   staff?: Staff
+  assessor?: Staff
 }
 
 export interface AssessmentResult {
@@ -85,6 +87,13 @@ export interface StaffMemberWithResults {
   positionId?: string
   positionName: string
   hasResults: boolean
+  superior: SuperiorLine
+}
+
+// See describeSuperior in ./utils.
+export interface SuperiorLine {
+  assessors: string[]
+  reportsTo: string | null
 }
 
 export interface CompetencyAverage {

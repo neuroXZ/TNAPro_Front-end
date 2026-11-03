@@ -25,6 +25,12 @@ interface StaffAccordionItemProps {
 export function StaffAccordionItem({ staffMember, staffData, assessmentId, onDataUpdate }: StaffAccordionItemProps) {
   const t = useTranslations('AdminAssessmentDetailPage')
   const { flags: featureFlags } = useFeatureFlags()
+  // The superior assessor, then the reporting line only when that is someone else.
+  const { superior } = staffMember
+  const superiorLine = [
+    superior.assessors.length > 0 && `${t('assessedByLabel')}: ${superior.assessors.join(", ")}`,
+    superior.reportsTo && `${t('reportsToLabel')}: ${superior.reportsTo}`,
+  ].filter(Boolean).join(" • ")
   const clusterNames = staffData
     ? Array.from(
         new Set(
@@ -97,6 +103,9 @@ export function StaffAccordionItem({ staffMember, staffData, assessmentId, onDat
               {staffMember.orgId && `${staffMember.orgId} • `}
               {staffMember.positionName}
             </p>
+            {superiorLine && (
+              <p className="text-xs text-muted-foreground text-left mt-0.5">{superiorLine}</p>
+            )}
           </div>
           <div className="flex items-center gap-2 mr-4">
             {staffMember.hasResults && (
