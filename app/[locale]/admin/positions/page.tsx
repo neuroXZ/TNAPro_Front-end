@@ -296,12 +296,14 @@ export default function PositionManagementPage() {
                     variant="outline"
                     role="combobox"
                     aria-expanded={gradePopoverOpen}
-                    className="w-full sm:w-[180px] justify-between"
+                    className="w-full sm:w-auto sm:min-w-[180px] sm:max-w-[300px] justify-between"
                   >
-                    {selectedGradeId === "all" 
-                      ? t('filterByGrade')
-                      : grades.find((g) => g.id === selectedGradeId)?.name || t('filterByGrade')
-                    }
+                    <span className="truncate">
+                      {selectedGradeId === "all"
+                        ? t('filterByGrade')
+                        : grades.find((g) => g.id === selectedGradeId)?.name || t('filterByGrade')
+                      }
+                    </span>
                     <IconFilter className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                   </Button>
                 </PopoverTrigger>
@@ -345,12 +347,14 @@ export default function PositionManagementPage() {
                       variant="outline"
                       role="combobox"
                       aria-expanded={categoryPopoverOpen}
-                      className="w-full sm:w-[180px] justify-between"
+                      className="w-full sm:w-auto sm:min-w-[180px] sm:max-w-[300px] justify-between"
                     >
-                      {selectedCategoryId === "all" 
-                        ? t('filterByCategory')
-                        : categories.find((c) => c.id === selectedCategoryId)?.name || t('filterByCategory')
-                      }
+                      <span className="truncate">
+                        {selectedCategoryId === "all"
+                          ? t('filterByCategory')
+                          : categories.find((c) => c.id === selectedCategoryId)?.name || t('filterByCategory')
+                        }
+                      </span>
                       <IconFilter className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                     </Button>
                   </PopoverTrigger>

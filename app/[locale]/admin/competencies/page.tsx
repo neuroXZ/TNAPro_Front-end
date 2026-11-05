@@ -279,12 +279,14 @@ export default function CompetencyManagementPage() {
                     variant="outline"
                     role="combobox"
                     aria-expanded={clusterPopoverOpen}
-                    className="w-full sm:w-[180px] justify-between"
+                    className="w-full sm:w-auto sm:min-w-[180px] sm:max-w-[300px] justify-between"
                   >
-                    {selectedClusterId === "all" 
-                      ? t('filterByCluster')
-                      : clusters.find((c) => c.id === selectedClusterId)?.name || t('filterByCluster')
-                    }
+                    <span className="truncate">
+                      {selectedClusterId === "all"
+                        ? t('filterByCluster')
+                        : clusters.find((c) => c.id === selectedClusterId)?.name || t('filterByCluster')
+                      }
+                    </span>
                     <IconFilter className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                   </Button>
                 </PopoverTrigger>

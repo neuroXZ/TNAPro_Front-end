@@ -372,15 +372,17 @@ export default function StaffManagementPage() {
                     variant="outline"
                     role="combobox"
                     aria-expanded={positionPopoverOpen}
-                    className="w-full sm:w-[180px] justify-between"
+                    className="w-full sm:w-auto sm:min-w-[180px] sm:max-w-[300px] justify-between"
                   >
-                    {selectedPositionId === "all"
-                      ? t('filterByPosition')
-                      : (() => {
-                          const p = positions.find((p) => p.id === selectedPositionId)
-                          return p ? formatPositionLabel(p) : t('filterByPosition')
-                        })()
-                    }
+                    <span className="truncate">
+                      {selectedPositionId === "all"
+                        ? t('filterByPosition')
+                        : (() => {
+                            const p = positions.find((p) => p.id === selectedPositionId)
+                            return p ? formatPositionLabel(p) : t('filterByPosition')
+                          })()
+                      }
+                    </span>
                     <IconFilter className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                   </Button>
                 </PopoverTrigger>
@@ -423,12 +425,14 @@ export default function StaffManagementPage() {
                     variant="outline"
                     role="combobox"
                     aria-expanded={unitPopoverOpen}
-                    className="w-full sm:w-[180px] justify-between"
+                    className="w-full sm:w-auto sm:min-w-[180px] sm:max-w-[300px] justify-between"
                   >
-                    {selectedUnitId === "all" 
-                      ? t('filterByUnit')
-                      : units.find((u) => u.id === selectedUnitId)?.name || t('filterByUnit')
-                    }
+                    <span className="truncate">
+                      {selectedUnitId === "all"
+                        ? t('filterByUnit')
+                        : units.find((u) => u.id === selectedUnitId)?.name || t('filterByUnit')
+                      }
+                    </span>
                     <IconFilter className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                   </Button>
                 </PopoverTrigger>

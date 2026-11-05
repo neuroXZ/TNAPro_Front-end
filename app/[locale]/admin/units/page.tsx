@@ -267,12 +267,14 @@ export default function UnitManagementPage() {
                     variant="outline"
                     role="combobox"
                     aria-expanded={unitTypePopoverOpen}
-                    className="w-full sm:w-[180px] justify-between"
+                    className="w-full sm:w-auto sm:min-w-[180px] sm:max-w-[300px] justify-between"
                   >
-                    {selectedUnitType === "all" 
-                      ? t('filterByUnitType')
-                      : unitTypes.find((ut) => ut.id === selectedUnitType)?.name || t('filterByUnitType')
-                    }
+                    <span className="truncate">
+                      {selectedUnitType === "all"
+                        ? t('filterByUnitType')
+                        : unitTypes.find((ut) => ut.id === selectedUnitType)?.name || t('filterByUnitType')
+                      }
+                    </span>
                     <IconFilter className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                   </Button>
                 </PopoverTrigger>
