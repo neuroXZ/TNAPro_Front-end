@@ -455,6 +455,7 @@
     "deleteSuccess": "Unit berjaya dipadam",
     "deletedMultiple": "{count} unit berjaya dipadam",
     "deleteError": "Gagal memadam unit",
+    "saveError": "Unit tidak dapat disimpan. Sila cuba lagi.",
     "selectAll": "Pilih semua",
     "selectRow": "Pilih baris",
     "colName": "Nama Unit",

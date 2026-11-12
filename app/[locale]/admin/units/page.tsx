@@ -138,15 +138,22 @@ export default function UnitManagementPage() {
       ...formData,
       unitTypeId: formData.unitTypeId === "" || formData.unitTypeId === "none" ? null : formData.unitTypeId,
       parentId: formData.parentId === "" || formData.parentId === "none" ? null : formData.parentId,
+      negeriId: formData.negeriId === "" || formData.negeriId === "none" ? null : formData.negeriId,
       description: formData.description === "" ? null : formData.description,
     }
-    
-    if (editingUnit) {
-      await unitAPI.update(editingUnit.id, cleanFormData)
-      toast.success(t('updateSuccess'))
-    } else {
-      await unitAPI.create(cleanFormData)
-      toast.success(t('createSuccess'))
+
+    try {
+      if (editingUnit) {
+        await unitAPI.update(editingUnit.id, cleanFormData)
+        toast.success(t('updateSuccess'))
+      } else {
+        await unitAPI.create(cleanFormData)
+        toast.success(t('createSuccess'))
+      }
+    } catch (error) {
+      // Tell the admin it failed (the dialog stays open); before, a failed save was silent.
+      toast.error(t('saveError'))
+      throw error
     }
 
     setEditingUnit(null)

@@ -455,6 +455,7 @@
     "deleteSuccess": "Unit deleted successfully",
     "deletedMultiple": "{count} units deleted successfully",
     "deleteError": "Failed to delete unit",
+    "saveError": "Could not save the unit. Please try again.",
     "selectAll": "Select all",
     "selectRow": "Select row",
     "colName": "Unit Name",
