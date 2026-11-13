@@ -11,7 +11,8 @@ import {
   SortingState,
   VisibilityState,
 } from "@tanstack/react-table"
-import { positionAPI, positionCompetencyAPI } from "@/lib/api"
+import { positionAPI, positionCompetencyAPI, unitAPI } from "@/lib/api"
+import { summarizePositionScopes } from "@/features/admin/position-competencies/lib/scope-summary"
 import {
   Card,
   CardContent,
@@ -51,9 +52,11 @@ export default function PositionCompetencyManagementPage() {
   const fetchPositions = async () => {
     try {
       setIsLoading(true)
-      const [positionsData, positionCompetenciesData] = await Promise.all([
+      const [positionsData, positionCompetenciesData, unitsData] = await Promise.all([
         positionAPI.getAll(),
         positionCompetencyAPI.getAll(),
+        // Only used for the Global/unit breakdown; the list still works without it.
+        unitAPI.getAll().catch(() => []),
       ])
       
       // Distinct competencies mapped to this position across every scope
@@ -72,6 +75,9 @@ export default function PositionCompetencyManagementPage() {
           _count: {
             positionCompetencies: distinctCompetencyIds.size,
           },
+          // null unless the position has unit-scoped mappings, in which case
+          // the raw total above adds up every unit's own list.
+          _scope: summarizePositionScopes(rowsForPosition, unitsData),
         }
       })
       

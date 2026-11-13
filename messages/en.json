@@ -850,6 +850,8 @@
     "colTotalCompetencies": "Total Competencies",
     "competencyCount": "{count} competency",
     "competenciesCount": "{count} competencies",
+    "perStaffCount": "{range} competencies per staff member",
+    "scopeBreakdown": "{global} global + {scoped} unit-specific across {units} units",
     "manageCompetencies": "Manage Competencies"
   },
   "AdminPositionCompetenciesDetailPage": {
@@ -919,7 +921,13 @@
     "unitScopeEmptyText": "No unit found.",
     "unitScopeBadgeGlobal": "Global",
     "unitScopeHelperText": "Mappings you add or view here apply only within the selected unit and its sub-units.",
-    "unitScopeAllHelperText": "Showing every mapping across Global and every unit, matching the count on the listing page. Switch to Global or a specific unit to add new mappings.",
+    "unitScopeAllHelperText": "Showing every mapping across Global and every unit. Switch to Global or a specific unit to add new mappings.",
+    "globalNoticeTitle": "Global list: {global} competencies for every staff member in this position",
+    "globalNoticeBody": "Functional competencies aren't listed here because they are set per unit ({units} units). Choose a unit under Scope to see them. One staff member is assessed on the Global list plus their own unit's list: {range} competencies in total.",
+    "allScopesNoticeTitle": "Combined view of every unit",
+    "allScopesNoticeBody": "These {total} competencies add up the Global list and every unit's own list ({units} units). One staff member is only assessed on the Global list ({global}) plus their own unit's list: {range} competencies in total. Choose a unit under Scope to see exactly what that unit's staff answer.",
+    "unitEffectiveNoticeTitle": "Staff in {unit} are assessed on {total} competencies",
+    "unitEffectiveNoticeBody": "{global} Global + {scoped} specific to this unit (including its parent units). Below, only this unit's own mappings are marked as added; Global ones are managed under the Global scope.",
     "selectScopeToAddError": "Select Global or a specific unit above before adding a new mapping — \"All Scopes\" is a read-only combined view.",
     "selectScopeToAddTooltip": "Switch to Global or a specific unit to add a new mapping",
     "templateSuggestedLevel": "Base template suggests level {level} for this position.",

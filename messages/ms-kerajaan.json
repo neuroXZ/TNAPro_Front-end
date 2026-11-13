@@ -850,6 +850,8 @@
     "colTotalCompetencies": "Jumlah Kompetensi",
     "competencyCount": "{count} kompetensi",
     "competenciesCount": "{count} kompetensi",
+    "perStaffCount": "{range} kompetensi setiap staf",
+    "scopeBreakdown": "{global} Global + {scoped} ikut unit ({units} unit)",
     "manageCompetencies": "Urus Kompetensi"
   },
   "AdminPositionCompetenciesDetailPage": {
@@ -919,7 +921,13 @@
     "unitScopeEmptyText": "Tiada unit dijumpai.",
     "unitScopeBadgeGlobal": "Global",
     "unitScopeHelperText": "Pemetaan yang ditambah atau dilihat di sini hanya terpakai dalam unit yang dipilih dan sub-unitnya.",
-    "unitScopeAllHelperText": "Menunjukkan semua pemetaan merentasi Global dan setiap unit, sepadan dengan jumlah di halaman senarai. Tukar ke Global atau unit tertentu untuk tambah pemetaan baharu.",
+    "unitScopeAllHelperText": "Menunjukkan semua pemetaan merentasi Global dan setiap unit. Tukar ke Global atau unit tertentu untuk tambah pemetaan baharu.",
+    "globalNoticeTitle": "Senarai Global: {global} kompetensi untuk semua staf jawatan ini",
+    "globalNoticeBody": "Kompetensi Fungsian tidak berada di sini kerana ia ditetapkan ikut unit ({units} unit). Pilih unit di Skop untuk melihatnya. Seorang staf dinilai pada senarai Global ditambah senarai unitnya sendiri, iaitu {range} kompetensi kesemuanya.",
+    "allScopesNoticeTitle": "Paparan gabungan semua unit",
+    "allScopesNoticeBody": "Jumlah {total} kompetensi ini menggabungkan senarai Global dan senarai setiap unit ({units} unit). Seorang staf hanya dinilai pada senarai Global ({global}) ditambah senarai unitnya sendiri, iaitu {range} kompetensi kesemuanya. Pilih unit di Skop untuk melihat senarai sebenar yang dijawab oleh staf unit tersebut.",
+    "unitEffectiveNoticeTitle": "Staf di {unit} dinilai pada {total} kompetensi",
+    "unitEffectiveNoticeBody": "{global} Global + {scoped} khusus untuk unit ini (termasuk unit induknya). Di bawah, hanya pemetaan milik unit ini ditanda Ditambah; pemetaan Global diurus di skop Global.",
     "selectScopeToAddError": "Pilih Global atau unit tertentu di atas sebelum menambah pemetaan baharu — \"Semua Skop\" adalah paparan gabungan baca-sahaja.",
     "selectScopeToAddTooltip": "Tukar ke Global atau unit tertentu untuk menambah pemetaan baharu",
     "templateSuggestedLevel": "Templat asas mencadangkan tahap {level} untuk jawatan ini.",

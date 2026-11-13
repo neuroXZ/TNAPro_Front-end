@@ -6,6 +6,7 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { IconEye, IconArrowUp, IconArrowDown, IconArrowsSort } from "@tabler/icons-react"
 import { useRouter } from "next/navigation"
 import { useTranslations } from "next-intl"
+import type { ScopeSummary } from "@/features/admin/position-competencies/lib/scope-summary"
 
 export interface Position {
   id: string
@@ -18,6 +19,7 @@ export interface Position {
   _count?: {
     positionCompetencies: number
   }
+  _scope?: ScopeSummary | null
 }
 
 export const getColumns = (
@@ -87,10 +89,33 @@ export const getColumns = (
     header: t('colTotalCompetencies'),
     cell: ({ row }) => {
       const count = row.original._count?.positionCompetencies || 0
+      const scope = row.original._scope
+      if (!scope) {
+        return (
+          <span className="font-medium">
+            {count === 1 ? t('competencyCount', { count }) : t('competenciesCount', { count })}
+          </span>
+        )
+      }
+      // Unit-scoped: the raw total sums every unit's own list, so show the
+      // split and what one staff member actually answers instead.
       return (
-        <span className="font-medium">
-          {count === 1 ? t('competencyCount', { count }) : t('competenciesCount', { count })}
-        </span>
+        <div className="flex flex-col">
+          <span className="font-medium">
+            {t('perStaffCount', {
+              range: scope.perStaffMin === scope.perStaffMax
+                ? String(scope.perStaffMin)
+                : `${scope.perStaffMin}–${scope.perStaffMax}`,
+            })}
+          </span>
+          <span className="text-xs text-muted-foreground">
+            {t('scopeBreakdown', {
+              global: scope.globalCount,
+              scoped: scope.unitScopedCount,
+              units: scope.unitCount,
+            })}
+          </span>
+        </div>
       )
     },
   },

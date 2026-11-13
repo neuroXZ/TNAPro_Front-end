@@ -1,6 +1,6 @@
 ﻿"use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import { useParams, useRouter } from "next/navigation"
 import { positionAPI, competencyAPI, positionCompetencyAPI, unitAPI, mappingTemplateAPI, templateLevelFor, type TemplateRuleInput } from "@/lib/api"
 import { useFeatureFlags } from "@/hooks/use-feature-flags"
@@ -14,7 +14,7 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { IconArrowLeft, IconPlus, IconEdit, IconTrash, IconEye, IconTrashX, IconSearch, IconAlertTriangle, IconBuilding, IconRestore } from "@tabler/icons-react"
+import { IconArrowLeft, IconPlus, IconEdit, IconTrash, IconEye, IconTrashX, IconSearch, IconAlertTriangle, IconBuilding, IconRestore, IconInfoCircle } from "@tabler/icons-react"
 import { toast } from "sonner"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Checkbox } from "@/components/ui/checkbox"
@@ -37,6 +37,8 @@ import { CompetencyViewDialog } from "@/features/admin/position-competencies/[id
 import { CompetencyDeleteDialog } from "@/features/admin/position-competencies/[id]/components/competency-delete-dialog"
 import { BulkLevelDialog } from "@/features/admin/position-competencies/[id]/components/bulk-level-dialog"
 import { useTranslations } from "next-intl"
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
+import { summarizePositionScopes, type ScopeSummary } from "@/features/admin/position-competencies/lib/scope-summary"
 
 interface Position {
   id: string
@@ -62,6 +64,7 @@ interface Competency {
 interface Unit {
   id: string
   name: string
+  parentId?: string | null
 }
 
 interface PositionCompetency {
@@ -145,20 +148,82 @@ export default function PositionCompetencyDetailPage() {
       // Scope selector just shows no options - non-fatal, matches how
       // unit-form-dialog.tsx treats a failed negeriAPI.getAll().
     })
-    // Default to the aggregate view once we know unit scoping is in play,
-    // so the count here matches the listing page's raw total instead of
-    // silently only showing Global. Guarded so it only applies the untouched
-    // initial value, never overriding a scope the admin already picked.
-    setSelectedUnitId((current) => (current === null ? ALL_SCOPES : current))
+    // Opens on Global (the initial null), not "All Scopes": the aggregate
+    // adds up every unit's own list (360 for one Waqaf Annur position) and
+    // read as "staff answer 360". The listing page now shows the split and
+    // the per-staff count instead of the raw total, so nothing needs the
+    // two pages' first numbers to match any more.
   }, [featureFlags.unitScopedCompetency])
 
-  // Set initial active tab after data loads
+  // What a staff member in the selected unit is actually assessed on — the
+  // same resolver the staff assessment form uses. Refetched when this
+  // page's own rows change, so it stays right after an add/edit/delete.
+  const [unitEffective, setUnitEffective] = useState<{ total: number; global: number; scoped: number } | null>(null)
   useEffect(() => {
-    const groupedKeys = Object.keys(groupCompetenciesByCluster())
-    if (!activeTab && groupedKeys.length > 0) {
-      setActiveTab(groupedKeys[0])
+    if (!selectedUnitId || selectedUnitId === ALL_SCOPES) {
+      setUnitEffective(null)
+      return
     }
-  }, [positionCompetencies, allCompetencies])
+    let cancelled = false
+    positionCompetencyAPI.getEffective(positionId, selectedUnitId)
+      .then((rows: Array<{ unitId?: string | null }>) => {
+        if (cancelled) return
+        const global = rows.filter((r) => !r.unitId).length
+        setUnitEffective({ total: rows.length, global, scoped: rows.length - global })
+      })
+      .catch(() => {
+        if (!cancelled) setUnitEffective(null) // notice just doesn't show
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [positionId, selectedUnitId, positionCompetencies])
+
+  // Global/unit split for this position across every scope, whatever scope
+  // is selected (the Global view's own rows can't tell whether unit lists
+  // exist). Null when the position has no unit-scoped rows, which hides
+  // both notices below for every client that doesn't use unit scoping.
+  const [scopeSummary, setScopeSummary] = useState<ScopeSummary | null>(null)
+  useEffect(() => {
+    if (!featureFlags.unitScopedCompetency) return
+    let cancelled = false
+    positionCompetencyAPI.getByPosition(positionId)
+      .then((rows) => {
+        if (!cancelled) setScopeSummary(summarizePositionScopes(rows, units))
+      })
+      .catch(() => {
+        if (!cancelled) setScopeSummary(null)
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [featureFlags.unitScopedCompetency, positionId, units, positionCompetencies])
+
+  const perStaffRange = scopeSummary
+    ? scopeSummary.perStaffMin === scopeSummary.perStaffMax
+      ? String(scopeSummary.perStaffMin)
+      : `${scopeSummary.perStaffMin}–${scopeSummary.perStaffMax}`
+    : ''
+
+  // Set initial active tab after data loads: the first cluster that has
+  // something mapped in this scope, so the page doesn't open on an all-
+  // "Not Added" list (e.g. Global opening on Fungsian 0/347 at Waqaf Annur).
+  // Also re-picked once after a scope switch (Global's mapped cluster is
+  // Teras, a unit's is Fungsian), but not after an add/edit/delete refetch -
+  // that would yank the admin off the tab they're working in.
+  const repickTabRef = useRef(false)
+  useEffect(() => {
+    repickTabRef.current = true
+  }, [selectedUnitId])
+  useEffect(() => {
+    const grouped = groupCompetenciesByCluster()
+    const groupedKeys = Object.keys(grouped)
+    if ((!activeTab || repickTabRef.current) && groupedKeys.length > 0 && !isLoading) {
+      repickTabRef.current = false
+      const firstMapped = groupedKeys.find((k) => grouped[k].competencies.some((c) => c.positionCompetency))
+      setActiveTab(firstMapped ?? groupedKeys[0])
+    }
+  }, [positionCompetencies, allCompetencies, isLoading])
 
   const fetchData = async () => {
     try {
@@ -571,6 +636,46 @@ export default function PositionCompetencyDetailPage() {
           </div>
         )}
       </div>
+
+      {scopeSummary && selectedUnitId === null && (
+        <Alert>
+          <IconInfoCircle />
+          <AlertTitle>{t('globalNoticeTitle', { global: scopeSummary.globalCount })}</AlertTitle>
+          <AlertDescription>
+            {t('globalNoticeBody', { units: scopeSummary.unitCount, range: perStaffRange })}
+          </AlertDescription>
+        </Alert>
+      )}
+
+      {scopeSummary && selectedUnitId === ALL_SCOPES && (
+        <Alert>
+          <IconInfoCircle />
+          <AlertTitle>{t('allScopesNoticeTitle')}</AlertTitle>
+          <AlertDescription>
+            {t('allScopesNoticeBody', {
+              total: validPositionCompetencyCount,
+              global: scopeSummary.globalCount,
+              units: scopeSummary.unitCount,
+              range: perStaffRange,
+            })}
+          </AlertDescription>
+        </Alert>
+      )}
+
+      {unitEffective && (
+        <Alert>
+          <IconInfoCircle />
+          <AlertTitle>
+            {t('unitEffectiveNoticeTitle', {
+              unit: units.find((u) => u.id === selectedUnitId)?.name ?? '',
+              total: unitEffective.total,
+            })}
+          </AlertTitle>
+          <AlertDescription>
+            {t('unitEffectiveNoticeBody', { global: unitEffective.global, scoped: unitEffective.scoped })}
+          </AlertDescription>
+        </Alert>
+      )}
 
       {orphanedPositionCompetencyCount > 0 && (
         <Card className="border-destructive/50 bg-destructive/5">
