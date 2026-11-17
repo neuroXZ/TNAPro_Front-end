@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { assessmentAPI, assessorAPI, staffAPI, assessmentResultAPI, positionCompetencyAPI } from "@/lib/api"
+import { assessmentAPI, assessorAPI, staffAPI, assessmentResultAPI, positionCompetencyAPI, superiorSubmitNoticeAPI } from "@/lib/api"
 import { toast } from "sonner"
 import { IconUsers, IconClipboardCheck, IconAlertCircle, IconCheck, IconFileText } from "@tabler/icons-react"
 import { format } from "date-fns"
@@ -45,6 +45,26 @@ export default function SuperiorAssessmentsPage() {
   const [isLoading, setIsLoading] = useState(true)
   const [userId, setUserId] = useState<string | null>(null)
   const [assessmentResults, setAssessmentResults] = useState<any[]>([])
+  // Subordinates who have submitted their self-assessment for the selected assessment. Only filled when the
+  // client turned on "notify superior on self-assessment submit"; status only, never scores.
+  const [selfSubmittedIds, setSelfSubmittedIds] = useState<Set<string>>(new Set())
+
+  useEffect(() => {
+    if (!selectedAssessmentId) return
+    let cancelled = false
+    superiorSubmitNoticeAPI
+      .getSubordinateStatus(selectedAssessmentId)
+      .then((status) => {
+        if (!cancelled) setSelfSubmittedIds(new Set(status.enabled ? status.submittedStaffIds : []))
+      })
+      // A missing badge is not worth an error toast; the list still works without it.
+      .catch(() => {
+        if (!cancelled) setSelfSubmittedIds(new Set())
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [selectedAssessmentId])
 
   useEffect(() => {
     const storedUser = localStorage.getItem('user')
@@ -383,7 +403,14 @@ export default function SuperiorAssessmentsPage() {
                                 </div>
                               </div>
                               {withinPeriod && !isCompleted && (
-                                <Badge className="bg-yellow-500 hover:bg-yellow-600 text-white">{t('badgePending')}</Badge>
+                                <div className="flex shrink-0 flex-col items-end gap-1 sm:flex-row sm:items-center">
+                                  {selfSubmittedIds.has(subordinate.id) && (
+                                    <Badge variant="outline" className="border-sky-300 bg-sky-50 text-sky-700 dark:border-sky-800 dark:bg-sky-950 dark:text-sky-300">
+                                      {t('badgeSelfSubmitted')}
+                                    </Badge>
+                                  )}
+                                  <Badge className="bg-yellow-500 hover:bg-yellow-600 text-white">{t('badgePending')}</Badge>
+                                </div>
                               )}
                               {isCompleted && (
                                 <Badge variant="default" className="bg-green-600 hover:bg-green-700 gap-1">

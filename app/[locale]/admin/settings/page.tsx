@@ -80,6 +80,7 @@ interface Setting {
   hideIdpFromStaff?: boolean
   selfResultVisibility?: SelfResultVisibility
   superiorCanViewSubordinateIdp?: boolean
+  notifySuperiorOnSelfSubmit?: boolean
 }
 
 interface DashboardSummary {
@@ -101,6 +102,7 @@ export default function SettingsPage() {
   const [hideIdpFromStaff, setHideIdpFromStaff] = useState(false)
   const [selfResultVisibility, setSelfResultVisibility] = useState<SelfResultVisibility>('OFF')
   const [superiorCanViewSubordinateIdp, setSuperiorCanViewSubordinateIdp] = useState(false)
+  const [notifySuperiorOnSelfSubmit, setNotifySuperiorOnSelfSubmit] = useState(false)
   const [dashboardData, setDashboardData] = useState<DashboardSummary | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [isSaving, setIsSaving] = useState(false)
@@ -250,6 +252,7 @@ export default function SettingsPage() {
         setHideIdpFromStaff(setting.hideIdpFromStaff ?? false)
         setSelfResultVisibility(setting.selfResultVisibility ?? 'OFF')
         setSuperiorCanViewSubordinateIdp(setting.superiorCanViewSubordinateIdp ?? false)
+        setNotifySuperiorOnSelfSubmit(setting.notifySuperiorOnSelfSubmit ?? false)
       }
     } catch (error) {
       toast.error(t('fetchError'))
@@ -382,6 +385,23 @@ export default function SettingsPage() {
       await fetchSettings()
     } catch (error) {
       setSuperiorCanViewSubordinateIdp(!checked)
+      toast.error(t('saveError'))
+      console.error(error)
+    }
+  }
+
+  const handleToggleNotifySuperiorOnSelfSubmit = async (checked: boolean) => {
+    setNotifySuperiorOnSelfSubmit(checked)
+    try {
+      if (settings?.id) {
+        await settingAPI.update(settings.id, { notifySuperiorOnSelfSubmit: checked })
+      } else {
+        await settingAPI.create({ notifySuperiorOnSelfSubmit: checked })
+      }
+      toast.success(t('saveSuccess'))
+      await fetchSettings()
+    } catch (error) {
+      setNotifySuperiorOnSelfSubmit(!checked)
       toast.error(t('saveError'))
       console.error(error)
     }
@@ -696,6 +716,20 @@ export default function SettingsPage() {
                   id="superiorCanViewSubordinateIdp"
                   checked={superiorCanViewSubordinateIdp}
                   onCheckedChange={handleToggleSuperiorCanViewSubordinateIdp}
+                />
+              </div>
+
+              <div className="flex items-center justify-between rounded-md border p-4">
+                <div className="space-y-0.5">
+                  <Label htmlFor="notifySuperiorOnSelfSubmit">{t('labelNotifySuperiorOnSelfSubmit')}</Label>
+                  <p className="text-xs text-muted-foreground">
+                    {t('notifySuperiorOnSelfSubmitHint')}
+                  </p>
+                </div>
+                <Switch
+                  id="notifySuperiorOnSelfSubmit"
+                  checked={notifySuperiorOnSelfSubmit}
+                  onCheckedChange={handleToggleNotifySuperiorOnSelfSubmit}
                 />
               </div>
             </CardContent>

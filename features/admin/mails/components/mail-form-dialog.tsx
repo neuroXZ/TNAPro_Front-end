@@ -28,7 +28,7 @@ interface MailFormData {
   name: string
   subject: string
   body: string
-  mailType: 'ASSESSMENT_REMINDER' | 'PASSWORD_RESET' | 'WELCOME_STAFF' | 'GENERAL_ANNOUNCEMENT'
+  mailType: 'ASSESSMENT_REMINDER' | 'PASSWORD_RESET' | 'WELCOME_STAFF' | 'GENERAL_ANNOUNCEMENT' | 'SELF_ASSESSMENT_SUBMITTED'
   sendTrigger: 'MANUAL' | 'RELATIVE_TO_ASSESSMENT_END' | 'RELATIVE_TO_ASSESSMENT_START'
   daysOffset?: number
   templateVariables?: Record<string, any>
@@ -371,6 +371,7 @@ export function MailFormDialog({
                     <SelectItem value="PASSWORD_RESET">Password Reset</SelectItem>
                     <SelectItem value="WELCOME_STAFF">Welcome Staff</SelectItem>
                     <SelectItem value="GENERAL_ANNOUNCEMENT">General Announcement</SelectItem>
+                    <SelectItem value="SELF_ASSESSMENT_SUBMITTED">Self-Assessment Submitted (to Superior)</SelectItem>
                   </SelectContent>
                 </Select>
               </div>

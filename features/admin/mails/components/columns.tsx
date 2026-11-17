@@ -11,7 +11,7 @@ export interface Mail {
   name: string
   subject?: string
   body?: string
-  mailType?: 'ASSESSMENT_REMINDER' | 'PASSWORD_RESET' | 'WELCOME_STAFF' | 'GENERAL_ANNOUNCEMENT'
+  mailType?: 'ASSESSMENT_REMINDER' | 'PASSWORD_RESET' | 'WELCOME_STAFF' | 'GENERAL_ANNOUNCEMENT' | 'SELF_ASSESSMENT_SUBMITTED'
   sendTrigger?: 'MANUAL' | 'RELATIVE_TO_ASSESSMENT_END' | 'RELATIVE_TO_ASSESSMENT_START'
   daysOffset?: number
   templateVariables?: Record<string, any>
