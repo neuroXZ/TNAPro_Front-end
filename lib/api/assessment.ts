@@ -6,6 +6,9 @@ export const assessmentAPI = createCrudApi('/assessment');
 
 export type SelfResultVisibility = 'OFF' | 'AFTER_SUPERIOR_SUBMIT' | 'ALWAYS';
 
+// When the superior hears about a submitted self-assessment: a morning digest, or one email per staff right away.
+export type SelfSubmitNoticeTiming = 'DAILY' | 'IMMEDIATE';
+
 export interface SubordinateSelfResults {
   visibility: SelfResultVisibility;
   available: boolean;
@@ -43,5 +46,10 @@ export const superiorSubmitNoticeAPI = {
     const params = new URLSearchParams({ assessmentId });
     const response = await api.get(`/superior-submit-notice/subordinate-status?${params.toString()}`);
     return response.data;
+  },
+  // Called once after the staff member's whole self-assessment was submitted. The server checks every self row
+  // itself and only emails the superior when the client chose "immediate"; otherwise it does nothing.
+  notifySelfSubmitted: async (assessmentId: string): Promise<void> => {
+    await api.post('/superior-submit-notice/self-submitted', { assessmentId });
   },
 };

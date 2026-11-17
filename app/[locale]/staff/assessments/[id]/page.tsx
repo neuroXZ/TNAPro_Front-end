@@ -17,7 +17,8 @@ import {
   levelAPI,
   competencyAPI,
   clusterAPI,
-  staffAPI
+  staffAPI,
+  superiorSubmitNoticeAPI
 } from "@/lib/api"
 import { toast } from "sonner"
 import { 
@@ -353,7 +354,13 @@ function AssessmentDetailPageContent() {
       })
 
       await Promise.all(promises)
-      
+
+      // Tell the superior right away when the client chose immediate notices. Never blocks or fails the submit:
+      // the server re-checks everything, and the daily digest catches anything this call misses.
+      superiorSubmitNoticeAPI.notifySelfSubmitted(assessmentId).catch((error) => {
+        console.error("Failed to notify superior:", error)
+      })
+
       // Update local state to reflect submitted status
       setScores(prevScores => {
         const updatedScores = { ...prevScores }

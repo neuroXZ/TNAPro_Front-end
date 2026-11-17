@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { settingAPI, dashboardAPI, developmentStrategyAPI, type DevelopmentStrategy, type SelfResultVisibility } from "@/lib/api"
+import { settingAPI, dashboardAPI, developmentStrategyAPI, type DevelopmentStrategy, type SelfResultVisibility, type SelfSubmitNoticeTiming } from "@/lib/api"
 import {
   Card,
   CardContent,
@@ -81,6 +81,7 @@ interface Setting {
   selfResultVisibility?: SelfResultVisibility
   superiorCanViewSubordinateIdp?: boolean
   notifySuperiorOnSelfSubmit?: boolean
+  selfSubmitNoticeTiming?: SelfSubmitNoticeTiming
 }
 
 interface DashboardSummary {
@@ -103,6 +104,7 @@ export default function SettingsPage() {
   const [selfResultVisibility, setSelfResultVisibility] = useState<SelfResultVisibility>('OFF')
   const [superiorCanViewSubordinateIdp, setSuperiorCanViewSubordinateIdp] = useState(false)
   const [notifySuperiorOnSelfSubmit, setNotifySuperiorOnSelfSubmit] = useState(false)
+  const [selfSubmitNoticeTiming, setSelfSubmitNoticeTiming] = useState<SelfSubmitNoticeTiming>('DAILY')
   const [dashboardData, setDashboardData] = useState<DashboardSummary | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [isSaving, setIsSaving] = useState(false)
@@ -253,6 +255,7 @@ export default function SettingsPage() {
         setSelfResultVisibility(setting.selfResultVisibility ?? 'OFF')
         setSuperiorCanViewSubordinateIdp(setting.superiorCanViewSubordinateIdp ?? false)
         setNotifySuperiorOnSelfSubmit(setting.notifySuperiorOnSelfSubmit ?? false)
+        setSelfSubmitNoticeTiming(setting.selfSubmitNoticeTiming ?? 'DAILY')
       }
     } catch (error) {
       toast.error(t('fetchError'))
@@ -402,6 +405,24 @@ export default function SettingsPage() {
       await fetchSettings()
     } catch (error) {
       setNotifySuperiorOnSelfSubmit(!checked)
+      toast.error(t('saveError'))
+      console.error(error)
+    }
+  }
+
+  const handleChangeSelfSubmitNoticeTiming = async (value: SelfSubmitNoticeTiming) => {
+    const previous = selfSubmitNoticeTiming
+    setSelfSubmitNoticeTiming(value)
+    try {
+      if (settings?.id) {
+        await settingAPI.update(settings.id, { selfSubmitNoticeTiming: value })
+      } else {
+        await settingAPI.create({ selfSubmitNoticeTiming: value })
+      }
+      toast.success(t('saveSuccess'))
+      await fetchSettings()
+    } catch (error) {
+      setSelfSubmitNoticeTiming(previous)
       toast.error(t('saveError'))
       console.error(error)
     }
@@ -719,18 +740,42 @@ export default function SettingsPage() {
                 />
               </div>
 
-              <div className="flex items-center justify-between rounded-md border p-4">
-                <div className="space-y-0.5">
-                  <Label htmlFor="notifySuperiorOnSelfSubmit">{t('labelNotifySuperiorOnSelfSubmit')}</Label>
-                  <p className="text-xs text-muted-foreground">
-                    {t('notifySuperiorOnSelfSubmitHint')}
-                  </p>
+              <div className="space-y-4 rounded-md border p-4">
+                <div className="flex items-center justify-between gap-4">
+                  <div className="space-y-0.5">
+                    <Label htmlFor="notifySuperiorOnSelfSubmit">{t('labelNotifySuperiorOnSelfSubmit')}</Label>
+                    <p className="text-xs text-muted-foreground">
+                      {t('notifySuperiorOnSelfSubmitHint')}
+                    </p>
+                  </div>
+                  <Switch
+                    id="notifySuperiorOnSelfSubmit"
+                    checked={notifySuperiorOnSelfSubmit}
+                    onCheckedChange={handleToggleNotifySuperiorOnSelfSubmit}
+                  />
                 </div>
-                <Switch
-                  id="notifySuperiorOnSelfSubmit"
-                  checked={notifySuperiorOnSelfSubmit}
-                  onCheckedChange={handleToggleNotifySuperiorOnSelfSubmit}
-                />
+                {notifySuperiorOnSelfSubmit && (
+                  <div className="flex flex-col gap-3 border-t pt-4 sm:flex-row sm:items-center sm:justify-between">
+                    <div className="space-y-0.5">
+                      <Label htmlFor="selfSubmitNoticeTiming">{t('labelSelfSubmitNoticeTiming')}</Label>
+                      <p className="text-xs text-muted-foreground">
+                        {selfSubmitNoticeTiming === 'IMMEDIATE' ? t('selfSubmitNoticeTimingImmediateHint') : t('selfSubmitNoticeTimingDailyHint')}
+                      </p>
+                    </div>
+                    <Select
+                      value={selfSubmitNoticeTiming}
+                      onValueChange={(value) => handleChangeSelfSubmitNoticeTiming(value as SelfSubmitNoticeTiming)}
+                    >
+                      <SelectTrigger id="selfSubmitNoticeTiming" className="w-full sm:w-60 shrink-0">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="DAILY">{t('selfSubmitNoticeTimingDaily')}</SelectItem>
+                        <SelectItem value="IMMEDIATE">{t('selfSubmitNoticeTimingImmediate')}</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                )}
               </div>
             </CardContent>
           </Card>
