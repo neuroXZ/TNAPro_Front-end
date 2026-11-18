@@ -2486,7 +2486,8 @@
     "breadcrumbZon": "Zone"
   },
   "RouteGuard": {
-    "loading": "Loading..."
+    "loading": "Loading...",
+    "sessionSwitched": "You signed in as a different user in another tab, so this tab has switched to that account."
   },
   "NavMain": {
     "documentation": "Documentation",

@@ -2486,7 +2486,8 @@
     "breadcrumbZon": "Zon"
   },
   "RouteGuard": {
-    "loading": "Memuatkan..."
+    "loading": "Memuatkan...",
+    "sessionSwitched": "Anda telah log masuk sebagai pengguna lain di tab lain, jadi tab ini telah bertukar ke akaun tersebut."
   },
   "NavMain": {
     "documentation": "Dokumentasi",
