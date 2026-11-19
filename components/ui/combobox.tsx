@@ -63,12 +63,16 @@ export function Combobox({
           aria-expanded={open}
           disabled={disabled}
           className={cn(
-            "w-full justify-between font-normal",
+            "w-full min-w-0 justify-between font-normal",
             !selected && "text-muted-foreground",
             className
           )}
+          title={selected?.label}
         >
-          <span className="truncate">{selected ? selected.label : resolvedPlaceholder}</span>
+          {/* w-0 + flex-1: a long label (e.g. a full Felcra position name)
+              must not widen the trigger, or it stretches the whole form
+              grid past the dialog edge. The label truncates instead. */}
+          <span className="w-0 flex-1 truncate text-left">{selected ? selected.label : resolvedPlaceholder}</span>
           <ChevronsUpDownIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
