@@ -1706,6 +1706,8 @@
     "generateSuccess": "PPK berjaya dijana!",
     "generateError": "Gagal menjana PPK",
     "assessmentIncompleteError": "Penilaian tidak lengkap. Sila pastikan semua penilaian kompetensi (Diri & Penyelia) telah diselesaikan.",
+    "noWeightagesError": "Kitaran penilaian ini belum ditetapkan wajaran markah, jadi IDP tidak dapat dikira. Sila hubungi pentadbir sistem.",
+    "noScoresTag": "belum ada markah",
     "noAssessmentResultsError": "Tiada keputusan penilaian ditemui. Sila lengkapkan penilaian terlebih dahulu.",
     "noCompetenciesDefinedError": "Tiada kompetensi ditakrifkan untuk jawatan anda. Sila hubungi pentadbir.",
     "exportError": "Gagal mengeksport PPK",

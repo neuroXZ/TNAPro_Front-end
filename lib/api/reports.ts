@@ -2,11 +2,25 @@ import axios from 'axios';
 import { api } from './client';
 import { cachedGet } from './cache';
 
+export interface ScoredAssessment {
+  assessmentId: string;
+  self: number;
+  superior: number;
+  peer: number;
+}
+
 // IDP (Individual Development Plan) API
 export const idpAPI = {
   generate: async (data: { staffId: string; assessmentId?: string }) => {
     const response = await api.post('/idp/generate', data);
     return response.data;
+  },
+
+  // Cycles where this staff member has scores the caller may see, with the
+  // number of competencies scored per rater type.
+  scoredAssessments: async (staffId: string): Promise<ScoredAssessment[]> => {
+    const response = await api.get('/idp/scored-assessments', { params: { staffId } });
+    return response.data?.data ?? [];
   },
 
   exportCsv: async (data: { staffId: string; assessmentId?: string }) => {

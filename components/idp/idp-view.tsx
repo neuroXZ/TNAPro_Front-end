@@ -28,6 +28,7 @@ import {
   developmentStrategyAPI,
   type DevelopmentStrategy,
 } from "@/lib/api"
+import type { ScoredAssessment } from "@/lib/api/reports"
 import { toast } from "sonner"
 import {
   IconTarget,
@@ -107,6 +108,9 @@ export function IdpView({ staffId, initialAssessmentId, title, description, gene
   const { flags: featureFlags } = useFeatureFlags()
   const [assessments, setAssessments] = useState<Assessment[]>([])
   const [selectedAssessmentId, setSelectedAssessmentId] = useState<string>("")
+  // Cycles in which this staff member has scores (null until loaded / if the
+  // lookup fails, so nothing gets tagged as "no scores" by mistake).
+  const [scoredById, setScoredById] = useState<Map<string, ScoredAssessment> | null>(null)
   const [idpResult, setIdpResult] = useState<IdpResult | null>(null)
   const [isLoading, setIsLoading] = useState(false)
   const [isLoadingAssessments, setIsLoadingAssessments] = useState(true)
@@ -120,7 +124,11 @@ export function IdpView({ staffId, initialAssessmentId, title, description, gene
 
 
   useEffect(() => {
-    fetchAssessments()
+    if (staffId) fetchAssessments(staffId)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [staffId])
+
+  useEffect(() => {
     fetchClusters()
     fetchCompetencies()
     fetchStrategies()
@@ -135,23 +143,36 @@ export function IdpView({ staffId, initialAssessmentId, title, description, gene
     }
   }
 
-  const fetchAssessments = async () => {
+  const fetchAssessments = async (forStaffId: string) => {
     try {
       setIsLoadingAssessments(true)
-      const data = await assessmentAPI.getAll()
+      const [data, scored] = await Promise.all([
+        assessmentAPI.getAll(),
+        // Optional: without it we fall back to "latest cycle" as before.
+        idpAPI.scoredAssessments(forStaffId).catch((error) => {
+          console.error("Failed to fetch scored assessments:", error)
+          return null
+        }),
+      ])
       // Sort by latest
       const sortedAssessments = data.sort((a: Assessment, b: Assessment) =>
         new Date(b.startDate || 0).getTime() - new Date(a.startDate || 0).getTime()
       )
       setAssessments(sortedAssessments)
+      const scoredMap = scored ? new Map(scored.map((s) => [s.assessmentId, s])) : null
+      setScoredById(scoredMap)
 
-      // Preselect the requested assessment if given, else the latest
+      // Preselect: the requested assessment if given; else the latest cycle
+      // that has both self and superior scores; else the latest with any
+      // score; else simply the latest.
       const initial = sortedAssessments.find((a: Assessment) => a.id === initialAssessmentId)
-      if (initial) {
-        setSelectedAssessmentId(initial.id)
-      } else if (sortedAssessments.length > 0) {
-        setSelectedAssessmentId(sortedAssessments[0].id)
-      }
+      const complete = scoredMap && sortedAssessments.find((a: Assessment) => {
+        const s = scoredMap.get(a.id)
+        return !!s && s.self > 0 && s.superior > 0
+      })
+      const anyScore = scoredMap && sortedAssessments.find((a: Assessment) => scoredMap.has(a.id))
+      const pick = initial ?? complete ?? anyScore ?? sortedAssessments[0]
+      if (pick) setSelectedAssessmentId(pick.id)
     } catch (error) {
       console.error("Failed to fetch assessments:", error)
       toast.error(t('loadAssessmentsError'))
@@ -208,6 +229,11 @@ export function IdpView({ staffId, initialAssessmentId, title, description, gene
         toast.error(
           t('assessmentIncompleteError'),
           { duration: 5000 }
+        )
+      } else if (errorMessage.includes("no configured rater weightages")) {
+        toast.error(
+          t('noWeightagesError'),
+          { duration: 6000 }
         )
       } else if (errorMessage.includes("No assessment results found")) {
         toast.error(
@@ -391,6 +417,9 @@ export function IdpView({ staffId, initialAssessmentId, title, description, gene
                             {` (${format(new Date(assessment.startDate), "dd MMM yyyy")})`}
                           </span>
                         )}
+                        {scoredById && !scoredById.has(assessment.id) && (
+                          <span className="text-xs text-muted-foreground">{` · ${t('noScoresTag')}`}</span>
+                        )}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -440,6 +469,9 @@ export function IdpView({ staffId, initialAssessmentId, title, description, gene
                       <SelectItem key={assessment.id} value={assessment.id}>
                         {assessment.name}
                         {assessment.startDate && ` (${format(new Date(assessment.startDate), "dd MMM yyyy")})`}
+                        {scoredById && !scoredById.has(assessment.id) && (
+                          <span className="text-muted-foreground">{` · ${t('noScoresTag')}`}</span>
+                        )}
                       </SelectItem>
                     ))}
                   </SelectContent>

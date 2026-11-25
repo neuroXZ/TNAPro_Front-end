@@ -1706,6 +1706,8 @@
     "generateSuccess": "IDP generated successfully!",
     "generateError": "Failed to generate IDP",
     "assessmentIncompleteError": "Assessment incomplete. Please ensure all competency assessments (Self & Superior) are completed.",
+    "noWeightagesError": "This assessment cycle has no score weightages set yet, so the IDP can't be calculated. Please contact your administrator.",
+    "noScoresTag": "no scores yet",
     "noAssessmentResultsError": "No assessment results found. Please complete the assessment first.",
     "noCompetenciesDefinedError": "No competencies defined for your position. Please contact administrator.",
     "exportError": "Failed to export IDP",
