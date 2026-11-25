@@ -20,7 +20,9 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar"
 import { IconEye, IconEyeOff, IconUpload, IconX, IconUser } from "@tabler/icons-react"
-import { positionAPI, unitAPI, staffAPI } from "@/lib/api"
+import { positionAPI, unitAPI, staffAPI, assessorAPI } from "@/lib/api"
+import { AssessorMultiPicker } from "@/features/admin/assessors/components/assessor-multi-picker"
+import { lockedAssessorIds, superiorIds as toSuperiorIds, type AssessorOption, type StaffAssessors } from "@/features/admin/assessors/types"
 import { Staff } from "./columns"
 import { toast } from "sonner"
 import { useTranslations } from "next-intl"
@@ -37,6 +39,10 @@ interface StaffFormData {
   unitId?: string
   supervisorId?: string
   gred?: string
+  /** Superior assessors (Penilai) picked in the form. */
+  superiorIds?: string[]
+  /** True when superiorIds differs from what was loaded, so the page saves it. */
+  superiorsChanged?: boolean
 }
 
 interface StaffFormDialogProps {
@@ -61,6 +67,8 @@ interface StaffOption {
   id: string
   name: string
   staffOrgId?: string
+  position?: { name: string | null } | null
+  unit?: { name: string | null } | null
 }
 
 export function StaffFormDialog({
@@ -80,6 +88,10 @@ export function StaffFormDialog({
   const [isUploading, setIsUploading] = useState(false)
   const [previewUrl, setPreviewUrl] = useState<string | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const [superiorIds, setSuperiorIds] = useState<string[]>([])
+  const [initialSuperiorIds, setInitialSuperiorIds] = useState<string[]>([])
+  const [lockedIds, setLockedIds] = useState<string[]>([])
+  const [assessorsLoading, setAssessorsLoading] = useState(false)
   const [formData, setFormData] = useState<StaffFormData>({
     staffOrgId: editingStaff?.staffOrgId || "",
     name: editingStaff?.name || "",
@@ -129,6 +141,9 @@ export function StaffFormDialog({
       })
       setPreviewUrl(editingStaff.image || null)
     } else {
+      setSuperiorIds([])
+      setInitialSuperiorIds([])
+      setLockedIds([])
       setFormData({
         staffOrgId: "",
         name: "",
@@ -144,6 +159,32 @@ export function StaffFormDialog({
       setPreviewUrl(null)
     }
   }, [editingStaff, open])
+
+  // Current Penilai of the staff member being edited.
+  useEffect(() => {
+    if (!open || !editingStaff) return
+    let cancelled = false
+    setAssessorsLoading(true)
+    assessorAPI.getForStaff(editingStaff.id)
+      .then((data: StaffAssessors) => {
+        if (cancelled) return
+        const ids = toSuperiorIds(data.superiors)
+        setSuperiorIds(ids)
+        setInitialSuperiorIds(ids)
+        setLockedIds(lockedAssessorIds(data.superiors))
+      })
+      .catch((err) => console.error("Failed to load assessors:", err))
+      .finally(() => { if (!cancelled) setAssessorsLoading(false) })
+    return () => { cancelled = true }
+  }, [editingStaff, open])
+
+  const assessorOptions: AssessorOption[] = staffOptions.map((s) => ({
+    id: s.id,
+    name: s.name,
+    staffOrgId: s.staffOrgId,
+    detail: [s.position?.name, s.unit?.name].filter(Boolean).join(" · ") || null,
+  }))
+  const supervisorOption = formData.supervisorId ? staffOptions.find((s) => s.id === formData.supervisorId) : undefined
 
   const handleFileSelect = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0]
@@ -193,7 +234,9 @@ export function StaffFormDialog({
     setIsSaving(true)
 
     try {
-      await onSubmit(formData)
+      const changed = superiorIds.length !== initialSuperiorIds.length
+        || superiorIds.some((id) => !initialSuperiorIds.includes(id))
+      await onSubmit({ ...formData, superiorIds, superiorsChanged: changed })
       onOpenChange(false)
     } catch (error) {
       console.error(error)
@@ -419,6 +462,31 @@ export function StaffFormDialog({
                 <p className="text-xs text-muted-foreground">{t('reportsToHelp')}</p>
               </div>
             )}
+            {/* Who rates this staff member (Assessor rows): drives rating, results and IDP access. */}
+            <div className="grid gap-2">
+              <Label htmlFor="superiorIds">{t('fieldAssessors')}</Label>
+              <AssessorMultiPicker
+                id="superiorIds"
+                options={assessorOptions}
+                value={superiorIds}
+                onChange={setSuperiorIds}
+                lockedIds={lockedIds}
+                excludeId={editingStaff?.id}
+                disabled={assessorsLoading}
+              />
+              {supervisorOption && !superiorIds.includes(supervisorOption.id) && (
+                <Button
+                  type="button"
+                  variant="link"
+                  size="sm"
+                  className="h-auto justify-start p-0 text-xs"
+                  onClick={() => setSuperiorIds([...superiorIds, supervisorOption.id])}
+                >
+                  {t('addReportsToAsAssessor', { name: supervisorOption.name })}
+                </Button>
+              )}
+              <p className="text-xs text-muted-foreground">{t('assessorsHelp')}</p>
+            </div>
           </div>
           <DialogFooter>
             <Button

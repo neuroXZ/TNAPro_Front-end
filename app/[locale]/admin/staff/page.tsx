@@ -54,6 +54,7 @@ import {
 } from "@/components/ui/popover"
 import { IconSearch, IconFilter } from "@tabler/icons-react"
 import { toast } from "sonner"
+import { useSaveSuperiors, assessorErrorMessage } from "@/features/admin/assessors/use-save-superiors"
 import { Staff, getColumns, GRED_COLUMN_ID } from "@/features/admin/staff/components/columns"
 import { useFeatureFlags } from "@/hooks/use-feature-flags"
 import { DataTablePagination } from "@/components/data-table-pagination"
@@ -74,6 +75,8 @@ function formatPositionLabel(position: { name: string; grade?: { name: string | 
 export default function StaffManagementPage() {
   const t = useTranslations('AdminStaffPage')
   const tc = useTranslations('Common')
+  const tp = useTranslations('AssessorPicker')
+  const saveSuperiors = useSaveSuperiors()
   const locale = useLocale()
   const router = useRouter()
   const [staff, setStaff] = useState<Staff[]>([])
@@ -192,12 +195,26 @@ export default function StaffManagementPage() {
         delete submitData.password
       }
 
+      let staffId: string | undefined
       if (editingStaff) {
         await staffAPI.update(editingStaff.id, submitData)
+        staffId = editingStaff.id
         toast.success(t('updateSuccess'))
       } else {
-        await staffAPI.create(submitData)
+        const created = await staffAPI.create(submitData)
+        staffId = created?.id
         toast.success(t('createSuccess'))
+      }
+
+      // Penilai are separate Assessor rows, saved after the staff record.
+      // A failure here doesn't undo the staff save; the admin is told.
+      if (staffId && formData.superiorsChanged) {
+        try {
+          await saveSuperiors(staffId, formData.superiorIds ?? [], { quiet: !editingStaff })
+        } catch (err) {
+          console.error(err)
+          toast.error(assessorErrorMessage(err, tp))
+        }
       }
 
       setEditingStaff(null)
