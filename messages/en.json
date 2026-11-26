@@ -990,7 +990,13 @@
     "resetToTemplate": "Reset to template",
     "resetToTemplateHint": "Reset to the base template (level {level})",
     "templateEditNotice": "This mapping comes from the base template. Saving a different level detaches it: the template will stop updating it. You can reset it later.",
-    "templateDeleteNotice": "This mapping comes from the base template. Removing it excludes it for this position, so the template will not re-create it. Use \"Reset to template\" to bring it back."
+    "templateDeleteNotice": "This mapping comes from the base template. Removing it excludes it for this position, so the template will not re-create it. Use \"Reset to template\" to bring it back.",
+    "impactChecking": "Checking existing assessment results…",
+    "impactTitle": "This mapping already has assessment results",
+    "impactSummary": "{results, plural, one {# result} other {# results}} for {staff, plural, one {# staff member} other {# staff}} ({submitted} submitted) currently use this mapping, in: {cycles}.",
+    "impactRemoved": "{count, plural, one {# result} other {# results}} will no longer appear in the individual gap analysis (CGA), IDP and Comparisons, and will count with a required level (RCL) of 0 in the organisation-wide reports.",
+    "impactLevelChanged": "{count, plural, one {# result} other {# results}} will be recalculated against another mapping's required level.",
+    "impactAdvice": "Reports for past cycles are calculated from the current mapping. If those reports still matter, keep this mapping."
   },
   "AdminTrainingCompetenciesPage": {
     "entityNameSingular": "training",

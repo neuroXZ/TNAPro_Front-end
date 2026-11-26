@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from "react"
 import { useParams, useRouter } from "next/navigation"
-import { positionAPI, competencyAPI, positionCompetencyAPI, unitAPI, mappingTemplateAPI, templateLevelFor, type TemplateRuleInput } from "@/lib/api"
+import { positionAPI, competencyAPI, positionCompetencyAPI, unitAPI, mappingTemplateAPI, templateLevelFor, type TemplateRuleInput, type PositionCompetencyDeleteImpact } from "@/lib/api"
 import { useFeatureFlags } from "@/hooks/use-feature-flags"
 import {
   Card,
@@ -35,6 +35,7 @@ import {
 import { CompetencyLevelDialog } from "@/features/admin/position-competencies/[id]/components/competency-level-dialog"
 import { CompetencyViewDialog } from "@/features/admin/position-competencies/[id]/components/competency-view-dialog"
 import { CompetencyDeleteDialog } from "@/features/admin/position-competencies/[id]/components/competency-delete-dialog"
+import { mappingRemovalImpactLines } from "@/features/admin/position-competencies/[id]/components/mapping-removal-impact"
 import { BulkLevelDialog } from "@/features/admin/position-competencies/[id]/components/bulk-level-dialog"
 import { useTranslations } from "next-intl"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
@@ -118,6 +119,11 @@ export default function PositionCompetencyDetailPage() {
   const [isLevelDialogOpen, setIsLevelDialogOpen] = useState(false)
   const [isViewDialogOpen, setIsViewDialogOpen] = useState(false)
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
+  const [deleteImpact, setDeleteImpact] = useState<PositionCompetencyDeleteImpact | null>(null)
+  const [deleteImpactLoading, setDeleteImpactLoading] = useState(false)
+  // Which row the in-flight impact check belongs to, so a slow response for a
+  // previously opened row never shows up in the current dialog.
+  const deleteImpactFor = useRef<string | null>(null)
   const [selectedCompetency, setSelectedCompetency] = useState<Competency | null>(null)
   const [selectedPositionCompetency, setSelectedPositionCompetency] = useState<PositionCompetency | null>(null)
   const [editMode, setEditMode] = useState(false)
@@ -354,6 +360,16 @@ export default function PositionCompetencyDetailPage() {
     setSelectedCompetency(allCompetencies.find((c) => c.id === positionCompetency.competencyId) ?? positionCompetency.competency ?? null)
     setSelectedPositionCompetency(positionCompetency)
     setIsDeleteDialogOpen(true)
+    // Warn (not block) when recorded results rely on this mapping. A failed
+    // check shows no warning rather than stopping the removal.
+    const requestedId = positionCompetency.id
+    deleteImpactFor.current = requestedId
+    setDeleteImpact(null)
+    setDeleteImpactLoading(true)
+    positionCompetencyAPI.getDeleteImpact([requestedId])
+      .then((impact) => { if (deleteImpactFor.current === requestedId) setDeleteImpact(impact) })
+      .catch((error) => console.error(error))
+      .finally(() => { if (deleteImpactFor.current === requestedId) setDeleteImpactLoading(false) })
   }
 
   const handleLevelSubmit = async (level: number) => {
@@ -433,14 +449,23 @@ export default function PositionCompetencyDetailPage() {
     }
 
     const templateSelected = positionCompetencies.filter((pc) => selectedIds.includes(pc.id) && pc.source === 'TEMPLATE').length
+    setIsBulkDeleting(true)
+    // Warn (not block) when recorded results rely on these mappings; a failed
+    // check just leaves the warning out.
+    const impact = await positionCompetencyAPI.getDeleteImpact(selectedIds).catch((error) => {
+      console.error(error)
+      return null
+    })
+    const impactLines = mappingRemovalImpactLines(t, impact)
     const message = (selectedIds.length === 1 ? t('confirmRemoveSingle') : t('confirmRemoveMultiple', { count: selectedIds.length }))
       + (templateSelected > 0 ? '\n\n' + t('templateBulkRemoveNote', { count: templateSelected }) : '')
+      + (impactLines.length > 0 ? '\n\n⚠ ' + t('impactTitle') + '\n' + impactLines.map((line) => '• ' + line).join('\n') : '')
     if (!confirm(message)) {
+      setIsBulkDeleting(false)
       return
     }
 
     try {
-      setIsBulkDeleting(true)
       await Promise.all(
         selectedIds.map(id => positionCompetencyAPI.delete(id))
       )
@@ -950,6 +975,8 @@ export default function PositionCompetencyDetailPage() {
         competency={selectedCompetency}
         onConfirm={handleDeleteConfirm}
         notice={selectedPositionCompetency?.source === 'TEMPLATE' && !selectedPositionCompetency.unitId ? t('templateDeleteNotice') : null}
+        impact={deleteImpact}
+        impactLoading={deleteImpactLoading}
       />
 
       <BulkLevelDialog

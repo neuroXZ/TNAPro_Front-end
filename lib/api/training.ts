@@ -4,6 +4,15 @@ import { createCrudApi } from './crud-factory';
 
 export const trainingAPI = createCrudApi('/training');
 
+export interface PositionCompetencyDeleteImpact {
+  results: number;
+  submittedResults: number;
+  removed: number;
+  levelChanged: number;
+  staff: number;
+  assessments: string[];
+}
+
 export const competencyAPI = {
   ...createCrudApi('/competency'),
 
@@ -21,6 +30,13 @@ export const competencyAPI = {
 
 export const positionCompetencyAPI = {
   ...createCrudApi('/positioncompetency'),
+
+  // Read-only: how many recorded results removing these mapping rows would
+  // affect (drop out of CGA/IDP, or be re-scored against another RCL).
+  getDeleteImpact: async (ids: string[]): Promise<PositionCompetencyDeleteImpact> => {
+    const response = await api.post('/positioncompetency/delete-impact', { ids });
+    return response.data;
+  },
 
   getByPosition: async (positionId: string) => {
     const data = await cachedGet<any[]>('/positioncompetency');

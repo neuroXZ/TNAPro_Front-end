@@ -990,7 +990,13 @@
     "resetToTemplate": "Kembali ke templat",
     "resetToTemplateHint": "Kembali ke templat asas (tahap {level})",
     "templateEditNotice": "Pemetaan ini datang daripada templat asas. Menyimpan tahap yang berbeza akan memisahkannya: templat tidak lagi mengemas kininya. Anda boleh mengembalikannya kemudian.",
-    "templateDeleteNotice": "Pemetaan ini datang daripada templat asas. Membuangnya akan mengecualikannya untuk jawatan ini, jadi templat tidak akan menjananya semula. Guna \"Kembali ke templat\" untuk memulihkannya."
+    "templateDeleteNotice": "Pemetaan ini datang daripada templat asas. Membuangnya akan mengecualikannya untuk jawatan ini, jadi templat tidak akan menjananya semula. Guna \"Kembali ke templat\" untuk memulihkannya.",
+    "impactChecking": "Menyemak keputusan penilaian sedia ada…",
+    "impactTitle": "Pemetaan ini sudah mempunyai keputusan penilaian",
+    "impactSummary": "{results} keputusan bagi {staff} staf ({submitted} telah dihantar) sedang menggunakan pemetaan ini, dalam: {cycles}.",
+    "impactRemoved": "{count} keputusan tidak lagi dipaparkan dalam analisis jurang individu (CGA), IDP dan Perbandingan, dan akan dikira dengan tahap diperlukan (RCL) 0 dalam laporan keseluruhan organisasi.",
+    "impactLevelChanged": "{count} keputusan akan dikira semula mengikut tahap diperlukan pemetaan lain.",
+    "impactAdvice": "Laporan kitaran lepas dikira daripada pemetaan semasa. Jika laporan tersebut masih diperlukan, kekalkan pemetaan ini."
   },
   "AdminTrainingCompetenciesPage": {
     "entityNameSingular": "latihan",
