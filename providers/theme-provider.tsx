@@ -1,39 +1,28 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useLayoutEffect } from "react";
 import { usePathname } from "next/navigation";
 import { ThemeProvider as NextThemesProvider } from "next-themes";
 import type { ThemeProviderProps } from "next-themes";
-import { loadAndApplyTheme } from "@/lib/theme-loader";
+import { applyStoredTheme, loadAndApplyTheme } from "@/lib/theme-loader";
 
 /**
- * ConditionalThemeProvider Component
- * Only loads theme for authenticated pages
- * Skips public pages to avoid fetch errors
+ * Applies the client's brand colours on every page, login included (they come
+ * from a public endpoint). The inline script in the root layout already put
+ * the last known colours on <html> before first paint; this re-applies them
+ * after React's dev remount and then fetches the current ones. A failed fetch
+ * is retried on the next navigation (only a success is cached).
  */
 export function ConditionalThemeProvider({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
-  const [themeLoaded, setThemeLoaded] = useState(false);
-  
-  // List of public pages that don't need theme loading
-  const publicPages = ['/login', '/signup', '/'];
-  const isPublicPage = publicPages.includes(pathname);
+
+  useLayoutEffect(() => {
+    applyStoredTheme();
+  }, []);
 
   useEffect(() => {
-    // Only load theme for non-public pages and if not already loaded
-    if (!isPublicPage && !themeLoaded) {
-      console.log('Loading theme from database...');
-      loadAndApplyTheme()
-        .then(() => {
-          console.log('Theme loaded and applied successfully');
-          setThemeLoaded(true);
-        })
-        .catch((error) => {
-          console.error('Theme loading failed:', error);
-          setThemeLoaded(true); // Mark as attempted
-        });
-    }
-  }, [isPublicPage, themeLoaded]);
+    loadAndApplyTheme().catch((error) => console.error('Theme loading failed:', error));
+  }, [pathname]);
 
   return <>{children}</>;
 }

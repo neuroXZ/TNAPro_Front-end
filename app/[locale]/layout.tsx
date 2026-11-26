@@ -4,6 +4,7 @@ import "../globals.css";
 import { AuthProvider } from "@/providers/auth-provider";
 import { Toaster } from "@/components/ui/sonner";
 import { ThemeProvider } from "@/providers/theme-provider";
+import { THEME_INLINE_SCRIPT } from "@/lib/theme-loader";
 import { NextIntlClientProvider } from 'next-intl';
 import { getMessages } from 'next-intl/server';
 
@@ -33,6 +34,10 @@ export default async function RootLayout({
   const messages = await getMessages();
   return (
     <html lang={locale} suppressHydrationWarning>
+      <head>
+        {/* Client brand colours from the last visit, before first paint (see lib/theme-loader.ts). */}
+        <script dangerouslySetInnerHTML={{ __html: THEME_INLINE_SCRIPT }} />
+      </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >

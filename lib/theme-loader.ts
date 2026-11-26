@@ -1,22 +1,51 @@
 /**
  * Theme Loader
- * Fetches and applies custom theme colors from database
- * Falls back to default CSS values if not found
+ *
+ * The client's brand colours live in Setting and are applied as CSS variables
+ * on <html>, so every component styled with the theme tokens (bg-primary,
+ * text-secondary-foreground, …) follows them.
+ *
+ * - Colours come from the public endpoint /public/setting/theme, so the login
+ *   page is themed too and nothing depends on being logged in. (The old
+ *   authenticated /setting fetch ran on the login page without a token, got a
+ *   401, cached "no theme" and kept the default colours until a full reload.)
+ * - The resolved variables are also kept in localStorage and re-applied by an
+ *   inline script in <head> (THEME_INLINE_SCRIPT) before the first paint, so a
+ *   page load doesn't flash the default colours while the fetch runs.
  */
 
 // API Base URL - Use environment variable or fallback to production
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
 interface ThemeSettings {
-  primaryColor?: string;
-  secondaryColor?: string;
-  successColor?: string;
-  warningColor?: string;
-  dangerColor?: string;
-  infoColor?: string;
+  primaryColor?: string | null;
+  secondaryColor?: string | null;
+  successColor?: string | null;
+  warningColor?: string | null;
+  dangerColor?: string | null;
+  infoColor?: string | null;
 }
 
-// Module-level cache — avoids re-fetching on every component mount
+// Every CSS variable this module may set on <html>, so a reset or a new theme
+// clears the ones the previous theme set.
+const MANAGED_VARS = [
+  '--primary', '--primary-foreground', '--secondary', '--secondary-foreground',
+  '--success', '--warning', '--destructive', '--info',
+] as const;
+
+// localStorage key holding { "--var": "value" } of the last applied theme.
+// Per origin, and each client has its own site, so it is per client.
+const THEME_STORAGE_KEY = 'tnapro-theme-vars';
+
+/**
+ * Runs synchronously in <head> before first paint: re-applies the last theme
+ * from localStorage. Kept tiny and dependency-free; only sets CSS custom
+ * properties whose names look like ours.
+ */
+export const THEME_INLINE_SCRIPT = `(function(){try{var v=JSON.parse(localStorage.getItem(${JSON.stringify(THEME_STORAGE_KEY)})||"null");if(v&&typeof v==="object"){var s=document.documentElement.style;for(var k in v){if(/^--[a-z-]+$/.test(k)&&typeof v[k]==="string")s.setProperty(k,v[k])}}}catch(e){}})()`;
+
+// Module-level cache — one fetch per page load. Only a successful fetch is
+// cached, so a failure (network, backend restarting) is retried later.
 let themeCache: ThemeSettings | null = null;
 let themeLoaded = false;
 
@@ -26,63 +55,52 @@ export function invalidateThemeCache(): void {
   themeLoaded = false;
 }
 
+async function fetchJson(url: string, headers?: HeadersInit): Promise<{ ok: boolean; status: number; body: any }> {
+  const response = await fetch(url, { headers });
+  return { ok: response.ok, status: response.status, body: response.ok ? await response.json() : null };
+}
+
 /**
  * Fetch theme settings from backend
  * Client-side only function
  */
 export async function fetchThemeSettings(): Promise<ThemeSettings | null> {
-  // Only run on client-side
-  if (typeof window === 'undefined') {
-    return null;
-  }
-
-  // Return cached result to avoid repeated network calls
+  if (typeof window === 'undefined') return null;
   if (themeLoaded) return themeCache;
 
   try {
-    console.log('Fetching theme settings from:', `${API_BASE_URL}/setting`);
-    
-    // Get token from localStorage
-    const token = localStorage.getItem('token');
-    const headers: HeadersInit = {
-      'Content-Type': 'application/json',
-    };
-    
-    if (token) {
-      headers['Authorization'] = `Bearer ${token}`;
-    }
-    
-    const response = await fetch(`${API_BASE_URL}/setting`, {
-      headers,
-    });
-
-    if (!response.ok) {
-      console.warn('Failed to fetch theme settings, status:', response.status);
+    const pub = await fetchJson(`${API_BASE_URL}/public/setting/theme`);
+    if (pub.ok) {
+      themeCache = pub.body ?? null;
       themeLoaded = true;
-      themeCache = null;
-      return null;
+      return themeCache;
     }
 
-    const settings = await response.json();
-    console.log('Theme settings received:', settings);
-    
-    // Assuming first setting record contains theme colors
-    if (settings && settings.length > 0) {
-      themeCache = {
-        primaryColor: settings[0].primaryColor,
-        secondaryColor: settings[0].secondaryColor,
-        successColor: settings[0].successColor,
-        warningColor: settings[0].warningColor,
-        dangerColor: settings[0].dangerColor,
-        infoColor: settings[0].infoColor,
-      };
+    // Backend not yet on the public endpoint (404): fall back to the
+    // authenticated list while logged in. Remove once every backend has it.
+    const token = localStorage.getItem('token');
+    if (pub.status === 404 && token) {
+      const res = await fetchJson(`${API_BASE_URL}/setting`, { Authorization: `Bearer ${token}` });
+      if (res.ok) {
+        const first = Array.isArray(res.body) ? res.body[0] : null;
+        themeCache = first
+          ? {
+              primaryColor: first.primaryColor,
+              secondaryColor: first.secondaryColor,
+              successColor: first.successColor,
+              warningColor: first.warningColor,
+              dangerColor: first.dangerColor,
+              infoColor: first.infoColor,
+            }
+          : null;
+        themeLoaded = true;
+        return themeCache;
+      }
     }
-    themeLoaded = true;
-    return themeCache;
+    console.warn('Failed to fetch theme settings, status:', pub.status);
+    return null;
   } catch (error) {
     console.error('Error fetching theme settings:', error);
-    themeLoaded = true;
-    themeCache = null;
     return null;
   }
 }
@@ -119,52 +137,70 @@ export function readableForeground(background: string): string | null {
   return contrastWithWhite >= contrastWithBlack ? LIGHT_FOREGROUND : DARK_FOREGROUND;
 }
 
-/** Set a themed colour and, when it has a paired text variable, a readable text colour for it. */
-function setThemedColor(root: HTMLElement, name: string, value: string, foregroundName?: string) {
-  root.style.setProperty(name, value);
-  if (!foregroundName) return;
-  const fg = readableForeground(value);
-  if (fg) root.style.setProperty(foregroundName, fg);
-  else root.style.removeProperty(foregroundName);
+/**
+ * The CSS variables a theme sets: each colour, plus a readable text colour for
+ * the two that have a paired foreground (a colour that can't be parsed gets no
+ * foreground, so the stylesheet default stays).
+ */
+function computeThemeVars(theme: ThemeSettings): Record<string, string> {
+  const vars: Record<string, string> = {};
+  const set = (name: string, value: string | null | undefined, foregroundName?: string) => {
+    if (!value) return;
+    vars[name] = value;
+    if (!foregroundName) return;
+    const fg = readableForeground(value);
+    if (fg) vars[foregroundName] = fg;
+  };
+  set('--primary', theme.primaryColor, '--primary-foreground');
+  set('--secondary', theme.secondaryColor, '--secondary-foreground');
+  set('--success', theme.successColor);
+  set('--warning', theme.warningColor);
+  set('--destructive', theme.dangerColor);
+  set('--info', theme.infoColor);
+  return vars;
+}
+
+function setRootVars(vars: Record<string, string>) {
+  const style = document.documentElement.style;
+  for (const name of MANAGED_VARS) {
+    if (vars[name]) style.setProperty(name, vars[name]);
+    else style.removeProperty(name);
+  }
+}
+
+function storeVars(vars: Record<string, string> | null) {
+  try {
+    if (vars && Object.keys(vars).length > 0) localStorage.setItem(THEME_STORAGE_KEY, JSON.stringify(vars));
+    else localStorage.removeItem(THEME_STORAGE_KEY);
+  } catch {
+    // Storage blocked (private mode etc.): the theme still applies, just not before first paint.
+  }
 }
 
 /**
- * Apply theme colors to CSS variables
- * This function runs on client-side to override default CSS values
+ * Apply theme colors to CSS variables, replacing any previous theme, and
+ * remember them for the next page load.
  */
 export function applyThemeColors(theme: ThemeSettings) {
   if (typeof window === 'undefined') return;
+  const vars = computeThemeVars(theme);
+  setRootVars(vars);
+  storeVars(vars);
+  themeCache = { ...theme };
+  themeLoaded = true;
+}
 
-  const root = document.documentElement;
-
-  console.log('Applying theme colors:', theme);
-
-  // Apply primary color if exists
-  if (theme.primaryColor) {
-    setThemedColor(root, '--primary', theme.primaryColor, '--primary-foreground');
-    console.log('Primary color applied:', theme.primaryColor);
-  }
-
-  // Apply secondary color if exists
-  if (theme.secondaryColor) {
-    setThemedColor(root, '--secondary', theme.secondaryColor, '--secondary-foreground');
-  }
-
-  // Apply other colors as needed
-  if (theme.successColor) {
-    root.style.setProperty('--success', theme.successColor);
-  }
-
-  if (theme.warningColor) {
-    root.style.setProperty('--warning', theme.warningColor);
-  }
-
-  if (theme.dangerColor) {
-    root.style.setProperty('--destructive', theme.dangerColor);
-  }
-
-  if (theme.infoColor) {
-    root.style.setProperty('--info', theme.infoColor);
+/**
+ * Re-apply the last stored theme. The inline <head> script does this before
+ * first paint; this covers React's dev-mode remount, which resets <html>.
+ */
+export function applyStoredTheme() {
+  if (typeof window === 'undefined') return;
+  try {
+    const vars = JSON.parse(localStorage.getItem(THEME_STORAGE_KEY) || 'null');
+    if (vars && typeof vars === 'object') setRootVars(vars);
+  } catch {
+    // Nothing stored or storage blocked: the fetch below still applies the theme.
   }
 }
 
@@ -174,9 +210,8 @@ export function applyThemeColors(theme: ThemeSettings) {
  */
 export async function loadAndApplyTheme() {
   const theme = await fetchThemeSettings();
-  if (theme) {
-    applyThemeColors(theme);
-  }
+  // null = fetch failed: keep whatever the stored theme already applied.
+  if (theme !== null) applyThemeColors(theme);
 }
 
 /**
@@ -184,16 +219,6 @@ export async function loadAndApplyTheme() {
  */
 export function resetThemeToDefault() {
   if (typeof window === 'undefined') return;
-
-  const root = document.documentElement;
-  
-  // Remove custom properties to fall back to CSS defaults
-  root.style.removeProperty('--primary');
-  root.style.removeProperty('--primary-foreground');
-  root.style.removeProperty('--secondary');
-  root.style.removeProperty('--secondary-foreground');
-  root.style.removeProperty('--success');
-  root.style.removeProperty('--warning');
-  root.style.removeProperty('--destructive');
-  root.style.removeProperty('--info');
+  setRootVars({});
+  storeVars(null);
 }
